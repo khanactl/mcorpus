@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mcorpus PRD log config  -->
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+    <File name="MCorpusFileLog" fileName="/logs/mcorpus.log">
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+      </PatternLayout>
+    </File>
+  </Appenders>
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="MCorpusFileLog"/>
+    </Root>
+  </Loggers>
+</Configuration>

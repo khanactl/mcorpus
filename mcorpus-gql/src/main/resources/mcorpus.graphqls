@@ -1,0 +1,401 @@
+scalar Date
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# the mcorpus queries
+type Query {
+
+  # member reference (mref) by member id
+  mrefByMid(mid: ID!): MRef
+
+  # member reference (mref) by empId and loc
+  mrefByEmpIdAndLoc(empId: String!, location: Location!): MRef
+
+  # all mrefs for a given empId
+  mrefsByEmpId(empId: String!): [MRef]!
+
+  # member by member id
+  memberByMid(mid: ID!): Member
+
+  # member search - dynamic, filter-able, paginate-able query
+  members(filter: MemberFilter, offset: Int, limit: Int): [Member]
+}
+
+# member locations
+enum Location {
+  # Location 01
+  L01
+  # Location 02
+  L02
+  # Location 03
+  L03
+  # Location 04
+  L04
+  # Location 05
+  L05
+  # Location 06
+  L06
+  # Location 07
+  L07
+  # Location 08
+  L08
+  # Location 09
+  L09
+  # Location 98
+  L98
+  # Location 20
+  L20
+}
+
+# Address names
+enum AddressName {
+  # home address
+  HOME
+  # work address
+  WORK
+  # other/uncategorized address
+  OTHER
+}
+
+# Member Statuses
+enum MemberStatus {
+  # member is active in the system
+  ACTIVE
+  # member is NOT active in the system
+  INACTIVE
+}
+
+# member reference (mref) type
+type MRef {
+  # member id
+  mid: ID
+  # member employee id
+  empId: String
+  # member tax id
+  tid: String
+  # member location
+  location: Location
+}
+
+# the primary member type
+type Member {
+  # member id
+  mid: ID!
+
+  # member record created date
+  created: Date!
+  # member record last modified date (null if never modified)
+  modified: Date
+
+  # member employee id
+  empId: String!
+  # member location
+  location: Location!
+
+  # first name
+  nameFirst: String!
+  # middle name
+  nameMiddle: String
+  # last name
+  nameLast: String!
+  # display name
+  displayName: String
+
+  # member status
+  status: MemberStatus!
+
+  # member addresses
+  addresses: [MemberAddress]
+
+  # date of birth
+  dob: String
+  # SSN
+  ssn: String
+
+  # personal email address
+  personalEmail: String
+  # work email address
+  workEmail: String
+
+  # mobile phone
+  mobilePhone: String
+  # home phone
+  homePhone: String
+  # work phone
+  workPhone: String
+
+  # member username
+  username: String!
+}
+
+# member address type
+type MemberAddress {
+  # member id
+  mid: ID!
+  # member address name
+  addressName: AddressName!
+
+  # last modified date
+  modified: Date!
+
+  # attn
+  attn: String
+  # street address one
+  street1: String!
+  # street address two
+  street2: String
+  # city
+  city: String!
+  # state/province
+  state: String!
+  # postal/zip code
+  postalCode: String
+  # country
+  country: String!
+}
+
+# date op
+enum DateOp {
+  # equal to
+  EQUAL_TO
+  # not equal to
+  NOT_EQUAL_TO
+  # less than
+  LESS_THAN
+  # less than or equal to
+  LESS_THAN_OR_EQUAL_TO
+  # greater than
+  GREATER_THAN
+  # greater than or equal to
+  GREATER_THAN_OR_EQUAL_TO
+  # between
+  BETWEEN
+  # not between
+  NOT_BETWEEN
+}
+
+# date criterion
+input DatePredicate {
+  # the date operation
+  dateOp: DateOp!
+  # date comparison argument A
+  a: Date!
+  # date comparison argument B
+  b: Date
+}
+
+# location criterion
+input LocationPredicate {
+  # list of subject locations
+  locations: [Location]
+  # include (false) or exclude (true)
+  negate: Boolean
+}
+
+# value comparison mode
+enum Operation {
+  # equals
+  EQUALS
+  # SQL like (* or % wildcards supported)
+  LIKE
+}
+
+# value (string) criterion
+input StringPredicate {
+  # the string value
+  value: String!
+  # ignore case?
+  ignoreCase: Boolean
+  # value operation
+  operation: Operation
+}
+
+# order by clause (direction)
+enum OrderByClause {
+  # ascending
+  ASCENDING
+  # descending
+  DESCENDING
+}
+
+# order by directive
+input OrderBy {
+  # order by field name
+  value: String!
+  # order by direction
+  direction: OrderByClause!
+}
+
+# the member filter type
+input MemberFilter {
+  # member created date predicate
+  created: DatePredicate
+  # member modified date predicate
+  modified: DatePredicate
+
+  # member emp id value predicate
+  empId: StringPredicate
+  # member location predicate
+  location: LocationPredicate
+
+  # member first name value predicate
+  nameFirst: StringPredicate
+  # member middle name value predicate
+  nameMiddle: StringPredicate
+  # member last name value predicate
+  nameLast: StringPredicate
+  # member display name value predicate
+  displayName: StringPredicate
+
+  # member results order by list
+  orderByList: [OrderBy]
+}
+
+# required properties for adding a new member to the system
+input MemberToAdd {
+
+  # member employee id (required, format: XX-XXXXXXX digits)
+  empId: String!
+  # member location (required)
+  location: Location!
+
+  # first name (required, max 120 chars)
+  nameFirst: String!
+  # middle name (optional)
+  nameMiddle: String
+  # last name (required)
+  nameLast: String!
+  # display name (optional)
+  displayName: String
+
+  # member status (required)
+  status: MemberStatus!
+
+  # date of birth (required)
+  dob: Date!
+  # SSN (required, format: XXX-XX-XXXX)
+  ssn: String!
+
+  # personal email address (optional)
+  personalEmail: String
+  # work email address (optional)
+  workEmail: String
+
+  # mobile phone (optional)
+  mobilePhone: String
+  # home phone (optional)
+  homePhone: String
+  # work phone (optional)
+  workPhone: String
+
+  # member username (required, 4 - 26 chars)
+  username: String!
+  # member password (required, 8 - 50 chars)
+  pswd: String!
+}
+
+# list of optional properties for updating a member
+input MemberToUpdate {
+  # member id
+  mid: ID!
+  # first name
+  nameFirst: String
+  # middle name
+  nameMiddle: String
+  # last name
+  nameLast: String
+  # display name
+  displayName: String
+
+  # member status
+  status: MemberStatus
+
+  # date of birth
+  dob: Date
+  # SSN
+  ssn: String
+
+  # personal email address
+  personalEmail: String
+  # work email address
+  workEmail: String
+
+  # mobile phone
+  mobilePhone: String
+  # home phone
+  homePhone: String
+  # work phone
+  workPhone: String
+}
+
+# required properties for adding a new member address
+input MemberAddressToAdd {
+  # member id (required)
+  mid: ID!
+  # member address name (required)
+  addressName: AddressName!
+
+  # attn (optional)
+  attn: String
+  # street address one (required)
+  street1: String!
+  # street address two (optional)
+  street2: String
+  # city (required)
+  city: String!
+  # state/province (required)
+  state: String!
+  # postal/zip code (required)
+  postalCode: String!
+  # country (required)
+  country: String!
+}
+
+# list of optional properties for updating a member address
+input MemberAddressToUpdate {
+  # member id (required)
+  mid: ID!
+  # member address name (required)
+  addressName: AddressName!
+
+  # attn
+  attn: String
+  # street address one
+  street1: String
+  # street address two
+  street2: String
+  # city
+  city: String
+  # state/province
+  state: String
+  # postal/zip code
+  postalCode: String
+  # country
+  country: String
+}
+
+# the mcorpus mutation methods
+type Mutation {
+
+  # add a member into the corpus
+  addMember(member: MemberToAdd!): Member
+
+  # update member properties
+  updateMember(member: MemberToUpdate!): Member
+
+  # physical removal of a member from the corpus - returns the deleted member id when successful
+  deleteMember(mid: ID!): ID
+
+  # add a member address of a given address name (type)
+  addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress
+
+  # update a member address
+  updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress
+
+  # delete a member address of the given address name (type) returning the member id when successful
+  deleteMemberAddress(mid: ID!, addressName: AddressName!): ID
+
+}

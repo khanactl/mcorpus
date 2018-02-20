@@ -1,0 +1,12 @@
+target
+.project
+.classpath
+.settings
+.factorypath
+.apt_generated
+.externalToolBuilders
+*.log
+bin
+.idea
+*.iml
+.DS_Store

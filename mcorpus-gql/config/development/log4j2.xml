@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mcorpus DEV log config  -->
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+    <File name="MCorpusDebugFile" fileName="/logs/mcorpus-dev.log">
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+      </PatternLayout>
+    </File>
+  </Appenders>
+  <Loggers>
+    <Logger name="org.jooq" level="info" />
+    <Logger name="com.zaxxer.hikari.pool" level="warn" />
+    <Logger name="io.netty" level="info" />
+    <Logger name="graphql" level="info" />
+    <Root level="DEBUG">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
