@@ -2,11 +2,10 @@
 ------------- mcorpus schema definition -------------
 -----------------------------------------------------
 -- Author               jkirton
--- mcorpus Version:     0.1
 -- Created:             10/15/17
--- Modified:            2/6/2018
+-- Modified:            2/25/2018
 -- Description:         Prototype member corpus db
--- PostgreSQL Version   10.1
+-- PostgreSQL Version   10.2
 -----------------------------------------------------
 
 -- NOTE: a postgres com.tll.mcorpus.db must already exist for this script to work
@@ -105,37 +104,37 @@ $$ language plpgsql
 RETURNS NULL ON NULL INPUT;
 
 /*
-login
+mcuser_login
 
-Call this function to authenticate users
+Call this function to authenticate mcuser users
 by username/passwoed credentials
 along with the sourcing http headers and ip address.
 
-When user authentication is successful,
+When an mcuser authentication is successful,
 a LOGIN-type mcuser_audit record is created.
 
-@param 1  username the user specified username
-@param 2  password the user specified password
-@param 3  user_session_id the unique identifier of the user instigated
-                          web session (usu. the JSESSIONID)
-@param 4  user_ip the users IP address
-@param 5  user_host the users incoming http host header value
-@param 6  user_origin the users incoming http origin header value
-@param 7  user_referer the users incoming http host header value
-@param 8  user_fowarded the users incoming http host header value
+@param 1  mcuser_username the mcuser's username
+@param 2  mcuser_password the mcuser's password
+@param 3  mcuser_session_id the unique identifier of the mcuser 
+                            instigated web session (usu. the JSESSIONID)
+@param 4  mcuser_ip the mcuser's incoming IP address
+@param 5  mcuser_host the mcuser's incoming http host header value
+@param 6  mcuser_origin the mcuser's incoming http origin header value
+@param 7  mcuser_referer the mcuser's incoming http host header value
+@param 8  mcuser_fowarded the mcuser's incoming http host header value
 
 @return:
   the matching mcuser record upon successfull login
   -OR-
   NULL when login fails.
 */
-CREATE OR REPLACE FUNCTION login(user_username text, user_password text, user_session_id text, user_ip text, user_host text, user_origin text, user_referer text, user_forwarded text)
+CREATE OR REPLACE FUNCTION mcuser_login(mcuser_username text, mcuser_password text, mcuser_session_id text, mcuser_ip text, mcuser_host text, mcuser_origin text, mcuser_referer text, mcuser_forwarded text)
 RETURNS mcuser as $$
   DECLARE passed BOOLEAN;
   DECLARE row_mcuser mcuser%ROWTYPE;
   BEGIN
     passed = false;
-    SELECT (pswd = crypt(user_password, pswd)) INTO passed
+    SELECT (pswd = crypt(mcuser_password, pswd)) INTO passed
     FROM mcuser
     WHERE username = $1;
 
@@ -144,31 +143,41 @@ RETURNS mcuser as $$
       SELECT uid, created, modified, name, email, username, null, admin from mcuser INTO row_mcuser where username = $1;
       -- add mcuser_audit LOGIN record upon successful login
       INSERT INTO mcuser_audit (uid, type, web_session_id, remote_addr, http_host, http_origin, http_referer, http_forwarded)
-        VALUES (row_mcuser.uid, 'LOGIN', user_session_id, user_ip, user_host, user_origin, user_referer, user_forwarded);
+        VALUES (row_mcuser.uid, 'LOGIN', mcuser_session_id, mcuser_ip, mcuser_host, mcuser_origin, mcuser_referer, mcuser_forwarded);
       -- return the user id and admin flag of the matched username
-      RAISE NOTICE '% logged in', row_mcuser.uid;
+      RAISE NOTICE 'mcuser % logged in', row_mcuser.uid;
       RETURN row_mcuser;
     END IF;
 
     -- default
-    RAISE NOTICE 'login failed';
+    RAISE NOTICE 'mcuser login failed';
     RETURN null;
   END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION logout(user_uid UUID, user_session_id text)
+/**
+ * mcuser_logout
+ * 
+ * Logs an mcuser out.
+ * 
+ * An mcuser_audit record is created of LOGOUT type.
+ * 
+ * @param mcuser_uid the mcuser's user id
+ * @param mcuser_session_id the web session id under which the mcuser is logging out 
+ */
+CREATE OR REPLACE FUNCTION mcuser_logout(mcuser_uid UUID, mcuser_session_id text)
 RETURNS void as $$
-  DECLARE user_exists BOOLEAN;
+  DECLARE mcmember_exists BOOLEAN;
   BEGIN
-    user_exists = false;
-    SELECT EXISTS(SELECT uid FROM mcuser WHERE uid = $1) INTO user_exists;
-    IF user_exists THEN
+    mcmember_exists = false;
+    SELECT EXISTS(SELECT uid FROM mcuser WHERE uid = $1) INTO mcmember_exists;
+    IF mcmember_exists THEN
       INSERT INTO mcuser_audit (uid, type, web_session_id)
-        VALUES (user_uid, 'LOGOUT', user_session_id);
-      RAISE NOTICE '% logged out', user_uid;
+        VALUES (mcuser_uid, 'LOGOUT', mcuser_session_id);
+      RAISE NOTICE 'mcuser % logged out', mcuser_uid;
     ELSE
       -- default
-      RAISE NOTICE 'logout failed';
+      RAISE NOTICE 'mcuser logout failed';
     END IF;
   END
 $$ LANGUAGE plpgsql;
@@ -219,6 +228,38 @@ create table member (
 );
 comment on type member is 'The core member table.';
 
+create type mref AS (
+  mid                     uuid,
+  emp_id                  text,
+  location                Location
+);
+comment on type mref is 'Uniquely identifies a single member in the corpus';
+
+create table mauth (
+  mid                     uuid primary key,
+
+  modified                timestamp not null default now(),
+
+  dob                     date not null,
+  ssn                     char(9) not null,
+
+  email_personal          text null,
+  email_work              text null,
+
+  mobile_phone            text null,
+  home_phone              text null,
+  work_phone              text null,
+  fax                     text null,
+
+  username                text not null,
+  pswd                    text not null,
+  
+  unique(username),
+
+  foreign key ("mid") references member ("mid") on delete cascade
+);
+comment on type mauth is 'The mauth table holds security sensitive member data.';
+
 /**
  * set_modified()
  *
@@ -241,28 +282,129 @@ CREATE TRIGGER trigger_member_updated
   FOR EACH ROW
   EXECUTE PROCEDURE set_modified();
 
-create table mauth (
-  mid                     uuid primary key,
-
-  modified                timestamp not null default now(),
-
-  dob                     date not null,
-  ssn                     char(9) not null,
-
-  email_personal          text null,
-  email_work              text null,
-
-  mobile_phone            text null,
-  home_phone              text null,
-  work_phone              text null,
-  fax                     text null,
-
-  username                text not null,
-  pswd                    text not null,
-
-  foreign key ("mid") references member ("mid") on delete cascade
+create type member_audit_type as enum (
+  'LOGIN',
+  'LOGOUT'
 );
-comment on type mauth is 'The mauth table holds security sensitive member data.';
+comment on type member_audit_type is 'The member audit record/event type.';
+
+create table member_audit (
+  mid                     uuid not null, -- i.e. the member.mid
+  created                 timestamp not null default now(),
+  type                    member_audit_type not null,
+  web_session_id          text null,
+  remote_addr             text null,
+  http_host               text null,
+  http_origin             text null,
+  http_referer            text null,
+  http_forwarded          text null,
+
+  primary key (created, type)
+);
+comment on type member_audit is 'Log of member events.';
+
+/*
+member_login
+
+Authenticates a member by requiring one and only one mauth record exists 
+with the given username and pswd.
+
+@param 1  member_username the provided member username (required)
+@param 2  member_password the provided member password (required)
+@param 3  member_web_session_id the web session id token 
+                                underwhich the member is authenticating (required)
+@param 4  member_ip the member's incoming IP address (required)
+@param 5  member_host the member's incoming http host header value (required)
+@param 6  member_origin the member's incoming http origin header value (required)
+@param 7  member_referer the member's incoming http host header value (required)
+@param 8  member_forwarded the member's incoming http host header value (required)
+
+@return:
+  the matching member id upon successfull login
+  -OR-
+  NULL when member login fails for any reason.
+*/
+CREATE OR REPLACE FUNCTION member_login(member_username text, member_password text, member_web_session_id text, member_ip text, member_host text, member_origin text, member_referer text, member_forwarded text)
+RETURNS mref as 
+$func$
+  DECLARE passed BOOLEAN;
+  DECLARE rec_mref mref;
+  BEGIN
+    passed = false;
+
+    -- validate input
+    IF( 
+      member_username is null
+      || member_password is null
+      || member_web_session_id is null
+      || member_ip is null
+      || member_host is null
+      || member_origin is null
+      || member_referer is null
+      || member_forwarded is null
+    ) THEN
+      RAISE NOTICE 'member login null input';
+      RETURN null;
+    END IF;
+
+    -- authenticate
+    SELECT (pswd = crypt(member_password, pswd)) INTO passed
+    FROM mauth
+    WHERE username = $1;
+
+    IF passed THEN
+      -- member login success
+      SELECT 
+        m.mid, m.emp_id, m.location
+      INTO rec_mref 
+      FROM 
+        member m join mauth ma on m.mid = ma.mid 
+      WHERE ma.username = $1;
+      -- add member_audit LOGIN record upon successful login
+      INSERT INTO member_audit (mid, type, web_session_id, remote_addr, http_host, http_origin, http_referer, http_forwarded)
+        VALUES (rec_mref.mid, 'LOGIN', member_web_session_id, member_ip, member_host, member_origin, member_referer, member_forwarded);
+      -- return the gotten mref
+      RAISE NOTICE 'member % logged in', rec_mref.mid;
+      RETURN rec_mref;
+    END IF;
+
+    -- default
+    RAISE NOTICE 'member login failed';
+    RETURN null;
+  END
+$func$ LANGUAGE plpgsql;
+
+/**
+ * member_logout
+ * 
+ * Logs an member out.
+ * 
+ * A member_audit record is created of LOGOUT type.
+ * 
+ * @param member_uid the member's user id
+ * @param member_web_session_id the web session id under which the member is logging out 
+ */
+CREATE OR REPLACE FUNCTION member_logout(mid UUID, member_web_session_id text)
+RETURNS void as $$
+  DECLARE member_exists BOOLEAN;
+  BEGIN
+    member_exists = false;
+    SELECT EXISTS(SELECT m.mid FROM member m WHERE m.mid = $1) INTO member_exists;
+    IF member_exists THEN
+      INSERT INTO member_audit (mid, type, web_session_id)
+        VALUES ($1, 'LOGOUT', $2);
+      RAISE NOTICE 'member % logged out', $1;
+    ELSE
+      -- default
+      RAISE NOTICE 'member logout failed';
+    END IF;
+  END
+$$ LANGUAGE plpgsql;
+
+
+-- ******************************
+-- *** member address related ***
+-- ******************************
 
 create type AddressName as enum (
   'home',
@@ -289,6 +431,11 @@ create table maddress (
   foreign key ("mid") references member ("mid") on delete cascade
 );
 comment on type maddress is 'The maddress table holds physical addresses of members.';
+
+
+-- ********************************
+-- *** member benefits related  ***
+-- ********************************
 
 create type Beli as enum (
   '1',

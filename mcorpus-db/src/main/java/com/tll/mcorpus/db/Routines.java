@@ -20,8 +20,10 @@ import com.tll.mcorpus.db.routines.GenSalt1;
 import com.tll.mcorpus.db.routines.GenSalt2;
 import com.tll.mcorpus.db.routines.Hmac1;
 import com.tll.mcorpus.db.routines.Hmac2;
-import com.tll.mcorpus.db.routines.Login;
-import com.tll.mcorpus.db.routines.Logout;
+import com.tll.mcorpus.db.routines.McuserLogin;
+import com.tll.mcorpus.db.routines.McuserLogout;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.routines.PassHash;
 import com.tll.mcorpus.db.routines.PgpKeyId;
 import com.tll.mcorpus.db.routines.PgpPubDecrypt1;
@@ -46,6 +48,7 @@ import com.tll.mcorpus.db.routines.SetModified;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
+import com.tll.mcorpus.db.udt.records.MrefRecord;
 
 import java.util.UUID;
 
@@ -615,64 +618,127 @@ public class Routines {
     }
 
     /**
-     * Call <code>public.login</code>
+     * Call <code>public.mcuser_login</code>
      */
-    public static McuserRecord login(Configuration configuration, String userUsername, String userPassword, String userSessionId, String userIp, String userHost, String userOrigin, String userReferer, String userForwarded) {
-        Login f = new Login();
-        f.setUserUsername(userUsername);
-        f.setUserPassword(userPassword);
-        f.setUserSessionId(userSessionId);
-        f.setUserIp(userIp);
-        f.setUserHost(userHost);
-        f.setUserOrigin(userOrigin);
-        f.setUserReferer(userReferer);
-        f.setUserForwarded(userForwarded);
+    public static McuserRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, String mcuserSessionId, String mcuserIp, String mcuserHost, String mcuserOrigin, String mcuserReferer, String mcuserForwarded) {
+        McuserLogin f = new McuserLogin();
+        f.setMcuserUsername(mcuserUsername);
+        f.setMcuserPassword(mcuserPassword);
+        f.setMcuserSessionId(mcuserSessionId);
+        f.setMcuserIp(mcuserIp);
+        f.setMcuserHost(mcuserHost);
+        f.setMcuserOrigin(mcuserOrigin);
+        f.setMcuserReferer(mcuserReferer);
+        f.setMcuserForwarded(mcuserForwarded);
 
         f.execute(configuration);
         return f.getReturnValue();
     }
 
     /**
-     * Get <code>public.login</code> as a field.
+     * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserRecord> login(String userUsername, String userPassword, String userSessionId, String userIp, String userHost, String userOrigin, String userReferer, String userForwarded) {
-        Login f = new Login();
-        f.setUserUsername(userUsername);
-        f.setUserPassword(userPassword);
-        f.setUserSessionId(userSessionId);
-        f.setUserIp(userIp);
-        f.setUserHost(userHost);
-        f.setUserOrigin(userOrigin);
-        f.setUserReferer(userReferer);
-        f.setUserForwarded(userForwarded);
+    public static Field<McuserRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, String mcuserSessionId, String mcuserIp, String mcuserHost, String mcuserOrigin, String mcuserReferer, String mcuserForwarded) {
+        McuserLogin f = new McuserLogin();
+        f.setMcuserUsername(mcuserUsername);
+        f.setMcuserPassword(mcuserPassword);
+        f.setMcuserSessionId(mcuserSessionId);
+        f.setMcuserIp(mcuserIp);
+        f.setMcuserHost(mcuserHost);
+        f.setMcuserOrigin(mcuserOrigin);
+        f.setMcuserReferer(mcuserReferer);
+        f.setMcuserForwarded(mcuserForwarded);
 
         return f.asField();
     }
 
     /**
-     * Get <code>public.login</code> as a field.
+     * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserRecord> login(Field<String> userUsername, Field<String> userPassword, Field<String> userSessionId, Field<String> userIp, Field<String> userHost, Field<String> userOrigin, Field<String> userReferer, Field<String> userForwarded) {
-        Login f = new Login();
-        f.setUserUsername(userUsername);
-        f.setUserPassword(userPassword);
-        f.setUserSessionId(userSessionId);
-        f.setUserIp(userIp);
-        f.setUserHost(userHost);
-        f.setUserOrigin(userOrigin);
-        f.setUserReferer(userReferer);
-        f.setUserForwarded(userForwarded);
+    public static Field<McuserRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<String> mcuserSessionId, Field<String> mcuserIp, Field<String> mcuserHost, Field<String> mcuserOrigin, Field<String> mcuserReferer, Field<String> mcuserForwarded) {
+        McuserLogin f = new McuserLogin();
+        f.setMcuserUsername(mcuserUsername);
+        f.setMcuserPassword(mcuserPassword);
+        f.setMcuserSessionId(mcuserSessionId);
+        f.setMcuserIp(mcuserIp);
+        f.setMcuserHost(mcuserHost);
+        f.setMcuserOrigin(mcuserOrigin);
+        f.setMcuserReferer(mcuserReferer);
+        f.setMcuserForwarded(mcuserForwarded);
 
         return f.asField();
     }
 
     /**
-     * Call <code>public.logout</code>
+     * Call <code>public.mcuser_logout</code>
      */
-    public static void logout(Configuration configuration, UUID userUid, String userSessionId) {
-        Logout p = new Logout();
-        p.setUserUid(userUid);
-        p.setUserSessionId(userSessionId);
+    public static void mcuserLogout(Configuration configuration, UUID mcuserUid, String mcuserSessionId) {
+        McuserLogout p = new McuserLogout();
+        p.setMcuserUid(mcuserUid);
+        p.setMcuserSessionId(mcuserSessionId);
+
+        p.execute(configuration);
+    }
+
+    /**
+     * Call <code>public.member_login</code>
+     */
+    public static MrefRecord memberLogin(Configuration configuration, String memberUsername, String memberPassword, String memberWebSessionId, String memberIp, String memberHost, String memberOrigin, String memberReferer, String memberForwarded) {
+        MemberLogin f = new MemberLogin();
+        f.setMemberUsername(memberUsername);
+        f.setMemberPassword(memberPassword);
+        f.setMemberWebSessionId(memberWebSessionId);
+        f.setMemberIp(memberIp);
+        f.setMemberHost(memberHost);
+        f.setMemberOrigin(memberOrigin);
+        f.setMemberReferer(memberReferer);
+        f.setMemberForwarded(memberForwarded);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.member_login</code> as a field.
+     */
+    public static Field<MrefRecord> memberLogin(String memberUsername, String memberPassword, String memberWebSessionId, String memberIp, String memberHost, String memberOrigin, String memberReferer, String memberForwarded) {
+        MemberLogin f = new MemberLogin();
+        f.setMemberUsername(memberUsername);
+        f.setMemberPassword(memberPassword);
+        f.setMemberWebSessionId(memberWebSessionId);
+        f.setMemberIp(memberIp);
+        f.setMemberHost(memberHost);
+        f.setMemberOrigin(memberOrigin);
+        f.setMemberReferer(memberReferer);
+        f.setMemberForwarded(memberForwarded);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.member_login</code> as a field.
+     */
+    public static Field<MrefRecord> memberLogin(Field<String> memberUsername, Field<String> memberPassword, Field<String> memberWebSessionId, Field<String> memberIp, Field<String> memberHost, Field<String> memberOrigin, Field<String> memberReferer, Field<String> memberForwarded) {
+        MemberLogin f = new MemberLogin();
+        f.setMemberUsername(memberUsername);
+        f.setMemberPassword(memberPassword);
+        f.setMemberWebSessionId(memberWebSessionId);
+        f.setMemberIp(memberIp);
+        f.setMemberHost(memberHost);
+        f.setMemberOrigin(memberOrigin);
+        f.setMemberReferer(memberReferer);
+        f.setMemberForwarded(memberForwarded);
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.member_logout</code>
+     */
+    public static void memberLogout(Configuration configuration, UUID mid, String memberWebSessionId) {
+        MemberLogout p = new MemberLogout();
+        p.setMid(mid);
+        p.setMemberWebSessionId(memberWebSessionId);
 
         p.execute(configuration);
     }

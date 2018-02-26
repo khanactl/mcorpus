@@ -10,8 +10,10 @@ import com.tll.mcorpus.db.tables.Mbenefits;
 import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
 import com.tll.mcorpus.db.tables.Member;
+import com.tll.mcorpus.db.tables.MemberAudit;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
+import com.tll.mcorpus.db.udt.Mref;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +26,7 @@ import org.jooq.Configuration;
 import org.jooq.Field;
 import org.jooq.Result;
 import org.jooq.Table;
+import org.jooq.UDT;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SchemaImpl;
 
@@ -41,7 +44,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 518892627;
+    private static final long serialVersionUID = -1077816511;
 
     /**
      * The reference instance of <code>public</code>
@@ -77,6 +80,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.member</code>.
      */
     public final Member MEMBER = com.tll.mcorpus.db.tables.Member.MEMBER;
+
+    /**
+     * The table <code>public.member_audit</code>.
+     */
+    public final MemberAudit MEMBER_AUDIT = com.tll.mcorpus.db.tables.MemberAudit.MEMBER_AUDIT;
 
     /**
      * The table <code>public.pgp_armor_headers</code>.
@@ -135,6 +143,19 @@ public class Public extends SchemaImpl {
             Mcuser.MCUSER,
             McuserAudit.MCUSER_AUDIT,
             Member.MEMBER,
+            MemberAudit.MEMBER_AUDIT,
             PgpArmorHeaders.PGP_ARMOR_HEADERS);
+    }
+
+    @Override
+    public final List<UDT<?>> getUDTs() {
+        List result = new ArrayList();
+        result.addAll(getUDTs0());
+        return result;
+    }
+
+    private final List<UDT<?>> getUDTs0() {
+        return Arrays.<UDT<?>>asList(
+            Mref.MREF);
     }
 }

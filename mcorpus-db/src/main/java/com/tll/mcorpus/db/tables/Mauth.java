@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth extends TableImpl<MauthRecord> {
 
-    private static final long serialVersionUID = -1621481659;
+    private static final long serialVersionUID = 1709688193;
 
     /**
      * The reference instance of <code>public.mauth</code>
@@ -159,7 +159,7 @@ public class Mauth extends TableImpl<MauthRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.MAUTH_PKEY);
+        return Arrays.<Index>asList(Indexes.MAUTH_PKEY, Indexes.UNIQUE_MEMBER_USERNAME);
     }
 
     /**
@@ -175,7 +175,7 @@ public class Mauth extends TableImpl<MauthRecord> {
      */
     @Override
     public List<UniqueKey<MauthRecord>> getKeys() {
-        return Arrays.<UniqueKey<MauthRecord>>asList(Keys.MAUTH_PKEY);
+        return Arrays.<UniqueKey<MauthRecord>>asList(Keys.MAUTH_PKEY, Keys.UNIQUE_MEMBER_USERNAME);
     }
 
     /**

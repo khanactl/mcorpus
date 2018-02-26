@@ -10,6 +10,7 @@ import com.tll.mcorpus.db.tables.Mbenefits;
 import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
 import com.tll.mcorpus.db.tables.Member;
+import com.tll.mcorpus.db.tables.MemberAudit;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 
@@ -63,6 +64,11 @@ public class Tables {
      * The table <code>public.member</code>.
      */
     public static final Member MEMBER = com.tll.mcorpus.db.tables.Member.MEMBER;
+
+    /**
+     * The table <code>public.member_audit</code>.
+     */
+    public static final MemberAudit MEMBER_AUDIT = com.tll.mcorpus.db.tables.MemberAudit.MEMBER_AUDIT;
 
     /**
      * The table <code>public.pgp_armor_headers</code>.
