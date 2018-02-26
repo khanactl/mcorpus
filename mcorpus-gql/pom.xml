@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.7.0</version>
+  <version>0.7.1</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -21,7 +21,7 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-db.version>1.0.0</mcorpus-db.version>
+    <mcorpus-db.version>1.1.0</mcorpus-db.version>
   </properties>
   
   <profiles>
@@ -185,7 +185,7 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>

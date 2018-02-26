@@ -82,7 +82,7 @@ public class MCorpusGraphQLTest {
   @Test
   public void testSchemaQuery() {
     log.info("Testing mcorpus gql with simple query..");
-    final ExecutionResult result = query("query { mrefByMid(mid: \"bLYU_FNrT6O3T917UPSAbw==\") { mid\nempId\ntid\nlocation} }");
+    final ExecutionResult result = query("query { mrefByMid(mid: \"bLYU_FNrT6O3T917UPSAbw==\") { mid\nempId\nlocation} }");
     assertNotNull(result);
     assertTrue(result.getErrors().isEmpty());
     final Map<?, ?> rmap = result.getData();

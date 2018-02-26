@@ -169,32 +169,43 @@ public class Main {
 
            // graphql (the api via http post)
            .post(ctx -> ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
-             final GraphQLWebQuery queryObject = parse(qmap);
-             final GraphQLSchema schema = ctx.get(MCorpusGraphQL.class).getGraphQLSchema();
-             final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-             log.info("query: ***\n{}\n***", queryObject);
-
-             // now process the gotten query
-             try {
-               if (queryObject.isValid()) {
-                 final ExecutionInput executionInput =
-                         ExecutionInput.newExecutionInput()
-                                 .query(queryObject.getQuery())
-                                 .variables(queryObject.getVariables())
-                                 .build();
-                 graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
-                   if (executionResult.getErrors().isEmpty()) {
-                     ctx.render(json(executionResult.toSpecification()));
-                   } else {
-                     ctx.render(json(executionResult.getErrors()));
-                   }
-                 });
+             // grab the http request info
+             RatpackPac4j.webContext(ctx).then(webContext -> {
+               final GraphQLWebQuery queryObject = parse(qmap, 
+                   webContext.getRemoteAddr(),
+                   webContext.getRequestHeader("Host"),
+                   webContext.getRequestHeader("Origin"),
+                   webContext.getRequestHeader("Referer"),
+                   webContext.getRequestHeader("Forwarded"),
+                   webContext.getSessionIdentifier());
+               final GraphQLSchema schema = ctx.get(MCorpusGraphQL.class).getGraphQLSchema();
+               final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+               log.info("query: ***\n{}\n***", queryObject);
+  
+               // now process the gotten query
+               try {
+                 if (queryObject.isValid()) {
+                   final ExecutionInput executionInput =
+                           ExecutionInput.newExecutionInput()
+                                   .query(queryObject.getQuery())
+                                   .variables(queryObject.getVariables())
+                                   // the graphql context: GraphQLWebQuery type
+                                   .context(queryObject)
+                                   .build();
+                   graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
+                     if (executionResult.getErrors().isEmpty()) {
+                       ctx.render(json(executionResult.toSpecification()));
+                     } else {
+                       ctx.render(json(executionResult.getErrors()));
+                     }
+                   });
+                 }
                }
-             }
-             catch (Throwable t) {
-               log.error("GraphQL query execution error: {}", t.getMessage());
-               ctx.render(json(t));
-             }
+               catch (Throwable t) {
+                 log.error("GraphQL query execution error: {}", t.getMessage());
+                 ctx.render(json(t));
+               }
+             });
            }))
 
            // grapihql (grahql/index)

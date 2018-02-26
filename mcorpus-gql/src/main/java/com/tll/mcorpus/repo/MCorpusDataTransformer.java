@@ -1,13 +1,10 @@
 package com.tll.mcorpus.repo;
 
-import com.tll.mcorpus.Util;
-import com.tll.mcorpus.db.enums.Addressname;
-import org.jooq.Field;
-
-import static com.tll.mcorpus.Util.*;
+import static com.tll.mcorpus.Util.asSqlDate;
+import static com.tll.mcorpus.Util.digits;
+import static com.tll.mcorpus.db.tables.Maddress.MADDRESS;
 import static com.tll.mcorpus.db.tables.Mauth.MAUTH;
 import static com.tll.mcorpus.db.tables.Member.MEMBER;
-import static com.tll.mcorpus.db.tables.Maddress.MADDRESS;
 import static com.tll.mcorpus.repo.RepoUtil.fval;
 import static com.tll.mcorpus.repo.RepoUtil.hasField;
 import static java.util.Arrays.asList;
@@ -18,6 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+
+import org.jooq.Field;
+
+import com.tll.mcorpus.Util;
+import com.tll.mcorpus.db.enums.Addressname;
 
 /**
  * Responsible for transforming datastore-bound (about to be persisted) member data to a 'datastore-ready' state.
@@ -47,6 +49,18 @@ public class MCorpusDataTransformer {
     if(hasField(f, source)) target.put(f.getName(), fieldTransform.apply(fval(f, source)));
   }
 
+  /**
+   * Same as {@link #mcopy(Field, Map, Map)} but with a specific output type of java.sql.Date.
+   * 
+   * @param f the <em>date</em> field ref
+   * @param source the input object
+   * @param target the target map
+   * @param fieldTransform the java.sql.Date conversion function
+   */
+  static void mcopySqlDate(Field<?> f, Map<String, Object> source, Map<String, Object> target) {
+    if(hasField(f, source)) target.put(f.getName(), asSqlDate(fval(f, source)));
+  }
+
   static void mcopyDigits(Field<String> f, Map<String, Object> source, Map<String, Object> target) {
     if(hasField(f, source)) target.put(f.getName(), digits((fval(f, source))));
   }
@@ -56,7 +70,6 @@ public class MCorpusDataTransformer {
    * but with cleansed / transformed values.
    *
    * <p>This is a way to accommodate database field/column constraints.</p>
-   *
    *
    * @param memberMap map of member properties keyed by the associated Jooq com.tll.mcorpus.db table/column field ref
    * @return newly created list of two maps:<br>
@@ -77,7 +90,7 @@ public class MCorpusDataTransformer {
     mcopy(MEMBER.STATUS, memberMap, cmapMember);
 
     // mauth
-    mcopy(MAUTH.DOB, memberMap, cmapMauth);
+    mcopySqlDate(MAUTH.DOB, memberMap, cmapMauth);
     mcopyDigits(MAUTH.SSN, memberMap, cmapMauth);
     mcopy(MAUTH.EMAIL_PERSONAL, memberMap, cmapMauth, Util::asStringAndClean);
     mcopy(MAUTH.EMAIL_WORK, memberMap, cmapMauth, Util::asStringAndClean);

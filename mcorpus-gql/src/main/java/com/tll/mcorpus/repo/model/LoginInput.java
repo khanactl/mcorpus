@@ -2,17 +2,34 @@ package com.tll.mcorpus.repo.model;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * Encapsulates input for web based login.
+ * 
+ * @author d2d
+ */
 public class LoginInput {
   private final String username;
   private final String password;
 
   private final String webSessionId;
-  private final String ip; // remote addr
+  private final String ip; // remote addr i.e. host
   private final String httpHost;
   private final String httpOrigin;
   private final String httpReferer;
   private final String httpForwarded;
 
+  /**
+   * Constructor.
+   *
+   * @param username
+   * @param password
+   * @param webSessionId
+   * @param ip
+   * @param httpHost
+   * @param httpOrigin
+   * @param httpReferer
+   * @param httpForwarded
+   */
   public LoginInput(String username, String password, String webSessionId, String ip, String httpHost, String httpOrigin, String httpReferer, String httpForwarded) {
     this.username = username;
     this.password = password;
@@ -24,6 +41,9 @@ public class LoginInput {
     this.httpForwarded = httpForwarded;
   }
 
+  /**
+   * @return true if this login input is valid, false otherwise.
+   */
   public boolean isValid() {
     return
       username != null

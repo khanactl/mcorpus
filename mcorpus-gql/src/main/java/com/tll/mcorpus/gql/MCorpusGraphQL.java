@@ -28,9 +28,12 @@ import org.slf4j.LoggerFactory;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.repo.MCorpusRepoAsync;
 import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.LoginInput;
 import com.tll.mcorpus.repo.model.MemberFilter;
+import com.tll.mcorpus.web.GraphQLWebQuery;
 
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
@@ -113,20 +116,44 @@ public class MCorpusGraphQL {
       // Query
       .type("Query", typeWiring -> typeWiring
 
+        // member login and logout
+        .dataFetcher("mlogin", env -> {
+          final GraphQLWebQuery webContext = env.getContext();
+          final LoginInput memberLoginInput = new LoginInput(
+              env.getArgument("username"),
+              env.getArgument("pswd"),
+              webContext.getWebSessionid(),
+              webContext.getRemoteAddr(),
+              webContext.getHttpHost(),
+              webContext.getHttpOrigin(),
+              webContext.getHttpReferer(),
+              webContext.getHttpForwarded());
+          final FetchResult<Mref> mloginResult = mCorpusRepo.memberLogin(memberLoginInput);
+          return mloginResult.isSuccess() ? mloginResult.get() : null;
+        })
+        .dataFetcher("mlogout", env -> {
+          final GraphQLWebQuery webContext = env.getContext();
+          final UUID mid = uuidFromToken(env.getArgument("mid"));
+          final FetchResult<Void> mloginResult = mCorpusRepo.memberLogout(
+              mid, webContext.getWebSessionid()
+          );
+          return mloginResult.hasErrorMsg() ? null : uuidToToken(mid);
+        })
+        
         .dataFetcher("mrefByMid", env -> {
           final UUID uuid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<Map<String, Object>> memberRefFetchResult = mCorpusRepo.fetchMRefByMid(uuid);
+          final FetchResult<Mref> memberRefFetchResult = mCorpusRepo.fetchMRefByMid(uuid);
           return memberRefFetchResult.isSuccess() ? memberRefFetchResult.get() : null;
         })
         .dataFetcher("mrefByEmpIdAndLoc", env -> {
           final String empId = env.getArgument("empId");
           final Location location = locationFromString(env.getArgument("location"));
-          final FetchResult<Map<String, Object>> memberRefFetchResult = mCorpusRepo.fetchMRefByEmpIdAndLoc(empId, location);
+          final FetchResult<Mref> memberRefFetchResult = mCorpusRepo.fetchMRefByEmpIdAndLoc(empId, location);
           return memberRefFetchResult.isSuccess() ? memberRefFetchResult.get() : null;
         })
         .dataFetcher("mrefsByEmpId", env -> {
           final String empId = env.getArgument("empId");
-          final FetchResult<List<Map<String, Object>>> memberRefsFetchResult = mCorpusRepo.fetchMRefsByEmpId(empId);
+          final FetchResult<List<Mref>> memberRefsFetchResult = mCorpusRepo.fetchMRefsByEmpId(empId);
           return memberRefsFetchResult.isSuccess() ? memberRefsFetchResult.get() : null;
         })
         .dataFetcher("memberByMid", env -> {
@@ -313,21 +340,16 @@ public class MCorpusGraphQL {
       // MRef
       .type("MRef", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
-          final Map<String, Object> mref = env.getSource();
-          final UUID mid = mref == null ? null : (UUID) mref.get(MEMBER.MID.getName());
-          return mid == null ? null : uuidToToken(mid);
+          final Mref mref = env.getSource();
+          return mref == null ? null : uuidToToken(mref.getMid());
         })
         .dataFetcher("empId", env -> {
-          final Map<String, Object> mref = env.getSource();
-          return mref == null ? null : mref.get(MEMBER.EMP_ID.getName());
+          final Mref mref = env.getSource();
+          return mref == null ? null : mref.getEmpId();
         })
         .dataFetcher("location", env -> {
-          final Map<String, Object> mref = env.getSource();
-          return mref == null ? null : locationToString((Location) mref.get(MEMBER.LOCATION.getName()));
-        })
-        .dataFetcher("tid", env -> {
-          // TODO impl?
-          return null;
+          final Mref mref = env.getSource();
+          return mref == null ? null : locationToString(mref.getLocation());
         })
       )
 

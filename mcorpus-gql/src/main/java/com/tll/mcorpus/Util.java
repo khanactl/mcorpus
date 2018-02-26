@@ -184,6 +184,22 @@ public class Util {
    * @return the filtered string -OR- empty string when given string is null.
    */
   public static String digits(final String s) { return emptyIfNull(s).replaceAll("[\\D]", ""); }
+  
+  /**
+   * Converts a java.util.Date to a java.sql.Date.
+   * 
+   * @param o the generalized date input argument assumed to be a java.util.Date instance.
+   * @return newly created java.sql.Date instance<br> 
+   *         -OR- null if null or bad input.
+   */
+  public static java.sql.Date asSqlDate(final Object o) {
+    if(o instanceof java.sql.Date) 
+      return (java.sql.Date) o;
+    else if(o instanceof java.util.Date) 
+      return new java.sql.Date( ((java.util.Date) o).getTime());
+    else
+      return null;
+  }
 
   /**
    * Converts a {@link UUID} to a URL-safe base64-encoded string 24 characters long.

@@ -22,6 +22,35 @@ type Query {
 
   # member search - dynamic, filter-able, paginate-able query
   members(filter: MemberFilter, offset: Int, limit: Int): [Member]
+  
+  # member login (MRef is returned upon member login success and null upon failure) 
+  mlogin(username: String!, pswd: String!): MRef
+  
+  # member logout (the member ID is returned upon success and null upon failure)
+  mlogout(mid: ID!): ID
+}
+
+# the mcorpus mutation methods
+type Mutation {
+
+  # add a member into the corpus
+  addMember(member: MemberToAdd!): Member
+
+  # update member properties
+  updateMember(member: MemberToUpdate!): Member
+
+  # physical removal of a member from the corpus - returns the deleted member id when successful
+  deleteMember(mid: ID!): ID
+
+  # add a member address of a given address name (type)
+  addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress
+
+  # update a member address
+  updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress
+
+  # delete a member address of the given address name (type) returning the member id when successful
+  deleteMemberAddress(mid: ID!, addressName: AddressName!): ID
+
 }
 
 # member locations
@@ -74,8 +103,6 @@ type MRef {
   mid: ID
   # member employee id
   empId: String
-  # member tax id
-  tid: String
   # member location
   location: Location
 }
@@ -375,27 +402,4 @@ input MemberAddressToUpdate {
   postalCode: String
   # country
   country: String
-}
-
-# the mcorpus mutation methods
-type Mutation {
-
-  # add a member into the corpus
-  addMember(member: MemberToAdd!): Member
-
-  # update member properties
-  updateMember(member: MemberToUpdate!): Member
-
-  # physical removal of a member from the corpus - returns the deleted member id when successful
-  deleteMember(mid: ID!): ID
-
-  # add a member address of a given address name (type)
-  addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress
-
-  # update a member address
-  updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress
-
-  # delete a member address of the given address name (type) returning the member id when successful
-  deleteMemberAddress(mid: ID!, addressName: AddressName!): ID
-
 }

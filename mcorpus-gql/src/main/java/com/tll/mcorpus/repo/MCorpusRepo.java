@@ -40,9 +40,15 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
+import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.records.MaddressRecord;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
+import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.db.udt.records.MrefRecord;
 import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.LoginInput;
 import com.tll.mcorpus.repo.model.MemberFilter;
 import com.tll.mcorpus.repo.model.MemberRef;
 
@@ -80,20 +86,89 @@ public class MCorpusRepo implements Closeable {
   }
 
   /**
+   * The member login routine which fetches the member ref whose username and password matches the ones given.
+   * <p>
+   * Blocking!
+   *
+   * @param memberLoginInput the member login input credentials along with http header captures
+   * @return Never null {@link FetchResult<Mcuser>} object holding the {@link Mcuser} ref if successful<br>
+   *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
+   */
+  public FetchResult<Mref> memberLogin(final LoginInput memberLoginInput) {
+    if(memberLoginInput != null && memberLoginInput.isValid()) {
+      log.debug("member logging in {}..", memberLoginInput);
+      try {
+        final MemberLogin mlogin = new MemberLogin();
+        mlogin.setMemberUsername(memberLoginInput.getUsername());
+        mlogin.setMemberPassword(memberLoginInput.getPassword());
+        mlogin.setMemberWebSessionId(memberLoginInput.getWebSessionId());
+        mlogin.setMemberIp(memberLoginInput.getIp());
+        mlogin.setMemberHost(memberLoginInput.getHttpHost());
+        mlogin.setMemberOrigin(memberLoginInput.getHttpOrigin());
+        mlogin.setMemberReferer(memberLoginInput.getHttpReferer());
+        mlogin.setMemberForwarded(memberLoginInput.getHttpForwarded());
+        mlogin.execute(dsl.configuration());
+        final MrefRecord rec = mlogin.getReturnValue();
+        if(rec != null && rec.getMid() != null) {
+          // login success
+          final Mref mref = rec.into(Mref.class);
+          log.info("MEMBER LOGGED IN: {}", mref);
+          return new FetchResult<>(mref, null);
+        } else {
+          // login fail - no record returned
+          return new FetchResult<>(null, "Member login unsuccessful.");
+        }
+      }
+      catch(Throwable t) {
+        log.error("Member login error: {}.", t.getMessage());
+      }
+    }
+    // default - login fail
+    return new FetchResult<>(null, "Member login failed.");
+  }
+
+  /**
+   * Log a member out.
+   * <p>
+   * Blocking!
+   *
+   * @param mid the member id
+   * @param webSessionId the member's current web session id
+   * @return Never null {@link FetchResult<Void>} object holding an error message if unsuccessful.
+   */
+  public FetchResult<Void> memberLogout(final UUID mid, final String webSessionId) {
+    if(mid != null && webSessionId != null) {
+      try {
+        final MemberLogout logout = new MemberLogout();
+        logout.setMid(mid);
+        logout.setMemberWebSessionId(webSessionId);
+        logout.execute(dsl.configuration());
+        // logout successful (no exception)
+        return new FetchResult<>(null, null);
+      }
+      catch(Throwable t) {
+        log.error("Member logout error: {}.", t.getMessage());
+      }
+    }
+    // default - logout failed
+    return new FetchResult<>(null, "Member logout failed.");
+  }
+
+  /**
    * Fetch the {@link MemberRef} by member id.
    *
    * @param mid the member id
    * @return newly created {@link FetchResult} wrapping a property map.
    */
-  public FetchResult<Map<String, Object>> fetchMRefByMid(final UUID mid) {
+  public FetchResult<Mref> fetchMRefByMid(final UUID mid) {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
     String emsg;
     try {
-      final Map<String, Object> mref = dsl
+      final Mref mref = dsl
         .select(MEMBER.MID, MEMBER.EMP_ID, MEMBER.LOCATION)
         .from(MEMBER)
         .where(MEMBER.MID.eq(mid))
-        .fetchOneMap();
+        .fetchOne().into(Mref.class);
       return new FetchResult<>(mref, null);
     }
     catch(DataAccessException dae) {
@@ -114,15 +189,15 @@ public class MCorpusRepo implements Closeable {
    * @return newly created {@link FetchResult} wrapping a property map upon success
    *          or wrapping an error message upon a fetch error.
    */
-  public FetchResult<Map<String, Object>> fetchMRefByEmpIdAndLoc(final String empId, final Location loc) {
+  public FetchResult<Mref> fetchMRefByEmpIdAndLoc(final String empId, final Location loc) {
     String emsg;
     if(empId != null && loc != null) {
       try {
-        Map<String, Object> mref = dsl
+        Mref mref = dsl
           .select(MEMBER.MID, MEMBER.EMP_ID, MEMBER.LOCATION)
           .from(MEMBER)
           .where(MEMBER.EMP_ID.eq(empId).and(MEMBER.LOCATION.eq(loc)))
-          .fetchOneMap();
+          .fetchOne().into(Mref.class);
         return new FetchResult<>(mref, null);
       }
       catch(DataAccessException dae) {
@@ -146,16 +221,15 @@ public class MCorpusRepo implements Closeable {
    * @return newly created {@link FetchResult} wrapping a list of property map mref elements upon success
    *          or wrapping an error message upon a fetch error.
    */
-  public FetchResult<List<Map<String, Object>>> fetchMRefsByEmpId(final String empId) {
+  public FetchResult<List<Mref>> fetchMRefsByEmpId(final String empId) {
     if(empId == null) return new FetchResult<>(null, "No emp id provided.");
     String emsg;
     try {
-      final List<Map<String, Object>> mref = dsl
+      final List<Mref> mref = dsl
         .select(MEMBER.MID, MEMBER.EMP_ID, MEMBER.LOCATION)
         .from(MEMBER)
         .where(MEMBER.EMP_ID.eq(empId))
-        .fetch()
-        .intoMaps();
+        .fetchInto(Mref.class);
       return new FetchResult<>(mref, null);
     }
     catch(DataAccessException dae) {

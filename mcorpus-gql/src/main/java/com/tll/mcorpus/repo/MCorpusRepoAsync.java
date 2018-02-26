@@ -1,12 +1,14 @@
 package com.tll.mcorpus.repo;
 
-import com.tll.mcorpus.repo.model.FetchResult;
-import ratpack.exec.Blocking;
-import ratpack.exec.Promise;
+import java.util.UUID;
 
 import javax.sql.DataSource;
-import java.util.Map;
-import java.util.UUID;
+
+import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.repo.model.FetchResult;
+
+import ratpack.exec.Blocking;
+import ratpack.exec.Promise;
 
 public class MCorpusRepoAsync extends MCorpusRepo {
 
@@ -19,7 +21,7 @@ public class MCorpusRepoAsync extends MCorpusRepo {
     super(ds);
   }
 
-  public Promise<FetchResult<Map<String, Object>>> fetchMRefByMidAsync(final UUID mid) {
+  public Promise<FetchResult<Mref>> fetchMRefByMidAsync(final UUID mid) {
     return Blocking.get(() -> { return fetchMRefByMid(mid); });
   }
 

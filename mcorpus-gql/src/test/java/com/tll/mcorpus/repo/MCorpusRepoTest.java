@@ -1,9 +1,30 @@
 package com.tll.mcorpus.repo;
 
-import com.tll.mcorpus.UnitTest;
-import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.tables.records.MemberRecord;
-import com.tll.mcorpus.repo.model.FetchResult;
+import static com.tll.mcorpus.TestUtil.addMaddressTableProperties;
+import static com.tll.mcorpus.TestUtil.addMauthTableProperties;
+import static com.tll.mcorpus.TestUtil.addMemberTableProperties;
+import static com.tll.mcorpus.TestUtil.generateMaddressToAddPropertyMap;
+import static com.tll.mcorpus.TestUtil.generateMaddressToUpdatePropertyMap;
+import static com.tll.mcorpus.TestUtil.generateMemberToAddPropertyMap;
+import static com.tll.mcorpus.TestUtil.generateMemberToUpdatePropertyMap;
+import static com.tll.mcorpus.db.Tables.MADDRESS;
+import static com.tll.mcorpus.db.Tables.MAUTH;
+import static com.tll.mcorpus.db.Tables.MEMBER;
+import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMember;
+import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddressForAdd;
+import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
@@ -16,17 +37,12 @@ import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
-import java.util.*;
-
-import static com.tll.mcorpus.TestUtil.*;
-import static com.tll.mcorpus.db.Tables.MADDRESS;
-import static com.tll.mcorpus.db.Tables.MAUTH;
-import static com.tll.mcorpus.db.Tables.MEMBER;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMember;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddressForAdd;
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.*;
+import com.tll.mcorpus.UnitTest;
+import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.tables.records.MemberRecord;
+import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.LoginInput;
 
 /**
  * Unit test for {@link MCorpusRepo}.
@@ -99,12 +115,68 @@ public class MCorpusRepoTest {
     if(mid != null) dsl().delete(MADDRESS).where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(Addressname.other))).execute();
   }
 
+  /**
+   * Here we use a known member password for<br>: 
+   *    username  'dhookes3f': 
+   *    pswd:     '8testItOut9'
+   */
+  @Test
+  public void testMemberLogin() {
+    MCorpusRepo repo = null;
+    try {
+      repo = new MCorpusRepo(ds());
+      LoginInput memberLoginInput = new LoginInput(
+          "dhookes3f",
+          "8testItOut9",
+          "test-webid-login",
+          "127.0.0.1",
+          "google.com",
+          "12.12.12.12",
+          "soy-sauce",
+          "http-forward");
+      FetchResult<Mref> mrefFetch = repo.memberLogin(memberLoginInput);
+      assertNotNull(mrefFetch);
+      assertNotNull(mrefFetch.get());
+      assertNull(mrefFetch.getErrorMsg());
+      assertNotNull(mrefFetch.get());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) repo.close();
+    }
+  }
+  
+  @Test
+  public void testMemberLogout() {
+    MCorpusRepo repo = null;
+    try {
+      repo = new MCorpusRepo(ds());
+      
+      FetchResult<Void> memberLogoutResult = repo.memberLogout(
+          UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba"), 
+          "test-webid-logout"
+      );
+      assertNotNull(memberLogoutResult);
+      assertFalse(memberLogoutResult.hasErrorMsg());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) repo.close();
+    }
+  }
+
   @Test
   public void testFetchMRefByMid() {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds());
-      FetchResult<Map<String, Object>> mrefFetch = repo.fetchMRefByMid(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
+      FetchResult<Mref> mrefFetch = repo.fetchMRefByMid(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
       assertNotNull(mrefFetch);
       assertNotNull(mrefFetch.get());
       assertNull(mrefFetch.getErrorMsg());

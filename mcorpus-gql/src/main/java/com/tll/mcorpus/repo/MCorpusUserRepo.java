@@ -1,11 +1,10 @@
 package com.tll.mcorpus.repo;
 
-import com.tll.mcorpus.db.routines.Login;
-import com.tll.mcorpus.db.routines.Logout;
-import com.tll.mcorpus.db.tables.pojos.Mcuser;
-import com.tll.mcorpus.db.tables.records.McuserRecord;
-import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.LoginInput;
+import java.io.Closeable;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
@@ -15,9 +14,12 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
-import java.io.Closeable;
-import java.util.UUID;
+import com.tll.mcorpus.db.routines.McuserLogin;
+import com.tll.mcorpus.db.routines.McuserLogout;
+import com.tll.mcorpus.db.tables.pojos.Mcuser;
+import com.tll.mcorpus.db.tables.records.McuserRecord;
+import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.LoginInput;
 
 /**
  * MCorpus User Repository (data access).
@@ -53,27 +55,29 @@ public class MCorpusUserRepo implements Closeable {
   }
 
   /**
-   * The mcorpus user login routine which fetches the user ref whose username and password matches the ones given.
+   * The mcorpus mcuser login routine which fetches the mcuser record ref 
+   * whose username and password matches the ones given.
    * <p>
    * Blocking!
    *
-   * @param loginInput the user login input credentials along with http header captures
-   * @return Never null {@link FetchResult<Mcuser>} object holding the {@link Mcuser} ref if successful<br>
+   * @param mcuserLoginInput the mcuser login input credentials along with http header captures
+   * @return Never null {@link FetchResult<Mcuser>} object 
+   *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final LoginInput loginInput) {
-    if(loginInput != null && loginInput.isValid()) {
-      log.debug("logging in {}..", loginInput);
+  public FetchResult<Mcuser> login(final LoginInput mcuserLoginInput) {
+    if(mcuserLoginInput != null && mcuserLoginInput.isValid()) {
+      log.debug("logging in {}..", mcuserLoginInput);
       try {
-        final Login login = new Login();
-        login.setUserUsername(loginInput.getUsername());
-        login.setUserPassword(loginInput.getPassword());
-        login.setUserSessionId(loginInput.getWebSessionId());
-        login.setUserIp(loginInput.getIp());
-        login.setUserHost(loginInput.getHttpHost());
-        login.setUserOrigin(loginInput.getHttpOrigin());
-        login.setUserReferer(loginInput.getHttpReferer());
-        login.setUserForwarded(loginInput.getHttpForwarded());
+        final McuserLogin login = new McuserLogin();
+        login.setMcuserUsername(mcuserLoginInput.getUsername());
+        login.setMcuserPassword(mcuserLoginInput.getPassword());
+        login.setMcuserSessionId(mcuserLoginInput.getWebSessionId());
+        login.setMcuserIp(mcuserLoginInput.getIp());
+        login.setMcuserHost(mcuserLoginInput.getHttpHost());
+        login.setMcuserOrigin(mcuserLoginInput.getHttpOrigin());
+        login.setMcuserReferer(mcuserLoginInput.getHttpReferer());
+        login.setMcuserForwarded(mcuserLoginInput.getHttpForwarded());
         login.execute(dsl.configuration());
         final McuserRecord rec = login.getReturnValue();
         if(rec != null && rec.getUid() != null) {
@@ -95,20 +99,21 @@ public class MCorpusUserRepo implements Closeable {
   }
 
   /**
-   * Log a user out.
+   * Log an mcuser out.
    * <p>
    * Blocking!
    *
-   * @param userId the user's id
+   * @param mcuserId the mcuser id
    * @param webSessionId the user's current web session id token
-   * @return Never null {@link FetchResult<Void>} object holding an error message if unsuccessful.
+   * @return Never null {@link FetchResult<Void>} object 
+   *         holding an error message if unsuccessful.
    */
-  public FetchResult<Void> logout(final UUID userId, final String webSessionId) {
-    if(userId != null && webSessionId != null) {
+  public FetchResult<Void> logout(final UUID mcuserId, final String webSessionId) {
+    if(mcuserId != null && webSessionId != null) {
       try {
-        final Logout logout = new Logout();
-        logout.setUserUid(userId);
-        logout.setUserSessionId(webSessionId);
+        final McuserLogout logout = new McuserLogout();
+        logout.setMcuserUid(mcuserId);
+        logout.setMcuserSessionId(webSessionId);
         logout.execute(dsl.configuration());
         // logout successful (no exception)
         return new FetchResult<>(null, null);
