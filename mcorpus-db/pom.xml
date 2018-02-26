@@ -76,7 +76,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <skip>false</skip>
+          <skip>true</skip>
           <jdbc>
             <driver>org.postgresql.Driver</driver>
             <url>jdbc:postgresql://${dbServerName}:${dbPortNumber}/${dbName}</url>
