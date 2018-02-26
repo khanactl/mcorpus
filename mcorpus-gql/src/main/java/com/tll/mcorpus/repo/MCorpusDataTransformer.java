@@ -55,7 +55,6 @@ public class MCorpusDataTransformer {
    * @param f the <em>date</em> field ref
    * @param source the input object
    * @param target the target map
-   * @param fieldTransform the java.sql.Date conversion function
    */
   static void mcopySqlDate(Field<?> f, Map<String, Object> source, Map<String, Object> target) {
     if(hasField(f, source)) target.put(f.getName(), asSqlDate(fval(f, source)));

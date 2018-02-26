@@ -11,11 +11,14 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Objects;
 
 import ratpack.exec.Blocking;
 import ratpack.handling.Context;
+import ratpack.http.MutableHeaders;
 import ratpack.render.Renderable;
 
 /**
@@ -43,20 +46,22 @@ public class WebFileRenderer implements Renderable {
   /**
    * Get an instance whose HTTP Content-Type is 'text/html'.
    *
-   * @param webFileTemplatePath
-   *          the string-wise path <em>relative to the ratpack web roor dir</em>
-   *          which, in-fact, is the jar root dir when run from uber-jar.
-   * @param dataMap
-   *          optional map of property names (key) and values.
+   * @param webFileTemplatePath the string-wise path <em>relative to the ratpack
+   *          web roor dir</em> which, in-fact, is the jar root dir when run from
+   *          uber-jar.
+   * @param dataMap optional map of property names (key) and values.
+   * @param noCache when true, add http headers to signal the client browser to
+   *          <em>NOT</em> cache this response.
    * @return newly created {@link WebFileRenderer}
    */
-  public static WebFileRenderer html(String webFileTemplatePath, Map<String, Object> dataMap) {    
-    return new WebFileRenderer(URI.create(rootWebDir + "/" + webFileTemplatePath), dataMap, "text/html");
+  public static WebFileRenderer html(String webFileTemplatePath, Map<String, Object> dataMap, boolean noCache) {    
+    return new WebFileRenderer(URI.create(rootWebDir + "/" + webFileTemplatePath), dataMap, "text/html", noCache);
   }
 
   private final URI webFileTemplatePath;
   private final Map<String, Object> dataMap;
   private final String contentType;
+  private final boolean noCache;
 
   /**
    * Constructor.
@@ -68,11 +73,14 @@ public class WebFileRenderer implements Renderable {
    *                <p>
    *                May be null in which case no property 'filtering' happens.
    * @param contentType the HTTP content-type set in the response
+   * @param noCache when true, add http headers to signal the client browser to
+   *                <em>NOT</em> cache this response.
    */
-  private WebFileRenderer(URI webFileTemplatePath, Map<String, Object> dataMap, String contentType) {
+  private WebFileRenderer(URI webFileTemplatePath, Map<String, Object> dataMap, String contentType, boolean noCache) {
     this.webFileTemplatePath = webFileTemplatePath;
     this.dataMap = dataMap;
     this.contentType = dflt(contentType, "text/html");
+    this.noCache = noCache;
   }
 
   @Override
@@ -84,6 +92,12 @@ public class WebFileRenderer implements Renderable {
         for(final Map.Entry<String, Object> pentry : dataMap.entrySet())
           if(not(isNullOrEmpty(pentry.getKey())))
             fileStr = fileStr.replace(String.format("${%s}", pentry.getKey()), asString(pentry.getValue()).trim());
+      }
+      if(noCache) {
+        final MutableHeaders responseHeaders = context.getResponse().getHeaders();
+        responseHeaders.add("Expires", "Sun, 01 Jan 2018 06:00:00 GMT");
+        responseHeaders.add("Last-Modified", ZonedDateTime.now(ZoneOffset.UTC).toString());
+        responseHeaders.add("Cache-Control", "max-age=0, no-cache, must-revalidate, proxy-revalidate");
       }
       context.getResponse().send(contentType, fileStr);
     });

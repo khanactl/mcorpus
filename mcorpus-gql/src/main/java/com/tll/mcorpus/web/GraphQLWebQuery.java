@@ -20,7 +20,14 @@ public class GraphQLWebQuery {
    * Parse the given raw GraphQL query into its constituent sub-components.
    * 
    * @param qmap map of inbound JSON tokens
+   * @param remoteAddr the remote address (ip/host) 
+   * @param httpHost the http host
+   * @param httpOrigin the http origin
+   * @param httpReferer the http referer
+   * @param httpForwarded the http forwarded
+   * @param webSessionid the web session id token
    * @throws Exception upon any parsing error
+   * @return Newly created {@link GraphQLWebQuery} instance.
    */
   public static GraphQLWebQuery parse(final Map<String, Object> qmap,
       String remoteAddr,

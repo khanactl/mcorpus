@@ -50,8 +50,18 @@ import ratpack.server.BaseDir;
 import ratpack.server.RatpackServer;
 import ratpack.session.SessionModule;
 
+/**
+ * MCorpus GraphQL Server entry point.
+ * 
+ * @author jkirton
+ */
 public class Main {
 
+  /**
+   * The MCorpus GraphQL server config type.
+   * <p>
+   * All needed startup properties shall be explicitly defined here.
+   */
   public static class MCorpusServerConfig {
     public String dataSourceClassName;
     public String dbUsername;
@@ -212,7 +222,7 @@ public class Main {
            .get("index", ctx -> RatpackPac4j.webContext(ctx).then(webContext -> ctx.render(
              html("graphql/index.html",
                  singletonMap(RSTGenerator.RST_TOKEN_NAME,
-                     rstGeneratorAuthorizer.currentRst(webContext))))
+                     rstGeneratorAuthorizer.currentRst(webContext)), true))
            ))
            .files(f -> f.dir("templates/graphql"))
          )
@@ -227,13 +237,13 @@ public class Main {
                  model.put("username", p.getUsername());
                  model.put("loggedInSince", p.getAttribute(JwtClaims.ISSUED_AT));
                  model.put("expires", p.getAttribute(JwtClaims.EXPIRATION_TIME));
-                 ctx.render(html("loggedIn.html", model));
+                 ctx.render(html("loggedIn.html", model, true));
                }
              });
            })
          )
          .path("loginForm", ctx ->
-           ctx.render(html("loginForm.html", singletonMap("callbackUrl", formClient.getCallbackUrl())))
+           ctx.render(html("loginForm.html", singletonMap("callbackUrl", formClient.getCallbackUrl()), false))
          )
          .path("logout", ctx -> {
            RatpackPac4j.webContext(ctx).then(webContext -> {

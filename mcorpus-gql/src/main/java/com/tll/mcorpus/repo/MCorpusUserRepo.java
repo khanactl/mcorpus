@@ -61,7 +61,7 @@ public class MCorpusUserRepo implements Closeable {
    * Blocking!
    *
    * @param mcuserLoginInput the mcuser login input credentials along with http header captures
-   * @return Never null {@link FetchResult<Mcuser>} object 
+   * @return Never null {@link FetchResult} object<br> 
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
@@ -105,7 +105,7 @@ public class MCorpusUserRepo implements Closeable {
    *
    * @param mcuserId the mcuser id
    * @param webSessionId the user's current web session id token
-   * @return Never null {@link FetchResult<Void>} object 
+   * @return Never null {@link FetchResult} object 
    *         holding an error message if unsuccessful.
    */
   public FetchResult<Void> logout(final UUID mcuserId, final String webSessionId) {
