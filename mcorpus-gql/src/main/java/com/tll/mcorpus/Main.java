@@ -155,14 +155,15 @@ public class Main {
 
          .all(RatpackPac4j.authenticator("callback", cookieClient, formClient))
 
+         // require RST token synchronization for all top-level http request paths
+         .path("::^(index|graphql.*|login.*|logout)$", ctx -> RatpackPac4j.webContext(ctx).then(webContext -> {
+           // we're just generating the per-request sync token here
+           rstGeneratorAuthorizer.isAuthorized(webContext, null);
+           ctx.next();
+         }))
+         
          // graphql/
          .prefix("graphql", chainsub -> chainsub
-           // "/graphql" and "graphql/index" both needs rst tokens 
-           .path("::^(index|)$", ctx -> RatpackPac4j.webContext(ctx).then(webContext -> {
-             // csrfTokenGeneratorAuthorizer.isAuthorized always returns true - we're just generating the CSRF token here
-             rstGeneratorAuthorizer.isAuthorized(webContext, null);
-             ctx.next();
-           }))
            // jwt auth and rst verification for graphql path
            .path("index", RatpackPac4j.requireAuth(CookieClient.class))
            .path(RatpackPac4j.requireAuth(CookieClient.class, rstAuthorizer))
