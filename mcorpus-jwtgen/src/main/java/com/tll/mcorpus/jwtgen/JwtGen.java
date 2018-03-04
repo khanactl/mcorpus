@@ -272,7 +272,7 @@ public class JwtGen {
       ds.setUser(jwtGenProps.getProperty("dbUsername"));
       ds.setPassword(jwtGenProps.getProperty("dbPassword"));
       cnc = ds.getConnection();
-      statement = cnc.prepareStatement("select uid, admin from login(?, ?, ?, ?, ?, ?, ?, ?)");
+      statement = cnc.prepareStatement("select uid, admin from mcuser_login(?, ?, ?, ?, ?, ?, ?, ?)");
       statement.setString(1, input.username);
       statement.setString(2, input.password);
       statement.setString(3, jwtSessionId);

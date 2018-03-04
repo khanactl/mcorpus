@@ -8,6 +8,9 @@ import static ratpack.handling.Handlers.redirect;
 import static ratpack.jackson.Jackson.fromJson;
 import static ratpack.jackson.Jackson.json;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +43,7 @@ import graphql.ExecutionInput;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.ssl.SslContextBuilder;
 import ratpack.error.ClientErrorHandler;
 import ratpack.error.ServerErrorHandler;
 import ratpack.guice.Guice;
@@ -57,26 +61,6 @@ import ratpack.session.SessionModule;
  */
 public class Main {
 
-  /**
-   * The MCorpus GraphQL server config type.
-   * <p>
-   * All needed startup properties shall be explicitly defined here.
-   */
-  public static class MCorpusServerConfig {
-    public String dataSourceClassName;
-    public String dbUsername;
-    public String dbPassword;
-    public String dbName;
-    public String dbSchema;
-    public String dbServerName;
-    public String dbPortNumber;
-
-    public String serverDomainName;
-
-    public String jwtSalt;
-    public long jwtTtlInMillis;
-  }
-
   private static final Logger log = LoggerFactory.getLogger(Main.class);
 
   @SuppressWarnings("serial")
@@ -90,11 +74,13 @@ public class Main {
        .args(args)
        .sysProps()
        .env()
+       .ssl(SslContextBuilder.forServer(new File(cpr("ssl.crt")), new File(cpr("ssl.key"))).build())
        .require("", MCorpusServerConfig.class)
        // .require("/metrics", DropwizardMetricsConfig.class)
      )
      .registry(Guice.registry(bindings -> {
        final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
+       log.info(config.toString());
 
        bindings.module(HikariModule.class, hikariConfig -> {
          hikariConfig.setDataSourceClassName(config.dataSourceClassName);
@@ -175,8 +161,8 @@ public class Main {
          // graphql/
          .prefix("graphql", chainsub -> chainsub
            // jwt auth and rst verification for graphql path
-           .path("index", RatpackPac4j.requireAuth(CookieClient.class))
-           .path(RatpackPac4j.requireAuth(CookieClient.class, rstAuthorizer))
+           .get("index", RatpackPac4j.requireAuth(CookieClient.class))
+           .post(RatpackPac4j.requireAuth(CookieClient.class, rstAuthorizer))
 
            // graphql (the api via http post)
            .post(ctx -> ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
@@ -230,7 +216,7 @@ public class Main {
 
          .prefix("login", chainsub -> chainsub
            .all(RatpackPac4j.requireAuth(FormClient.class))
-           .path(ctx -> { // i.e. `/login` path only
+           .get(ctx -> { // i.e. `/login` path only
              RatpackPac4j.userProfile(ctx).then(po -> {
                if(po.isPresent()) {
                  final CommonProfile p = po.get();
@@ -243,10 +229,10 @@ public class Main {
              });
            })
          )
-         .path("loginForm", ctx ->
+         .get("loginForm", ctx ->
            ctx.render(html("loginForm.html", singletonMap("callbackUrl", formClient.getCallbackUrl()), false))
          )
-         .path("logout", ctx -> {
+         .get("logout", ctx -> {
            RatpackPac4j.webContext(ctx).then(webContext -> {
              RatpackPac4j.userProfile(ctx).then(po -> {
                if (po.isPresent()) {
@@ -268,14 +254,36 @@ public class Main {
            });
          })
 
-         .path("index", ctx -> {
+         .get("index", ctx -> {
            log.debug("mcorpus index.");
            ctx.render(ctx.file("templates/index.html"));
          })
 
-         .path("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")));
+         .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")));
      })
    );
   }
 
+  /**
+   * Class Path Resource. 
+   * <p>
+   * Get the identifying {@link URI} for a packaged (jar) resource by a given path
+   * string by way of the current thread's class loader.
+   * 
+   * @param path
+   *          the path of the packaged resource relative to the package root
+   * @return never null {@link URI} identifying the resource
+   * @throws Error
+   *           a fatal runtime error exception is thrown upon failure to identify
+   *           the resource by the given path
+   */
+  private static URI cpr(String path) {
+    try {
+      final URI uri = Thread.currentThread().getContextClassLoader().getResource(path).toURI();
+      if(uri == null) throw new Error("Resource not found.");
+      return uri;
+    } catch (URISyntaxException e) {
+      throw new Error("Resource load failure.");
+    }
+  }  
 }
