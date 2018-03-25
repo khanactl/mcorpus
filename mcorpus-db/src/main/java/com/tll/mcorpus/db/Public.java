@@ -13,6 +13,7 @@ import com.tll.mcorpus.db.tables.Member;
 import com.tll.mcorpus.db.tables.MemberAudit;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
+import com.tll.mcorpus.db.udt.JwtAndMcuserStatus;
 import com.tll.mcorpus.db.udt.Mref;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1077816511;
+    private static final long serialVersionUID = 1437464756;
 
     /**
      * The reference instance of <code>public</code>
@@ -156,6 +157,7 @@ public class Public extends SchemaImpl {
 
     private final List<UDT<?>> getUDTs0() {
         return Arrays.<UDT<?>>asList(
+            JwtAndMcuserStatus.JWT_AND_MCUSER_STATUS,
             Mref.MREF);
     }
 }

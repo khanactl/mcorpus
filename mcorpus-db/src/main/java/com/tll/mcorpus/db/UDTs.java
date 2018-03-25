@@ -4,6 +4,7 @@
 package com.tll.mcorpus.db;
 
 
+import com.tll.mcorpus.db.udt.JwtAndMcuserStatus;
 import com.tll.mcorpus.db.udt.Mref;
 
 import javax.annotation.Generated;
@@ -21,6 +22,11 @@ import javax.annotation.Generated;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class UDTs {
+
+    /**
+     * The type <code>public.jwt_and_mcuser_status</code>
+     */
+    public static JwtAndMcuserStatus JWT_AND_MCUSER_STATUS = com.tll.mcorpus.db.udt.JwtAndMcuserStatus.JWT_AND_MCUSER_STATUS;
 
     /**
      * The type <code>public.mref</code>

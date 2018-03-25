@@ -7,6 +7,7 @@ package com.tll.mcorpus.db.tables;
 import com.tll.mcorpus.db.Indexes;
 import com.tll.mcorpus.db.Keys;
 import com.tll.mcorpus.db.Public;
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.tables.records.McuserAuditRecord;
 
@@ -41,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = 1898972321;
+    private static final long serialVersionUID = 1295094112;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -72,34 +73,29 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     public final TableField<McuserAuditRecord, McuserAuditType> TYPE = createField("type", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), this, "");
 
     /**
-     * The column <code>public.mcuser_audit.web_session_id</code>.
+     * The column <code>public.mcuser_audit.request_timestamp</code>.
      */
-    public final TableField<McuserAuditRecord, String> WEB_SESSION_ID = createField("web_session_id", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<McuserAuditRecord, Timestamp> REQUEST_TIMESTAMP = createField("request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
-     * The column <code>public.mcuser_audit.remote_addr</code>.
+     * The column <code>public.mcuser_audit.request_origin</code>.
      */
-    public final TableField<McuserAuditRecord, String> REMOTE_ADDR = createField("remote_addr", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<McuserAuditRecord, String> REQUEST_ORIGIN = createField("request_origin", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.mcuser_audit.http_host</code>.
+     * The column <code>public.mcuser_audit.login_expiration</code>.
      */
-    public final TableField<McuserAuditRecord, String> HTTP_HOST = createField("http_host", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<McuserAuditRecord, Timestamp> LOGIN_EXPIRATION = createField("login_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
-     * The column <code>public.mcuser_audit.http_origin</code>.
+     * The column <code>public.mcuser_audit.jwt_id</code>.
      */
-    public final TableField<McuserAuditRecord, String> HTTP_ORIGIN = createField("http_origin", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<McuserAuditRecord, UUID> JWT_ID = createField("jwt_id", org.jooq.impl.SQLDataType.UUID, this, "");
 
     /**
-     * The column <code>public.mcuser_audit.http_referer</code>.
+     * The column <code>public.mcuser_audit.jwt_id_status</code>.
      */
-    public final TableField<McuserAuditRecord, String> HTTP_REFERER = createField("http_referer", org.jooq.impl.SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.mcuser_audit.http_forwarded</code>.
-     */
-    public final TableField<McuserAuditRecord, String> HTTP_FORWARDED = createField("http_forwarded", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<McuserAuditRecord, JwtStatus> JWT_ID_STATUS = createField("jwt_id_status", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), this, "");
 
     /**
      * Create a <code>public.mcuser_audit</code> table reference

@@ -6,6 +6,7 @@ package com.tll.mcorpus.db.routines;
 
 import com.tll.mcorpus.db.Public;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -27,7 +28,7 @@ import org.jooq.impl.AbstractRoutine;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberLogout extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = 770932281;
+    private static final long serialVersionUID = 658608581;
 
     /**
      * The parameter <code>public.member_logout.mid</code>.
@@ -35,9 +36,14 @@ public class MemberLogout extends AbstractRoutine<java.lang.Void> {
     public static final Parameter<UUID> MID = createParameter("mid", org.jooq.impl.SQLDataType.UUID, false, false);
 
     /**
-     * The parameter <code>public.member_logout.member_web_session_id</code>.
+     * The parameter <code>public.member_logout.in_request_timestamp</code>.
      */
-    public static final Parameter<String> MEMBER_WEB_SESSION_ID = createParameter("member_web_session_id", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<Timestamp> IN_REQUEST_TIMESTAMP = createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, false, false);
+
+    /**
+     * The parameter <code>public.member_logout.in_request_origin</code>.
+     */
+    public static final Parameter<String> IN_REQUEST_ORIGIN = createParameter("in_request_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
 
     /**
      * Create a new routine call instance
@@ -46,7 +52,8 @@ public class MemberLogout extends AbstractRoutine<java.lang.Void> {
         super("member_logout", Public.PUBLIC);
 
         addInParameter(MID);
-        addInParameter(MEMBER_WEB_SESSION_ID);
+        addInParameter(IN_REQUEST_TIMESTAMP);
+        addInParameter(IN_REQUEST_ORIGIN);
     }
 
     /**
@@ -57,9 +64,16 @@ public class MemberLogout extends AbstractRoutine<java.lang.Void> {
     }
 
     /**
-     * Set the <code>member_web_session_id</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
      */
-    public void setMemberWebSessionId(String value) {
-        setValue(MEMBER_WEB_SESSION_ID, value);
+    public void setInRequestTimestamp(Timestamp value) {
+        setValue(IN_REQUEST_TIMESTAMP, value);
+    }
+
+    /**
+     * Set the <code>in_request_origin</code> parameter IN value to the routine
+     */
+    public void setInRequestOrigin(String value) {
+        setValue(IN_REQUEST_ORIGIN, value);
     }
 }

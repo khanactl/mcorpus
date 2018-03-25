@@ -4,6 +4,8 @@
 package com.tll.mcorpus.db.tables.pojos;
 
 
+import com.tll.mcorpus.db.enums.MemberStatus;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -24,16 +26,17 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser implements Serializable {
 
-    private static final long serialVersionUID = -769414326;
+    private static final long serialVersionUID = -1321251932;
 
-    private final UUID      uid;
-    private final Timestamp created;
-    private final Timestamp modified;
-    private final String    name;
-    private final String    email;
-    private final String    username;
-    private final String    pswd;
-    private final Boolean   admin;
+    private final UUID         uid;
+    private final Timestamp    created;
+    private final Timestamp    modified;
+    private final String       name;
+    private final String       email;
+    private final String       username;
+    private final String       pswd;
+    private final Boolean      admin;
+    private final MemberStatus status;
 
     public Mcuser(Mcuser value) {
         this.uid = value.uid;
@@ -44,17 +47,19 @@ public class Mcuser implements Serializable {
         this.username = value.username;
         this.pswd = value.pswd;
         this.admin = value.admin;
+        this.status = value.status;
     }
 
     public Mcuser(
-        UUID      uid,
-        Timestamp created,
-        Timestamp modified,
-        String    name,
-        String    email,
-        String    username,
-        String    pswd,
-        Boolean   admin
+        UUID         uid,
+        Timestamp    created,
+        Timestamp    modified,
+        String       name,
+        String       email,
+        String       username,
+        String       pswd,
+        Boolean      admin,
+        MemberStatus status
     ) {
         this.uid = uid;
         this.created = created;
@@ -64,6 +69,7 @@ public class Mcuser implements Serializable {
         this.username = username;
         this.pswd = pswd;
         this.admin = admin;
+        this.status = status;
     }
 
     public UUID getUid() {
@@ -98,6 +104,10 @@ public class Mcuser implements Serializable {
         return this.admin;
     }
 
+    public MemberStatus getStatus() {
+        return this.status;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Mcuser (");
@@ -110,6 +120,7 @@ public class Mcuser implements Serializable {
         sb.append(", ").append(username);
         sb.append(", ").append(pswd);
         sb.append(", ").append(admin);
+        sb.append(", ").append(status);
 
         sb.append(")");
         return sb.toString();

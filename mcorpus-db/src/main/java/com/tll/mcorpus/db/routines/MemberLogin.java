@@ -7,6 +7,8 @@ package com.tll.mcorpus.db.routines;
 import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
+import java.sql.Timestamp;
+
 import javax.annotation.Generated;
 
 import org.jooq.Field;
@@ -27,7 +29,7 @@ import org.jooq.impl.AbstractRoutine;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberLogin extends AbstractRoutine<MrefRecord> {
 
-    private static final long serialVersionUID = 1972675467;
+    private static final long serialVersionUID = -1005690740;
 
     /**
      * The parameter <code>public.member_login.RETURN_VALUE</code>.
@@ -45,34 +47,14 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
     public static final Parameter<String> MEMBER_PASSWORD = createParameter("member_password", org.jooq.impl.SQLDataType.CLOB, false, false);
 
     /**
-     * The parameter <code>public.member_login.member_web_session_id</code>.
+     * The parameter <code>public.member_login.in_request_timestamp</code>.
      */
-    public static final Parameter<String> MEMBER_WEB_SESSION_ID = createParameter("member_web_session_id", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<Timestamp> IN_REQUEST_TIMESTAMP = createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, false, false);
 
     /**
-     * The parameter <code>public.member_login.member_ip</code>.
+     * The parameter <code>public.member_login.in_request_origin</code>.
      */
-    public static final Parameter<String> MEMBER_IP = createParameter("member_ip", org.jooq.impl.SQLDataType.CLOB, false, false);
-
-    /**
-     * The parameter <code>public.member_login.member_host</code>.
-     */
-    public static final Parameter<String> MEMBER_HOST = createParameter("member_host", org.jooq.impl.SQLDataType.CLOB, false, false);
-
-    /**
-     * The parameter <code>public.member_login.member_origin</code>.
-     */
-    public static final Parameter<String> MEMBER_ORIGIN = createParameter("member_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
-
-    /**
-     * The parameter <code>public.member_login.member_referer</code>.
-     */
-    public static final Parameter<String> MEMBER_REFERER = createParameter("member_referer", org.jooq.impl.SQLDataType.CLOB, false, false);
-
-    /**
-     * The parameter <code>public.member_login.member_forwarded</code>.
-     */
-    public static final Parameter<String> MEMBER_FORWARDED = createParameter("member_forwarded", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_REQUEST_ORIGIN = createParameter("in_request_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
 
     /**
      * Create a new routine call instance
@@ -83,12 +65,8 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
         setReturnParameter(RETURN_VALUE);
         addInParameter(MEMBER_USERNAME);
         addInParameter(MEMBER_PASSWORD);
-        addInParameter(MEMBER_WEB_SESSION_ID);
-        addInParameter(MEMBER_IP);
-        addInParameter(MEMBER_HOST);
-        addInParameter(MEMBER_ORIGIN);
-        addInParameter(MEMBER_REFERER);
-        addInParameter(MEMBER_FORWARDED);
+        addInParameter(IN_REQUEST_TIMESTAMP);
+        addInParameter(IN_REQUEST_ORIGIN);
     }
 
     /**
@@ -120,86 +98,30 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
     }
 
     /**
-     * Set the <code>member_web_session_id</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
      */
-    public void setMemberWebSessionId(String value) {
-        setValue(MEMBER_WEB_SESSION_ID, value);
+    public void setInRequestTimestamp(Timestamp value) {
+        setValue(IN_REQUEST_TIMESTAMP, value);
     }
 
     /**
-     * Set the <code>member_web_session_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setMemberWebSessionId(Field<String> field) {
-        setField(MEMBER_WEB_SESSION_ID, field);
+    public void setInRequestTimestamp(Field<Timestamp> field) {
+        setField(IN_REQUEST_TIMESTAMP, field);
     }
 
     /**
-     * Set the <code>member_ip</code> parameter IN value to the routine
+     * Set the <code>in_request_origin</code> parameter IN value to the routine
      */
-    public void setMemberIp(String value) {
-        setValue(MEMBER_IP, value);
+    public void setInRequestOrigin(String value) {
+        setValue(IN_REQUEST_ORIGIN, value);
     }
 
     /**
-     * Set the <code>member_ip</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setMemberIp(Field<String> field) {
-        setField(MEMBER_IP, field);
-    }
-
-    /**
-     * Set the <code>member_host</code> parameter IN value to the routine
-     */
-    public void setMemberHost(String value) {
-        setValue(MEMBER_HOST, value);
-    }
-
-    /**
-     * Set the <code>member_host</code> parameter to the function to be used with a {@link org.jooq.Select} statement
-     */
-    public void setMemberHost(Field<String> field) {
-        setField(MEMBER_HOST, field);
-    }
-
-    /**
-     * Set the <code>member_origin</code> parameter IN value to the routine
-     */
-    public void setMemberOrigin(String value) {
-        setValue(MEMBER_ORIGIN, value);
-    }
-
-    /**
-     * Set the <code>member_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
-     */
-    public void setMemberOrigin(Field<String> field) {
-        setField(MEMBER_ORIGIN, field);
-    }
-
-    /**
-     * Set the <code>member_referer</code> parameter IN value to the routine
-     */
-    public void setMemberReferer(String value) {
-        setValue(MEMBER_REFERER, value);
-    }
-
-    /**
-     * Set the <code>member_referer</code> parameter to the function to be used with a {@link org.jooq.Select} statement
-     */
-    public void setMemberReferer(Field<String> field) {
-        setField(MEMBER_REFERER, field);
-    }
-
-    /**
-     * Set the <code>member_forwarded</code> parameter IN value to the routine
-     */
-    public void setMemberForwarded(String value) {
-        setValue(MEMBER_FORWARDED, value);
-    }
-
-    /**
-     * Set the <code>member_forwarded</code> parameter to the function to be used with a {@link org.jooq.Select} statement
-     */
-    public void setMemberForwarded(Field<String> field) {
-        setField(MEMBER_FORWARDED, field);
+    public void setInRequestOrigin(Field<String> field) {
+        setField(IN_REQUEST_ORIGIN, field);
     }
 }

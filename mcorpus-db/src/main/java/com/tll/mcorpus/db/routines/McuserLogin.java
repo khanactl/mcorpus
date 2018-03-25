@@ -7,6 +7,9 @@ package com.tll.mcorpus.db.routines;
 import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 
+import java.sql.Timestamp;
+import java.util.UUID;
+
 import javax.annotation.Generated;
 
 import org.jooq.Field;
@@ -27,7 +30,7 @@ import org.jooq.impl.AbstractRoutine;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserLogin extends AbstractRoutine<McuserRecord> {
 
-    private static final long serialVersionUID = 1972187186;
+    private static final long serialVersionUID = -1685328486;
 
     /**
      * The parameter <code>public.mcuser_login.RETURN_VALUE</code>.
@@ -45,34 +48,24 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     public static final Parameter<String> MCUSER_PASSWORD = createParameter("mcuser_password", org.jooq.impl.SQLDataType.CLOB, false, false);
 
     /**
-     * The parameter <code>public.mcuser_login.mcuser_session_id</code>.
+     * The parameter <code>public.mcuser_login.in_request_timestamp</code>.
      */
-    public static final Parameter<String> MCUSER_SESSION_ID = createParameter("mcuser_session_id", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<Timestamp> IN_REQUEST_TIMESTAMP = createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMP, false, false);
 
     /**
-     * The parameter <code>public.mcuser_login.mcuser_ip</code>.
+     * The parameter <code>public.mcuser_login.in_request_origin</code>.
      */
-    public static final Parameter<String> MCUSER_IP = createParameter("mcuser_ip", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_REQUEST_ORIGIN = createParameter("in_request_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
 
     /**
-     * The parameter <code>public.mcuser_login.mcuser_host</code>.
+     * The parameter <code>public.mcuser_login.in_login_expiration</code>.
      */
-    public static final Parameter<String> MCUSER_HOST = createParameter("mcuser_host", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<Timestamp> IN_LOGIN_EXPIRATION = createParameter("in_login_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, false, false);
 
     /**
-     * The parameter <code>public.mcuser_login.mcuser_origin</code>.
+     * The parameter <code>public.mcuser_login.in_jwt_id</code>.
      */
-    public static final Parameter<String> MCUSER_ORIGIN = createParameter("mcuser_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
-
-    /**
-     * The parameter <code>public.mcuser_login.mcuser_referer</code>.
-     */
-    public static final Parameter<String> MCUSER_REFERER = createParameter("mcuser_referer", org.jooq.impl.SQLDataType.CLOB, false, false);
-
-    /**
-     * The parameter <code>public.mcuser_login.mcuser_forwarded</code>.
-     */
-    public static final Parameter<String> MCUSER_FORWARDED = createParameter("mcuser_forwarded", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<UUID> IN_JWT_ID = createParameter("in_jwt_id", org.jooq.impl.SQLDataType.UUID, false, false);
 
     /**
      * Create a new routine call instance
@@ -83,12 +76,10 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
         setReturnParameter(RETURN_VALUE);
         addInParameter(MCUSER_USERNAME);
         addInParameter(MCUSER_PASSWORD);
-        addInParameter(MCUSER_SESSION_ID);
-        addInParameter(MCUSER_IP);
-        addInParameter(MCUSER_HOST);
-        addInParameter(MCUSER_ORIGIN);
-        addInParameter(MCUSER_REFERER);
-        addInParameter(MCUSER_FORWARDED);
+        addInParameter(IN_REQUEST_TIMESTAMP);
+        addInParameter(IN_REQUEST_ORIGIN);
+        addInParameter(IN_LOGIN_EXPIRATION);
+        addInParameter(IN_JWT_ID);
     }
 
     /**
@@ -120,86 +111,58 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>mcuser_session_id</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
      */
-    public void setMcuserSessionId(String value) {
-        setValue(MCUSER_SESSION_ID, value);
+    public void setInRequestTimestamp(Timestamp value) {
+        setValue(IN_REQUEST_TIMESTAMP, value);
     }
 
     /**
-     * Set the <code>mcuser_session_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setMcuserSessionId(Field<String> field) {
-        setField(MCUSER_SESSION_ID, field);
+    public void setInRequestTimestamp(Field<Timestamp> field) {
+        setField(IN_REQUEST_TIMESTAMP, field);
     }
 
     /**
-     * Set the <code>mcuser_ip</code> parameter IN value to the routine
+     * Set the <code>in_request_origin</code> parameter IN value to the routine
      */
-    public void setMcuserIp(String value) {
-        setValue(MCUSER_IP, value);
+    public void setInRequestOrigin(String value) {
+        setValue(IN_REQUEST_ORIGIN, value);
     }
 
     /**
-     * Set the <code>mcuser_ip</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setMcuserIp(Field<String> field) {
-        setField(MCUSER_IP, field);
+    public void setInRequestOrigin(Field<String> field) {
+        setField(IN_REQUEST_ORIGIN, field);
     }
 
     /**
-     * Set the <code>mcuser_host</code> parameter IN value to the routine
+     * Set the <code>in_login_expiration</code> parameter IN value to the routine
      */
-    public void setMcuserHost(String value) {
-        setValue(MCUSER_HOST, value);
+    public void setInLoginExpiration(Timestamp value) {
+        setValue(IN_LOGIN_EXPIRATION, value);
     }
 
     /**
-     * Set the <code>mcuser_host</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_login_expiration</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setMcuserHost(Field<String> field) {
-        setField(MCUSER_HOST, field);
+    public void setInLoginExpiration(Field<Timestamp> field) {
+        setField(IN_LOGIN_EXPIRATION, field);
     }
 
     /**
-     * Set the <code>mcuser_origin</code> parameter IN value to the routine
+     * Set the <code>in_jwt_id</code> parameter IN value to the routine
      */
-    public void setMcuserOrigin(String value) {
-        setValue(MCUSER_ORIGIN, value);
+    public void setInJwtId(UUID value) {
+        setValue(IN_JWT_ID, value);
     }
 
     /**
-     * Set the <code>mcuser_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_jwt_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setMcuserOrigin(Field<String> field) {
-        setField(MCUSER_ORIGIN, field);
-    }
-
-    /**
-     * Set the <code>mcuser_referer</code> parameter IN value to the routine
-     */
-    public void setMcuserReferer(String value) {
-        setValue(MCUSER_REFERER, value);
-    }
-
-    /**
-     * Set the <code>mcuser_referer</code> parameter to the function to be used with a {@link org.jooq.Select} statement
-     */
-    public void setMcuserReferer(Field<String> field) {
-        setField(MCUSER_REFERER, field);
-    }
-
-    /**
-     * Set the <code>mcuser_forwarded</code> parameter IN value to the routine
-     */
-    public void setMcuserForwarded(String value) {
-        setValue(MCUSER_FORWARDED, value);
-    }
-
-    /**
-     * Set the <code>mcuser_forwarded</code> parameter to the function to be used with a {@link org.jooq.Select} statement
-     */
-    public void setMcuserForwarded(Field<String> field) {
-        setField(MCUSER_FORWARDED, field);
+    public void setInJwtId(Field<UUID> field) {
+        setField(IN_JWT_ID, field);
     }
 }

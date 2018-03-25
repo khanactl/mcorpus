@@ -7,6 +7,7 @@ package com.tll.mcorpus.db.tables;
 import com.tll.mcorpus.db.Indexes;
 import com.tll.mcorpus.db.Keys;
 import com.tll.mcorpus.db.Public;
+import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 
 import java.sql.Timestamp;
@@ -40,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser extends TableImpl<McuserRecord> {
 
-    private static final long serialVersionUID = 661733694;
+    private static final long serialVersionUID = -221715394;
 
     /**
      * The reference instance of <code>public.mcuser</code>
@@ -94,6 +95,11 @@ public class Mcuser extends TableImpl<McuserRecord> {
      * The column <code>public.mcuser.admin</code>.
      */
     public final TableField<McuserRecord, Boolean> ADMIN = createField("admin", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false), this, "");
+
+    /**
+     * The column <code>public.mcuser.status</code>.
+     */
+    public final TableField<McuserRecord, MemberStatus> STATUS = createField("status", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), this, "");
 
     /**
      * Create a <code>public.mcuser</code> table reference

@@ -20,6 +20,7 @@ import com.tll.mcorpus.db.routines.GenSalt1;
 import com.tll.mcorpus.db.routines.GenSalt2;
 import com.tll.mcorpus.db.routines.Hmac1;
 import com.tll.mcorpus.db.routines.Hmac2;
+import com.tll.mcorpus.db.routines.JwtIdOk;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.MemberLogin;
@@ -50,6 +51,7 @@ import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -618,18 +620,47 @@ public class Routines {
     }
 
     /**
+     * Call <code>public.jwt_id_ok</code>
+     */
+    public static Boolean jwtIdOk(Configuration configuration, UUID jwtId) {
+        JwtIdOk f = new JwtIdOk();
+        f.setJwtId(jwtId);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.jwt_id_ok</code> as a field.
+     */
+    public static Field<Boolean> jwtIdOk(UUID jwtId) {
+        JwtIdOk f = new JwtIdOk();
+        f.setJwtId(jwtId);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.jwt_id_ok</code> as a field.
+     */
+    public static Field<Boolean> jwtIdOk(Field<UUID> jwtId) {
+        JwtIdOk f = new JwtIdOk();
+        f.setJwtId(jwtId);
+
+        return f.asField();
+    }
+
+    /**
      * Call <code>public.mcuser_login</code>
      */
-    public static McuserRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, String mcuserSessionId, String mcuserIp, String mcuserHost, String mcuserOrigin, String mcuserReferer, String mcuserForwarded) {
+    public static McuserRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
-        f.setMcuserSessionId(mcuserSessionId);
-        f.setMcuserIp(mcuserIp);
-        f.setMcuserHost(mcuserHost);
-        f.setMcuserOrigin(mcuserOrigin);
-        f.setMcuserReferer(mcuserReferer);
-        f.setMcuserForwarded(mcuserForwarded);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+        f.setInLoginExpiration(inLoginExpiration);
+        f.setInJwtId(inJwtId);
 
         f.execute(configuration);
         return f.getReturnValue();
@@ -638,16 +669,14 @@ public class Routines {
     /**
      * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, String mcuserSessionId, String mcuserIp, String mcuserHost, String mcuserOrigin, String mcuserReferer, String mcuserForwarded) {
+    public static Field<McuserRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
-        f.setMcuserSessionId(mcuserSessionId);
-        f.setMcuserIp(mcuserIp);
-        f.setMcuserHost(mcuserHost);
-        f.setMcuserOrigin(mcuserOrigin);
-        f.setMcuserReferer(mcuserReferer);
-        f.setMcuserForwarded(mcuserForwarded);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+        f.setInLoginExpiration(inLoginExpiration);
+        f.setInJwtId(inJwtId);
 
         return f.asField();
     }
@@ -655,16 +684,14 @@ public class Routines {
     /**
      * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<String> mcuserSessionId, Field<String> mcuserIp, Field<String> mcuserHost, Field<String> mcuserOrigin, Field<String> mcuserReferer, Field<String> mcuserForwarded) {
+    public static Field<McuserRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin, Field<Timestamp> inLoginExpiration, Field<UUID> inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
-        f.setMcuserSessionId(mcuserSessionId);
-        f.setMcuserIp(mcuserIp);
-        f.setMcuserHost(mcuserHost);
-        f.setMcuserOrigin(mcuserOrigin);
-        f.setMcuserReferer(mcuserReferer);
-        f.setMcuserForwarded(mcuserForwarded);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+        f.setInLoginExpiration(inLoginExpiration);
+        f.setInJwtId(inJwtId);
 
         return f.asField();
     }
@@ -672,27 +699,52 @@ public class Routines {
     /**
      * Call <code>public.mcuser_logout</code>
      */
-    public static void mcuserLogout(Configuration configuration, UUID mcuserUid, String mcuserSessionId) {
-        McuserLogout p = new McuserLogout();
-        p.setMcuserUid(mcuserUid);
-        p.setMcuserSessionId(mcuserSessionId);
+    public static Boolean mcuserLogout(Configuration configuration, UUID mcuserUid, UUID jwtId, Timestamp requestTimestamp, String requestOrigin) {
+        McuserLogout f = new McuserLogout();
+        f.setMcuserUid(mcuserUid);
+        f.setJwtId(jwtId);
+        f.setRequestTimestamp(requestTimestamp);
+        f.setRequestOrigin(requestOrigin);
 
-        p.execute(configuration);
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.mcuser_logout</code> as a field.
+     */
+    public static Field<Boolean> mcuserLogout(UUID mcuserUid, UUID jwtId, Timestamp requestTimestamp, String requestOrigin) {
+        McuserLogout f = new McuserLogout();
+        f.setMcuserUid(mcuserUid);
+        f.setJwtId(jwtId);
+        f.setRequestTimestamp(requestTimestamp);
+        f.setRequestOrigin(requestOrigin);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.mcuser_logout</code> as a field.
+     */
+    public static Field<Boolean> mcuserLogout(Field<UUID> mcuserUid, Field<UUID> jwtId, Field<Timestamp> requestTimestamp, Field<String> requestOrigin) {
+        McuserLogout f = new McuserLogout();
+        f.setMcuserUid(mcuserUid);
+        f.setJwtId(jwtId);
+        f.setRequestTimestamp(requestTimestamp);
+        f.setRequestOrigin(requestOrigin);
+
+        return f.asField();
     }
 
     /**
      * Call <code>public.member_login</code>
      */
-    public static MrefRecord memberLogin(Configuration configuration, String memberUsername, String memberPassword, String memberWebSessionId, String memberIp, String memberHost, String memberOrigin, String memberReferer, String memberForwarded) {
+    public static MrefRecord memberLogin(Configuration configuration, String memberUsername, String memberPassword, Timestamp inRequestTimestamp, String inRequestOrigin) {
         MemberLogin f = new MemberLogin();
         f.setMemberUsername(memberUsername);
         f.setMemberPassword(memberPassword);
-        f.setMemberWebSessionId(memberWebSessionId);
-        f.setMemberIp(memberIp);
-        f.setMemberHost(memberHost);
-        f.setMemberOrigin(memberOrigin);
-        f.setMemberReferer(memberReferer);
-        f.setMemberForwarded(memberForwarded);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
 
         f.execute(configuration);
         return f.getReturnValue();
@@ -701,16 +753,12 @@ public class Routines {
     /**
      * Get <code>public.member_login</code> as a field.
      */
-    public static Field<MrefRecord> memberLogin(String memberUsername, String memberPassword, String memberWebSessionId, String memberIp, String memberHost, String memberOrigin, String memberReferer, String memberForwarded) {
+    public static Field<MrefRecord> memberLogin(String memberUsername, String memberPassword, Timestamp inRequestTimestamp, String inRequestOrigin) {
         MemberLogin f = new MemberLogin();
         f.setMemberUsername(memberUsername);
         f.setMemberPassword(memberPassword);
-        f.setMemberWebSessionId(memberWebSessionId);
-        f.setMemberIp(memberIp);
-        f.setMemberHost(memberHost);
-        f.setMemberOrigin(memberOrigin);
-        f.setMemberReferer(memberReferer);
-        f.setMemberForwarded(memberForwarded);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
 
         return f.asField();
     }
@@ -718,16 +766,12 @@ public class Routines {
     /**
      * Get <code>public.member_login</code> as a field.
      */
-    public static Field<MrefRecord> memberLogin(Field<String> memberUsername, Field<String> memberPassword, Field<String> memberWebSessionId, Field<String> memberIp, Field<String> memberHost, Field<String> memberOrigin, Field<String> memberReferer, Field<String> memberForwarded) {
+    public static Field<MrefRecord> memberLogin(Field<String> memberUsername, Field<String> memberPassword, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin) {
         MemberLogin f = new MemberLogin();
         f.setMemberUsername(memberUsername);
         f.setMemberPassword(memberPassword);
-        f.setMemberWebSessionId(memberWebSessionId);
-        f.setMemberIp(memberIp);
-        f.setMemberHost(memberHost);
-        f.setMemberOrigin(memberOrigin);
-        f.setMemberReferer(memberReferer);
-        f.setMemberForwarded(memberForwarded);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
 
         return f.asField();
     }
@@ -735,10 +779,11 @@ public class Routines {
     /**
      * Call <code>public.member_logout</code>
      */
-    public static void memberLogout(Configuration configuration, UUID mid, String memberWebSessionId) {
+    public static void memberLogout(Configuration configuration, UUID mid, Timestamp inRequestTimestamp, String inRequestOrigin) {
         MemberLogout p = new MemberLogout();
         p.setMid(mid);
-        p.setMemberWebSessionId(memberWebSessionId);
+        p.setInRequestTimestamp(inRequestTimestamp);
+        p.setInRequestOrigin(inRequestOrigin);
 
         p.execute(configuration);
     }

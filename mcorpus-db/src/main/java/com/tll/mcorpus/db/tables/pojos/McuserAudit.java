@@ -4,6 +4,7 @@
 package com.tll.mcorpus.db.tables.pojos;
 
 
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 
 import java.io.Serializable;
@@ -26,50 +27,46 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit implements Serializable {
 
-    private static final long serialVersionUID = 1010662203;
+    private static final long serialVersionUID = 312234894;
 
     private final UUID            uid;
     private final Timestamp       created;
     private final McuserAuditType type;
-    private final String          webSessionId;
-    private final String          remoteAddr;
-    private final String          httpHost;
-    private final String          httpOrigin;
-    private final String          httpReferer;
-    private final String          httpForwarded;
+    private final Timestamp       requestTimestamp;
+    private final String          requestOrigin;
+    private final Timestamp       loginExpiration;
+    private final UUID            jwtId;
+    private final JwtStatus       jwtIdStatus;
 
     public McuserAudit(McuserAudit value) {
         this.uid = value.uid;
         this.created = value.created;
         this.type = value.type;
-        this.webSessionId = value.webSessionId;
-        this.remoteAddr = value.remoteAddr;
-        this.httpHost = value.httpHost;
-        this.httpOrigin = value.httpOrigin;
-        this.httpReferer = value.httpReferer;
-        this.httpForwarded = value.httpForwarded;
+        this.requestTimestamp = value.requestTimestamp;
+        this.requestOrigin = value.requestOrigin;
+        this.loginExpiration = value.loginExpiration;
+        this.jwtId = value.jwtId;
+        this.jwtIdStatus = value.jwtIdStatus;
     }
 
     public McuserAudit(
         UUID            uid,
         Timestamp       created,
         McuserAuditType type,
-        String          webSessionId,
-        String          remoteAddr,
-        String          httpHost,
-        String          httpOrigin,
-        String          httpReferer,
-        String          httpForwarded
+        Timestamp       requestTimestamp,
+        String          requestOrigin,
+        Timestamp       loginExpiration,
+        UUID            jwtId,
+        JwtStatus       jwtIdStatus
     ) {
         this.uid = uid;
         this.created = created;
         this.type = type;
-        this.webSessionId = webSessionId;
-        this.remoteAddr = remoteAddr;
-        this.httpHost = httpHost;
-        this.httpOrigin = httpOrigin;
-        this.httpReferer = httpReferer;
-        this.httpForwarded = httpForwarded;
+        this.requestTimestamp = requestTimestamp;
+        this.requestOrigin = requestOrigin;
+        this.loginExpiration = loginExpiration;
+        this.jwtId = jwtId;
+        this.jwtIdStatus = jwtIdStatus;
     }
 
     public UUID getUid() {
@@ -84,28 +81,24 @@ public class McuserAudit implements Serializable {
         return this.type;
     }
 
-    public String getWebSessionId() {
-        return this.webSessionId;
+    public Timestamp getRequestTimestamp() {
+        return this.requestTimestamp;
     }
 
-    public String getRemoteAddr() {
-        return this.remoteAddr;
+    public String getRequestOrigin() {
+        return this.requestOrigin;
     }
 
-    public String getHttpHost() {
-        return this.httpHost;
+    public Timestamp getLoginExpiration() {
+        return this.loginExpiration;
     }
 
-    public String getHttpOrigin() {
-        return this.httpOrigin;
+    public UUID getJwtId() {
+        return this.jwtId;
     }
 
-    public String getHttpReferer() {
-        return this.httpReferer;
-    }
-
-    public String getHttpForwarded() {
-        return this.httpForwarded;
+    public JwtStatus getJwtIdStatus() {
+        return this.jwtIdStatus;
     }
 
     @Override
@@ -115,12 +108,11 @@ public class McuserAudit implements Serializable {
         sb.append(uid);
         sb.append(", ").append(created);
         sb.append(", ").append(type);
-        sb.append(", ").append(webSessionId);
-        sb.append(", ").append(remoteAddr);
-        sb.append(", ").append(httpHost);
-        sb.append(", ").append(httpOrigin);
-        sb.append(", ").append(httpReferer);
-        sb.append(", ").append(httpForwarded);
+        sb.append(", ").append(requestTimestamp);
+        sb.append(", ").append(requestOrigin);
+        sb.append(", ").append(loginExpiration);
+        sb.append(", ").append(jwtId);
+        sb.append(", ").append(jwtIdStatus);
 
         sb.append(")");
         return sb.toString();

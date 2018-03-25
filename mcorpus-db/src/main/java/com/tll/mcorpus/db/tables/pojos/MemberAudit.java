@@ -26,50 +26,34 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit implements Serializable {
 
-    private static final long serialVersionUID = 1544766784;
+    private static final long serialVersionUID = -936459688;
 
     private final UUID            mid;
     private final Timestamp       created;
     private final MemberAuditType type;
-    private final String          webSessionId;
-    private final String          remoteAddr;
-    private final String          httpHost;
-    private final String          httpOrigin;
-    private final String          httpReferer;
-    private final String          httpForwarded;
+    private final Timestamp       requestTimestamp;
+    private final String          requestOrigin;
 
     public MemberAudit(MemberAudit value) {
         this.mid = value.mid;
         this.created = value.created;
         this.type = value.type;
-        this.webSessionId = value.webSessionId;
-        this.remoteAddr = value.remoteAddr;
-        this.httpHost = value.httpHost;
-        this.httpOrigin = value.httpOrigin;
-        this.httpReferer = value.httpReferer;
-        this.httpForwarded = value.httpForwarded;
+        this.requestTimestamp = value.requestTimestamp;
+        this.requestOrigin = value.requestOrigin;
     }
 
     public MemberAudit(
         UUID            mid,
         Timestamp       created,
         MemberAuditType type,
-        String          webSessionId,
-        String          remoteAddr,
-        String          httpHost,
-        String          httpOrigin,
-        String          httpReferer,
-        String          httpForwarded
+        Timestamp       requestTimestamp,
+        String          requestOrigin
     ) {
         this.mid = mid;
         this.created = created;
         this.type = type;
-        this.webSessionId = webSessionId;
-        this.remoteAddr = remoteAddr;
-        this.httpHost = httpHost;
-        this.httpOrigin = httpOrigin;
-        this.httpReferer = httpReferer;
-        this.httpForwarded = httpForwarded;
+        this.requestTimestamp = requestTimestamp;
+        this.requestOrigin = requestOrigin;
     }
 
     public UUID getMid() {
@@ -84,28 +68,12 @@ public class MemberAudit implements Serializable {
         return this.type;
     }
 
-    public String getWebSessionId() {
-        return this.webSessionId;
+    public Timestamp getRequestTimestamp() {
+        return this.requestTimestamp;
     }
 
-    public String getRemoteAddr() {
-        return this.remoteAddr;
-    }
-
-    public String getHttpHost() {
-        return this.httpHost;
-    }
-
-    public String getHttpOrigin() {
-        return this.httpOrigin;
-    }
-
-    public String getHttpReferer() {
-        return this.httpReferer;
-    }
-
-    public String getHttpForwarded() {
-        return this.httpForwarded;
+    public String getRequestOrigin() {
+        return this.requestOrigin;
     }
 
     @Override
@@ -115,12 +83,8 @@ public class MemberAudit implements Serializable {
         sb.append(mid);
         sb.append(", ").append(created);
         sb.append(", ").append(type);
-        sb.append(", ").append(webSessionId);
-        sb.append(", ").append(remoteAddr);
-        sb.append(", ").append(httpHost);
-        sb.append(", ").append(httpOrigin);
-        sb.append(", ").append(httpReferer);
-        sb.append(", ").append(httpForwarded);
+        sb.append(", ").append(requestTimestamp);
+        sb.append(", ").append(requestOrigin);
 
         sb.append(")");
         return sb.toString();

@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit extends TableImpl<MemberAuditRecord> {
 
-    private static final long serialVersionUID = -323318512;
+    private static final long serialVersionUID = -194532563;
 
     /**
      * The reference instance of <code>public.member_audit</code>
@@ -72,34 +72,14 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
     public final TableField<MemberAuditRecord, MemberAuditType> TYPE = createField("type", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.MemberAuditType.class), this, "");
 
     /**
-     * The column <code>public.member_audit.web_session_id</code>.
+     * The column <code>public.member_audit.request_timestamp</code>.
      */
-    public final TableField<MemberAuditRecord, String> WEB_SESSION_ID = createField("web_session_id", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MemberAuditRecord, Timestamp> REQUEST_TIMESTAMP = createField("request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
-     * The column <code>public.member_audit.remote_addr</code>.
+     * The column <code>public.member_audit.request_origin</code>.
      */
-    public final TableField<MemberAuditRecord, String> REMOTE_ADDR = createField("remote_addr", org.jooq.impl.SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.member_audit.http_host</code>.
-     */
-    public final TableField<MemberAuditRecord, String> HTTP_HOST = createField("http_host", org.jooq.impl.SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.member_audit.http_origin</code>.
-     */
-    public final TableField<MemberAuditRecord, String> HTTP_ORIGIN = createField("http_origin", org.jooq.impl.SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.member_audit.http_referer</code>.
-     */
-    public final TableField<MemberAuditRecord, String> HTTP_REFERER = createField("http_referer", org.jooq.impl.SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>public.member_audit.http_forwarded</code>.
-     */
-    public final TableField<MemberAuditRecord, String> HTTP_FORWARDED = createField("http_forwarded", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MemberAuditRecord, String> REQUEST_ORIGIN = createField("request_origin", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * Create a <code>public.member_audit</code> table reference

@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-db</artifactId>
-  <version>1.1.0</version>
+  <version>1.2</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-db</name>
@@ -76,7 +76,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <skip>true</skip>
+          <skip>false</skip>
           <jdbc>
             <driver>org.postgresql.Driver</driver>
             <url>jdbc:postgresql://${dbServerName}:${dbPortNumber}/${dbName}</url>
@@ -128,7 +128,7 @@
         <executions>
           <execution>
             <id>jooq-generate-sources</id>
-            <phase>compile</phase>
+            <phase>process-resources</phase>
             <goals>
               <goal>generate</goal>
             </goals>

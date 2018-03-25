@@ -4,9 +4,9 @@
 -- Author               jkirton
 -- mcorpus Version:     0.7.0
 -- Created:             10/15/17
--- Modified:            02/25/18
+-- Modified:            03/21/18
 -- Description:         Prototype UC member corpus db written in PostgreSQL.
--- PostgreSQL Version   10.2
+-- PostgreSQL Version   10.3
 ---------------------------------
 
 -- Role: mcweb
@@ -18,8 +18,7 @@ create role mcweb with
   valid until '2020-01-01';
 grant connect on database mcorpus to mcweb;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcweb;
-grant insert on member_audit to mcweb;
-grant select, insert on mcuser, mcuser_audit to mcweb;
+grant select, insert on mcuser, mcuser_audit, member_audit to mcweb;
 
 -- Role: mcadmin
 -- Desc: mcorpus db architect privileges - ddl create/drop
