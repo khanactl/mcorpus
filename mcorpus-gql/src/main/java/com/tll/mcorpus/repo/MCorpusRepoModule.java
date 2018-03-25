@@ -1,12 +1,10 @@
 package com.tll.mcorpus.repo;
 
+import javax.sql.DataSource;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.tll.mcorpus.repo.MCorpusRepoAsync;
-import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
-
-import javax.sql.DataSource;
 
 /**
  * MCorpusRepoModule module.

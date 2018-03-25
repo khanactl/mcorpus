@@ -46,7 +46,7 @@
    * various React params to enable interesting integrations.
    */
   // Parse the search string to get url parameters.
-  var rst = '${RST}';
+  var rst = '${rst}';
   var search = window.location.search;
   var parameters = {};
   search.substr(1).split('&').forEach(function (entry) {
@@ -100,14 +100,14 @@
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'RST': rst
+        'rst': rst
       },
       body: JSON.stringify(graphQLParams),
       credentials: 'include',
     }).then(function (response) {
     	  // grab the updated RST token
     	  try {
-    		  rst = response.headers.get('RST');
+    		  rst = response.headers.get('rst');
     	  } catch (error) { }
     	  ///
       return response.text();

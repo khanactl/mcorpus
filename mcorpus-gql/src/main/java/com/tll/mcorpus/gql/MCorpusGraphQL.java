@@ -1,5 +1,6 @@
 package com.tll.mcorpus.gql;
 
+import static com.tll.mcorpus.Util.asStringAndClean;
 import static com.tll.mcorpus.Util.dflt;
 import static com.tll.mcorpus.Util.emptyIfNull;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
@@ -16,6 +17,7 @@ import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotNull;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +30,14 @@ import org.slf4j.LoggerFactory;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.repo.MCorpusRepoAsync;
 import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.LoginInput;
 import com.tll.mcorpus.repo.model.MemberFilter;
 import com.tll.mcorpus.web.GraphQLWebQuery;
+import com.tll.mcorpus.web.RequestSnapshot;
 
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
@@ -116,27 +120,31 @@ public class MCorpusGraphQL {
       // Query
       .type("Query", typeWiring -> typeWiring
 
-        // member login and logout
+        // member login
         .dataFetcher("mlogin", env -> {
           final GraphQLWebQuery webContext = env.getContext();
-          final LoginInput memberLoginInput = new LoginInput(
-              env.getArgument("username"),
-              env.getArgument("pswd"),
-              webContext.getWebSessionid(),
-              webContext.getRemoteAddr(),
-              webContext.getHttpHost(),
-              webContext.getHttpOrigin(),
-              webContext.getHttpReferer(),
-              webContext.getHttpForwarded());
-          final FetchResult<Mref> mloginResult = mCorpusRepo.memberLogin(memberLoginInput);
+          final RequestSnapshot rs = webContext.getRequestSnapshot();
+          final MemberLogin mlogin = new MemberLogin();
+          mlogin.setMemberUsername(asStringAndClean(env.getArgument("username")));
+          mlogin.setMemberPassword(asStringAndClean(env.getArgument("pswd")));
+          mlogin.setInRequestTimestamp(new Timestamp(rs.getRequestInstant().getEpochSecond()));
+          try {
+            mlogin.setInRequestOrigin(rs.getClientOrigin().toString());
+          } catch (Exception e) {
+            log.error("Error determining client origin.");
+          }
+          final FetchResult<Mref> mloginResult = mCorpusRepo.memberLogin(mlogin);
           return mloginResult.isSuccess() ? mloginResult.get() : null;
         })
+        
+        // member logout
         .dataFetcher("mlogout", env -> {
           final GraphQLWebQuery webContext = env.getContext();
           final UUID mid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<Void> mloginResult = mCorpusRepo.memberLogout(
-              mid, webContext.getWebSessionid()
-          );
+          final MemberLogout memberLogout = new MemberLogout();
+           memberLogout.setMid(mid);
+           memberLogout.setInRequestTimestamp(new Timestamp(webContext.getRequestSnapshot().getRequestInstant().toEpochMilli()));
+          final FetchResult<Void> mloginResult = mCorpusRepo.memberLogout(memberLogout);
           return mloginResult.hasErrorMsg() ? null : uuidToToken(mid);
         })
         

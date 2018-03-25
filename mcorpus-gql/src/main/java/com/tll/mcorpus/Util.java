@@ -2,6 +2,7 @@ package com.tll.mcorpus;
 
 import java.nio.ByteBuffer;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,14 @@ public class Util {
    * @return true if the given string is empty, false otherwise.
    */
   public static boolean isNullOrEmpty(final String s) { return s == null || s.isEmpty(); }
+  
+  /**
+   * Is the given collection null or empty?
+   * 
+   * @param clc the collection to check
+   * @return true if the given collection is null or empty, false otherwise
+   */
+  public static boolean isNullOrEmpty(final Collection<?> clc) { return clc == null || clc.isEmpty(); }
 
   /**
    * Is the given string blank? (I.e. null or 0-length or contains only whitespace)

@@ -5,8 +5,12 @@
 </head>
 <body>
 <h1>mcorpus Index</h1>
-<p><a href="login" title="Login into mcorpus">Login</a></p>
+<p><a href="loginPage" title="Login into mcorpus">Login</a></p>
 <p><a href="graphql/index" title="mcorpus GraphiQL developer interface">GraphiQL</a></p>
-<p><a href="logout" title="Logout of mcorpus">Logout</a></p>
+<p>
+  <form action="logout" method="post">
+    <input type="submit" name="Logout" value="Logout" title="Logout of mcorpus" />
+  </form>
+</p>
 </body>
 </html>

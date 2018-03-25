@@ -2,28 +2,113 @@ package com.tll.mcorpus;
 
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
+import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Random;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.conf.RenderKeywordStyle;
+import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.db.routines.McuserLogin;
+import com.tll.mcorpus.db.routines.McuserLogout;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
+import com.tll.mcorpus.db.tables.pojos.McuserAudit;
+import com.tll.mcorpus.web.RequestSnapshot;
 
 public class TestUtil {
+  
+  public static final UUID testMcuserUid = UUID.fromString("d712f2d3-5494-472d-bdcc-4a1722a8c818");
+
+  
+  private static final Logger log = LoggerFactory.getLogger("TestUtil");
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
   private static final TypeReference<Map<String, Object>> strObjMapTypeRef = new TypeReference<Map<String, Object>>() { };
+
+  private static final DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");
+
+  private static final Random rand = new Random();
+  
+  private static DSLContext testDsl = null;
+  
+  /**
+   * @return A newly created {@link DataSource} to the test database intended for
+   *         testing.
+   */
+  public static DataSource ds() {
+    Properties dbprops = new Properties();
+    InputStream istream = null;
+    try {
+      istream = Thread.currentThread().getContextClassLoader().getResourceAsStream("testdb.properties");
+      dbprops.load(istream);
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to load test db props.");
+    } finally {
+      if(istream != null) try {
+        istream.close();
+      } catch (IOException e) {
+      }
+    }
+    PGSimpleDataSource ds = new PGSimpleDataSource();
+    ds.setUrl(dbprops.getProperty("testDbUrl"));
+    ds.setUser(dbprops.getProperty("testDbUsername"));
+    ds.setPassword(dbprops.getProperty("testDbPassword"));
+    ds.setCurrentSchema(dbprops.getProperty("testDbSchema"));
+    return ds;
+  }
+
+  /**
+   * @return a JooQ {@link DSLContext} intended for testing.<br>
+   *         (Connects to the test db.)
+   */
+  public static synchronized DSLContext dsl() {
+    if(testDsl == null) {
+      Settings s = new Settings();
+      s.setRenderSchema(false);
+      s.setRenderNameStyle(RenderNameStyle.LOWER);
+      s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
+      testDsl = DSL.using(ds(), SQLDialect.POSTGRES, s);
+    }
+    return testDsl;
+  }
 
   /**
    * Converts a JSON string to a map.
@@ -52,6 +137,22 @@ public class TestUtil {
   }
 
   /**
+   * Class path resource to string.
+   *
+   * @param path the string-wise path to the test resource to load into a string
+   * @return the loaded classpath resource as a UTF-8 string
+   */
+  public static String cpr(String path) {
+    try {
+      Path p = Paths.get(Thread.currentThread().getContextClassLoader().getResource(path).toURI());
+      byte[] bytes = Objects.requireNonNull(Files.readAllBytes(p));
+      return new String(bytes, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Return a string of repeated characters: <code><fillChar/code> of length <code>n</code>.
    *
    * @param n the number of characters to return
@@ -65,10 +166,6 @@ public class TestUtil {
     }
     return "";
   }
-
-  private static final DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");
-
-  private static final Random rand = new Random();
 
   /**
    * Convert a string date token of format: "yyyy-MM-dd" to a {@link Date}.
@@ -159,22 +256,135 @@ public class TestUtil {
     addMaddressTableProperties(maddressMap, mid, addressname);
     return maddressMap;
   }
-
+  
   /**
-   * Class path resource to string.
-   *
-   * @param path the string-wise path to the test resource to load into a string
-   * @return the loaded classpath resource as a UTF-8 string
+   * @return newly created {@link RequestSnapshot} for testing purposes.
    */
-  public static String cpr(String path) {
-    try {
-      Path p = Paths.get(Thread.currentThread().getContextClassLoader().getResource(path).toURI());
-      byte[] bytes = Objects.requireNonNull(Files.readAllBytes(p));
-      return new String(bytes, StandardCharsets.UTF_8);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  public static RequestSnapshot rsnap() {
+    return new RequestSnapshot(
+        Instant.now(),
+        "127.0.0.1:5150",
+        "localhost",
+        "Origin",
+        "Referer",
+        "Forwarded",
+        "jwt",
+        "sid",
+        "rst",
+        "rsth"
+    );
+  }
+  
+  /**
+   * @return newly created {@link McuserLogin} instance for an mcuser for testing purposes.
+   */
+  public static McuserLogin testMcuserLoginInput() {
+    final long lnow = System.currentTimeMillis();
+    final long expiry = lnow + Duration.ofMinutes(30).toMillis();
+    McuserLogin mcuserLogin = new McuserLogin();
+    mcuserLogin.setMcuserUsername("test");
+    mcuserLogin.setMcuserPassword("jackson");
+    mcuserLogin.setInJwtId(UUID.randomUUID());
+    mcuserLogin.setInRequestTimestamp(new Timestamp(lnow));
+    mcuserLogin.setInRequestOrigin("request-origin");
+    mcuserLogin.setInLoginExpiration(new Timestamp(expiry));
+    return mcuserLogin;
   }
 
+  /**
+   * @return newly created {@link McuserLogout} instance for an mcuser for testing purposes.
+   */
+  public static McuserLogout testMcuserLogoutInput() {
+    final long lnow = System.currentTimeMillis();
+    McuserLogout mcuserLogout = new McuserLogout();
+    mcuserLogout.setJwtId((UUID)null);
+    mcuserLogout.setMcuserUid((UUID)null);
+    mcuserLogout.setRequestTimestamp(new Timestamp(lnow));
+    mcuserLogout.setRequestOrigin("request-origin");
+    return mcuserLogout;
+  }
+
+  /**
+   * @return newly created {@link MemberLogin} instance for a member for testing purposes.
+   */
+  public static MemberLogin testMemberLoginInput() {
+    final long lnow = System.currentTimeMillis();
+    MemberLogin memberLogin = new MemberLogin();
+    memberLogin.setMemberUsername("dhookes3f");
+    memberLogin.setMemberPassword("8testItOut9");
+    memberLogin.setInRequestTimestamp(new Timestamp(lnow));
+    memberLogin.setInRequestOrigin("request-origin");
+    return memberLogin;
+  }
+
+  /**
+   * @return newly created {@link MemberLogout} instance for a member for testing purposes.
+   */
+  public static MemberLogout testMemberLogoutInput() {
+    final long lnow = System.currentTimeMillis();
+    MemberLogout memberLogout = new MemberLogout();
+    memberLogout.setMid(UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba"));
+    memberLogout.setInRequestTimestamp(new Timestamp(lnow));
+    memberLogout.setInRequestOrigin("request-origin");
+    return memberLogout;
+  }
+  
+  /**
+   * Add a test mcuser_audit record.
+   * 
+   * @return Newly created McuserAudit pojo corresponding to the added
+   *         MCUSER_AUDIT test record.
+   * @throws Exception upon test record insert failure
+   */
+  public static McuserAudit addTestMcuserAuditRecord() throws Exception {
+    long lnow = Instant.now().toEpochMilli();
+    final long expiry = lnow + Duration.ofMinutes(30).toMillis();
+    
+    McuserAudit e = new McuserAudit(
+        UUID.randomUUID(),
+        null,
+        McuserAuditType.LOGIN,
+        new Timestamp(lnow),
+        "request-origin",
+        new Timestamp(expiry),
+        UUID.randomUUID(),
+        JwtStatus.OK);
+    
+    final int numInserted = dsl().insertInto(MCUSER_AUDIT,
+        MCUSER_AUDIT.TYPE,
+        MCUSER_AUDIT.JWT_ID, 
+        MCUSER_AUDIT.JWT_ID_STATUS,
+        MCUSER_AUDIT.UID,
+        MCUSER_AUDIT.REQUEST_TIMESTAMP,
+        MCUSER_AUDIT.REQUEST_ORIGIN,
+        MCUSER_AUDIT.LOGIN_EXPIRATION
+      ).values(
+          McuserAuditType.LOGIN,
+          e.getJwtId(),
+          e.getJwtIdStatus(),
+          testMcuserUid,
+          e.getRequestTimestamp(),
+          e.getRequestOrigin(),
+          e.getLoginExpiration()
+      ).execute();
+    if(numInserted != 1) throw new Exception("Num inserted MCUSER_AUDIT records: " + numInserted);
+    
+    return e;
+  }
+  
+  /**
+   * @param jwtId the jwt id of the mcuser_audit record to delete.
+   */
+  public static void deleteTestMcuserAuditRecord(UUID jwtId) {
+    try {
+      int num = dsl().deleteFrom(MCUSER_AUDIT).where(MCUSER_AUDIT.JWT_ID.eq(jwtId)).execute();
+      if(num != 1) throw new Exception("record not fould.");
+      log.info("MCUSER_AUDIT record deleted jwtId: {}", jwtId.toString());
+    }
+    catch(Exception e) {
+      log.error("MCUSER_AUDIT record delete error: ", e.getMessage());
+    }
+  }
+  
   private TestUtil() {}
 }

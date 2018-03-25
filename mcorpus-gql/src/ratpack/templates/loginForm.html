@@ -5,7 +5,9 @@
 </head>
 <body>
 <h1>mcorpus Login</h1>
-<form action="${callbackUrl}" method="POST">
+<h3>${statusMsg}</h3>
+<form action="/login" method="POST">
+  <input type="hidden" name="rst" value="${rst}" />
   <p>Username</p>
 	<input type="text" name="username" value="" />
   <p>Password</p>

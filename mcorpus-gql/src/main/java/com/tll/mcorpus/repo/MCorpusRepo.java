@@ -48,7 +48,6 @@ import com.tll.mcorpus.db.tables.records.MemberRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.LoginInput;
 import com.tll.mcorpus.repo.model.MemberFilter;
 import com.tll.mcorpus.repo.model.MemberRef;
 
@@ -86,33 +85,26 @@ public class MCorpusRepo implements Closeable {
   }
 
   /**
-   * The member login routine which fetches the member ref whose username and password matches the ones given.
+   * The member login routine which fetches the member ref whose username and
+   * password matches the ones given.
    * <p>
    * Blocking!
    *
-   * @param memberLoginInput the member login input credentials along with http header captures
-   * @return Never null {@link FetchResult} object holding the {@link Mcuser} ref if successful<br>
+   * @param mlogin
+   *          the member login input credentials
+   * @return Never null {@link FetchResult} object holding the {@link Mcuser} ref
+   *         if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mref> memberLogin(final LoginInput memberLoginInput) {
-    if(memberLoginInput != null && memberLoginInput.isValid()) {
-      log.debug("member logging in {}..", memberLoginInput);
+  public FetchResult<Mref> memberLogin(final MemberLogin mlogin) {
+    if(mlogin != null) {
       try {
-        final MemberLogin mlogin = new MemberLogin();
-        mlogin.setMemberUsername(memberLoginInput.getUsername());
-        mlogin.setMemberPassword(memberLoginInput.getPassword());
-        mlogin.setMemberWebSessionId(memberLoginInput.getWebSessionId());
-        mlogin.setMemberIp(memberLoginInput.getIp());
-        mlogin.setMemberHost(memberLoginInput.getHttpHost());
-        mlogin.setMemberOrigin(memberLoginInput.getHttpOrigin());
-        mlogin.setMemberReferer(memberLoginInput.getHttpReferer());
-        mlogin.setMemberForwarded(memberLoginInput.getHttpForwarded());
         mlogin.execute(dsl.configuration());
         final MrefRecord rec = mlogin.getReturnValue();
         if(rec != null && rec.getMid() != null) {
           // login success
           final Mref mref = rec.into(Mref.class);
-          log.info("MEMBER LOGGED IN: {}", mref);
+          log.info("MEMBER LOGGED IN: {}", mref.getMid());
           return new FetchResult<>(mref, null);
         } else {
           // login fail - no record returned
@@ -132,17 +124,13 @@ public class MCorpusRepo implements Closeable {
    * <p>
    * Blocking!
    *
-   * @param mid the member id
-   * @param webSessionId the member's current web session id
+   * @param memberLogout the member logout instance
    * @return Never null {@link FetchResult} object holding an error message if unsuccessful.
    */
-  public FetchResult<Void> memberLogout(final UUID mid, final String webSessionId) {
-    if(mid != null && webSessionId != null) {
+  public FetchResult<Void> memberLogout(final MemberLogout memberLogout) {
+    if(memberLogout != null) {
       try {
-        final MemberLogout logout = new MemberLogout();
-        logout.setMid(mid);
-        logout.setMemberWebSessionId(webSessionId);
-        logout.execute(dsl.configuration());
+        memberLogout.execute(dsl.configuration());
         // logout successful (no exception)
         return new FetchResult<>(null, null);
       }

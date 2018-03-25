@@ -14,12 +14,12 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tll.mcorpus.db.routines.JwtIdOk;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.LoginInput;
 
 /**
  * MCorpus User Repository (data access).
@@ -53,6 +53,29 @@ public class MCorpusUserRepo implements Closeable {
       log.info("Closed.");
     }
   }
+  
+  /**
+   * Is the given JWT id ok by way of these conditions:
+   * <ul>
+   * <li>JWT id is known and has 'OK' status on backend (db)
+   * <li>the associated mcuser's status is valid
+   * </ul>
+   * @param jwtId the JWT id to check
+   * @return fetch result around a Boolean indicating JWT id validity 
+   */
+  public FetchResult<Boolean> isJwtIdValid(final UUID jwtId) {
+    if(jwtId == null) return new FetchResult<>(null, "JWT status check failed: bad input.");
+    try {
+      final JwtIdOk backend = new JwtIdOk();
+      backend.setJwtId(jwtId);
+      backend.execute(dsl.configuration());
+      return new FetchResult<>(backend.getReturnValue(), null);
+    }
+    catch(Throwable e) {
+      log.info("JWT id validation check error: {}", e.getMessage());
+      return new FetchResult<>(null, "JWT id validation check failed.");
+    }
+  }
 
   /**
    * The mcorpus mcuser login routine which fetches the mcuser record ref 
@@ -60,30 +83,20 @@ public class MCorpusUserRepo implements Closeable {
    * <p>
    * Blocking!
    *
-   * @param mcuserLoginInput the mcuser login input credentials along with http header captures
+   * @param mcuserLogin the mcuser login input credentials
    * @return Never null {@link FetchResult} object<br> 
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final LoginInput mcuserLoginInput) {
-    if(mcuserLoginInput != null && mcuserLoginInput.isValid()) {
-      log.debug("logging in {}..", mcuserLoginInput);
+  public FetchResult<Mcuser> login(final McuserLogin mcuserLogin) {
+    if(mcuserLogin != null) {
       try {
-        final McuserLogin login = new McuserLogin();
-        login.setMcuserUsername(mcuserLoginInput.getUsername());
-        login.setMcuserPassword(mcuserLoginInput.getPassword());
-        login.setMcuserSessionId(mcuserLoginInput.getWebSessionId());
-        login.setMcuserIp(mcuserLoginInput.getIp());
-        login.setMcuserHost(mcuserLoginInput.getHttpHost());
-        login.setMcuserOrigin(mcuserLoginInput.getHttpOrigin());
-        login.setMcuserReferer(mcuserLoginInput.getHttpReferer());
-        login.setMcuserForwarded(mcuserLoginInput.getHttpForwarded());
-        login.execute(dsl.configuration());
-        final McuserRecord rec = login.getReturnValue();
+        mcuserLogin.execute(dsl.configuration());
+        final McuserRecord rec = mcuserLogin.getReturnValue();
         if(rec != null && rec.getUid() != null) {
           // login success
           final Mcuser mcuser = rec.into(Mcuser.class);
-          log.info("LOGGED IN: {}", mcuser);
+          log.info("LOGGED IN: {}", mcuser.getUid());
           return new FetchResult<>(mcuser, null);
         } else {
           // login fail - no record returned
@@ -91,7 +104,7 @@ public class MCorpusUserRepo implements Closeable {
         }
       }
       catch(Throwable t) {
-        log.error("User login error: {}.", t.getMessage());
+        log.error("Login error: {}.", t.getMessage());
       }
     }
     // default - login fail
@@ -103,26 +116,23 @@ public class MCorpusUserRepo implements Closeable {
    * <p>
    * Blocking!
    *
-   * @param mcuserId the mcuser id
-   * @param webSessionId the user's current web session id token
+   * @param mcuserLogoutInput the mcuser logout input data object along with request snapshot
    * @return Never null {@link FetchResult} object 
    *         holding an error message if unsuccessful.
    */
-  public FetchResult<Void> logout(final UUID mcuserId, final String webSessionId) {
-    if(mcuserId != null && webSessionId != null) {
+  public FetchResult<Boolean> logout(final McuserLogout mcuserLogout) {
+    if(mcuserLogout != null) {
       try {
-        final McuserLogout logout = new McuserLogout();
-        logout.setMcuserUid(mcuserId);
-        logout.setMcuserSessionId(webSessionId);
-        logout.execute(dsl.configuration());
+        mcuserLogout.execute(dsl.configuration());
         // logout successful (no exception)
-        return new FetchResult<>(null, null);
+        log.info("LOGGED OUT.");
+        return new FetchResult<>(Boolean.TRUE, null);
       }
       catch(Throwable t) {
-        log.error("User logout error: {}.", t.getMessage());
+        log.error("Logout error: {}.", t.getMessage());
       }
     }
     // default - logout failed
-    return new FetchResult<>(null, "Logout failed.");
+    return new FetchResult<>(Boolean.FALSE, "Logout failed.");
   }
 }

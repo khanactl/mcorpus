@@ -11,9 +11,6 @@ import java.util.Objects;
 import org.jooq.Condition;
 import org.jooq.Field;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Encapsulates a logical date comparison operation.
  *
@@ -124,8 +121,7 @@ public class DatePredicate implements IFieldPredicate<Timestamp> {
    * @param a the first instant argument
    * @param b the second instant argument which may not be used (depends on the date op)
    */
-  @JsonCreator
-  public DatePredicate(@JsonProperty("dateOp") DateOp dateOp, @JsonProperty("a") Date a, @JsonProperty("b") Date b) {
+  public DatePredicate(DateOp dateOp, Date a, Date b) {
     this.dateOp = dateOp;
     this.a = a;
     this.b = b;

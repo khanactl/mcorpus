@@ -3,10 +3,14 @@ package com.tll.mcorpus.repo;
 import static com.tll.mcorpus.TestUtil.addMaddressTableProperties;
 import static com.tll.mcorpus.TestUtil.addMauthTableProperties;
 import static com.tll.mcorpus.TestUtil.addMemberTableProperties;
+import static com.tll.mcorpus.TestUtil.ds;
+import static com.tll.mcorpus.TestUtil.dsl;
 import static com.tll.mcorpus.TestUtil.generateMaddressToAddPropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMaddressToUpdatePropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMemberToAddPropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMemberToUpdatePropertyMap;
+import static com.tll.mcorpus.TestUtil.testMemberLoginInput;
+import static com.tll.mcorpus.TestUtil.testMemberLogoutInput;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
@@ -23,26 +27,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.sql.DataSource;
-
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.conf.RenderKeywordStyle;
-import org.jooq.conf.RenderNameStyle;
-import org.jooq.conf.Settings;
-import org.jooq.impl.DSL;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.LoginInput;
 
 /**
  * Unit test for {@link MCorpusRepo}.
@@ -51,28 +47,6 @@ import com.tll.mcorpus.repo.model.LoginInput;
 public class MCorpusRepoTest {
 
   private static final Logger log = LoggerFactory.getLogger(MCorpusRepoTest.class);
-
-  private static DSLContext dsl = null;
-
-  private static DataSource ds() {
-    PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUrl("jdbc:postgresql://localhost:5432/mcorpus");
-    ds.setUser("mcweb");
-    ds.setPassword("YAcsR6*-L;djIaX1~%zBa");
-    ds.setCurrentSchema("public");
-    return ds;
-  }
-
-  private static DSLContext dsl() {
-    if(dsl == null) {
-      Settings s = new Settings();
-      s.setRenderSchema(false);
-      s.setRenderNameStyle(RenderNameStyle.LOWER);
-      s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
-      dsl = DSL.using(ds(), SQLDialect.POSTGRES, s);
-    }
-    return dsl;
-  }
 
   private static UUID insertTestMember() {
     Map<String, Object> memberMap = new HashMap<>();
@@ -125,15 +99,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds());
-      LoginInput memberLoginInput = new LoginInput(
-          "dhookes3f",
-          "8testItOut9",
-          "test-webid-login",
-          "127.0.0.1",
-          "google.com",
-          "12.12.12.12",
-          "soy-sauce",
-          "http-forward");
+      MemberLogin memberLoginInput = testMemberLoginInput();
       FetchResult<Mref> mrefFetch = repo.memberLogin(memberLoginInput);
       assertNotNull(mrefFetch);
       assertNotNull(mrefFetch.get());
@@ -154,11 +120,8 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds());
-      
-      FetchResult<Void> memberLogoutResult = repo.memberLogout(
-          UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba"), 
-          "test-webid-logout"
-      );
+      MemberLogout memberLogoutInput = testMemberLogoutInput();
+      FetchResult<Void> memberLogoutResult = repo.memberLogout(memberLogoutInput);
       assertNotNull(memberLogoutResult);
       assertFalse(memberLogoutResult.hasErrorMsg());
     }

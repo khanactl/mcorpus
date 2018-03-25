@@ -1,18 +1,25 @@
 package com.tll.mcorpus.repo;
 
-import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.enums.Location;
+import static com.tll.mcorpus.Util.isBlank;
+import static com.tll.mcorpus.Util.isNotNull;
+import static com.tll.mcorpus.Util.isNull;
+import static com.tll.mcorpus.Util.isNullOrEmpty;
+import static com.tll.mcorpus.Util.lenchk;
+import static com.tll.mcorpus.Util.not;
+import static com.tll.mcorpus.db.Tables.MADDRESS;
+import static com.tll.mcorpus.db.Tables.MAUTH;
+import static com.tll.mcorpus.db.Tables.MEMBER;
+import static com.tll.mcorpus.repo.RepoUtil.fmissing;
+import static com.tll.mcorpus.repo.RepoUtil.fval;
+import static com.tll.mcorpus.repo.RepoUtil.hasField;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.tll.mcorpus.Util.*;
-import static com.tll.mcorpus.db.Tables.MADDRESS;
-import static com.tll.mcorpus.db.Tables.MAUTH;
-import static com.tll.mcorpus.db.Tables.MEMBER;
-import static com.tll.mcorpus.repo.RepoUtil.*;
+import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.enums.Location;
 
 /**
  * Non-mutating validation methods for incoming member data.

@@ -24,5 +24,5 @@ public class MCorpusRepoAsync extends MCorpusRepo {
   public Promise<FetchResult<Mref>> fetchMRefByMidAsync(final UUID mid) {
     return Blocking.get(() -> { return fetchMRefByMid(mid); });
   }
-
+  
 }
