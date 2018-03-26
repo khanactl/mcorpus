@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.gql.MCorpusGraphQLModule;
 import com.tll.mcorpus.repo.MCorpusRepoModule;
-import com.tll.mcorpus.web.AntiCsrfHandler;
+import com.tll.mcorpus.web.CsrfGuardByCookieAndHeaderHandler;
 import com.tll.mcorpus.web.GraphQLHandler;
 import com.tll.mcorpus.web.GraphQLIndexHandler;
 import com.tll.mcorpus.web.JWTRequireValidHandler;
@@ -15,8 +15,8 @@ import com.tll.mcorpus.web.JWTStatusHandler;
 import com.tll.mcorpus.web.LoginRequestHandler;
 import com.tll.mcorpus.web.LogoutRequestHandler;
 import com.tll.mcorpus.web.MCorpusWebModule;
-import com.tll.mcorpus.web.RstAwarePostRequestHandler;
-import com.tll.mcorpus.web.ViewLoginPageRequestHandler;
+import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler;
+import com.tll.mcorpus.web.LoginPageRequestHandler;
 import com.tll.mcorpus.web.WebSessionVerifyHandler;
 
 import io.netty.handler.ssl.SslContextBuilder;
@@ -77,7 +77,7 @@ public class Main {
          .all(JWTRequireValidHandler.class)
          
          // the mcorpus GraphQL api (post only)
-         .post(AntiCsrfHandler.class)
+         .post(CsrfGuardByCookieAndHeaderHandler.class)
          .post(GraphQLHandler.class)
          
          // the GraphiQL developer interface (get only)
@@ -89,14 +89,14 @@ public class Main {
        // login page
        .prefix("loginPage", chainsub -> chainsub
          .get(JWTStatusHandler.class)
-         .get(ViewLoginPageRequestHandler.class)
+         .get(LoginPageRequestHandler.class)
        )
 
        // login (post only)
        .prefix("login", chainsub -> chainsub 
          .post(JWTStatusHandler.class)
          .post(WebSessionVerifyHandler.class)
-         .post(RstAwarePostRequestHandler.class)
+         .post(CsrfGuardByWebSessionAndPostHandler.class)
          .post(LoginRequestHandler.class)
        )
 

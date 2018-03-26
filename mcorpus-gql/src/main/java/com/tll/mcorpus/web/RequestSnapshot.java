@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Immutable snapshot of the key 'auditable' attributes of an incoming http
- * requeset attempting access to the mcorus api.
+ * request attempting to access the mcorpus api.
  * 
  * @author jkirton
  */
@@ -70,7 +70,7 @@ public class RequestSnapshot {
    * <p>
    * The client origin is determined thus:
    * <ul>
-   * <li>Origin http header value
+   * <li>Origin http header value.
    * </ul>
    * 
    * @return Never-null resolved client origin as a {@link URL}.

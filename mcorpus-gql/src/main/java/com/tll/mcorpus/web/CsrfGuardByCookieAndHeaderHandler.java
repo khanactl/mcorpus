@@ -18,10 +18,13 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Verifies an incoming reqest by verifying the following:
+ * Anti-CSRF statelessly. Requires no server-side web sessions.
+ * <p>
+ * Verifies an incoming request by verifying the following:
  * <ul>
- * <li>The incoming request's resloved origin URL matches that held in the JWT
- * claim as gotten from the 'jwt' request cookie.
+ * <li>A valid JWT cookie is present.
+ * <li>The incoming request client origin matches that held in the signed JWT
+ * {@link JWT#JWT_CLIENT_ORIGIN_KEY} claim.
  * <li>The incoming request's rst http header value matches the rst cookie
  * value.
  * </ul>
@@ -30,9 +33,9 @@ import ratpack.handling.Handler;
  * 
  * @author d2d
  */
-public class AntiCsrfHandler implements Handler {
+public class CsrfGuardByCookieAndHeaderHandler implements Handler {
   
-  private static final Logger log = LoggerFactory.getLogger(AntiCsrfHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(CsrfGuardByCookieAndHeaderHandler.class);
 
   @Override
   public void handle(Context ctx) throws Exception {

@@ -33,9 +33,9 @@ import ratpack.handling.Handler;
  * 
  * @author jkirton
  */
-public class ViewLoginPageRequestHandler implements Handler {
+public class LoginPageRequestHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(ViewLoginPageRequestHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(LoginPageRequestHandler.class);
   
   @Override
   public void handle(Context ctx) throws Exception {

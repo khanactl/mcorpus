@@ -17,7 +17,7 @@ import ratpack.handling.Handler;
  * <p>
  * The GraphiQL interface.
  * <p>
- * We use a fresh rst for each requst of this page. The subsequent reqeuests
+ * We use a fresh rst for each requst of this page. The subsequent requests
  * into /graphql will require the rst to be passed back.
  * 
  * @author jkirton

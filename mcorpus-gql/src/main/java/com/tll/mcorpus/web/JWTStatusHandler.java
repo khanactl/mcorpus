@@ -5,13 +5,15 @@ import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tll.mcorpus.web.JWT.JWTStatusInstance;
+
 import ratpack.exec.Promise;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Determine the JWT status for incoming http requests and cache for downstrem
- * handlers.
+ * Determine the JWT status for incoming http requests and cache a
+ * {@link JWTStatusInstance} for downstrem handlers to access.
  * <p>
  * <b>IMPT</b>: This handler will query the backend db to verify the held claims
  * of a JWT if one is present thus the reason for the asynchronous

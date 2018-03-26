@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
-import com.tll.mcorpus.web.RstAwarePostRequestHandler.NextRst;
+import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import ratpack.form.Form;

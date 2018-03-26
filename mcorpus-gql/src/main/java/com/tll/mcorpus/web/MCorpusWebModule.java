@@ -23,12 +23,12 @@ public class MCorpusWebModule extends AbstractModule {
     bind(JWTRequireValidHandler.class);
     bind(GraphQLHandler.class);
     bind(GraphQLIndexHandler.class);
-    bind(ViewLoginPageRequestHandler.class);
+    bind(LoginPageRequestHandler.class);
     bind(LoginRequestHandler.class);
     bind(LogoutRequestHandler.class);
     bind(WebSessionVerifyHandler.class);
-    bind(AntiCsrfHandler.class);
-    bind(RstAwarePostRequestHandler.class);
+    bind(CsrfGuardByCookieAndHeaderHandler.class);
+    bind(CsrfGuardByWebSessionAndPostHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
   }

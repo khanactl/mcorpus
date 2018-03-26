@@ -1,5 +1,6 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.mcorpus.Util.clean;
 import static com.tll.mcorpus.Util.not;
 
 import java.util.UUID;
@@ -15,6 +16,8 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
+ * Anti-CSRF by stateful server-side web sessions and rst in post checking.
+ * <p>
  * Verifies the rst in an incoming post request against the server held web
  * session rst then adds the processed form data as a {@link Form} instance to
  * the current request object held in the given context.
@@ -33,9 +36,9 @@ import ratpack.handling.Handler;
  * 
  * @author jkirton
  */
-public class RstAwarePostRequestHandler implements Handler {
+public class CsrfGuardByWebSessionAndPostHandler implements Handler {
   
-  private static final Logger log = LoggerFactory.getLogger(RstAwarePostRequestHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(CsrfGuardByWebSessionAndPostHandler.class);
   
   /**
    * Strongly type the 'next rst' to add to the request for use by downstream
@@ -59,7 +62,13 @@ public class RstAwarePostRequestHandler implements Handler {
       final WebSession webSession = ctx.getRequest().get(WebSessionInstance.class).getWebSession();
       
       // rst verify
-      final String formRstString = formData.get("rst");
+      final String formRstString = clean(formData.get("rst"));
+      if(formRstString.isEmpty()) {
+        log.error("rst absent in post.");
+        ctx.clientError(205); // 205 - Reset Content
+        return;
+      }
+      
       try {
         final UUID formRst = UUID.fromString(formRstString);
         final UUID webSessionRst = webSession.currentRst();
