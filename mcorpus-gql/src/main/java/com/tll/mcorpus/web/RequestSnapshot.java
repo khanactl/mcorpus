@@ -68,26 +68,40 @@ public class RequestSnapshot {
   /**
    * Determines the client origin by interrogating the http headers.
    * <p>
-   * The client origin is determined thus:
+   * The client origin is determined by:
    * <ul>
-   * <li>Origin http header value.
+   * <li>If the Origin http header value is present, this is the client origin.
+   * (POST)
+   * <li>If the Origin is absent, use the Referer http header as the client
+   * origin. (GET)
    * </ul>
    * 
    * @return Never-null resolved client origin as a {@link URL}.
-   * @throws Exception upon any error resolving the Origin URL.
+   * @throws Exception
+   *           upon any error resolving the client origin.
    */
   public URL getClientOrigin() throws Exception {
+    final URL clientOrigin;
     if(isNullOrEmpty(httpOrigin) || "null".equalsIgnoreCase(httpOrigin)) {
-      log.error("No http Origin present.");
-      throw new Exception("No http Origin present.");
+      // fallback on Referer
+      log.info("No http Origin present.  Falling back on Referer.");
+      try {
+        URL referer = new URL(httpReferer);
+        clientOrigin = new URL(referer.getProtocol(), referer.getHost(), referer.getPort(), "");
+      } catch (MalformedURLException e) {
+        log.error("Invalid http Referer: {}", httpReferer);
+        throw new Exception("Invalid http Referer.");
+      }
     } else {
       try {
-        return new URL(httpOrigin);
+        clientOrigin = new URL(httpOrigin);
       } catch (MalformedURLException e) {
         log.error("Invalid http Origin: {}", httpOrigin);
-        throw new Exception("Invalid http Origin: " + httpOrigin);
+        throw new Exception("Invalid http Origin.");
       }
     }
+    log.info("Client Origin resolved to: {}", clientOrigin);
+    return clientOrigin;
   }
 
   /**

@@ -138,7 +138,7 @@ public class MCorpusGraphQL {
           try {
             mlogin.setInRequestOrigin(rs.getClientOrigin().toString());
           } catch (Exception e) {
-            log.error("Error determining client origin.");
+            log.error("Error determining client origin: {}", e.getMessage());
           }
           final FetchResult<Mref> mloginResult = mCorpusRepo.memberLogin(mlogin);
           return mloginResult.isSuccess() ? mloginResult.get() : null;

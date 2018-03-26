@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -277,8 +278,9 @@ public class JWT {
    * <ul>
    * <li>a JWT is present in the given request snapshot <code>rs</code>.</li>
    * <li>the JWT signature is verified
-   * <li>the JWT claims are verified
+   * <li>the JWT ISSUER and AUDIENCE claims are verified
    * <li>the JWT has not expired
+   * <li>the JWT client origin claim matches the current request client origin
    * </ul>
    * 
    * @param rs
@@ -330,9 +332,9 @@ public class JWT {
     final UUID jwtId = UUID.fromString(claims.getJWTID());
     final Date issued = claims.getIssueTime();
     final Date expires = claims.getExpirationTime();
-    final URL clientOrigin;
+    final URL jwtClientOrigin;
     try {
-      clientOrigin = new URL(claims.getClaim(JWT_CLIENT_ORIGIN_KEY).toString());
+      jwtClientOrigin = new URL(claims.getClaim(JWT_CLIENT_ORIGIN_KEY).toString());
     }
     catch(MalformedURLException e) {
       log.error("Error parsing client origin JWT claim.");
@@ -342,6 +344,18 @@ public class JWT {
     // expired? (check for exp. time in the past)
     if(new Date().after(expires)) {
       return Promise.value(jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, null));
+    }
+    
+    // verify the jwt client origin claim matches the current request client origin
+    try {
+      final URL requestClientOrigin = rs.getClientOrigin();
+      if(not(Objects.equals(jwtClientOrigin, requestClientOrigin))) {
+        log.error("JWT and request client origin mismatch: jwtClientOrigin: {}, requestClientOrigin: {}", jwtClientOrigin, requestClientOrigin);
+        return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+      }
+    } catch(Exception e) {
+      log.error("Bad request client origin.");
+      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
     }
 
     // Backend verification:
@@ -357,7 +371,7 @@ public class JWT {
                   jwtId, 
                   issued, 
                   expires, 
-                  clientOrigin
+                  jwtClientOrigin
               );
             });
   }
