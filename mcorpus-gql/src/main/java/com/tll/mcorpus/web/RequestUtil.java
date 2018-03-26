@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.web.WebSessionManager.WebSession;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionStatus;
@@ -27,6 +26,18 @@ import ratpack.registry.NotInRegistryException;
 public class RequestUtil {
   
   private static final Logger log = LoggerFactory.getLogger(RequestUtil.class);
+  
+  /**
+   * Get the configured server domain name (aka public address) underwhich the
+   * system is running.
+   * 
+   * @param ctx
+   *          the request context
+   * @return the configured server domain name
+   */
+  public static String getServerDomainName(final Context ctx) {
+    return ctx.getServerConfig().getPublicAddress().getHost();
+  }
 
   /**
    * Interrogate the given request object for the presence of a
@@ -150,7 +161,7 @@ public class RequestUtil {
     final Cookie sidCookieRef = ctx.getResponse().cookie("sid", sid.toString());
     sidCookieRef.setSecure(true);
     sidCookieRef.setHttpOnly(true);
-    sidCookieRef.setDomain(ctx.getServerConfig().get(MCorpusServerConfig.class).serverDomainName);
+    sidCookieRef.setDomain(getServerDomainName(ctx));
     sidCookieRef.setPath("/");
     sidCookieRef.setMaxAge(webSessionDuration.getSeconds());
   }
@@ -168,7 +179,7 @@ public class RequestUtil {
     final Cookie rstCookieRef = ctx.getResponse().cookie("rst", rst);
     rstCookieRef.setSecure(true);
     rstCookieRef.setHttpOnly(true);
-    rstCookieRef.setDomain(ctx.getServerConfig().get(MCorpusServerConfig.class).serverDomainName);
+    rstCookieRef.setDomain(getServerDomainName(ctx));
     rstCookieRef.setPath("/");
     rstCookieRef.setMaxAge(webSessionDuration.getSeconds());
   }
@@ -181,7 +192,7 @@ public class RequestUtil {
    *          the incoming request context
    */
   public static void expireAllCookies(final Context ctx) {
-    final String cookieServerName = ctx.getServerConfig().get(MCorpusServerConfig.class).serverDomainName;
+    final String cookieServerName = getServerDomainName(ctx);
     // rst cookie
     final Cookie rstCookieRef = ctx.getResponse().expireCookie("rst");
     rstCookieRef.setPath("/");

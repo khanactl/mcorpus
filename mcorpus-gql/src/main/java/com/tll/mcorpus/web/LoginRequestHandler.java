@@ -1,6 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Util.isBlank;
+import static com.tll.mcorpus.web.RequestUtil.getServerDomainName;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
 
 import java.net.URL;
@@ -12,7 +13,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
@@ -112,7 +112,7 @@ public class LoginRequestHandler implements Handler {
       
       // jwt cookie
       final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);
-      jwtCookieRef.setDomain(ctx.getServerConfig().get(MCorpusServerConfig.class).serverDomainName);
+      jwtCookieRef.setDomain(getServerDomainName(ctx));
       jwtCookieRef.setMaxAge(jwtbiz.jwtCookieTtlInSeconds()); // cookie max age is in seconds
       jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
       jwtCookieRef.setSecure(true); // secure

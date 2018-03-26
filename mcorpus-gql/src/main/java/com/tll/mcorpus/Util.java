@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -124,13 +125,13 @@ public class Util {
    */
   public static String asStringAndClean(final Object o) { return o == null ? "" : o.toString().trim(); }
 
-  public static String upper(final String s) { return s == null ? "" : s.toUpperCase(); }
+  public static String upper(final String s) { return s == null ? "" : s.toUpperCase(Locale.US); }
 
-  public static String lower(final String s) { return s == null ? "" : s.toLowerCase(); }
+  public static String lower(final String s) { return s == null ? "" : s.toLowerCase(Locale.US); }
 
-  public static String upper(final Object o) { return asStringAndClean(o).toUpperCase(); }
+  public static String upper(final Object o) { return upper(asStringAndClean(o)); }
 
-  public static String lower(final Object o) { return asStringAndClean(o).toLowerCase(); }
+  public static String lower(final Object o) { return lower(asStringAndClean(o)); }
 
   /**
    * Takes a list as input and adds each list element to a string

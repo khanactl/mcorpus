@@ -1,30 +1,20 @@
 package com.tll.mcorpus;
 
-import com.google.common.base.MoreObjects;
-
 /**
- * The MCorpus GraphQL server config type.
+ * The MCorpus GraphQL server config properties.
  * <p>
- * All needed startup properties shall be explicitly defined here.
+ * All needed startup properties shall be explicitly declared herein.
  */
 public class MCorpusServerConfig {
-  public String dataSourceClassName;
+  // db
+  public String dbDataSourceClassName;
   public String dbUsername;
   public String dbPassword;
   public String dbName;
   public String dbSchema;
   public String dbServerName;
   public String dbPortNumber;
-
-  public String serverDomainName;
-
+  // jwt
   public String jwtSalt;
   public long jwtTtlInMillis;
-  
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("serverDomainName", serverDomainName)
-        .toString();
-  }
 }

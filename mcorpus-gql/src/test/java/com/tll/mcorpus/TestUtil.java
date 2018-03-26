@@ -184,9 +184,11 @@ public class TestUtil {
   }
 
   public static String randomEmpId() {
-    return String.format("%s-%s",
-      Integer.toString(rand.nextInt(99) + 10),
-      Integer.toString(rand.nextInt(9999999) + 1000000));
+    String s = String.format("%02d-%07d",
+      Integer.valueOf(rand.nextInt(100) + 1),
+      Integer.valueOf(rand.nextInt(10000000) + 1)
+    );
+    return s;
   }
 
   public static Location randomLocation() {

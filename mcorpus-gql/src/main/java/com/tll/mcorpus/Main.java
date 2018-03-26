@@ -50,26 +50,23 @@ public class Main {
        .require("", MCorpusServerConfig.class)
        // .require("/metrics", DropwizardMetricsConfig.class)
      )
-     .registry(Guice.registry(bindings -> {
-       final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
-       log.info(config.toString());
-       
-       bindings.module(HikariModule.class, hikariConfig -> {
-         hikariConfig.setDataSourceClassName(config.dataSourceClassName);
+     .registry(Guice.registry(bindings -> bindings
+       .module(HikariModule.class, hikariConfig -> {
+         final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
+         hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
          hikariConfig.setUsername(config.dbUsername);
          hikariConfig.setPassword(config.dbPassword);
          hikariConfig.addDataSourceProperty("serverName", config.dbServerName);
          hikariConfig.addDataSourceProperty("databaseName", config.dbName);
          hikariConfig.addDataSourceProperty("currentSchema", config.dbSchema);
          hikariConfig.addDataSourceProperty("portNumber", config.dbPortNumber);
-       });
-       bindings.module(MCorpusRepoModule.class);
-       bindings.module(MCorpusGraphQLModule.class);
-       bindings.module(MCorpusWebModule.class);
-     }))
-
+       })
+       .module(MCorpusRepoModule.class)
+       .module(MCorpusGraphQLModule.class)
+       .module(MCorpusWebModule.class)
+     ))
      .handlers(chain -> chain
-       .all(RequestLogger.ncsa())
+       .all(RequestLogger.ncsa()) // log all incoming requests
 
        // redirect to /index if coming in under /
        .path(redirect(301, "index"))

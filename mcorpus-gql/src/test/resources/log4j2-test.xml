@@ -6,6 +6,7 @@
     </Console>
   </Appenders>
   <Loggers>
+    <Logger name="graphql.execution" level="INFO" />
     <Root level="DEBUG">
       <AppenderRef ref="Console"/>
     </Root>

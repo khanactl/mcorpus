@@ -152,12 +152,12 @@ public class JWT {
     /**
      * @return the Date when the JWT was created
      */
-    public Date issued() { return issued; }
+    public Date issued() { return issued == null ? null : new Date(issued.getTime()); }
     
     /**
      * @return the Date when the JWT expires
      */
-    public Date expires() { return expires; }
+    public Date expires() { return expires == null ? null : new Date(expires.getTime()); }
     
     /**
      * @return The originating client domain and protocol.

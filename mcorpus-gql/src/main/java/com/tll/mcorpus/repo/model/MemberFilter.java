@@ -122,7 +122,11 @@ public class MemberFilter implements IFetchFilter {
    * @return the default member search result ordering for Jooq.
    */
   public static SortField<?>[] getDefaultJooqSortFields() {
-    return defaultJooqSorting;
+    // keep internal array safe from mutations by returning a copy
+    final int len = defaultJooqSorting.length;
+    final SortField<?>[] rval = new SortField[len]; 
+    System.arraycopy(defaultJooqSorting, 0, rval, 0, len);
+    return rval;
   }
 
   private static final SortField<?>[] defaultJooqSorting;
@@ -256,7 +260,7 @@ public class MemberFilter implements IFetchFilter {
 
   @Override
   public Condition[] asJooqCondition() {
-    if(!isSet()) return null;
+    if(!isSet()) return new Condition[0];
     final List<Condition> conditions = new ArrayList<>(8);
     if(hasCreated()) conditions.add(getCreated().asJooqCondition(MEMBER.CREATED));
     if(hasModified()) conditions.add(getModified().asJooqCondition(MEMBER.MODIFIED));

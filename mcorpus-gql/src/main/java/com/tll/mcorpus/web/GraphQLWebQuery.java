@@ -66,6 +66,6 @@ public class GraphQLWebQuery {
   
   @Override
   public String toString() {
-    return String.format("\n%s\n", query);
+    return String.format("%n%s%n", query);
   }
 }

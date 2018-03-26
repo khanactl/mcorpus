@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,7 +77,7 @@ public class MCorpusGraphQL {
     if(graphQLSchema == null) {
       loadSchema();
     }
-    assert graphQLSchema != null : "No GraphQL schema loaded.";
+    if(graphQLSchema == null) throw new RuntimeException("No GraphQL schema loaded.");
     return graphQLSchema;
   }
 
@@ -108,7 +109,13 @@ public class MCorpusGraphQL {
       throw new RuntimeException(e);
     }
     finally {
-      if(greader != null) try { greader.close(); } catch (IOException e) {}
+      if(greader != null) { 
+        try { 
+          greader.close(); 
+        } catch (IOException e) {
+          log.error("Error closing handle to GraphQL schema file.");
+        }
+      }
     }
   }
 
@@ -519,6 +526,6 @@ public class MCorpusGraphQL {
   }
 
   private static String addressNameToString(Addressname addressname) {
-    return addressname == null ? null : addressname.getLiteral().toUpperCase();
+    return addressname == null ? null : addressname.getLiteral().toUpperCase(Locale.US);
   }
 }

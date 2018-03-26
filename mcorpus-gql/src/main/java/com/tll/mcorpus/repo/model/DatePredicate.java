@@ -123,8 +123,8 @@ public class DatePredicate implements IFieldPredicate<Timestamp> {
    */
   public DatePredicate(DateOp dateOp, Date a, Date b) {
     this.dateOp = dateOp;
-    this.a = a;
-    this.b = b;
+    setA(a);
+    setB(b);
   }
 
   public DateOp getDateOp() {
@@ -136,19 +136,19 @@ public class DatePredicate implements IFieldPredicate<Timestamp> {
   }
 
   public Date getA() {
-    return a;
+    return a == null ? null : new Date(a.getTime());
   }
 
   public void setA(Date d) {
-    this.a = d;
+    this.a = d == null ? null : new Date(d.getTime());
   }
 
   public Date getB() {
-    return b;
+    return b == null ? null : new Date(b.getTime());
   }
 
   public void setB(Date d) {
-    this.b = d;
+    this.b = d == null ? null : new Date(d.getTime());
   }
 
   @Override

@@ -3,6 +3,7 @@ package com.tll.mcorpus.web;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.nimbusds.jose.util.StandardCharset;
 import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
 
@@ -35,6 +36,6 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   JWT jwt(MCorpusServerConfig config, MCorpusUserRepoAsync mcuserRepo) {
-    return new JWT(config.jwtTtlInMillis, config.jwtSalt.getBytes(), mcuserRepo);
+    return new JWT(config.jwtTtlInMillis, config.jwtSalt.getBytes(StandardCharset.UTF_8), mcuserRepo);
   }
 }
