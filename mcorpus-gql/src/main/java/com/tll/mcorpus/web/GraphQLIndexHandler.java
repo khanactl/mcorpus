@@ -25,11 +25,11 @@ import ratpack.handling.Handler;
 public class GraphQLIndexHandler implements Handler {
 
   private static final Logger log = LoggerFactory.getLogger(GraphQLIndexHandler.class);
-  
+ 
   @Override
   public void handle(Context ctx) throws Exception {
     final String rst = UUID.randomUUID().toString();
-    addRstCookieToResponse(ctx, rst);
+    addRstCookieToResponse(ctx, rst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
     ctx.render(html("graphql/index.html", singletonMap("rst", rst), true));
     log.info("GraphiQL page rendered with rst: {}", rst);
   }

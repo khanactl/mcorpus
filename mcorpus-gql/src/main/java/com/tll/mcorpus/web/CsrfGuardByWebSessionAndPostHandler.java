@@ -78,7 +78,7 @@ public class CsrfGuardByWebSessionAndPostHandler implements Handler {
           return;
         }
       }
-      catch(IllegalArgumentException e) {
+      catch(Exception e) {
         log.error("Bad rst: {}", formRstString);
         ctx.clientError(400); // bad request
         return;

@@ -3,7 +3,6 @@ package com.tll.mcorpus.web;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
@@ -328,15 +327,29 @@ public class JWT {
     // - mcuserId     (subject)
     // - jwtId        (JWTID)
     // - clientOrigin (JWT_CLIENT_ORIGIN)
-    final UUID mcuserId = UUID.fromString(claims.getSubject());
-    final UUID jwtId = UUID.fromString(claims.getJWTID());
+    final UUID mcuserId;
+    try {
+      mcuserId = UUID.fromString(claims.getSubject());
+    }
+    catch(Exception e) {
+      log.error("Error parsing subject (mcuserId) JWT claim.");
+      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+    }
+    final UUID jwtId;
+    try {
+      jwtId = UUID.fromString(claims.getJWTID());
+    }
+    catch(Exception e) {
+      log.error("Error parsing JWT ID claim.");
+      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+    }
     final Date issued = claims.getIssueTime();
     final Date expires = claims.getExpirationTime();
     final URL jwtClientOrigin;
     try {
       jwtClientOrigin = new URL(claims.getClaim(JWT_CLIENT_ORIGIN_KEY).toString());
     }
-    catch(MalformedURLException e) {
+    catch(Exception e) {
       log.error("Error parsing client origin JWT claim.");
       return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
     }

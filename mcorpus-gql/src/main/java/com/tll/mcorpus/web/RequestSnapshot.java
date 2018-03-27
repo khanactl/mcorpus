@@ -1,6 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Util.isNullOrEmpty;
+import static com.tll.mcorpus.Util.lower;
 import static com.tll.mcorpus.Util.not;
 
 import java.net.MalformedURLException;
@@ -19,6 +20,10 @@ import org.slf4j.LoggerFactory;
 public class RequestSnapshot {
   
   private static final Logger log = LoggerFactory.getLogger(RequestSnapshot.class);
+  
+  private static boolean isNullwiseOrEmpty(final String s) {
+    return isNullOrEmpty(s) || "null".equals(lower(s));
+  }
 
   private final Instant requestInstant;
   
@@ -149,7 +154,7 @@ public class RequestSnapshot {
   /**
    * @return true if a web session id cookie value is present, false otherwise.
    */
-  public boolean hasSidCookie() { return not(isNullOrEmpty(sidCookie)); }
+  public boolean hasSidCookie() { return not(isNullwiseOrEmpty(sidCookie)); }
 
   /**
    * @return the mcorpus session id from cookie value.
@@ -161,7 +166,7 @@ public class RequestSnapshot {
   /**
    * @return true if an mcorpus JWT cookie value is present, false otherwise
    */
-  public boolean hasJwtCookie() { return not(isNullOrEmpty(jwtCookie)); }
+  public boolean hasJwtCookie() { return not(isNullwiseOrEmpty(jwtCookie)); }
   
   /**
    * @return the mcorpus JWT cookie value.
@@ -173,7 +178,7 @@ public class RequestSnapshot {
   /**
    * @return true if a request sync token is present, false otherwise.
    */
-  public boolean hasRstCookie() { return not(isNullOrEmpty(rstCookie)); }
+  public boolean hasRstCookie() { return not(isNullwiseOrEmpty(rstCookie)); }
 
   /**
    * @return the mcorpus request sync token cookie value.
@@ -185,7 +190,7 @@ public class RequestSnapshot {
   /**
    * @return true if an mcorpus rst header value is present, false otherwise
    */
-  public boolean hasRstHeader() { return not(isNullOrEmpty(rstHeader)); }
+  public boolean hasRstHeader() { return not(isNullwiseOrEmpty(rstHeader)); }
   
   /**
    * @return the mcorpus rst header value.

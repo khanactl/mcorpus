@@ -4,6 +4,7 @@ import static com.tll.mcorpus.web.RequestUtil.addRstCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.addSidCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateWebSession;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
+import static com.tll.mcorpus.web.WebSessionManager.webSessionDuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class LoginPageRequestHandler implements Handler {
     // 1) the current web session id (sid)
     // 2) freshly generated and strong rst
     addSidCookieToResponse(ctx, webSession.sid());
-    addRstCookieToResponse(ctx, nextRst);
+    addRstCookieToResponse(ctx, nextRst, (int) webSessionDuration.getSeconds());
     
     // render the login form
     final Map<String, Object> model = new HashMap<>(2);

@@ -58,11 +58,18 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
       return;
     }
     
-    final UUID cookieRst = requestSnapshot.hasRstCookie() ? 
-            UUID.fromString(requestSnapshot.getRstCookie()) : null;
-    
-    final UUID headerRst = requestSnapshot.hasRstHeader() ? 
-        UUID.fromString(requestSnapshot.getRstHeader()) : null;
+    final UUID cookieRst;
+    final UUID headerRst;
+    try {
+      cookieRst = requestSnapshot.hasRstCookie() ? 
+          UUID.fromString(requestSnapshot.getRstCookie()) : null;
+      headerRst = requestSnapshot.hasRstHeader() ? 
+          UUID.fromString(requestSnapshot.getRstHeader()) : null;
+    } catch(Exception e) {
+      log.error("Bad rst token(s).");
+      ctx.clientError(400); // bad request
+      return;
+    }
     
     // send a no content response if either the cookie or header rst are not present
     // this serves as a way for http clients to sync the per request rst exchange
@@ -84,7 +91,7 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
     
     // reset the current rst and provide the new rst in the response
     final String nextRst = UUID.randomUUID().toString();
-    addRstCookieToResponse(ctx, nextRst);
+    addRstCookieToResponse(ctx, nextRst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
     ctx.getResponse().getHeaders().add("rst", nextRst);
     log.info("rst (next) added to response: {}.", nextRst);
 

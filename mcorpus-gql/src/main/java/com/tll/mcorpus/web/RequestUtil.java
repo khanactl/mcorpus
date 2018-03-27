@@ -85,7 +85,7 @@ public class RequestUtil {
         // verify the session identifier
         try {
           sid = UUID.fromString(requestSnapshot.getSidCookie());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
           log.error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
           throw new Exception("Invalid session cookie.");
         }
@@ -129,7 +129,7 @@ public class RequestUtil {
       if (requestSnapshot.hasSidCookie()) {
         try {
           webSession = WebSessionManager.getSession(UUID.fromString(requestSnapshot.getSidCookie()));
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
           log.error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
           status = WebSessionStatus.BAD_SESSION_ID;
         }
@@ -174,14 +174,15 @@ public class RequestUtil {
    *          the request context object
    * @param rst
    *          the rst value to use in the response cookie
+   * @param maxAge the cookie max age (seconds)
    */
-  public static void addRstCookieToResponse(final Context ctx, final String rst) {
+  public static void addRstCookieToResponse(final Context ctx, final String rst, int maxAge) {
     final Cookie rstCookieRef = ctx.getResponse().cookie("rst", rst);
     rstCookieRef.setSecure(true);
     rstCookieRef.setHttpOnly(true);
     rstCookieRef.setDomain(getServerDomainName(ctx));
     rstCookieRef.setPath("/");
-    rstCookieRef.setMaxAge(webSessionDuration.getSeconds());
+    rstCookieRef.setMaxAge(maxAge);
   }
   
   /**

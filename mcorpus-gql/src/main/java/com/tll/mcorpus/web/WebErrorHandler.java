@@ -24,6 +24,9 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
   public void error(Context ctx, int statusCode) throws Exception {
     ctx.getResponse().status(statusCode);
     switch(statusCode) {
+    case 205: // reset content 
+      ctx.getResponse().send("Reset Content");
+      break;
     case 400: // bad request
       ctx.render(ctx.file("templates/error400.html"));
       break;
