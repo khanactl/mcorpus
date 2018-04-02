@@ -27,7 +27,7 @@ public class RequestSnapshot {
 
   private final Instant requestInstant;
   
-  private final String remoteAddr;
+  private final String remoteAddressHost;
   
   private final String httpHost;
   private final String httpOrigin;
@@ -44,7 +44,7 @@ public class RequestSnapshot {
    * Constructor.
    *
    * @param requestInstant the instant the request hit the server
-   * @param remoteAddr the tcp datagram remote address (ip and host)
+   * @param remoteAddressHost the tcp datagram remote ip address
    * @param httpHost the http Host header value
    * @param httpOrigin the http Origin header value
    * @param httpReferer the http Referer header value
@@ -54,12 +54,12 @@ public class RequestSnapshot {
    * @param rstCookie the mcorpus request sync token cookie value
    * @param rstHeader the mcorpus request sync token http header value
    */
-  public RequestSnapshot(Instant requestInstant, String remoteAddr, String httpHost, String httpOrigin,
+  public RequestSnapshot(Instant requestInstant, String remoteAddressHost, String httpHost, String httpOrigin,
       String httpReferer, String httpForwarded, 
       String jwtCookie, String sidCookie, String rstCookie, String rstHeader) {
     super();
     this.requestInstant = requestInstant;
-    this.remoteAddr = remoteAddr;
+    this.remoteAddressHost = remoteAddressHost;
     this.httpHost = httpHost;
     this.httpOrigin = httpOrigin;
     this.httpReferer = httpReferer;
@@ -117,10 +117,10 @@ public class RequestSnapshot {
   }
   
   /**
-   * @return the http tcp datagram remote address (host and port).
+   * @return the http tcp datagram remote IP address.
    */
-  public String getRemoteAddr() {
-    return remoteAddr;
+  public String getRemoteAddressHost() {
+    return remoteAddressHost;
   }
 
   /**
@@ -202,8 +202,8 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-        "RequestSnapshot [requestTimestamp=%s, remoteAddr=%s, httpHost=%s, httpOrigin=%s, httpReferer=%s, httpForwarded=%s, jwtCookie=%s, sidCookie=%s, rstCookie=%s, rstHeader=%s]",
-        requestInstant, remoteAddr, 
+        "RequestSnapshot [requestTimestamp=%s, remoteAddressHost=%s, httpHost=%s, httpOrigin=%s, httpReferer=%s, httpForwarded=%s, jwtCookie=%s, sidCookie=%s, rstCookie=%s, rstHeader=%s]",
+        requestInstant, remoteAddressHost, 
         httpHost, httpOrigin, httpReferer, httpForwarded, 
         jwtCookie, sidCookie, rstCookie, rstHeader);
   }

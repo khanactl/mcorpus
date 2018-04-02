@@ -102,13 +102,17 @@ public class LoginRequestHandler implements Handler {
 
       // at this point, we're authenticated
       
+      final String issuer = ctx.getServerConfig().getPublicAddress().toString();
+      final String audience = requestSnapshot.getRemoteAddressHost();
+      
       // create the JWT - and set as a cookie to go back to user
       // the user is now expected to provide this JWT for subsequent mcorpus api requests
       final String jwt = jwtbiz.generate(
           requestSnapshot.getRequestInstant(), 
           mcuser.getUid(), 
           pendingJwtID,
-          requestSnapshot.getClientOrigin());
+          issuer,
+          audience);
       
       // jwt cookie
       final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);

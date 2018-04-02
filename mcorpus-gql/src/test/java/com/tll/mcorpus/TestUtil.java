@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.MemberStatus;
@@ -350,7 +350,7 @@ public class TestUtil {
         "request-origin",
         new Timestamp(expiry),
         UUID.randomUUID(),
-        JwtStatus.OK);
+        JwtIdStatus.OK);
     
     final int numInserted = dsl().insertInto(MCUSER_AUDIT,
         MCUSER_AUDIT.TYPE,

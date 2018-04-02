@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
@@ -31,7 +32,7 @@ public class MCorpusUserRepoAsync extends MCorpusUserRepo {
     return Blocking.get(() -> { return logout(mcuserLogout); });
   }
 
-  public Promise<FetchResult<Boolean>> isJwtValidAsync(final UUID jwtId) {
-    return Blocking.get(() -> { return isJwtIdValid(jwtId); });
+  public Promise<FetchResult<JwtStatus>> getJwtStatusAsync(final UUID jwtId) {
+    return Blocking.get(() -> { return getJwtStatus(jwtId); });
   }
 }

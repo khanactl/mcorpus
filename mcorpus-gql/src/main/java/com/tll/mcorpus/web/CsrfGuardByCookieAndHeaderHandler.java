@@ -5,14 +5,11 @@ import static com.tll.mcorpus.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.addRstCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 
-import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -40,20 +37,19 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
   @Override
   public void handle(Context ctx) throws Exception {
     final RequestSnapshot requestSnapshot = getOrCreateRequestSnapshot(ctx);
-    final JWTStatusInstance jwtStatus = ctx.get(JWTStatusInstance.class);
     
-    // verify http client origin header matches with that held in the inbound JWT claim
-    final URL clientOrigin;
+    // verify client Origin matches the server configured public address
+    final String serverPublicAddress = ctx.getServerConfig().getPublicAddress().toString();
+    final String clientOrigin;
     try {
-      clientOrigin = requestSnapshot.getClientOrigin();
+      clientOrigin = requestSnapshot.getClientOrigin().toString();
     } catch(Exception e) {
       log.error("Bad client Origin.");
       ctx.clientError(400); // bad request
       return;
     }
-    final URL jwtClaimOrigin = jwtStatus.clientOrigin();
-    if(isNull(clientOrigin) || isNull(jwtClaimOrigin) || not(Objects.equals(clientOrigin, jwtClaimOrigin))) {
-      log.error("Client Origin mis-match.  incomingOrigin: {}, jwtClaimOrigin: {}.", clientOrigin, jwtClaimOrigin);
+    if(isNull(clientOrigin) || not(Objects.equals(clientOrigin, serverPublicAddress))) {
+      log.error("Client Origin mis-match.  incomingOrigin: {}, serverPublicAdderss: {}.", clientOrigin, serverPublicAddress);
       ctx.clientError(400); // bad request
       return;
     }

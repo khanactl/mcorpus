@@ -14,7 +14,8 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tll.mcorpus.db.routines.JwtIdOk;
+import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
@@ -63,10 +64,10 @@ public class MCorpusUserRepo implements Closeable {
    * @param jwtId the JWT id to check
    * @return fetch result around a Boolean indicating JWT id validity 
    */
-  public FetchResult<Boolean> isJwtIdValid(final UUID jwtId) {
+  public FetchResult<JwtStatus> getJwtStatus(final UUID jwtId) {
     if(jwtId == null) return new FetchResult<>(null, "JWT status check failed: bad input.");
     try {
-      final JwtIdOk backend = new JwtIdOk();
+      final GetJwtStatus backend = new GetJwtStatus();
       backend.setJwtId(jwtId);
       backend.execute(dsl.configuration());
       return new FetchResult<>(backend.getReturnValue(), null);
