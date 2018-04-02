@@ -7,7 +7,7 @@ package com.tll.mcorpus.db.tables;
 import com.tll.mcorpus.db.Indexes;
 import com.tll.mcorpus.db.Keys;
 import com.tll.mcorpus.db.Public;
-import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.tables.records.McuserAuditRecord;
 
@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = 1295094112;
+    private static final long serialVersionUID = -1904394885;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -95,7 +95,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.jwt_id_status</code>.
      */
-    public final TableField<McuserAuditRecord, JwtStatus> JWT_ID_STATUS = createField("jwt_id_status", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), this, "");
+    public final TableField<McuserAuditRecord, JwtIdStatus> JWT_ID_STATUS = createField("jwt_id_status", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), this, "");
 
     /**
      * Create a <code>public.mcuser_audit</code> table reference

@@ -4,6 +4,7 @@
 package com.tll.mcorpus.db;
 
 
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.routines.Armor1;
 import com.tll.mcorpus.db.routines.Armor2;
 import com.tll.mcorpus.db.routines.Crypt;
@@ -18,9 +19,9 @@ import com.tll.mcorpus.db.routines.GenRandomBytes;
 import com.tll.mcorpus.db.routines.GenRandomUuid;
 import com.tll.mcorpus.db.routines.GenSalt1;
 import com.tll.mcorpus.db.routines.GenSalt2;
+import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.Hmac1;
 import com.tll.mcorpus.db.routines.Hmac2;
-import com.tll.mcorpus.db.routines.JwtIdOk;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.MemberLogin;
@@ -546,6 +547,37 @@ public class Routines {
     }
 
     /**
+     * Call <code>public.get_jwt_status</code>
+     */
+    public static JwtStatus getJwtStatus(Configuration configuration, UUID jwtId) {
+        GetJwtStatus f = new GetJwtStatus();
+        f.setJwtId(jwtId);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.get_jwt_status</code> as a field.
+     */
+    public static Field<JwtStatus> getJwtStatus(UUID jwtId) {
+        GetJwtStatus f = new GetJwtStatus();
+        f.setJwtId(jwtId);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.get_jwt_status</code> as a field.
+     */
+    public static Field<JwtStatus> getJwtStatus(Field<UUID> jwtId) {
+        GetJwtStatus f = new GetJwtStatus();
+        f.setJwtId(jwtId);
+
+        return f.asField();
+    }
+
+    /**
      * Call <code>public.hmac</code>
      */
     public static byte[] hmac1(Configuration configuration, String __1, String __2, String __3) {
@@ -615,37 +647,6 @@ public class Routines {
         f.set__1(__1);
         f.set__2(__2);
         f.set__3(__3);
-
-        return f.asField();
-    }
-
-    /**
-     * Call <code>public.jwt_id_ok</code>
-     */
-    public static Boolean jwtIdOk(Configuration configuration, UUID jwtId) {
-        JwtIdOk f = new JwtIdOk();
-        f.setJwtId(jwtId);
-
-        f.execute(configuration);
-        return f.getReturnValue();
-    }
-
-    /**
-     * Get <code>public.jwt_id_ok</code> as a field.
-     */
-    public static Field<Boolean> jwtIdOk(UUID jwtId) {
-        JwtIdOk f = new JwtIdOk();
-        f.setJwtId(jwtId);
-
-        return f.asField();
-    }
-
-    /**
-     * Get <code>public.jwt_id_ok</code> as a field.
-     */
-    public static Field<Boolean> jwtIdOk(Field<UUID> jwtId) {
-        JwtIdOk f = new JwtIdOk();
-        f.setJwtId(jwtId);
 
         return f.asField();
     }

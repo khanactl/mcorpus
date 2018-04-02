@@ -4,7 +4,7 @@
 package com.tll.mcorpus.db.tables.pojos;
 
 
-import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 
 import java.io.Serializable;
@@ -27,7 +27,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit implements Serializable {
 
-    private static final long serialVersionUID = 312234894;
+    private static final long serialVersionUID = -85464092;
 
     private final UUID            uid;
     private final Timestamp       created;
@@ -36,7 +36,7 @@ public class McuserAudit implements Serializable {
     private final String          requestOrigin;
     private final Timestamp       loginExpiration;
     private final UUID            jwtId;
-    private final JwtStatus       jwtIdStatus;
+    private final JwtIdStatus     jwtIdStatus;
 
     public McuserAudit(McuserAudit value) {
         this.uid = value.uid;
@@ -57,7 +57,7 @@ public class McuserAudit implements Serializable {
         String          requestOrigin,
         Timestamp       loginExpiration,
         UUID            jwtId,
-        JwtStatus       jwtIdStatus
+        JwtIdStatus     jwtIdStatus
     ) {
         this.uid = uid;
         this.created = created;
@@ -97,7 +97,7 @@ public class McuserAudit implements Serializable {
         return this.jwtId;
     }
 
-    public JwtStatus getJwtIdStatus() {
+    public JwtIdStatus getJwtIdStatus() {
         return this.jwtIdStatus;
     }
 

@@ -74,11 +74,11 @@ create table mcuser (
 );
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
 
-create type jwt_status as enum (
+create type jwt_id_status as enum (
   'BLACKLISTED',
   'OK'
 );
-comment on type jwt_status is 'The JWT ID status.';
+comment on type jwt_id_status is 'The JWT ID status.';
 
 create type mcuser_audit_type as enum (
   'LOGIN',
@@ -111,34 +111,48 @@ comment on type mcuser_audit is 'Log of when mcusers login/out and access the ap
        by uid (the associated mcuser).
     2) The associated mcuser's status is valid.
 */
-create type jwt_and_mcuser_status as (
-  jwt_id_status jwt_status,
-  mcuser_status mcuser_status
+CREATE TYPE jwt_mcuser_status AS (
+  jwt_id uuid,
+  jwt_id_status jwt_id_status,
+  mcuser_status mcuser_status,
+  admin boolean
 );
-create or replace function jwt_id_ok(jwt_id uuid) returns boolean as $$
-  DECLARE qrec jwt_and_mcuser_status;
+CREATE TYPE jwt_status AS ENUM (
+    'NOT_PRESENT',
+    'BLACKLISTED',
+    'MCUSER_INACTIVE',
+    'VALID',
+    'VALID_ADMIN'
+);
+CREATE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
+    LANGUAGE plpgsql
+    AS $_$
+  DECLARE qrec jwt_mcuser_status;
 BEGIN
-    -- pull the jwt id status and mcuser status
-    select into qrec a.jwt_id_status, m.status 
-    from mcuser_audit a join mcuser m on a.uid = m.uid 
-    where a.type = 'LOGIN' and a.jwt_id = $1;
-    
-    -- verify 
-    IF qrec is null THEN 
-      RAISE NOTICE 'JWT id not found: %', jwt_id;
-      return false;
-    ELSIF qrec.jwt_id_status != 'OK' THEN 
-      RAISE NOTICE 'JWT id bad status: %', jwt_id;
-      return false;
-    ELSIF qrec.mcuser_status != 'ACTIVE' THEN 
-      RAISE NOTICE 'mcuser bad status: jwt_id: %', jwt_id;
-      return false;
-    END IF;
+  -- pull the jwt id status and mcuser status
+  select into qrec a.jwt_id, a.jwt_id_status, m.status, m.admin 
+  from mcuser_audit a join mcuser m on a.uid = m.uid 
+  where a.type = 'LOGIN' and a.jwt_id = $1;
 
-    -- jwt id is good
-    return true;
+  IF qrec is null or qrec.jwt_id is null THEN 
+    -- the input jwt id was not found
+    RAISE NOTICE 'JWT id not found: %', jwt_id;
+    return 'NOT_PRESENT'::jwt_status;
+  ELSEIF qrec.jwt_id_status = 'BLACKLISTED'::jwt_id_status THEN
+    -- jwt id is marked as blacklisted
+    return 'BLACKLISTED'::jwt_status;
+  ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
+    -- mcuser is bad or inactive
+    return 'MCUSER_INACTIVE'::jwt_status;
+  ELSEIF qrec.admin = true THEN
+    -- jwt id is valid with admin priviliges
+    return 'VALID_ADMIN'::jwt_status;
+  ELSE
+    -- jwt id is valid with NON-admin priviliges
+    return 'VALID'::jwt_status;
+  END IF;
 END 
-$$ LANGUAGE plpgsql;
+$_$;
 
 /*
 pass_hash()
@@ -170,18 +184,11 @@ a LOGIN-type mcuser_audit record is created.
   -OR-
   NULL when login fails.
 */
-CREATE OR REPLACE FUNCTION mcuser_login(
-  mcuser_username         text, 
-  mcuser_password         text, 
-  in_request_timestamp    timestamp,
-  in_request_origin       text,
-  in_login_expiration     timestamp,
-  in_jwt_id               uuid
-)
-RETURNS mcuser as $$
+CREATE FUNCTION public.mcuser_login(mcuser_username text, mcuser_password text, in_request_timestamp timestamp without time zone, in_request_origin text, in_login_expiration timestamp without time zone, in_jwt_id uuid) RETURNS public.mcuser
+    LANGUAGE plpgsql
+    AS $_$
   DECLARE passed BOOLEAN;
   DECLARE row_mcuser mcuser%ROWTYPE;
-  DECLARE jwtStatus jwt_status;
   BEGIN
     passed = false;
     SELECT (pswd = crypt(mcuser_password, pswd)) INTO passed
@@ -231,7 +238,7 @@ RETURNS mcuser as $$
     RAISE NOTICE 'mcuser login failed';
     RETURN null;
   END
-$$ LANGUAGE plpgsql;
+$_$;
 
 /**
  * mcuser_logout
@@ -240,28 +247,26 @@ $$ LANGUAGE plpgsql;
  * 
  * An mcuser_audit record is created of LOGOUT type.
  */
-CREATE OR REPLACE FUNCTION mcuser_logout(
-  mcuser_uid          uuid,
-  jwt_id              uuid, 
-  request_timestamp   timestamp, 
-  request_origin      text
-)
-RETURNS BOOLEAN as $$
+CREATE FUNCTION mcuser_logout(mcuser_uid uuid, jwt_id uuid, request_timestamp timestamp without time zone, request_origin text) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $_$
   BEGIN
     -- logout is predicated on finding a single mcuser_audit record with the 
     -- given mcuserId *and* jwtId.
-    IF EXISTS(SELECT uid FROM mcuser WHERE uid = $1 and jwt_id = $2) THEN
+    IF EXISTS(SELECT uid FROM mcuser_audit m WHERE m.uid = $1 and m.jwt_id = $2 and m.type = 'LOGIN') THEN
       INSERT INTO mcuser_audit (
         uid, 
         type, 
         jwt_id,
+        jwt_id_status,
         request_timestamp, 
         request_origin
       )
       VALUES (
         $1, 
-        'LOGOUT', 
+        'LOGOUT'::mcuser_audit_type, 
         $2,
+        'BLACKLISTED'::jwt_id_status,
         $3, 
         $4
       );
@@ -273,7 +278,7 @@ RETURNS BOOLEAN as $$
       return false;
     END IF;
   END
-$$ LANGUAGE plpgsql;
+$_$;
 
 -- ***************
 -- *** mcorpus ***
@@ -403,14 +408,9 @@ with the given username and pswd.
   -OR-
   NULL when member login fails for any reason.
 */
-CREATE OR REPLACE FUNCTION member_login(
-  member_username        text, 
-  member_password        text, 
-  in_request_timestamp   timestamp, 
-  in_request_origin      text
-)
-RETURNS mref as 
-$func$
+CREATE FUNCTION public.member_login(member_username text, member_password text, in_request_timestamp timestamp without time zone, in_request_origin text) RETURNS public.mref
+    LANGUAGE plpgsql
+    AS $_$
   DECLARE passed BOOLEAN;
   DECLARE rec_mref mref;
   BEGIN
@@ -453,7 +453,7 @@ $func$
     RAISE NOTICE 'member login failed';
     RETURN null;
   END
-$func$ LANGUAGE plpgsql;
+$_$;
 
 /**
  * member_logout
@@ -462,12 +462,9 @@ $func$ LANGUAGE plpgsql;
  * 
  * A member_audit record is created of LOGOUT type.
  */
-CREATE OR REPLACE FUNCTION member_logout(
-  mid                    uuid, 
-  in_request_timestamp   timestamp, 
-  in_request_origin      text
-)
-RETURNS void as $$
+CREATE FUNCTION public.member_logout(mid uuid, in_request_timestamp timestamp without time zone, in_request_origin text) RETURNS void
+    LANGUAGE plpgsql
+    AS $_$
   DECLARE member_exists BOOLEAN;
   BEGIN
     member_exists = false;
@@ -491,8 +488,7 @@ RETURNS void as $$
       RAISE NOTICE 'member logout failed';
     END IF;
   END
-$$ LANGUAGE plpgsql;
-
+$_$;
 
 -- ******************************
 -- *** member address related ***
