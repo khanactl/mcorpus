@@ -217,7 +217,7 @@ public class RequestUtil {
   private static RequestSnapshot takeRequestSnapshot(final Request req) {
     return new RequestSnapshot(
         req.getTimestamp(),
-        req.getRemoteAddress().toString(),
+        req.getRemoteAddress().getHost(),
         req.getHeaders().get("Host"),
         req.getHeaders().get("Origin"),
         req.getHeaders().get("Referer"),

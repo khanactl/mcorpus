@@ -328,9 +328,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(members, null);
     }
     catch(DataAccessException dae) {
+      log.error(dae.getMessage());
       emsg = dae.getMessage();
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred fetching members.";
     }
     // error

@@ -15,7 +15,7 @@ public class OrderBy {
       for(final Entry<String, Object> entry : map.entrySet()) {
         String key = entry.getKey();
         switch(key) {
-          case "token":
+          case "value":
             ob.token = (String) entry.getValue();
             break;
           case "direction":
