@@ -19,10 +19,9 @@ import ratpack.handling.Handler;
  * <p>
  * Verifies an incoming request by verifying the following:
  * <ul>
- * <li>A valid JWT cookie is present.
- * <li>The incoming request client origin matches that held in the signed JWT
- * {@link JWT#JWT_CLIENT_ORIGIN_KEY} claim.
- * <li>The incoming request's rst http header value matches the rst cookie
+ * <li>The incoming request client origin matches the server configured public
+ * address.
+ * <li>The incoming request's rst http header value matches the rst cookie.
  * value.
  * </ul>
  * <p>

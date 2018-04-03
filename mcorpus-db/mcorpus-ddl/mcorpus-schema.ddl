@@ -203,6 +203,7 @@ CREATE FUNCTION public.mcuser_login(mcuser_username text, mcuser_password text, 
         uid, 
         created, 
         modified, 
+        status,
         name, 
         email, 
         username, 
@@ -219,7 +220,8 @@ CREATE FUNCTION public.mcuser_login(mcuser_username text, mcuser_password text, 
         request_timestamp, 
         request_origin,
         login_expiration,
-        jwt_id
+        jwt_id,
+        jwt_id_status
       )
       VALUES (
         row_mcuser.uid, 
@@ -227,7 +229,8 @@ CREATE FUNCTION public.mcuser_login(mcuser_username text, mcuser_password text, 
         in_request_timestamp, 
         in_request_origin,
         in_login_expiration,
-        in_jwt_id
+        in_jwt_id,
+        'OK'::jwt_id_status
       );
       -- return the user id and admin flag of the matched username
       RAISE NOTICE 'mcuser % logged in', row_mcuser.uid;
@@ -247,7 +250,12 @@ $_$;
  * 
  * An mcuser_audit record is created of LOGOUT type.
  */
-CREATE FUNCTION mcuser_logout(mcuser_uid uuid, jwt_id uuid, request_timestamp timestamp without time zone, request_origin text) RETURNS boolean
+CREATE FUNCTION mcuser_logout(
+  mcuser_uid uuid, 
+  jwt_id uuid, 
+  request_timestamp timestamp without time zone, 
+  request_origin text
+) RETURNS boolean
     LANGUAGE plpgsql
     AS $_$
   BEGIN
