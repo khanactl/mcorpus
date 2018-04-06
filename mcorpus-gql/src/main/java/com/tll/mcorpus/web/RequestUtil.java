@@ -1,13 +1,11 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.mcorpus.Util.glog;
 import static com.tll.mcorpus.Util.isNull;
 import static com.tll.mcorpus.web.WebSessionManager.webSessionDuration;
 import static com.tll.mcorpus.web.WebSessionManager.wsi;
 
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.web.WebSessionManager.WebSession;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
@@ -24,8 +22,6 @@ import ratpack.registry.NotInRegistryException;
  * @author jkirton
  */
 public class RequestUtil {
-  
-  private static final Logger log = LoggerFactory.getLogger(RequestUtil.class);
   
   /**
    * Get the configured server domain name (aka public address) underwhich the
@@ -57,7 +53,7 @@ public class RequestUtil {
     catch(NotInRegistryException e) {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
-      log.debug("Request snapshot taken and cached in request.");
+      glog().debug("Request snapshot taken and cached in request.");
       return rs;
     }
   }
@@ -78,7 +74,7 @@ public class RequestUtil {
       return ctx.getRequest().get(WebSession.class);
     } 
     catch (NotInRegistryException e) {
-      log.debug("No web session found. Creating one..");
+      glog().debug("No web session found. Creating one..");
       final UUID sid;
       final RequestSnapshot requestSnapshot = getOrCreateRequestSnapshot(ctx);
       if (requestSnapshot.hasSidCookie()) {
@@ -86,7 +82,7 @@ public class RequestUtil {
         try {
           sid = UUID.fromString(requestSnapshot.getSidCookie());
         } catch (Exception ex) {
-          log.error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
+          glog().error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
           throw new Exception("Invalid session cookie.");
         }
       } 
@@ -97,7 +93,7 @@ public class RequestUtil {
 
       final WebSession webSession = WebSessionManager.getSession(sid, nsid -> {
         final WebSession ws = new WebSession(nsid, requestSnapshot);
-        log.info("Web session created: {}", ws);
+        glog().info("Web session created: {}", ws);
         return ws;
       });
 
@@ -130,7 +126,7 @@ public class RequestUtil {
         try {
           webSession = WebSessionManager.getSession(UUID.fromString(requestSnapshot.getSidCookie()));
         } catch (Exception ex) {
-          log.error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
+          glog().error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
           status = WebSessionStatus.BAD_SESSION_ID;
         }
       }
@@ -145,7 +141,7 @@ public class RequestUtil {
     // cache web session status in the current request instance for downstream handlers
     final WebSessionInstance wsi = wsi(status, webSession);
     ctx.getRequest().add(wsi);
-    log.info("Web session status '{}' cached in request.", status);
+    glog().info("Web session status '{}' cached in request.", status);
     return wsi;
   }
   

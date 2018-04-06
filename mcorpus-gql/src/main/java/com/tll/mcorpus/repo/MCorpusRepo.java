@@ -59,7 +59,7 @@ import com.tll.mcorpus.repo.model.MemberRef;
  * @author jpk
  */
 public class MCorpusRepo implements Closeable {
-  protected static final Logger log = LoggerFactory.getLogger("MCorpusRepo");
+  protected final Logger log = LoggerFactory.getLogger("MCorpusRepo");
 
   protected final DSLContext dsl;
 

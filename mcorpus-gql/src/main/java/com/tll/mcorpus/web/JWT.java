@@ -3,12 +3,14 @@ package com.tll.mcorpus.web;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +28,9 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
-
-import ratpack.exec.Promise;
+import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.mcorpus.repo.model.FetchResult;
 
 /**
  * JWT (Json Web Token) business rules and public methods for supporting them in
@@ -45,16 +47,14 @@ import ratpack.exec.Promise;
  */
 public class JWT {
   
-  private static final Logger log = LoggerFactory.getLogger(JWT.class);
-  
   /**
    * The supported states for an mcorpus JWT.
    */
   public static enum JWTStatus {
     /**
-     * No JWT present. 
+     * No JWT present in the received request. 
      */
-    NOT_PRESENT,
+    NOT_PRESENT_IN_REQUEST,
     /**
      * JWT is present but is not parseable.
      */
@@ -64,15 +64,35 @@ public class JWT {
      */
     BAD_SIGNATURE,
     /**
-     * One or more embedded JWT claims are wrong or incorrect.
+     * The JWT claims are not parseable.
      */
     BAD_CLAIMS,
+    /**
+     * The JWT issuer claim is bad.
+     */
+    BAD_ISSUER,
+    /**
+     * The JWT audience claim is bad.
+     */
+    BAD_AUDIENCE,
+    /**
+     * The JWT subject claim is bad.
+     */
+    BAD_SUBJECT,
+    /**
+     * The JWT ID claim is bad.
+     */
+    BAD_JWTID,
+    /**
+     * The JWT ID was not found in the backend database.
+     */
+    NOT_PRESENT_BACKEND,
     /**
      * JWT has valid signature but has expired.
      */
     EXPIRED,
     /**
-     * Either the jwt id or mcuser id are logically blocked.
+     * Either the jwt id or mcuser id are logically blocked by way of backend check.
      */
     BLOCKED,
     /**
@@ -87,7 +107,7 @@ public class JWT {
     /**
      * @return true of a JWT is present in the incoming (target) request.
      */
-    public boolean isPresent() { return this != NOT_PRESENT; }
+    public boolean isPresent() { return this != NOT_PRESENT_IN_REQUEST; }
     
     /**
      * @return true if the JWT is valid (non-expired and deemed legit).
@@ -174,6 +194,38 @@ public class JWT {
 
   } // JWTStatusInstance class
 
+  /**
+   * @return Cryptographically strong random 32-byte (256 bits) array to serve as
+   *         a JWT salt (shared secret).
+   */
+  public static byte[] generateJwtSharedSecret() {
+    final SecureRandom random = new SecureRandom();
+    final byte[] sharedSecret = new byte[32]; // i.e. 256 bits
+    random.nextBytes(sharedSecret);
+    return sharedSecret;
+  }
+
+  /**
+   * Generate a hex-wise string from an arbitrary byte array.
+   * 
+   * @param bytes the bytes array
+   * @return newly created string that represents the given byte array as a
+   *         hex-based string
+   */
+  public static String serialize(final byte[] bytes) {
+    return DatatypeConverter.printHexBinary(bytes);
+  }
+  
+  /**
+   * De-serialize a random hex-based string.
+   * 
+   * @param hexToken
+   * @return the de-serialized hex token as a byte array
+   */
+  public static byte[] deserialize(final String hexToken) {
+    return DatatypeConverter.parseHexBinary(hexToken);
+  }
+  
   private static JWTStatusInstance jsi(JWTStatus status) { 
     return new JWTStatusInstance(status, null, null, null, null, false); 
   }
@@ -182,9 +234,11 @@ public class JWT {
     return new JWTStatusInstance(status, mcuserId, jwtId, issued, expires, admin); 
   }
   
+  private final Logger log = LoggerFactory.getLogger(JWT.class);
+  
   private final long jwtCookieTtlInMillis; 
   private final long jwtCookieTtlInSeconds;
-  private final MCorpusUserRepoAsync mcuserRepo;
+  private final MCorpusUserRepo mcuserRepo;
   private final SecretKey secretKey;
 
   /**
@@ -197,12 +251,13 @@ public class JWT {
    * @param mcuserRepo
    *          the mcorpus mcuser repo needed for backend JWT verification
    */
-  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, MCorpusUserRepoAsync mcuserRepo) {
+  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, MCorpusUserRepo mcuserRepo) {
     super();
     this.jwtCookieTtlInMillis = jwtCookieTtlInMillis;
     this.jwtCookieTtlInSeconds = Math.floorDiv(jwtCookieTtlInMillis, 1000);
     this.mcuserRepo = mcuserRepo;
     this.secretKey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
+    log.info("JWT configured.  JWT cookie time-to-live: {} seconds.", jwtCookieTtlInSeconds);
   }
 
   /**
@@ -225,7 +280,7 @@ public class JWT {
    * @param issuer the ascribed JWT issuer claim value which is expected to match
    *          <em>this server's public address</em>.
    * @param audience the ascribed JWT audience claim value which is expected to
-   *          match incoming client request's remote address host address (the
+   *          match incoming client request's remote host address (the
    *          client's IP).
    * @return newly created, never null JWT as a string.
    * @throws Exception upon any error while generating the JWT
@@ -252,7 +307,7 @@ public class JWT {
       signedJWT.sign(new MACSigner(secretKey.getEncoded()));
       // encrypt
       JWEObject jweObject = new JWEObject(
-          new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128CBC_HS256)
+          new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A256GCM)
               .contentType("JWT") // required to signal nested JWT
               .build(),
           new Payload(signedJWT));
@@ -264,12 +319,10 @@ public class JWT {
   }
   
   /**
-   * Get a promise for the mcorpus JWT status of given request snapshot.
+   * Get the JWT status for the given received server request snapshot.
    * <p>
-   * <b>IMPT</b>: We return a promise for the JWT status since a call to the
-   * backend is required to check its held jwtid claim as well as the associated
-   * mcuser's status and we honor processing this task off of the main compute
-   * thread.
+   * <b>IMPT</b>: This method issues a call to the backend system (db) to verify
+   * the JWT subject (the mcuser id) status and the JWTID status.
    * <p>
    * NOTE: a backend call to the db happens AFTER these checks:
    * <ul>
@@ -277,27 +330,27 @@ public class JWT {
    * <li>the JWT signature is verified
    * <li>the JWT ISSUER and AUDIENCE claims are verified
    * <li>the JWT has not expired
-   * <li>the JWT client origin claim matches the current request client origin
    * </ul>
    * 
-   * @param serverPublicAddress this server's public address which is used to verify the issuer claim
-   * @param rs
-   *          the request snapshot for which to extract and verify a possibly held
-   *          JWT
+   * @param serverPublicAddress this server's public address which is used to
+   *          verify the issuer claim
+   * @param rs the request snapshot for which to extract and verify a possibly
+   *          held JWT
    * @return Never null promise for a never-null {@link JWTStatusInstance}.
    */
-  public Promise<JWTStatusInstance> jwtRequestStatus(final String serverPublicAddress, final RequestSnapshot rs) {
+  public JWTStatusInstance jwtRequestStatus(final String serverPublicAddress, final RequestSnapshot rs) {
     // present?
     if(rs == null || rs.getJwtCookie() == null) 
-      return Promise.value(jsi(JWTStatus.NOT_PRESENT));
+      return jsi(JWTStatus.NOT_PRESENT_IN_REQUEST);
     
     // decrypt JWT
     final JWEObject jweObject;
     try {
       jweObject = JWEObject.parse(rs.getJwtCookie());
       jweObject.decrypt(new DirectDecrypter(secretKey.getEncoded()));
-    } catch (Exception e1) {
-      return Promise.value(jsi(JWTStatus.BAD_TOKEN));
+    } catch (Exception e) {
+      log.error("JWT decrypt error: {}", e.getMessage());
+      return jsi(JWTStatus.BAD_TOKEN);
     }
     
     // parse to object
@@ -306,7 +359,8 @@ public class JWT {
       sjwt = jweObject.getPayload().toSignedJWT();
       if(sjwt == null) throw new Exception();
     } catch (Exception e) {
-      return Promise.value(jsi(JWTStatus.BAD_TOKEN));
+      log.error("JWT un-signing error: {}", e.getMessage());
+      return jsi(JWTStatus.BAD_TOKEN);
     }
     
     // verify signature
@@ -314,7 +368,8 @@ public class JWT {
       if(not(sjwt.verify(new MACVerifier(secretKey.getEncoded())))) 
         throw new Exception();
     } catch (Exception e) {
-      return Promise.value(jsi(JWTStatus.BAD_SIGNATURE));
+      log.error("JWT verify signature error: {}", e.getMessage());
+      return jsi(JWTStatus.BAD_SIGNATURE);
     }
     
     // verify claims
@@ -323,73 +378,79 @@ public class JWT {
       claims = sjwt.getJWTClaimsSet();
     }
     catch (Exception e) {
-      log.error("Error parsing JWT claims: {}", e.getMessage());
-      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+      log.error("JWT bad claims: {}", e.getMessage());
+      return jsi(JWTStatus.BAD_CLAIMS);
     }
     
     final Date issued = claims.getIssueTime();
     final Date expires = claims.getExpirationTime();
-    // expired? (check for exp. time in the past)
-    if(new Date().after(expires)) {
-      return Promise.value(jsi(JWTStatus.EXPIRED, null, null, issued, expires, false));
-    }
-    
     final String issuer = claims.getIssuer();
     final String audience = claims.getAudience().isEmpty() ? "" : claims.getAudience().get(0);
     
     // verify issuer (this server's public host name)
     if(isNullOrEmpty(issuer) || not(issuer.equals(serverPublicAddress))) {
-      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+      log.error("JWT bad issuer: {}", issuer);
+      return jsi(JWTStatus.BAD_ISSUER);
     }
     
     // verify audience (client IP address)
     if(isNullOrEmpty(audience) || not(audience.equals(rs.getRemoteAddressHost()))) {
-      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+      log.error("JWT bad audience: {}", audience);
+      return jsi(JWTStatus.BAD_AUDIENCE);
     }
     
-    // JWT claims:
-    // - mcuserId     (subject)
-    // - jwtId        (JWTID)
+    // JWT subject (mcuser id)
     final UUID mcuserId;
     try {
       mcuserId = UUID.fromString(claims.getSubject());
     }
     catch(Exception e) {
-      log.error("Error parsing subject (mcuserId) JWT claim.");
-      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+      log.error("JWT bad subject (mcuserId): {}", claims.getSubject());
+      return jsi(JWTStatus.BAD_SUBJECT);
     }
+    
+    // JWT ID
     final UUID jwtId;
     try {
       jwtId = UUID.fromString(claims.getJWTID());
     }
     catch(Exception e) {
-      log.error("Error parsing JWT ID claim.");
-      return Promise.value(jsi(JWTStatus.BAD_CLAIMS));
+      log.error("JWT bad JWTID: {}", claims.getJWTID());
+      return jsi(JWTStatus.BAD_JWTID);
+    }
+    
+    // expired? (check for exp. time in the past)
+    if(new Date().after(expires)) {
+      log.info("JWT expired for JWT ID: {}", jwtId);
+      return jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, false);
     }
     
     // Backend verification:
     // 1) the jwt id is *known* and *not blacklisted*
     // 2) the associated mcuser has a valid status
-    return mcuserRepo
-            .getJwtStatusAsync(jwtId)
-            .map(fr -> {
-              if(fr == null || not(fr.isSuccess())) {
-                return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, false);
-              }
-              switch(fr.get()) {
-              default:
-              case NOT_PRESENT:
-              case BLACKLISTED:
-              case MCUSER_INACTIVE:
-                // logically blocked
-                return jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, false);
-              case VALID:
-                // valid non-admin privs (standard mcuser)
-                return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, false);
-              case VALID_ADMIN:
-                // valid with admin privs
-                return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, true);
-              }
-            });
+    
+    final FetchResult<JwtStatus> fr = mcuserRepo.getJwtStatus(jwtId);
+    if(fr == null || not(fr.isSuccess())) {
+      log.error("JWT (jwtId: {}) fetch backend status error: {}", jwtId.toString(), fr.getErrorMsg());
+      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, false);
+    }
+    switch(fr.get()) {
+    default:
+    case NOT_PRESENT:
+      // jwt id not found in db - treat as blocked then
+      log.warn("JWT not present on backend.  jwtId: {}", jwtId.toString());
+      return jsi(JWTStatus.NOT_PRESENT_BACKEND, mcuserId, jwtId, issued, expires, false);
+    case BLACKLISTED:
+    case MCUSER_INACTIVE:
+      // logically blocked
+      log.warn("JWT logically blocked.  jwtId: {}", jwtId.toString());
+      return jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, false);
+    case VALID:
+      // valid non-admin privs (standard mcuser)
+      return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, false);
+    case VALID_ADMIN:
+      // valid with admin privs
+      return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, true);
+    }
   }
 }

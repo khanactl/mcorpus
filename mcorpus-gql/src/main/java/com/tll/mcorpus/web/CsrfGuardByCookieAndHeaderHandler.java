@@ -15,15 +15,14 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Anti-CSRF statelessly. Requires no server-side web sessions.
+ * Anti-CSRF statelessly by comparing http the header rst (request sync token)
+ * value to rst cookie value contained in the received request..
  * <p>
- * Verifies an incoming request by verifying the following:
- * <ul>
- * <li>The incoming request client origin matches the server configured public
- * address.
- * <li>The incoming request's rst http header value matches the rst cookie.
- * value.
- * </ul>
+ * Note: No http header Origin / Referer header checking is performed as this
+ * proves problematic with an xhr server api as incoming requests will actually
+ * be directly from client (application instance) origin. <br>
+ * Instead, we bind clients by their remote address (no port) and this is
+ * checked by way of JWT handling.
  * <p>
  * This is a variant on the double submit cookie method to thwart CSRF attacks.
  * 
@@ -31,27 +30,11 @@ import ratpack.handling.Handler;
  */
 public class CsrfGuardByCookieAndHeaderHandler implements Handler {
   
-  private static final Logger log = LoggerFactory.getLogger(CsrfGuardByCookieAndHeaderHandler.class);
+  private final Logger log = LoggerFactory.getLogger(CsrfGuardByCookieAndHeaderHandler.class);
 
   @Override
   public void handle(Context ctx) throws Exception {
     final RequestSnapshot requestSnapshot = getOrCreateRequestSnapshot(ctx);
-    
-    // verify client Origin matches the server configured public address
-    final String serverPublicAddress = ctx.getServerConfig().getPublicAddress().toString();
-    final String clientOrigin;
-    try {
-      clientOrigin = requestSnapshot.getClientOrigin().toString();
-    } catch(Exception e) {
-      log.error("Bad client Origin.");
-      ctx.clientError(400); // bad request
-      return;
-    }
-    if(isNull(clientOrigin) || not(Objects.equals(clientOrigin, serverPublicAddress))) {
-      log.error("Client Origin mis-match.  incomingOrigin: {}, serverPublicAdderss: {}.", clientOrigin, serverPublicAddress);
-      ctx.clientError(400); // bad request
-      return;
-    }
     
     final UUID cookieRst;
     final UUID headerRst;
@@ -82,7 +65,7 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
     }
     // rst now verified
     
-    log.info("Client Origin ({}) and provided rst ({}) verified.", clientOrigin, headerRst);
+    log.info("Received rst ({}) verified.", headerRst);
     
     // reset the current rst and provide the new rst in the response
     final String nextRst = UUID.randomUUID().toString();

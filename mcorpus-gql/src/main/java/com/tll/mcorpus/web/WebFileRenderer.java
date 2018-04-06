@@ -7,7 +7,6 @@ import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,7 +37,8 @@ public class WebFileRenderer implements Renderable {
   static {
     try {
       rootWebDir = Thread.currentThread().getContextClassLoader().getResource("templates").toURI().toString();
-    } catch (URISyntaxException e) {
+      if(rootWebDir == null) throw new Exception();
+    } catch (Exception e) {
       throw new Error(e);
     }
   }

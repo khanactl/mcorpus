@@ -1,11 +1,10 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.mcorpus.Util.glog;
+
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -19,8 +18,6 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public final class WebSessionManager {
-  
-  private static final Logger log = LoggerFactory.getLogger(WebSessionManager.class);
   
   /**
    *  The amount of time a newly created web session lasts by design.
@@ -133,7 +130,7 @@ public final class WebSessionManager {
     public synchronized UUID resetRst() {
       final UUID rand = UUID.randomUUID();
       this.rst = new UUID(rand.getMostSignificantBits(), rand.getLeastSignificantBits());
-      log.debug("rst reset to: {}", rand.toString());
+      glog().debug("rst reset to: {}", rand.toString());
       return rand;
     }
     
@@ -158,7 +155,7 @@ public final class WebSessionManager {
       .expireAfterWrite(webSessionDuration)
       // TODO add listener when sessions expire for logging
       .build();
-    log.info("Web session manager created (Max. size: {}, Session duration: {}).", maxSize, webSessionDuration.toString());
+    glog().info("Web session manager created (Max. size: {}, Session duration: {}).", maxSize, webSessionDuration.toString());
   }
   
   /**

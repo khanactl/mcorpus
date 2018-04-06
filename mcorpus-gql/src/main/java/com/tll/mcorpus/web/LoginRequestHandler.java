@@ -40,7 +40,7 @@ import ratpack.handling.Handler;
  */
 public class LoginRequestHandler implements Handler {
   
-  private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
+  private final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
   
   private static void rerenderLoginPage(final Context ctx, final String nextRst, final String errorMsg) {
     // re-display login page with error message
@@ -123,7 +123,8 @@ public class LoginRequestHandler implements Handler {
       jwtCookieRef.setPath("/");
       log.info("JWT mcorpus cookie generated: {}", jwtCookieRef.toString());
 
-      log.info("Mcuser '{}' logged in and JWT generated.", mcuser.getUid());
+      log.info("Mcuser '{}' logged in.  JWT issued from server (issuer): '{}' to client (audience): '{}'.", 
+          mcuser.getUid(), issuer, audience);
       
       // finally, redirect to the home page
       ctx.redirect(301, "index");

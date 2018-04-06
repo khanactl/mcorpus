@@ -50,14 +50,14 @@ import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
-import com.tll.mcorpus.web.RequestSnapshot;
 
 public class TestUtil {
   
-  public static final UUID testMcuserUid = UUID.fromString("d712f2d3-5494-472d-bdcc-4a1722a8c818");
-
-  
   private static final Logger log = LoggerFactory.getLogger("TestUtil");
+
+  public static final UUID testMcuserUid = UUID.fromString("d712f2d3-5494-472d-bdcc-4a1722a8c818");
+  
+  public static final String serverPublicAddress = "https://mcorpus.d2d:5150";
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -257,24 +257,6 @@ public class TestUtil {
     Map<String, Object> maddressMap = new HashMap<>();
     addMaddressTableProperties(maddressMap, mid, addressname);
     return maddressMap;
-  }
-  
-  /**
-   * @return newly created {@link RequestSnapshot} for testing purposes.
-   */
-  public static RequestSnapshot rsnap() {
-    return new RequestSnapshot(
-        Instant.now(),
-        "127.0.0.1:5150",
-        "localhost",
-        "Origin",
-        "Referer",
-        "Forwarded",
-        "jwt",
-        "sid",
-        "rst",
-        "rsth"
-    );
   }
   
   /**

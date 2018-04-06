@@ -26,7 +26,7 @@ import ratpack.handling.Handler;
  */
 public class LogoutRequestHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(LogoutRequestHandler.class);
+  private final Logger log = LoggerFactory.getLogger(LogoutRequestHandler.class);
 
   @Override
   public void handle(Context ctx) throws Exception {

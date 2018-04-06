@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
+import ratpack.exec.Blocking;
 import ratpack.exec.Promise;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -26,12 +27,15 @@ import ratpack.handling.Handler;
  */
 public class JWTStatusHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(JWTStatusHandler.class);
+  private final Logger log = LoggerFactory.getLogger(JWTStatusHandler.class);
   
   @Override
   public void handle(Context ctx) throws Exception {
     final String serverPublicAddress = ctx.getServerConfig().getPublicAddress().toString();
-    ctx.get(JWT.class).jwtRequestStatus(serverPublicAddress, getOrCreateRequestSnapshot(ctx)).then(jwtStatus -> {
+    final RequestSnapshot rsnap = getOrCreateRequestSnapshot(ctx);
+    Blocking.get(() -> { 
+      return ctx.get(JWT.class).jwtRequestStatus(serverPublicAddress, rsnap); 
+    }).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);
       log.info("JWT status cached in incoming request: {}", jwtStatus);
       ctx.next();

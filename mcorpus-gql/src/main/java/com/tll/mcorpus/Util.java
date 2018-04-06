@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * General 'project-level' utility methods.
  *
@@ -14,6 +17,19 @@ import java.util.UUID;
  */
 public class Util {
 
+  /**
+   * The app-wide global logger.
+   * <p>
+   * Use this sole static logger to issue application level logging
+   * when logging at class/global level (i.e. inside static methods).
+   */
+  private static final Logger appLog = LoggerFactory.getLogger("mcorpus-gql-server");
+  
+  /**
+   * @return the global app logger.
+   */
+  public static Logger glog() { return appLog; }
+  
   /**
    * Is the given object ref null?
    *

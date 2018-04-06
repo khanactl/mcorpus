@@ -1,22 +1,20 @@
 package com.tll.mcorpus;
 
+import static com.tll.mcorpus.Util.glog;
 import static ratpack.handling.Handlers.redirect;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.gql.MCorpusGraphQLModule;
 import com.tll.mcorpus.repo.MCorpusRepoModule;
 import com.tll.mcorpus.web.CsrfGuardByCookieAndHeaderHandler;
+import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler;
 import com.tll.mcorpus.web.GraphQLHandler;
 import com.tll.mcorpus.web.GraphQLIndexHandler;
 import com.tll.mcorpus.web.JWTRequireValidHandler;
 import com.tll.mcorpus.web.JWTStatusHandler;
+import com.tll.mcorpus.web.LoginPageRequestHandler;
 import com.tll.mcorpus.web.LoginRequestHandler;
 import com.tll.mcorpus.web.LogoutRequestHandler;
 import com.tll.mcorpus.web.MCorpusWebModule;
-import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler;
-import com.tll.mcorpus.web.LoginPageRequestHandler;
 import com.tll.mcorpus.web.WebSessionVerifyHandler;
 
 import io.netty.handler.ssl.SslContextBuilder;
@@ -32,8 +30,6 @@ import ratpack.server.RatpackServer;
  * @author jkirton
  */
 public class Main {
-
-  private static final Logger log = LoggerFactory.getLogger(Main.class);
 
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
@@ -109,7 +105,7 @@ public class Main {
 
        // mcorpus graphql api landing page
        .get("index", ctx -> {
-         log.debug("mcorpus index.");
+         glog().debug("mcorpus index.");
          ctx.render(ctx.file("templates/index.html"));
        })
 

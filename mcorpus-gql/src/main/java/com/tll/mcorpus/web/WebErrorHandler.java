@@ -15,7 +15,7 @@ import ratpack.handling.Context;
  */
 public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(WebErrorHandler.class);
+  private final Logger log = LoggerFactory.getLogger(WebErrorHandler.class);
   
   /**
    * The client error handler.

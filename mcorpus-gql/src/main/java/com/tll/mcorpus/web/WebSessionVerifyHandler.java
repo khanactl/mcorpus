@@ -26,7 +26,7 @@ import ratpack.handling.Handler;
  */
 public class WebSessionVerifyHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(WebSessionVerifyHandler.class);
+  private final Logger log = LoggerFactory.getLogger(WebSessionVerifyHandler.class);
   
   @Override
   public void handle(Context ctx) throws Exception {

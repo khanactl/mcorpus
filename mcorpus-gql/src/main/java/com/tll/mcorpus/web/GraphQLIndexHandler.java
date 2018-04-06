@@ -24,7 +24,7 @@ import ratpack.handling.Handler;
  */
 public class GraphQLIndexHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(GraphQLIndexHandler.class);
+  private final Logger log = LoggerFactory.getLogger(GraphQLIndexHandler.class);
  
   @Override
   public void handle(Context ctx) throws Exception {

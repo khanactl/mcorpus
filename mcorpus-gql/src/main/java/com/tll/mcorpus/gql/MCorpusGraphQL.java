@@ -48,7 +48,7 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 
 public class MCorpusGraphQL {
 
-  private static final Logger log = LoggerFactory.getLogger(MCorpusGraphQL.class);
+  private final Logger log = LoggerFactory.getLogger(MCorpusGraphQL.class);
 
   private final String graphqlSchemaFilename;
 

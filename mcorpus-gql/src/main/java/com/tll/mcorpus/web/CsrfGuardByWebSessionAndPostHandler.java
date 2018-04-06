@@ -38,7 +38,7 @@ import ratpack.handling.Handler;
  */
 public class CsrfGuardByWebSessionAndPostHandler implements Handler {
   
-  private static final Logger log = LoggerFactory.getLogger(CsrfGuardByWebSessionAndPostHandler.class);
+  private final Logger log = LoggerFactory.getLogger(CsrfGuardByWebSessionAndPostHandler.class);
   
   /**
    * Strongly type the 'next rst' to add to the request for use by downstream
@@ -57,10 +57,6 @@ public class CsrfGuardByWebSessionAndPostHandler implements Handler {
   public void handle(Context ctx) throws Exception {
     ctx.parse(Form.class).then(formData -> {
       
-      // get the already resolved web session instance 
-      // which is expected to be present by way of upstream handlers
-      final WebSession webSession = ctx.getRequest().get(WebSessionInstance.class).getWebSession();
-      
       // rst verify
       final String formRstString = clean(formData.get("rst"));
       if(formRstString.isEmpty()) {
@@ -68,6 +64,10 @@ public class CsrfGuardByWebSessionAndPostHandler implements Handler {
         ctx.clientError(205); // 205 - Reset Content
         return;
       }
+      
+      // get the already resolved web session instance 
+      // which is expected to be present by way of upstream handlers
+      final WebSession webSession = ctx.getRequest().get(WebSessionInstance.class).getWebSession();
       
       try {
         final UUID formRst = UUID.fromString(formRstString);

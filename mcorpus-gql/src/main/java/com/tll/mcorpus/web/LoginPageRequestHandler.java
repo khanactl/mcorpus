@@ -36,7 +36,7 @@ import ratpack.handling.Handler;
  */
 public class LoginPageRequestHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(LoginPageRequestHandler.class);
+  private final Logger log = LoggerFactory.getLogger(LoginPageRequestHandler.class);
   
   @Override
   public void handle(Context ctx) throws Exception {
@@ -44,13 +44,10 @@ public class LoginPageRequestHandler implements Handler {
     
     switch(jwtStatusInst.status()) {
     default:
-    case BAD_TOKEN:
-    case BAD_SIGNATURE:
-    case BAD_CLAIMS:
       ctx.clientError(403); // forbidden
       return;
       
-    case NOT_PRESENT:
+    case NOT_PRESENT_IN_REQUEST:
     case EXPIRED:
       // login allowed
       break;

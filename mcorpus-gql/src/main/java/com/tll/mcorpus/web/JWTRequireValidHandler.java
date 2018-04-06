@@ -17,19 +17,16 @@ import ratpack.handling.Handler;
  */
 public class JWTRequireValidHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(JWTRequireValidHandler.class);
+  private final Logger log = LoggerFactory.getLogger(JWTRequireValidHandler.class);
 
   @Override
   public void handle(Context ctx) throws Exception {
     switch (ctx.getRequest().get(JWTStatusInstance.class).status()) {
     default:
-    case BAD_TOKEN:
-    case BAD_SIGNATURE:
-    case BAD_CLAIMS:
       ctx.clientError(403); // forbidden
       return;
 
-    case NOT_PRESENT:
+    case NOT_PRESENT_IN_REQUEST:
     case EXPIRED:
     case BLOCKED:
       ctx.clientError(401); // unauthorized

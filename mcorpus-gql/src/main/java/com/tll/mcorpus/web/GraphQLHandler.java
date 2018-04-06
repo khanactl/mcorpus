@@ -26,7 +26,7 @@ import ratpack.handling.Handler;
  */
 public class GraphQLHandler implements Handler {
 
-  private static final Logger log = LoggerFactory.getLogger(GraphQLHandler.class);
+  private final Logger log = LoggerFactory.getLogger(GraphQLHandler.class);
   
   @SuppressWarnings("serial")
   private static final TypeToken<Map<String, Object>> strObjMapTypeRef = new TypeToken<Map<String, Object>>() { };

@@ -30,7 +30,7 @@ import com.tll.mcorpus.repo.model.FetchResult;
  * @author jpk
  */
 public class MCorpusUserRepo implements Closeable {
-  protected static final Logger log = LoggerFactory.getLogger("MCorpusUserRepo");
+  protected final Logger log = LoggerFactory.getLogger("MCorpusUserRepo");
 
   protected final DSLContext dsl;
 

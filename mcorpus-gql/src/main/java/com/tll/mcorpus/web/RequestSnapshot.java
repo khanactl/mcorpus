@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RequestSnapshot {
   
-  private static final Logger log = LoggerFactory.getLogger(RequestSnapshot.class);
+  private final Logger log = LoggerFactory.getLogger(RequestSnapshot.class);
   
   private static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
@@ -39,6 +39,8 @@ public class RequestSnapshot {
   private final String rstCookie;
   
   private final String rstHeader;
+  
+  private transient URL clientOrigin;
 
   /**
    * Constructor.
@@ -82,30 +84,30 @@ public class RequestSnapshot {
    * </ul>
    * 
    * @return Never-null resolved client origin as a {@link URL}.
-   * @throws Exception
-   *           upon any error resolving the client origin.
+   * @throws Exception upon any error resolving the client origin.
    */
-  public URL getClientOrigin() throws Exception {
-    final URL clientOrigin;
-    if(isNullOrEmpty(httpOrigin) || "null".equalsIgnoreCase(httpOrigin)) {
-      // fallback on Referer
-      log.info("No http Origin present.  Falling back on Referer.");
-      try {
-        URL referer = new URL(httpReferer);
-        clientOrigin = new URL(referer.getProtocol(), referer.getHost(), referer.getPort(), "");
-      } catch (MalformedURLException e) {
-        log.error("Invalid http Referer: {}", httpReferer);
-        throw new Exception("Invalid http Referer.");
+  public synchronized URL getClientOrigin() throws Exception {
+    if(this.clientOrigin == null) {
+      if(isNullOrEmpty(httpOrigin) || "null".equalsIgnoreCase(httpOrigin)) {
+        // fallback on Referer
+        log.info("No http Origin present.  Falling back on Referer.");
+        try {
+          URL referer = new URL(httpReferer);
+          clientOrigin = new URL(referer.getProtocol(), referer.getHost(), referer.getPort(), "");
+        } catch (MalformedURLException e) {
+          log.error("Invalid http Referer: {}", httpReferer);
+          throw new Exception("Invalid http Referer.");
+        }
+      } else {
+        try {
+          clientOrigin = new URL(httpOrigin);
+        } catch (MalformedURLException e) {
+          log.error("Invalid http Origin: {}", httpOrigin);
+          throw new Exception("Invalid http Origin.");
+        }
       }
-    } else {
-      try {
-        clientOrigin = new URL(httpOrigin);
-      } catch (MalformedURLException e) {
-        log.error("Invalid http Origin: {}", httpOrigin);
-        throw new Exception("Invalid http Origin.");
-      }
+      log.info("Client Origin resolved to: {}", clientOrigin);
     }
-    log.info("Client Origin resolved to: {}", clientOrigin);
     return clientOrigin;
   }
 
