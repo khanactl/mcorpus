@@ -1,8 +1,11 @@
 package com.tll.mcorpus.repo;
 
-import static com.tll.mcorpus.TestUtil.ds;
-// import static com.tll.mcorpus.TestUtil.dsl;
+import static com.tll.mcorpus.TestUtil.ds_mcweb;
+import static com.tll.mcorpus.TestUtil.testDslMcwebTest;
+import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.TestUtil.testMcuserLoginInput;
+import static com.tll.mcorpus.TestUtil.testRequestOrigin;
+import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -11,9 +14,11 @@ import static org.junit.Assert.fail;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
@@ -33,7 +38,23 @@ import com.tll.mcorpus.repo.model.FetchResult;
 @Category(UnitTest.class)
 public class MCorpusUserRepoTest {
   private static final Logger log = LoggerFactory.getLogger(MCorpusUserRepoTest.class);
-
+  
+  @AfterClass
+  public static void clearBackend() {
+    try {
+      // using mcwebtest db creds - 
+      //   remove any test generated mcuser audit records (if any).
+     log.info("Num mcuser audit records deleted after test: {}.", 
+         testDslMcwebTest().delete(MCUSER_AUDIT).where(MCUSER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+    }
+    finally {
+      if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
+    }
+  }
+  
   /**
    * Test {MCorpusUserRepo#login} with valid user credentials.
    */
@@ -41,20 +62,23 @@ public class MCorpusUserRepoTest {
   public void testMcuserLogin_AuthSuccess() {
     MCorpusUserRepo repo = null;
     try {
-      DataSource ds = ds();
+      DataSource ds = ds_mcweb();
       repo = new MCorpusUserRepo(ds);
 
       McuserLogin loginInput = testMcuserLoginInput();
       FetchResult<Mcuser> loginResult = repo.login(loginInput);
-      log.info("mcorpus login TEST result: {}", loginResult);
+      log.info("mcorpus LOGIN WITH AUTH SUCCESS TEST result: {}", loginResult);
+      
+      Mcuser mcuser = loginResult.get();
+      log.info("mcuser: {}", mcuser);
+      
       assertNotNull(loginResult);
       assertNull(loginResult.getErrorMsg());
       assertFalse(loginResult.hasErrorMsg());
-      Mcuser mcuser = loginResult.get();
+      
       assertNotNull(mcuser);
       assertNotNull(mcuser.getUsername());
       assertNull(mcuser.getPswd());
-      log.info("mcuser: {}", mcuser);
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -66,23 +90,26 @@ public class MCorpusUserRepoTest {
   }
 
   /**
-   * Test {MCorpusUserRepo#login} with INVALID user credentials.
+   * Test {MCorpusUserRepo#login} with a bad password.
+   * <p>
+   * The mcuser login return value is expected to return null indicating login
+   * failure on the backend.
    */
   @Test
-  public void testMcuserLogin_AuthFail() {
+  public void testMcuserLogin_BadPassword() {
     MCorpusUserRepo repo = null;
     try {
-      DataSource ds = ds();
+      DataSource ds = ds_mcweb();
       repo = new MCorpusUserRepo(ds);
       McuserLogin loginInput = testMcuserLoginInput();
       loginInput.setMcuserPassword("bunko");
       FetchResult<Mcuser> loginResult = repo.login(loginInput);
-      log.info("mcorpus login TEST result: {}", loginResult);
+      log.info("mcorpus LOGIN WITH BAD PASSWORD TEST result: {}", loginResult);
+      
       assertNotNull(loginResult);
       assertNotNull(loginResult.getErrorMsg());
       assertTrue(loginResult.hasErrorMsg());
-      Mcuser mcuser = loginResult.get();
-      assertNull(mcuser);
+      assertNull(loginResult.get());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -94,23 +121,60 @@ public class MCorpusUserRepoTest {
   }
   
   /**
-   * Test {MCorpusUserRepo#logout}.
+   * Test {MCorpusUserRepo#login} with a username not currently in the backend
+   * system.
+   * <p>
+   * The mcuser login return value is expected to return null indicating login
+   * failure on the backend.
    */
   @Test
-  public void testMcuserLogout() {
+  public void testMcuserLogin_UnknownUsername() {
     MCorpusUserRepo repo = null;
     try {
+      DataSource ds = ds_mcweb();
+      repo = new MCorpusUserRepo(ds);
+      McuserLogin loginInput = testMcuserLoginInput();
+      loginInput.setMcuserUsername("unknown");
+      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
+      
+      assertNotNull(loginResult);
+      assertNotNull(loginResult.getErrorMsg());
+      assertTrue(loginResult.hasErrorMsg());
+      assertNull(loginResult.get());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) repo.close();
+    }
+  }
+  
+  /**
+   * Test {MCorpusUserRepo#logout} when an mcuser is currently logged in.
+   * <p>
+   * This is the happy path test for mcuser logout functionality.
+   */
+  @Test
+  public void testMcuserLogout_ValidLogin() {
+    MCorpusUserRepo repo = null;
+    try {
+      // establish the condition that a target test mcuser is validly logged in on the backend
       McuserAudit mcuserAudit = TestUtil.addTestMcuserAuditRecord();
-      DataSource ds = ds();
+      
+      DataSource ds = ds_mcweb();
       repo = new MCorpusUserRepo(ds);
 
       McuserLogout logoutInput = TestUtil.testMcuserLogoutInput();
       logoutInput.setJwtId(mcuserAudit.getJwtId());
       logoutInput.setMcuserUid(TestUtil.testMcuserUid);
-      logoutInput.setRequestOrigin("request-origin");
+      logoutInput.setRequestOrigin(testRequestOrigin);
       logoutInput.setRequestTimestamp(new Timestamp(Instant.now().toEpochMilli()));
       FetchResult<Boolean> logoutResult = repo.logout(logoutInput);
-      log.info("mcorpus logout TEST result: {}", logoutResult);
+      log.info("mcorpus LOGOUT WITH VALID LOGIN TEST result: {}", logoutResult);
+      
       assertNotNull(logoutResult);
       assertNull(logoutResult.getErrorMsg());
       assertFalse(logoutResult.hasErrorMsg());
@@ -124,5 +188,39 @@ public class MCorpusUserRepoTest {
     }
   }
 
-  
+  /**
+   * Test {MCorpusUserRepo#logout} when an mcuser is NOT currently logged in.
+   * <p>
+   * This test verifies that the mcuser logout functionality should fail when a
+   * valid mcuser is <em>not</em> currently logged in.
+   */
+  @Test
+  public void testMcuserLogout_InvalidLogin() {
+    MCorpusUserRepo repo = null;
+    try {
+      DataSource ds = ds_mcweb();
+      repo = new MCorpusUserRepo(ds);
+
+      // create a logout input instance where the jwt id is not in the backend system
+      // this is expected to fail the logout on the backend
+      McuserLogout logoutInput = TestUtil.testMcuserLogoutInput();
+      logoutInput.setJwtId(UUID.randomUUID());
+      logoutInput.setMcuserUid(TestUtil.testMcuserUid);
+      logoutInput.setRequestOrigin(testRequestOrigin);
+      logoutInput.setRequestTimestamp(new Timestamp(Instant.now().toEpochMilli()));
+      FetchResult<Boolean> logoutResult = repo.logout(logoutInput);
+      log.info("mcorpus LOGOUT WITH INVALID LOGIN TEST result: {}", logoutResult);
+      
+      assertNotNull(logoutResult);
+      assertNotNull(logoutResult.getErrorMsg());
+      assertTrue(logoutResult.hasErrorMsg());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) repo.close();
+    }
+  }
 }

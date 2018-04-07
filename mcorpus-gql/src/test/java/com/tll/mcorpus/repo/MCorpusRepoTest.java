@@ -3,17 +3,21 @@ package com.tll.mcorpus.repo;
 import static com.tll.mcorpus.TestUtil.addMaddressTableProperties;
 import static com.tll.mcorpus.TestUtil.addMauthTableProperties;
 import static com.tll.mcorpus.TestUtil.addMemberTableProperties;
-import static com.tll.mcorpus.TestUtil.ds;
-import static com.tll.mcorpus.TestUtil.dsl;
+import static com.tll.mcorpus.TestUtil.ds_mcweb;
+import static com.tll.mcorpus.TestUtil.testDslMcweb;
+import static com.tll.mcorpus.TestUtil.testDslMcwebTest;
+import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.TestUtil.generateMaddressToAddPropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMaddressToUpdatePropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMemberToAddPropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMemberToUpdatePropertyMap;
 import static com.tll.mcorpus.TestUtil.testMemberLoginInput;
 import static com.tll.mcorpus.TestUtil.testMemberLogoutInput;
+import static com.tll.mcorpus.TestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
+import static com.tll.mcorpus.db.Tables.MEMBER_AUDIT;
 import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMember;
 import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddressForAdd;
 import static junit.framework.TestCase.assertNull;
@@ -27,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
@@ -59,18 +64,18 @@ public class MCorpusRepoTest {
     Map<String, Object> cmapMauth = cmaps.get(1);
 
     // add member record
-    MemberRecord memberRecord = dsl().insertInto(MEMBER).set(cmapMember).returning(MEMBER.MID).fetchOne();
+    MemberRecord memberRecord = testDslMcweb().insertInto(MEMBER).set(cmapMember).returning(MEMBER.MID).fetchOne();
     UUID mid = memberRecord.getMid();
 
     // add mauth record
     cmapMauth.put(MAUTH.MID.getName(), mid);
-    dsl().insertInto(MAUTH).set(cmapMauth).execute();
+    testDslMcweb().insertInto(MAUTH).set(cmapMauth).execute();
 
     return mid;
   }
 
   private static void deleteTestMember(UUID mid) {
-    if(mid != null) dsl().delete(MEMBER).where(MEMBER.MID.eq(mid)).execute();
+    if(mid != null) testDslMcweb().delete(MEMBER).where(MEMBER.MID.eq(mid)).execute();
   }
 
   private static void insertTestMemberAddress(UUID mid) {
@@ -82,23 +87,33 @@ public class MCorpusRepoTest {
     cmap.put(MADDRESS.MID.getName(), mid);
 
     // add member address record
-    dsl().insertInto(MADDRESS).set(cmap).returning(MADDRESS.MID).execute();
+    testDslMcweb().insertInto(MADDRESS).set(cmap).returning(MADDRESS.MID).execute();
   }
 
   private static void deleteTestMemberAddress(UUID mid) {
-    if(mid != null) dsl().delete(MADDRESS).where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(Addressname.other))).execute();
+    if(mid != null) testDslMcweb().delete(MADDRESS).where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(Addressname.other))).execute();
   }
 
-  /**
-   * Here we use a known member password for<br>: 
-   *    username  'dhookes3f': 
-   *    pswd:     '8testItOut9'
-   */
+  @AfterClass
+  public static void clearBackend() {
+    try {
+      // using mcwebtest db creds - 
+      //   remove any test generated member audit records (if any).
+      log.info("Num member audit records deleted after test: {}.", testDslMcwebTest().deleteFrom(MEMBER_AUDIT).where(MEMBER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+    }
+    finally {
+      if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
+    }
+  }
+  
   @Test
   public void testMemberLogin() {
     MCorpusRepo repo = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
       MemberLogin memberLoginInput = testMemberLoginInput();
       FetchResult<Mref> mrefFetch = repo.memberLogin(memberLoginInput);
       assertNotNull(mrefFetch);
@@ -119,7 +134,7 @@ public class MCorpusRepoTest {
   public void testMemberLogout() {
     MCorpusRepo repo = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
       MemberLogout memberLogoutInput = testMemberLogoutInput();
       FetchResult<Void> memberLogoutResult = repo.memberLogout(memberLogoutInput);
       assertNotNull(memberLogoutResult);
@@ -138,7 +153,7 @@ public class MCorpusRepoTest {
   public void testFetchMRefByMid() {
     MCorpusRepo repo = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
       FetchResult<Mref> mrefFetch = repo.fetchMRefByMid(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
       assertNotNull(mrefFetch);
       assertNotNull(mrefFetch.get());
@@ -157,7 +172,7 @@ public class MCorpusRepoTest {
   public void testFetchMember() {
     MCorpusRepo repo = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
       FetchResult<Map<String, Object>> memberFetch = repo.fetchMember(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
       assertNotNull(memberFetch);
       assertNotNull(memberFetch.get());
@@ -176,7 +191,7 @@ public class MCorpusRepoTest {
   public void testFetchMemberAddresses() {
     MCorpusRepo repo = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
       FetchResult<List<Map<String, Object>>> fetchResult = repo.fetchMemberAddresses(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
@@ -196,7 +211,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     UUID mid = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
 
       Map<String, Object> memberMap = generateMemberToAddPropertyMap();
 
@@ -227,7 +242,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     UUID mid = null;
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
 
       mid = insertTestMember();
 
@@ -256,7 +271,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     UUID mid = insertTestMember();
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
 
       FetchResult<UUID> fetchResult = repo.deleteMember(mid);
 
@@ -286,7 +301,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     UUID mid = insertTestMember();
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
 
       Map<String, Object> maddressMap = generateMaddressToAddPropertyMap(mid, Addressname.other);
 
@@ -319,7 +334,7 @@ public class MCorpusRepoTest {
     UUID mid = insertTestMember();
     insertTestMemberAddress(mid);
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
 
       Map<String, Object> maddressMap = generateMaddressToUpdatePropertyMap(mid, Addressname.other);
       maddressMap.put(MEMBER.MID.getName(), mid);
@@ -348,7 +363,7 @@ public class MCorpusRepoTest {
     UUID mid = insertTestMember();
     insertTestMemberAddress(mid);
     try {
-      repo = new MCorpusRepo(ds());
+      repo = new MCorpusRepo(ds_mcweb());
 
       FetchResult<UUID> fetchResult = repo.deleteMemberAddress(mid, Addressname.other);
 

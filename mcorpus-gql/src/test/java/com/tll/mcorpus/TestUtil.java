@@ -35,8 +35,6 @@ import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.postgresql.ds.PGSimpleDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,10 +51,10 @@ import com.tll.mcorpus.db.tables.pojos.McuserAudit;
 
 public class TestUtil {
   
-  private static final Logger log = LoggerFactory.getLogger("TestUtil");
-
   public static final UUID testMcuserUid = UUID.fromString("d712f2d3-5494-472d-bdcc-4a1722a8c818");
   
+  public static final String testRequestOrigin = "test-request-origin";
+
   public static final String serverPublicAddress = "https://mcorpus.d2d:5150";
 
   private static final ObjectMapper mapper = new ObjectMapper();
@@ -67,13 +65,43 @@ public class TestUtil {
 
   private static final Random rand = new Random();
   
-  private static DSLContext testDsl = null;
+  private static DSLContext dslMcweb = null;
+  
+  private static DSLContext dslMcwebtest = null;
   
   /**
    * @return A newly created {@link DataSource} to the test database intended for
    *         testing.
    */
-  public static DataSource ds() {
+  public static DataSource ds_mcweb() {
+    Properties dbprops = new Properties();
+    InputStream istream = null;
+    try {
+      istream = Thread.currentThread().getContextClassLoader().getResourceAsStream("app.properties");
+      dbprops.load(istream);
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to load test db props.");
+    } finally {
+      if(istream != null) try {
+        istream.close();
+      } catch (IOException e) {
+      }
+    }
+    PGSimpleDataSource ds = new PGSimpleDataSource();
+    ds.setDatabaseName(dbprops.getProperty("dbName"));
+    ds.setServerName(dbprops.getProperty("dbServerName"));
+    ds.setPortNumber(Integer.parseInt(dbprops.getProperty("dbPortNumber")));
+    ds.setUser(dbprops.getProperty("dbUsername"));
+    ds.setPassword(dbprops.getProperty("dbPassword"));
+    ds.setCurrentSchema(dbprops.getProperty("dbSchema"));
+    return ds;
+  }
+  
+  /**
+   * @return A newly created {@link DataSource} to the test database intended for
+   *         testing.
+   */
+  public static DataSource ds_mcwebtest() {
     Properties dbprops = new Properties();
     InputStream istream = null;
     try {
@@ -94,20 +122,49 @@ public class TestUtil {
     ds.setCurrentSchema(dbprops.getProperty("testDbSchema"));
     return ds;
   }
+  
+  /**
+   * @return true if the internally managed test dsl context has been loaded.
+   */
+  public static synchronized boolean isTestDslMcwebLoaded() {
+    return dslMcweb != null;
+  }
 
   /**
-   * @return a JooQ {@link DSLContext} intended for testing.<br>
-   *         (Connects to the test db.)
+   * @return a JooQ {@link DSLContext} intended for testing with <em>mcweb</em> db
+   *         credentials.
    */
-  public static synchronized DSLContext dsl() {
-    if(testDsl == null) {
+  public static synchronized DSLContext testDslMcweb() {
+    if(dslMcweb == null) {
       Settings s = new Settings();
       s.setRenderSchema(false);
       s.setRenderNameStyle(RenderNameStyle.LOWER);
       s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
-      testDsl = DSL.using(ds(), SQLDialect.POSTGRES, s);
+      dslMcweb = DSL.using(ds_mcweb(), SQLDialect.POSTGRES, s);
     }
-    return testDsl;
+    return dslMcweb;
+  }
+
+  /**
+   * @return true if the internally managed mcwebtest dsl context has been loaded.
+   */
+  public static synchronized boolean isTestDslMcwebTestLoaded() {
+    return dslMcwebtest != null;
+  }
+
+  /**
+   * @return a JooQ {@link DSLContext} intended for testing with <em>mcwebtest</em> db
+   *         credentials.
+   */
+  public static synchronized DSLContext testDslMcwebTest() {
+    if(dslMcwebtest == null) {
+      Settings s = new Settings();
+      s.setRenderSchema(false);
+      s.setRenderNameStyle(RenderNameStyle.LOWER);
+      s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
+      dslMcwebtest = DSL.using(ds_mcwebtest(), SQLDialect.POSTGRES, s);
+    }
+    return dslMcwebtest;
   }
 
   /**
@@ -270,7 +327,7 @@ public class TestUtil {
     mcuserLogin.setMcuserPassword("jackson");
     mcuserLogin.setInJwtId(UUID.randomUUID());
     mcuserLogin.setInRequestTimestamp(new Timestamp(lnow));
-    mcuserLogin.setInRequestOrigin("request-origin");
+    mcuserLogin.setInRequestOrigin(testRequestOrigin);
     mcuserLogin.setInLoginExpiration(new Timestamp(expiry));
     return mcuserLogin;
   }
@@ -284,7 +341,7 @@ public class TestUtil {
     mcuserLogout.setJwtId((UUID)null);
     mcuserLogout.setMcuserUid((UUID)null);
     mcuserLogout.setRequestTimestamp(new Timestamp(lnow));
-    mcuserLogout.setRequestOrigin("request-origin");
+    mcuserLogout.setRequestOrigin(testRequestOrigin);
     return mcuserLogout;
   }
 
@@ -297,7 +354,7 @@ public class TestUtil {
     memberLogin.setMemberUsername("dhookes3f");
     memberLogin.setMemberPassword("8testItOut9");
     memberLogin.setInRequestTimestamp(new Timestamp(lnow));
-    memberLogin.setInRequestOrigin("request-origin");
+    memberLogin.setInRequestOrigin(testRequestOrigin);
     return memberLogin;
   }
 
@@ -309,7 +366,7 @@ public class TestUtil {
     MemberLogout memberLogout = new MemberLogout();
     memberLogout.setMid(UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba"));
     memberLogout.setInRequestTimestamp(new Timestamp(lnow));
-    memberLogout.setInRequestOrigin("request-origin");
+    memberLogout.setInRequestOrigin(testRequestOrigin);
     return memberLogout;
   }
   
@@ -329,12 +386,12 @@ public class TestUtil {
         null,
         McuserAuditType.LOGIN,
         new Timestamp(lnow),
-        "request-origin",
+        testRequestOrigin,
         new Timestamp(expiry),
         UUID.randomUUID(),
         JwtIdStatus.OK);
     
-    final int numInserted = dsl().insertInto(MCUSER_AUDIT,
+    final int numInserted = testDslMcweb().insertInto(MCUSER_AUDIT,
         MCUSER_AUDIT.TYPE,
         MCUSER_AUDIT.JWT_ID, 
         MCUSER_AUDIT.JWT_ID_STATUS,
@@ -354,20 +411,6 @@ public class TestUtil {
     if(numInserted != 1) throw new Exception("Num inserted MCUSER_AUDIT records: " + numInserted);
     
     return e;
-  }
-  
-  /**
-   * @param jwtId the jwt id of the mcuser_audit record to delete.
-   */
-  public static void deleteTestMcuserAuditRecord(UUID jwtId) {
-    try {
-      int num = dsl().deleteFrom(MCUSER_AUDIT).where(MCUSER_AUDIT.JWT_ID.eq(jwtId)).execute();
-      if(num != 1) throw new Exception("record not fould.");
-      log.info("MCUSER_AUDIT record deleted jwtId: {}", jwtId.toString());
-    }
-    catch(Exception e) {
-      log.error("MCUSER_AUDIT record delete error: ", e.getMessage());
-    }
   }
   
   private TestUtil() {}

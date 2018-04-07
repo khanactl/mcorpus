@@ -1,6 +1,6 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.TestUtil.ds;
+import static com.tll.mcorpus.TestUtil.ds_mcweb;
 import static com.tll.mcorpus.TestUtil.serverPublicAddress;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +32,7 @@ public class JWTTest {
   private static final Logger log = LoggerFactory.getLogger(JWTTest.class);
   
   private static JWT jwt() {
-    MCorpusUserRepo repo = new MCorpusUserRepo(ds());
+    MCorpusUserRepo repo = new MCorpusUserRepo(ds_mcweb());
     byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
     long jwtTtlInMillis = Duration.ofDays(2).toMillis();
     return new JWT(jwtTtlInMillis, jwtSharedSecret, repo);
