@@ -97,8 +97,8 @@ create table mcuser_audit (
   jwt_id                  uuid,
   jwt_id_status           jwt_status,
 
-  primary key (uid, created, type)
-  -- TODO add index for jwt_id col
+  primary key (uid, created, type),
+  unique(type, jwt_id)
 );
 comment on type mcuser_audit is 'Log of when mcusers login/out and access the api.';
 
@@ -124,7 +124,7 @@ CREATE TYPE jwt_status AS ENUM (
     'VALID',
     'VALID_ADMIN'
 );
-CREATE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
+CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
     LANGUAGE plpgsql
     AS $_$
   DECLARE qrec jwt_mcuser_status;
@@ -174,7 +174,7 @@ mcuser_login
 
 Call this function to authenticate mcuser users
 by username/passwoed credentials
-along with the sourcing http headers and ip address.
+along with the needed meta information.
 
 When an mcuser authentication is successful,
 a LOGIN-type mcuser_audit record is created.
@@ -184,12 +184,30 @@ a LOGIN-type mcuser_audit record is created.
   -OR-
   NULL when login fails.
 */
-CREATE FUNCTION public.mcuser_login(mcuser_username text, mcuser_password text, in_request_timestamp timestamp without time zone, in_request_origin text, in_login_expiration timestamp without time zone, in_jwt_id uuid) RETURNS public.mcuser
+CREATE OR REPLACE FUNCTION mcuser_login(
+  mcuser_username text, 
+  mcuser_password text, 
+  in_request_timestamp timestamp without time zone, 
+  in_request_origin text, 
+  in_login_expiration timestamp without time zone, 
+  in_jwt_id uuid
+) RETURNS public.mcuser
     LANGUAGE plpgsql
     AS $_$
+  DECLARE existing_jwt_id uuid;
   DECLARE passed BOOLEAN;
   DECLARE row_mcuser mcuser%ROWTYPE;
   BEGIN
+    -- verify the given in_jwt_id is unique against the existing jwt ids held
+    -- in the mcuser_audit table
+    select ma.jwt_id into existing_jwt_id from mcuser_audit ma where ma.jwt_id = in_jwt_id;
+    IF existing_jwt_id IS NOT NULL THEN
+      RAISE NOTICE 'Non-unique jwt id provided.';
+      RETURN NULL;
+    END IF;
+
+    -- verify the existence of a single mcuser record 
+    -- by the given username and password
     passed = false;
     SELECT (pswd = crypt(mcuser_password, pswd)) INTO passed
     FROM mcuser
@@ -203,12 +221,12 @@ CREATE FUNCTION public.mcuser_login(mcuser_username text, mcuser_password text, 
         uid, 
         created, 
         modified, 
-        status,
         name, 
         email, 
         username, 
         null, 
-        admin 
+        admin, 
+        status 
       FROM mcuser 
       INTO row_mcuser 
       WHERE username = $1;
@@ -250,7 +268,7 @@ $_$;
  * 
  * An mcuser_audit record is created of LOGOUT type.
  */
-CREATE FUNCTION mcuser_logout(
+CREATE OR REPLACE FUNCTION mcuser_logout(
   mcuser_uid uuid, 
   jwt_id uuid, 
   request_timestamp timestamp without time zone, 
@@ -371,7 +389,7 @@ comment on type mauth is 'The mauth table holds security sensitive member data.'
  *
  * Function to set the member.modified column to current timestamp.
  */
-CREATE FUNCTION set_modified() RETURNS TRIGGER
+CREATE OR REPLACE FUNCTION set_modified() RETURNS TRIGGER
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -416,7 +434,12 @@ with the given username and pswd.
   -OR-
   NULL when member login fails for any reason.
 */
-CREATE FUNCTION public.member_login(member_username text, member_password text, in_request_timestamp timestamp without time zone, in_request_origin text) RETURNS public.mref
+CREATE OR REPLACE FUNCTION member_login(
+  member_username text, 
+  member_password text, 
+  in_request_timestamp timestamp without time zone, 
+  in_request_origin text
+) RETURNS public.mref
     LANGUAGE plpgsql
     AS $_$
   DECLARE passed BOOLEAN;
@@ -470,7 +493,11 @@ $_$;
  * 
  * A member_audit record is created of LOGOUT type.
  */
-CREATE FUNCTION public.member_logout(mid uuid, in_request_timestamp timestamp without time zone, in_request_origin text) RETURNS void
+CREATE OR REPLACE FUNCTION member_logout(
+  mid uuid, 
+  in_request_timestamp timestamp without time zone, 
+  in_request_origin text
+) RETURNS void
     LANGUAGE plpgsql
     AS $_$
   DECLARE member_exists BOOLEAN;

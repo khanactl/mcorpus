@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = -1904394885;
+    private static final long serialVersionUID = 1200987095;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -139,7 +139,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.MCUSER_AUDIT_PKEY);
+        return Arrays.<Index>asList(Indexes.MCUSER_AUDIT_PKEY, Indexes.TYPE__JWT_ID);
     }
 
     /**
@@ -155,7 +155,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
      */
     @Override
     public List<UniqueKey<McuserAuditRecord>> getKeys() {
-        return Arrays.<UniqueKey<McuserAuditRecord>>asList(Keys.MCUSER_AUDIT_PKEY);
+        return Arrays.<UniqueKey<McuserAuditRecord>>asList(Keys.MCUSER_AUDIT_PKEY, Keys.TYPE__JWT_ID);
     }
 
     /**

@@ -44,6 +44,7 @@ public class Indexes {
     public static final Index MCUSER_PKEY = Indexes0.MCUSER_PKEY;
     public static final Index MCUSER_USERNAME_KEY = Indexes0.MCUSER_USERNAME_KEY;
     public static final Index MCUSER_AUDIT_PKEY = Indexes0.MCUSER_AUDIT_PKEY;
+    public static final Index TYPE__JWT_ID = Indexes0.TYPE__JWT_ID;
     public static final Index MEMBER_EMP_ID_LOCATION_KEY = Indexes0.MEMBER_EMP_ID_LOCATION_KEY;
     public static final Index MEMBER_PKEY = Indexes0.MEMBER_PKEY;
     public static final Index MEMBER_AUDIT_PKEY = Indexes0.MEMBER_AUDIT_PKEY;
@@ -61,6 +62,7 @@ public class Indexes {
         public static Index MCUSER_PKEY = Internal.createIndex("mcuser_pkey", Mcuser.MCUSER, new OrderField[] { Mcuser.MCUSER.UID }, true);
         public static Index MCUSER_USERNAME_KEY = Internal.createIndex("mcuser_username_key", Mcuser.MCUSER, new OrderField[] { Mcuser.MCUSER.USERNAME }, true);
         public static Index MCUSER_AUDIT_PKEY = Internal.createIndex("mcuser_audit_pkey", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE }, true);
+        public static Index TYPE__JWT_ID = Internal.createIndex("type__jwt_id", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID }, true);
         public static Index MEMBER_EMP_ID_LOCATION_KEY = Internal.createIndex("member_emp_id_location_key", Member.MEMBER, new OrderField[] { Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION }, true);
         public static Index MEMBER_PKEY = Internal.createIndex("member_pkey", Member.MEMBER, new OrderField[] { Member.MEMBER.MID }, true);
         public static Index MEMBER_AUDIT_PKEY = Internal.createIndex("member_audit_pkey", MemberAudit.MEMBER_AUDIT, new OrderField[] { MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE }, true);
