@@ -81,8 +81,6 @@ public class MCorpusUserRepo implements Closeable {
   /**
    * The mcorpus mcuser login routine which fetches the mcuser record ref 
    * whose username and password matches the ones given.
-   * <p>
-   * Blocking!
    *
    * @param mcuserLogin the mcuser login input credentials
    * @return Never null {@link FetchResult} object<br> 
@@ -97,7 +95,6 @@ public class MCorpusUserRepo implements Closeable {
         if(rec != null && rec.getUid() != null) {
           // login success
           final Mcuser mcuser = rec.into(Mcuser.class);
-          log.info("LOGGED IN: {}", mcuser.getUid());
           return new FetchResult<>(mcuser, null);
         } else {
           // login fail - no record returned
@@ -114,8 +111,6 @@ public class MCorpusUserRepo implements Closeable {
 
   /**
    * Log an mcuser out.
-   * <p>
-   * Blocking!
    *
    * @param mcuserLogoutInput the mcuser logout input data object along with request snapshot
    * @return Never null {@link FetchResult} object 
@@ -125,9 +120,10 @@ public class MCorpusUserRepo implements Closeable {
     if(mcuserLogout != null) {
       try {
         mcuserLogout.execute(dsl.configuration());
-        // logout successful (no exception)
-        log.info("LOGGED OUT.");
-        return new FetchResult<>(Boolean.TRUE, null);
+        if(mcuserLogout.getReturnValue() == Boolean.TRUE) {
+          // logout success
+          return new FetchResult<>(Boolean.TRUE, null);
+        }
       }
       catch(Throwable t) {
         log.error("Logout error: {}.", t.getMessage());

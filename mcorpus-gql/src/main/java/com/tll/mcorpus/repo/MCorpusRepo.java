@@ -104,7 +104,6 @@ public class MCorpusRepo implements Closeable {
         if(rec != null && rec.getMid() != null) {
           // login success
           final Mref mref = rec.into(Mref.class);
-          log.info("MEMBER LOGGED IN: {}", mref.getMid());
           return new FetchResult<>(mref, null);
         } else {
           // login fail - no record returned
