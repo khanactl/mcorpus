@@ -31,10 +31,8 @@ public class JWTStatusHandler implements Handler {
   
   @Override
   public void handle(Context ctx) throws Exception {
-    final String serverPublicAddress = ctx.getServerConfig().getPublicAddress().toString();
-    final RequestSnapshot rsnap = getOrCreateRequestSnapshot(ctx);
     Blocking.get(() -> { 
-      return ctx.get(JWT.class).jwtRequestStatus(serverPublicAddress, rsnap); 
+      return ctx.get(JWT.class).jwtRequestStatus(getOrCreateRequestSnapshot(ctx)); 
     }).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);
       log.info("JWT status cached in incoming request: {}", jwtStatus);

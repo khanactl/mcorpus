@@ -8,6 +8,7 @@ import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
 
 import ratpack.error.ClientErrorHandler;
 import ratpack.error.ServerErrorHandler;
+import ratpack.server.ServerConfig;
 
 /**
  * Object bindings for the web layer.
@@ -34,7 +35,7 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Provides
   @Singleton
-  JWT jwt(MCorpusServerConfig config, MCorpusUserRepoAsync mcuserRepo) {
-    return new JWT(config.jwtTtlInMillis, JWT.deserialize(config.jwtSalt), mcuserRepo);
+  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepoAsync mcuserRepo) {
+    return new JWT(config.jwtTtlInMillis, JWT.deserialize(config.jwtSalt), mcuserRepo, serverConfig.getPublicAddress().toString());
   }
 }

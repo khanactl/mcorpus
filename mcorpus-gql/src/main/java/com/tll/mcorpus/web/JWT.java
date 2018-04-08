@@ -240,6 +240,7 @@ public class JWT {
   private final long jwtCookieTtlInSeconds;
   private final MCorpusUserRepo mcuserRepo;
   private final SecretKey secretKey;
+  private final String serverIssuer; 
 
   /**
    * Constructor.
@@ -250,13 +251,15 @@ public class JWT {
    *          signing and later verifying JWTs
    * @param mcuserRepo
    *          the mcorpus mcuser repo needed for backend JWT verification
+   * @param serverIssuer the expected JWT issuer used to verify received JWTs
    */
-  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, MCorpusUserRepo mcuserRepo) {
+  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, MCorpusUserRepo mcuserRepo, String serverIssuer) {
     super();
     this.jwtCookieTtlInMillis = jwtCookieTtlInMillis;
     this.jwtCookieTtlInSeconds = Math.floorDiv(jwtCookieTtlInMillis, 1000);
     this.mcuserRepo = mcuserRepo;
     this.secretKey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
+    this.serverIssuer = serverIssuer;
     log.info("JWT configured.  JWT cookie time-to-live: {} seconds.", jwtCookieTtlInSeconds);
   }
 
@@ -338,7 +341,7 @@ public class JWT {
    *          held JWT
    * @return Never null promise for a never-null {@link JWTStatusInstance}.
    */
-  public JWTStatusInstance jwtRequestStatus(final String serverPublicAddress, final RequestSnapshot rs) {
+  public JWTStatusInstance jwtRequestStatus(final RequestSnapshot rs) {
     // present?
     if(rs == null || rs.getJwtCookie() == null) 
       return jsi(JWTStatus.NOT_PRESENT_IN_REQUEST);
@@ -388,7 +391,7 @@ public class JWT {
     final String audience = claims.getAudience().isEmpty() ? "" : claims.getAudience().get(0);
     
     // verify issuer (this server's public host name)
-    if(isNullOrEmpty(issuer) || not(issuer.equals(serverPublicAddress))) {
+    if(isNullOrEmpty(issuer) || not(issuer.equals(serverIssuer))) {
       log.error("JWT bad issuer: {}", issuer);
       return jsi(JWTStatus.BAD_ISSUER);
     }
