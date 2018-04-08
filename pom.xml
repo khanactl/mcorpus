@@ -145,12 +145,12 @@
         <artifactId>ratpack-session</artifactId>
         <version>${ratpack.version}</version>
       </dependency>
-      -->
       <dependency>
         <groupId>io.ratpack</groupId>
         <artifactId>ratpack-dropwizard-metrics</artifactId>
         <version>${ratpack.version}</version>
       </dependency>
+      -->
 
 			<!-- nimbus jwt -->
 	    <dependency>

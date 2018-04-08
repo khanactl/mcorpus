@@ -1,7 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.TestUtil.ds_mcweb;
-import static com.tll.mcorpus.TestUtil.serverPublicAddress;
+import static com.tll.mcorpus.TestUtil.testServerPublicAddress;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -35,7 +35,7 @@ public class JWTTest {
     MCorpusUserRepo repo = new MCorpusUserRepo(ds_mcweb());
     byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
     long jwtTtlInMillis = Duration.ofDays(2).toMillis();
-    return new JWT(jwtTtlInMillis, jwtSharedSecret, repo);
+    return new JWT(jwtTtlInMillis, jwtSharedSecret, repo, testServerPublicAddress);
   }
   
   @Test
@@ -54,13 +54,13 @@ public class JWTTest {
     // generate
     Instant now = Instant.now();
     UUID jwtId = UUID.randomUUID();
-    String issuer = "https://mcorpus.d2d:5150";
+    String issuer = testServerPublicAddress;
     String audience = "127.0.0.1";
     String jwt = jwti.generate(now, TestUtil.testMcuserUid, jwtId, issuer, audience);
     log.info("JWT generated: {}", jwt);
     
     // parse
-    JWTStatusInstance jwtStatus = jwti.jwtRequestStatus(serverPublicAddress, new RequestSnapshot(
+    JWTStatusInstance jwtStatus = jwti.jwtRequestStatus(new RequestSnapshot(
         Instant.now(),
         "127.0.0.1",
         "localhost",
