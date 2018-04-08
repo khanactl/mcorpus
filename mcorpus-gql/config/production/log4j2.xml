@@ -5,16 +5,18 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
-    <File name="MCorpusFileLog" fileName="/logs/mcorpus.log">
+    <File name="File" fileName="/logs/mcorpus-gql-server.log">
       <PatternLayout>
         <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
       </PatternLayout>
     </File>
   </Appenders>
   <Loggers>
+    <Logger name="com.zaxxer.hikari.pool" level="warn" />
+    
     <Root level="INFO">
       <AppenderRef ref="Console"/>
-      <AppenderRef ref="MCorpusFileLog"/>
+      <AppenderRef ref="File"/>
     </Root>
   </Loggers>
 </Configuration>
