@@ -1,7 +1,8 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Util.isBlank;
-import static com.tll.mcorpus.web.RequestUtil.getServerDomainName;
+import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
+import static com.tll.mcorpus.web.RequestUtil.clearSidCookie;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
 
 import java.net.URL;
@@ -17,8 +18,8 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
 import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
+import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
 
-import io.netty.handler.codec.http.cookie.Cookie;
 import ratpack.form.Form;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -115,13 +116,15 @@ public class LoginRequestHandler implements Handler {
           audience);
       
       // jwt cookie
-      final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);
-      jwtCookieRef.setDomain(getServerDomainName(ctx));
-      jwtCookieRef.setMaxAge(jwtbiz.jwtCookieTtlInSeconds()); // cookie max age is in seconds
-      jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
-      jwtCookieRef.setSecure(true); // secure
-      jwtCookieRef.setPath("/");
-      log.info("JWT mcorpus cookie generated: {}", jwtCookieRef.toString());
+      addJwtCookieToResponse(ctx, jwt, jwtbiz.jwtCookieTtlInSeconds());
+      
+      // clear out no longer needed sid cookie
+      clearSidCookie(ctx);
+
+      // invalidate the current web session as we no longer need it
+      final WebSessionInstance wsi = ctx.getRequest().get(WebSessionInstance.class);
+      if(wsi != null && wsi.getWebSession() != null)
+        WebSessionManager.destroySession(wsi.getWebSession().sid());
 
       log.info("Mcuser '{}' logged in.  JWT issued from server (issuer): '{}' to client (audience): '{}'.", 
           mcuser.getUid(), issuer, audience);

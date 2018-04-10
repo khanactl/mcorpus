@@ -47,11 +47,11 @@
       </resource>
       <resource>
         <directory>src/main/resources</directory>
-        <filtering>true</filtering>
+        <filtering>false</filtering>
       </resource>
       <resource>
         <directory>src/ratpack</directory>
-        <filtering>true</filtering>
+        <filtering>false</filtering>
       </resource>
     </resources>
     <testResources>
@@ -275,15 +275,5 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <issueManagement>
-    <url>https://github.com/khanactl/mcorpus/issues</url>
-    <system>Github Issues</system>
-  </issueManagement>
-  <scm>
-    <url>https://github.com/khanactl/mcorpus</url>
-    <connection>scm:git:git://github.com/khanactl/mcorpus.git</connection>
-    <developerConnection>scm:git:jkirton@github.com/khanactl/mcorpus.git</developerConnection>
-  </scm>
 
 </project>

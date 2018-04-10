@@ -12,7 +12,7 @@
     </File>
   </Appenders>
   <Loggers>
-    <Logger name="com.zaxxer.hikari.pool" level="warn" />
+    <Logger name="com.zaxxer.hikari" level="warn" />
     
     <Root level="INFO">
       <AppenderRef ref="Console"/>

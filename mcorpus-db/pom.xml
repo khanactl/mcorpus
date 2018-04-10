@@ -79,9 +79,12 @@
           <skip>false</skip>
           <jdbc>
             <driver>org.postgresql.Driver</driver>
-            <url>jdbc:postgresql://${dbServerName}:${dbPortNumber}/${dbName}</url>
+            <url>${dbUrl}</url>
+            <!-- 
             <user>${dbUsername}</user>
             <password>${dbPassword}</password>
+            <url>jdbc:postgresql://${dbServerName}:${dbPortNumber}/${dbName}</url>
+            -->
             <properties>
               <property>
                 <key>ssl</key>

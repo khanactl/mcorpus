@@ -148,6 +148,8 @@ public class RequestUtil {
   /**
    * Add a web session tracking cookie to the response in the given request
    * context.
+   * <p>
+   * NOTE: The cookie max age is set to the pre-set web session duration.
    * 
    * @param ctx the request context object
    * @param sid the current session id
@@ -163,16 +165,25 @@ public class RequestUtil {
   }
   
   /**
+   * Clear the session id (sid) cookie from the pending http response.
+   * 
+   * @param ctx the request context object
+   */
+  public static void clearSidCookie(final Context ctx) {
+    final Cookie sidCookieRef = ctx.getResponse().expireCookie("sid");
+    sidCookieRef.setPath("/");
+    sidCookieRef.setDomain(getServerDomainName(ctx));
+  }
+  
+  /**
    * Add the next request sync token tracking cookie to the response in the given
    * request context.
    * 
-   * @param ctx
-   *          the request context object
-   * @param rst
-   *          the rst value to use in the response cookie
-   * @param maxAge the cookie max age (seconds)
+   * @param ctx the request context object
+   * @param rst the rst value to use in the response cookie
+   * @param maxAge the cookie max age in seconds
    */
-  public static void addRstCookieToResponse(final Context ctx, final String rst, int maxAge) {
+  public static void addRstCookieToResponse(final Context ctx, final String rst, final long maxAge) {
     final Cookie rstCookieRef = ctx.getResponse().cookie("rst", rst);
     rstCookieRef.setSecure(true);
     rstCookieRef.setHttpOnly(true);
@@ -182,11 +193,26 @@ public class RequestUtil {
   }
   
   /**
+   * Add a JWT cookie to the response in the given request context.
+   * 
+   * @param ctx the request context object
+   * @param jwt the JWT cookie value
+   * @param maxAge the cookie max age in seconds
+   */
+  public static void addJwtCookieToResponse(final Context ctx, final String jwt, final long maxAge) {
+    final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);
+    jwtCookieRef.setDomain(getServerDomainName(ctx));
+    jwtCookieRef.setMaxAge(maxAge);
+    jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
+    jwtCookieRef.setSecure(true); // secure
+    jwtCookieRef.setPath("/");
+  }
+  
+  /**
    * Add cookies for rst, sid and jwt that are expired to the response to force
    * the client to expire them.
    * 
-   * @param ctx
-   *          the incoming request context
+   * @param ctx the incoming request context
    */
   public static void expireAllCookies(final Context ctx) {
     final String cookieServerName = getServerDomainName(ctx);

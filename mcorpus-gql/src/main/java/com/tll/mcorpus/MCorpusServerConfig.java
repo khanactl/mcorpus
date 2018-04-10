@@ -8,12 +8,7 @@ package com.tll.mcorpus;
 public class MCorpusServerConfig {
   // db
   public String dbDataSourceClassName;
-  public String dbUsername;
-  public String dbPassword;
-  public String dbName;
-  public String dbSchema;
-  public String dbServerName;
-  public String dbPortNumber;
+  public String dbUrl;
   // jwt
   public String jwtSalt;
   public long jwtTtlInMillis;

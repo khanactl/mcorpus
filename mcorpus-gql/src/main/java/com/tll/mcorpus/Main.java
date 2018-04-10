@@ -35,10 +35,11 @@ public class Main {
     RatpackServer.start(serverSpec -> serverSpec
      .serverConfig(config -> config
        .baseDir(BaseDir.find())
-       .props("app.properties")
+       // .props("app.properties")
        .args(args)
        .sysProps()
        .env()
+       .env("MCORPUS_")
        .ssl(SslContextBuilder.forServer(
          Thread.currentThread().getContextClassLoader().getResourceAsStream("ssl.crt"),
          Thread.currentThread().getContextClassLoader().getResourceAsStream("ssl.key")
@@ -50,12 +51,7 @@ public class Main {
        .module(HikariModule.class, hikariConfig -> {
          final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
          hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
-         hikariConfig.setUsername(config.dbUsername);
-         hikariConfig.setPassword(config.dbPassword);
-         hikariConfig.addDataSourceProperty("serverName", config.dbServerName);
-         hikariConfig.addDataSourceProperty("databaseName", config.dbName);
-         hikariConfig.addDataSourceProperty("currentSchema", config.dbSchema);
-         hikariConfig.addDataSourceProperty("portNumber", config.dbPortNumber);
+         hikariConfig.addDataSourceProperty("URL", config.dbUrl);
        })
        .module(MCorpusRepoModule.class)
        .module(MCorpusGraphQLModule.class)
