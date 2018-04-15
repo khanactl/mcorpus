@@ -51,11 +51,12 @@ public class JWTTest {
   public void testJwtGenerateAndParse() throws Exception {
     final JWT jwti = jwt();
     
-    // generate
     Instant now = Instant.now();
     UUID jwtId = UUID.randomUUID();
     String issuer = testServerPublicAddress;
-    String audience = "127.0.0.1";
+    String audience = "127.0.0.1|127.0.0.1";
+    
+    // generate
     String jwt = jwti.generate(now, TestUtil.testMcuserUid, jwtId, issuer, audience);
     log.info("JWT generated: {}", jwt);
     
@@ -64,9 +65,12 @@ public class JWTTest {
         Instant.now(),
         "127.0.0.1",
         "localhost",
-        "Origin",
-        "Referer",
-        "Forwarded",
+        "https://mcorpus.d2d:5150/loginPage",
+        "https://mcorpus.d2d:5150/index",
+        "",
+        "127.0.0.1",
+        "https",
+        "5150",
         jwt,
         "sid",
         "rst",

@@ -24,25 +24,10 @@
     <mcorpus-db.version>1.2</mcorpus-db.version>
   </properties>
   
-  <profiles>
-    <profile>
-      <id>localdev</id>
-      <properties>
-        <environment>development</environment>
-      </properties>
-    </profile>
-    <profile>
-      <id>prd</id>
-      <properties>
-        <environment>production</environment>
-      </properties>
-    </profile>
-  </profiles>
-
   <build>
     <resources>
       <resource>
-        <directory>config/${environment}</directory>
+        <directory>config/${mcorpusEnv}</directory>
         <filtering>false</filtering>
       </resource>
       <resource>

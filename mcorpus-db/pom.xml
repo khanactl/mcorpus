@@ -76,21 +76,21 @@
           </dependency>
         </dependencies>
         <configuration>
-          <skip>false</skip>
+          <skip>true</skip>
           <jdbc>
             <driver>org.postgresql.Driver</driver>
-            <url>${dbUrl}</url>
+            <url>${env.MCORPUS_DB_URL}</url>
             <!-- 
             <user>${dbUsername}</user>
             <password>${dbPassword}</password>
             <url>jdbc:postgresql://${dbServerName}:${dbPortNumber}/${dbName}</url>
-            -->
             <properties>
               <property>
                 <key>ssl</key>
-                <value>false</value>
+                <value>true</value>
               </property>
             </properties>
+            -->
           </jdbc>
           <generator>
             <name>org.jooq.util.DefaultGenerator</name>

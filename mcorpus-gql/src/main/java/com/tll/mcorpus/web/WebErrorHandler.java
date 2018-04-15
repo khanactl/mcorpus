@@ -44,7 +44,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
       ctx.getResponse().send("Bad Client");
       break;
     }
-    log.error("Client error {} response sent.", statusCode);
+    log.error("Client error {} response sent for request: {}.", statusCode, ctx.getRequest().getPath());
   }
 
   /**
@@ -56,7 +56,9 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
   @Override
   public void error(Context ctx, Throwable error) throws Exception {
     ctx.render(ctx.file("templates/error500.html"));
-    log.error("Server error: {}", error == null ? "-" : error.getMessage());
+    log.error("Server error: {} for request: {}.", 
+        error == null ? "-" : error.getMessage(),
+        ctx.getRequest().getPath());
   }
 
 }

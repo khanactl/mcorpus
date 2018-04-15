@@ -35,7 +35,6 @@ public class Main {
     RatpackServer.start(serverSpec -> serverSpec
      .serverConfig(config -> config
        .baseDir(BaseDir.find())
-       // .props("app.properties")
        .args(args)
        .sysProps()
        .env()
@@ -65,14 +64,16 @@ public class Main {
 
        // graphql/
        .prefix("graphql", chainsub -> chainsub
-         .all(JWTStatusHandler.class)
-         .all(JWTRequireValidHandler.class)
          
          // the mcorpus GraphQL api (post only)
+         .post(JWTStatusHandler.class)
+         .post(JWTRequireValidHandler.class)
          .post(CsrfGuardByCookieAndHeaderHandler.class)
          .post(GraphQLHandler.class)
          
          // the GraphiQL developer interface (get only)
+         .get("index", JWTStatusHandler.class)
+         .get("index", JWTRequireValidHandler.class)
          .get("index", GraphQLIndexHandler.class)
          
          .files(f -> f.dir("templates/graphql"))

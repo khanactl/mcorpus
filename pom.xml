@@ -50,16 +50,6 @@
     <module>mcorpus-gql</module>
   </modules>
 
-  <scm>
-    <url>https://github.com/khanactl/mcorpus</url>
-    <connection>scm:git:git://github.com/khanactl/mcorpus.git</connection>
-    <developerConnection>scm:git:jkirton@github.com/khanactl/mcorpus.git</developerConnection>
-  </scm>
-  <issueManagement>
-    <url>https://github.com/khanactl/mcorpus/issues</url>
-    <system>Github Issues</system>
-  </issueManagement>
-
   <dependencyManagement>
     <dependencies>
       <!-- postgres-jdbc -->
@@ -360,6 +350,16 @@
     <name>University of California</name>
     <url>https://www.universityofcalifornia.edu</url>
   </organization>
+
+  <scm>
+    <url>https://github.com/khanactl/mcorpus</url>
+    <connection>scm:git:git://github.com/khanactl/mcorpus.git</connection>
+    <developerConnection>scm:git:jkirton@github.com/khanactl/mcorpus.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <url>https://github.com/khanactl/mcorpus/issues</url>
+    <system>Github Issues</system>
+  </issueManagement>
 
   <developers>
     <developer>

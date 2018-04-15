@@ -53,7 +53,7 @@ public class RequestUtil {
     catch(NotInRegistryException e) {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
-      glog().debug("Request snapshot taken and cached in request.");
+      glog().debug("Request snapshot taken and cached in request.\n{}\n", rs);
       return rs;
     }
   }
@@ -244,6 +244,9 @@ public class RequestUtil {
         req.getHeaders().get("Origin"),
         req.getHeaders().get("Referer"),
         req.getHeaders().get("Forwarded"),
+        req.getHeaders().get("X-Forwarded-For"),
+        req.getHeaders().get("X-Forwarded-Proto"),
+        req.getHeaders().get("X-Forwarded-Port"),
         req.oneCookie("jwt"),
         req.oneCookie("sid"),
         req.oneCookie("rst"),

@@ -321,6 +321,38 @@ public class JWT {
     }
   }
   
+  
+  /**
+   * Verify a current client origin against an originating clieint origin.
+   * 
+   * @param original the originating client origin
+   * @param current the received client origin
+   * @return true if the given client origin matches the one held.
+   */
+  private static boolean verifyClientOrigin(final String original, final String current) {
+    if(isNullOrEmpty(original) || isNullOrEmpty(current)) return false;
+    
+    final String[] originalParsed = RequestSnapshot.parseClientOriginToken(original);
+    final String[] currentParsed = RequestSnapshot.parseClientOriginToken(current);
+    
+    String originalRemoteAddrHost = originalParsed[0];
+    String originalXForwardedFor = originalParsed[1];
+    
+    String currentRemoteAddrHost = currentParsed[0];
+    String currentXForwardedFor = currentParsed[1];
+    
+    // if the original remote address host matches either the current remote address host 
+    // -OR- the x-forwarded-for then we approve this message
+    if(originalRemoteAddrHost.equals(currentRemoteAddrHost) || originalRemoteAddrHost.equals(currentXForwardedFor)) 
+      return true;
+    
+    if(originalXForwardedFor.equals(currentRemoteAddrHost) || originalXForwardedFor.equals(currentXForwardedFor)) 
+      return true;
+    
+    // denied
+    return false;
+  }
+  
   /**
    * Get the JWT status for the given received server request snapshot.
    * <p>
@@ -389,16 +421,17 @@ public class JWT {
     final Date expires = claims.getExpirationTime();
     final String issuer = claims.getIssuer();
     final String audience = claims.getAudience().isEmpty() ? "" : claims.getAudience().get(0);
+    log.debug("JWT issuer: {}, audience: {}", issuer, audience);
     
     // verify issuer (this server's public host name)
     if(isNullOrEmpty(issuer) || not(issuer.equals(serverIssuer))) {
-      log.error("JWT bad issuer: {}", issuer);
+      log.error("JWT bad issuer: {} (expected: {})", issuer, serverIssuer);
       return jsi(JWTStatus.BAD_ISSUER);
     }
     
-    // verify audience (client IP address)
-    if(isNullOrEmpty(audience) || not(audience.equals(rs.getRemoteAddressHost()))) {
-      log.error("JWT bad audience: {}", audience);
+    // verify audience (client origin)
+    if(not(verifyClientOrigin(audience, rs.getClientOrigin()))) {
+      log.error("JWT bad audience: {} (expected: {})", audience, rs.getClientOrigin());
       return jsi(JWTStatus.BAD_AUDIENCE);
     }
     

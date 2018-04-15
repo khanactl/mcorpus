@@ -5,7 +5,6 @@ import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.clearSidCookie;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
 
-import java.net.URL;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,15 +53,6 @@ public class LoginRequestHandler implements Handler {
   @Override
   public void handle(Context ctx) {
     final RequestSnapshot requestSnapshot = ctx.getRequest().get(RequestSnapshot.class);
-    final URL clientOrigin;
-    try {
-      clientOrigin = requestSnapshot.getClientOrigin();
-    }
-    catch(Exception e) {
-      log.error("Bad client origin: {}", e.getMessage());
-      ctx.clientError(403);
-      return;
-    }
 
     final Form formData = ctx.getRequest().get(Form.class);
     final String username = formData.get("username");
@@ -87,7 +77,7 @@ public class LoginRequestHandler implements Handler {
     mcuserLogin.setMcuserPassword(pswd);
     mcuserLogin.setInJwtId(pendingJwtID);
     mcuserLogin.setInLoginExpiration(new Timestamp(requestInstantMillis));
-    mcuserLogin.setInRequestOrigin(clientOrigin.toString());
+    mcuserLogin.setInRequestOrigin(requestSnapshot.getClientOrigin());
     mcuserLogin.setInRequestTimestamp(new Timestamp(jwtExpiresMillis));
     
     // call db login
@@ -104,7 +94,7 @@ public class LoginRequestHandler implements Handler {
       // at this point, we're authenticated
       
       final String issuer = ctx.getServerConfig().getPublicAddress().toString();
-      final String audience = requestSnapshot.getRemoteAddressHost();
+      final String audience = requestSnapshot.getClientOrigin();
       
       // create the JWT - and set as a cookie to go back to user
       // the user is now expected to provide this JWT for subsequent mcorpus api requests

@@ -75,8 +75,7 @@ public class TestUtil {
    */
   public static DataSource ds_mcweb() {
     PGSimpleDataSource ds = new PGSimpleDataSource();
-    // get db url from environment
-    ds.setURL(System.getenv("MCORPUS_DB_URL"));
+    ds.setUrl(System.getenv("MCORPUS_DB_URL"));
     return ds;
   }
   

@@ -1,15 +1,13 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.mcorpus.Util.clean;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.lower;
 import static com.tll.mcorpus.Util.not;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Instant;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Immutable snapshot of the key 'auditable' attributes of an incoming http
@@ -19,10 +17,35 @@ import org.slf4j.LoggerFactory;
  */
 public class RequestSnapshot {
   
-  private final Logger log = LoggerFactory.getLogger(RequestSnapshot.class);
+  /**
+   * Parse a given client origin token into its constituent parts.
+   * 
+   * @param clientOrigin the client origin to parse
+   * @return Never-null String array of size 2 where:<br>
+   *         <ul>
+   *         <li>element 1: remote-address-host
+   *         <li>element 2: X-Forwarded-For
+   *         </ul>
+   * @see #getClientOrigin() for the expected client origin format
+   */
+  public static String[] parseClientOriginToken(final String clientOrigin) {
+    if(not(isNullOrEmpty(clientOrigin)) && clientOrigin.indexOf('|') >= 0) {
+      final Matcher matcher = clientOriginExtractor.matcher(clientOrigin);
+      if(matcher.matches()) {
+        return new String[] { matcher.group(1), matcher.group(2) };
+      }
+    }
+    return new String[] { "", "" };
+  }
+  
+  private static final Pattern clientOriginExtractor = Pattern.compile("^(.*)\\|(.*)$");
   
   private static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
+  }
+
+  private static String nullwiseClean(final String s) {
+    return isNullwiseOrEmpty(s) ? "" : clean(s);
   }
 
   private final Instant requestInstant;
@@ -34,13 +57,17 @@ public class RequestSnapshot {
   private final String httpReferer;
   private final String httpForwarded;
   
+  private final String xForwardedFor;
+  private final String xForwardedProto;
+  private final String xForwardedPort;
+  
   private final String jwtCookie;
   private final String sidCookie;
   private final String rstCookie;
   
   private final String rstHeader;
   
-  private transient URL clientOrigin;
+  private final String clientOrigin;
 
   /**
    * Constructor.
@@ -51,6 +78,9 @@ public class RequestSnapshot {
    * @param httpOrigin the http Origin header value
    * @param httpReferer the http Referer header value
    * @param httpForwarded the http Forwarded header value
+   * @param xForwardedFor the X-Forwarded-For http header value
+   * @param xForwardedProto the X-Forwarded-Proto http header value
+   * @param xForwardedPort the X-Forwarded-Port http header value
    * @param jwtCookie the mcorpus JWT token cookie value
    * @param sidCookie the mcorpus session id token cookie value
    * @param rstCookie the mcorpus request sync token cookie value
@@ -58,56 +88,42 @@ public class RequestSnapshot {
    */
   public RequestSnapshot(Instant requestInstant, String remoteAddressHost, String httpHost, String httpOrigin,
       String httpReferer, String httpForwarded, 
+      String xForwardedFor, String xForwardedProto, String xForwardedPort,
       String jwtCookie, String sidCookie, String rstCookie, String rstHeader) {
     super();
     this.requestInstant = requestInstant;
     this.remoteAddressHost = remoteAddressHost;
+    
     this.httpHost = httpHost;
     this.httpOrigin = httpOrigin;
     this.httpReferer = httpReferer;
     this.httpForwarded = httpForwarded;
+    
+    this.xForwardedFor = xForwardedFor;
+    this.xForwardedProto = xForwardedProto;
+    this.xForwardedPort = xForwardedPort;
+    
     this.jwtCookie = jwtCookie;
     this.sidCookie = sidCookie;
     this.rstCookie = rstCookie;
     this.rstHeader = rstHeader;
+    
+    this.clientOrigin = String.format("%s|%s", nullwiseClean(remoteAddressHost), nullwiseClean(xForwardedFor));
   }
   
   /**
-   * Determines the client origin by interrogating the http headers.
+   * The client origin token.
    * <p>
-   * The client origin is determined by:
-   * <ul>
-   * <li>If the Origin http header value is present, this is the client origin.
-   * (POST)
-   * <li>If the Origin is absent, use the Referer http header as the client
-   * origin. (GET)
-   * </ul>
+   * <b>FORMAT:</b> <br>
+   * <code>
+   * "{remote-address-host}|{X-Forwarded-For}"
+   * </code>
    * 
-   * @return Never-null resolved client origin as a {@link URL}.
-   * @throws Exception upon any error resolving the client origin.
+   * @return Never-null resolved client origin token containing both the remote
+   *         address host of the received request and the X-Forwarded-For header
+   *         value.
    */
-  public synchronized URL getClientOrigin() throws Exception {
-    if(this.clientOrigin == null) {
-      if(isNullOrEmpty(httpOrigin) || "null".equalsIgnoreCase(httpOrigin)) {
-        // fallback on Referer
-        log.info("No http Origin present.  Falling back on Referer.");
-        try {
-          URL referer = new URL(httpReferer);
-          clientOrigin = new URL(referer.getProtocol(), referer.getHost(), referer.getPort(), "");
-        } catch (MalformedURLException e) {
-          log.error("Invalid http Referer: {}", httpReferer);
-          throw new Exception("Invalid http Referer.");
-        }
-      } else {
-        try {
-          clientOrigin = new URL(httpOrigin);
-        } catch (MalformedURLException e) {
-          log.error("Invalid http Origin: {}", httpOrigin);
-          throw new Exception("Invalid http Origin.");
-        }
-      }
-      log.info("Client Origin resolved to: {}", clientOrigin);
-    }
+  public String getClientOrigin() {
     return clientOrigin;
   }
 
@@ -151,6 +167,27 @@ public class RequestSnapshot {
    */
   public String getHttpForwarded() {
     return httpForwarded;
+  }
+
+  /**
+   * @return the xForwardedFor
+   */
+  public String getxForwardedFor() {
+    return xForwardedFor;
+  }
+
+  /**
+   * @return the xForwardedProto
+   */
+  public String getxForwardedProto() {
+    return xForwardedProto;
+  }
+
+  /**
+   * @return the xForwardedPort
+   */
+  public String getxForwardedPort() {
+    return xForwardedPort;
   }
 
   /**
@@ -204,9 +241,19 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-        "RequestSnapshot [requestTimestamp=%s, remoteAddressHost=%s, httpHost=%s, httpOrigin=%s, httpReferer=%s, httpForwarded=%s, jwtCookie=%s, sidCookie=%s, rstCookie=%s, rstHeader=%s]",
-        requestInstant, remoteAddressHost, 
-        httpHost, httpOrigin, httpReferer, httpForwarded, 
-        jwtCookie, sidCookie, rstCookie, rstHeader);
+        "RequestSnapshot [\n"
+        + "  requestInstant=%s,\n"
+        + "  clientOrigin=%s, \n"
+        + "  jwtCookie %s, \n"
+        + "  sidCookie=%s, \n"
+        + "  rstCookie=%s, \n"
+        + "  rstHeader=%s \n"
+        + "]",
+        requestInstant, 
+        clientOrigin,
+        jwtCookie == null ? "--NOT present--" : "-present-", 
+        sidCookie, 
+        rstCookie, 
+        rstHeader);
   }
 }
