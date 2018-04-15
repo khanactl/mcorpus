@@ -101,6 +101,13 @@
               <finalName>mcorpus-gql-server</finalName>
               <minimizeJar>false</minimizeJar>
               <shadedClassifierName>gql-server</shadedClassifierName>
+              <artifactSet>
+                <excludes>
+                  <!-- keep log4j outside of shaded jar due to log4j2 bootstrap limitations -->
+                  <exclude>org.apache.logging.log4j</exclude>
+                  <exclude>com.lmax</exclude>
+                </excludes>
+              </artifactSet>
               <filters>
                 <filter>
                   <artifact>*:*</artifact>
@@ -128,7 +135,26 @@
           </execution>
         </executions>
       </plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-log4j2-deps</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+						  <includeGroupIds>org.apache.logging.log4j, com.lmax</includeGroupIds>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -204,12 +230,25 @@
     </dependency>
 
     <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-handler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec-http</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-core</artifactId>
     </dependency>
     <dependency>
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-exec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.ratpack</groupId>
+      <artifactId>ratpack-guice</artifactId>
     </dependency>
     <dependency>
       <groupId>io.ratpack</groupId>

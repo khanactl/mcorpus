@@ -118,6 +118,18 @@
         <version>2.8.0</version><!-- not at current jackson version -->
       </dependency>
 
+      <!-- netty -->
+			<dependency>
+			  <groupId>io.netty</groupId>
+			  <artifactId>netty-handler</artifactId>
+        <version>${netty.version}</version>
+			</dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-codec-http</artifactId>
+        <version>${netty.version}</version>
+      </dependency>
+      
       <!-- ratpack -->
       <dependency>
         <groupId>io.ratpack</groupId>
