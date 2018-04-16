@@ -16,7 +16,7 @@ import ratpack.handling.Handler;
 
 /**
  * Anti-CSRF statelessly by comparing http the header rst (request sync token)
- * value to rst cookie value contained in the received request..
+ * value to rst cookie value contained in the received request.
  * <p>
  * Note: No http header Origin / Referer header checking is performed as this
  * proves problematic with an xhr server api as incoming requests will actually

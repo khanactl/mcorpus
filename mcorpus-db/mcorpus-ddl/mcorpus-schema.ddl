@@ -300,7 +300,7 @@ CREATE OR REPLACE FUNCTION mcuser_logout(
       return true;
     ELSE
       -- default
-      RAISE NOTICE 'mcuser logout failed';
+      RAISE NOTICE 'mcuser % logout failed', mcuser_uid;
       return false;
     END IF;
   END

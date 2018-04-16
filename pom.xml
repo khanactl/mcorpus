@@ -22,7 +22,6 @@
     <slf4j-api.version>1.7.25</slf4j-api.version>
     <lmax-disruptor.version>3.3.4</lmax-disruptor.version>
 
-    <postgres.version>10.2</postgres.version>
     <postgres-jdbc.version>42.2.1</postgres-jdbc.version>
     
     <jooq.version>3.10.5</jooq.version>
@@ -38,8 +37,6 @@
     <netty.version>4.1.22.Final</netty.version>
     <ratpack.version>1.5.4</ratpack.version>
     
-    <nimbus-jose-jwt.version>4.36</nimbus-jose-jwt.version>
-
     <graphql-java.version>7.0</graphql-java.version>
 
     <junit.version>4.12</junit.version>
