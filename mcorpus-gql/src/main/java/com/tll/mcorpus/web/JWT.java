@@ -320,10 +320,9 @@ public class JWT {
       throw new Exception("JWT signing/encryption error: " + e.getMessage());
     }
   }
-  
-  
+
   /**
-   * Verify a current client origin against an originating clieint origin.
+   * Verify a current client origin against an originating client origin.
    * 
    * @param original the originating client origin
    * @param current the received client origin
