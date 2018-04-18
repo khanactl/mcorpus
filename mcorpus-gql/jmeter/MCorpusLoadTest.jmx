@@ -165,7 +165,7 @@ props.put(&quot;mids&quot;, mids);
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">5</stringProp>
+        <stringProp name="ThreadGroup.num_threads">2</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <longProp name="ThreadGroup.start_time">1516483344000</longProp>
         <longProp name="ThreadGroup.end_time">1516483344000</longProp>
@@ -175,6 +175,23 @@ props.put(&quot;mids&quot;, mids);
         <stringProp name="TestPlan.comments">Send out test requests against /graphql http endpoint</stringProp>
       </ThreadGroup>
       <hashTree>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Accept</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">rst</stringProp>
+              <stringProp name="Header.value">${rst}</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only Controller (Login)" enabled="true">
           <stringProp name="TestPlan.comments">Ensure we have a valid JWT</stringProp>
         </OnceOnlyController>
@@ -267,58 +284,41 @@ props.put(&quot;mids&quot;, mids);
             <hashTree/>
           </hashTree>
         </hashTree>
-        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
-          <stringProp name="CounterConfig.start">1</stringProp>
-          <stringProp name="CounterConfig.end">${midCount}</stringProp>
-          <stringProp name="CounterConfig.incr">1</stringProp>
-          <stringProp name="CounterConfig.name">C</stringProp>
-          <stringProp name="CounterConfig.format"></stringProp>
-          <boolProp name="CounterConfig.per_user">false</boolProp>
-          <stringProp name="TestPlan.comments">Used to pluck out a single mid from the mids array (created during Init phase)</stringProp>
-        </CounterConfig>
-        <hashTree/>
-        <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="pluck mid" enabled="true">
-          <stringProp name="TestPlan.comments">set the mid variable</stringProp>
-          <stringProp name="BeanShellSampler.query">// set the mid variable for this test loop run
-String[] mids = props.get(&quot;mids&quot;);
-String mid = mids[${C}];
-vars.put(&quot;mid&quot;, mid);</stringProp>
-          <stringProp name="BeanShellSampler.filename"></stringProp>
-          <stringProp name="BeanShellSampler.parameters"></stringProp>
-          <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
-        </BeanShellSampler>
-        <hashTree/>
         <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="Debug Sampler" enabled="true">
           <boolProp name="displayJMeterProperties">true</boolProp>
           <boolProp name="displayJMeterVariables">true</boolProp>
           <boolProp name="displaySystemProperties">false</boolProp>
         </DebugSampler>
         <hashTree/>
-        <RandomController guiclass="RandomControlGui" testclass="RandomController" testname="Random Controller" enabled="true">
-          <intProp name="InterleaveControl.style">1</intProp>
-        </RandomController>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+          <stringProp name="LoopController.loops">5000</stringProp>
+        </LoopController>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Accept</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">rst</stringProp>
-                <stringProp name="Header.value">${rst}</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
+          <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
+            <stringProp name="CounterConfig.start">1</stringProp>
+            <stringProp name="CounterConfig.end">${midCount}</stringProp>
+            <stringProp name="CounterConfig.incr">1</stringProp>
+            <stringProp name="CounterConfig.name">C</stringProp>
+            <stringProp name="CounterConfig.format"></stringProp>
+            <boolProp name="CounterConfig.per_user">false</boolProp>
+            <stringProp name="TestPlan.comments">Used to pluck out a single mid from the mids array (created during Init phase)</stringProp>
+          </CounterConfig>
           <hashTree/>
-          <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-            <boolProp name="LoopController.continue_forever">true</boolProp>
-            <stringProp name="LoopController.loops">2</stringProp>
-          </LoopController>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="pluck mid" enabled="true">
+            <stringProp name="TestPlan.comments">set the mid variable</stringProp>
+            <stringProp name="BeanShellSampler.query">// set the mid variable for this test loop run
+String[] mids = props.get(&quot;mids&quot;);
+String mid = mids[${C}];
+vars.put(&quot;mid&quot;, mid);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <RandomController guiclass="RandomControlGui" testclass="RandomController" testname="Random Controller" enabled="true">
+            <intProp name="InterleaveControl.style">1</intProp>
+          </RandomController>
           <hashTree>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP (mrefByMid)" enabled="true">
               <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
@@ -326,7 +326,7 @@ vars.put(&quot;mid&quot;, mid);</stringProp>
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  mrefByMid(mid: \&quot;${mid}\&quot;) {\n    mid\n    empId\n    tid\n    location\n  }\n}\n&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
+                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  mrefByMid(mid: \&quot;${mid}\&quot;) {\n    mid\n    empId\n    location\n  }\n}\n&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
                 </collectionProp>
@@ -345,7 +345,18 @@ vars.put(&quot;mid&quot;, mid);</stringProp>
               <stringProp name="HTTPSampler.connect_timeout"></stringProp>
               <stringProp name="HTTPSampler.response_timeout"></stringProp>
             </HTTPSamplerProxy>
-            <hashTree/>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="rst" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">rst</stringProp>
+                <stringProp name="RegexExtractor.regex">rst=([^\s;]*)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default"></stringProp>
+                <stringProp name="RegexExtractor.match_number"></stringProp>
+                <stringProp name="TestPlan.comments">Login required? (check the /login response body)?</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP (memberByMid)" enabled="true">
               <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
@@ -371,14 +382,19 @@ vars.put(&quot;mid&quot;, mid);</stringProp>
               <stringProp name="HTTPSampler.connect_timeout"></stringProp>
               <stringProp name="HTTPSampler.response_timeout"></stringProp>
             </HTTPSamplerProxy>
-            <hashTree/>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="rst" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">rst</stringProp>
+                <stringProp name="RegexExtractor.regex">rst=([^\s;]*)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default"></stringProp>
+                <stringProp name="RegexExtractor.match_number"></stringProp>
+                <stringProp name="TestPlan.comments">Login required? (check the /login response body)?</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
           </hashTree>
-          <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="Debug Sampler" enabled="true">
-            <boolProp name="displayJMeterProperties">true</boolProp>
-            <boolProp name="displayJMeterVariables">true</boolProp>
-            <boolProp name="displaySystemProperties">false</boolProp>
-          </DebugSampler>
-          <hashTree/>
         </hashTree>
         <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
