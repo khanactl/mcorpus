@@ -30,6 +30,8 @@ public enum JwtStatus implements EnumType {
 
     BLACKLISTED("BLACKLISTED"),
 
+    EXPIRED("EXPIRED"),
+
     MCUSER_INACTIVE("MCUSER_INACTIVE"),
 
     VALID("VALID"),

@@ -8,6 +8,7 @@ import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -26,16 +27,18 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus implements Serializable {
 
-    private static final long serialVersionUID = 1520035074;
+    private static final long serialVersionUID = 1036364008;
 
     private final UUID         jwtId;
     private final JwtIdStatus  jwtIdStatus;
+    private final Timestamp    loginExpiration;
     private final McuserStatus mcuserStatus;
     private final Boolean      admin;
 
     public JwtMcuserStatus(JwtMcuserStatus value) {
         this.jwtId = value.jwtId;
         this.jwtIdStatus = value.jwtIdStatus;
+        this.loginExpiration = value.loginExpiration;
         this.mcuserStatus = value.mcuserStatus;
         this.admin = value.admin;
     }
@@ -43,11 +46,13 @@ public class JwtMcuserStatus implements Serializable {
     public JwtMcuserStatus(
         UUID         jwtId,
         JwtIdStatus  jwtIdStatus,
+        Timestamp    loginExpiration,
         McuserStatus mcuserStatus,
         Boolean      admin
     ) {
         this.jwtId = jwtId;
         this.jwtIdStatus = jwtIdStatus;
+        this.loginExpiration = loginExpiration;
         this.mcuserStatus = mcuserStatus;
         this.admin = admin;
     }
@@ -58,6 +63,10 @@ public class JwtMcuserStatus implements Serializable {
 
     public JwtIdStatus getJwtIdStatus() {
         return this.jwtIdStatus;
+    }
+
+    public Timestamp getLoginExpiration() {
+        return this.loginExpiration;
     }
 
     public McuserStatus getMcuserStatus() {
@@ -74,6 +83,7 @@ public class JwtMcuserStatus implements Serializable {
 
         sb.append(jwtId);
         sb.append(", ").append(jwtIdStatus);
+        sb.append(", ").append(loginExpiration);
         sb.append(", ").append(mcuserStatus);
         sb.append(", ").append(admin);
 

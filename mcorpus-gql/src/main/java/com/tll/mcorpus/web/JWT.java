@@ -480,6 +480,10 @@ public class JWT {
       // logically blocked
       log.warn("JWT logically blocked.  jwtId: {}", jwtId.toString());
       return jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, false);
+    case EXPIRED:
+      // jwt (login) expired
+      log.warn("JWT expired.  jwtId: {}", jwtId.toString());
+      return jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, false);
     case VALID:
       // valid non-admin privs (standard mcuser)
       return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, false);

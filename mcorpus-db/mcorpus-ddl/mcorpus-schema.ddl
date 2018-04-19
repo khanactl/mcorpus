@@ -103,6 +103,33 @@ create table mcuser_audit (
 comment on type mcuser_audit is 'Log of when mcusers login/out and access the api.';
 
 /**
+  get_num_active_logins()
+
+  Calculate the current number of active non-expired JWT IDs held for a given mcuser.
+**/
+CREATE OR REPLACE FUNCTION get_num_active_logins(mcuser_id uuid) RETURNS int
+LANGUAGE plpgsql AS 
+$_$
+DECLARE num_valid_logins int;
+DECLARE the_mcuser_id uuid;
+BEGIN 
+  select 
+    into the_mcuser_id, num_valid_logins a.uid, count(a.jwt_id) 
+  from 
+    mcuser_audit a 
+  where 
+    a.type = 'LOGIN' 
+    and a.jwt_id_status = 'OK' 
+    and a.login_expiration >= now() 
+    and a.uid = mcuser_id
+  group by 
+    a.uid;
+  
+  return num_valid_logins;
+END
+$_$;
+
+/**
   jwt_id_ok()
 
   Is the given jwt id valid by way of:
@@ -110,19 +137,22 @@ comment on type mcuser_audit is 'Log of when mcusers login/out and access the ap
        NOTE: shis -should- (i think) always be the last created record 
        by uid (the associated mcuser).
     2) The associated mcuser's status is valid.
+    3) The login expiration timestamp is in the future
 */
 CREATE TYPE jwt_mcuser_status AS (
   jwt_id uuid,
   jwt_id_status jwt_id_status,
+  login_expiration timestamp,
   mcuser_status mcuser_status,
   admin boolean
 );
 CREATE TYPE jwt_status AS ENUM (
-    'NOT_PRESENT',
-    'BLACKLISTED',
-    'MCUSER_INACTIVE',
-    'VALID',
-    'VALID_ADMIN'
+  'NOT_PRESENT',
+  'BLACKLISTED',
+  'EXPIRED',
+  'MCUSER_INACTIVE',
+  'VALID',
+  'VALID_ADMIN'
 );
 CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
     LANGUAGE plpgsql
@@ -130,7 +160,7 @@ CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
   DECLARE qrec jwt_mcuser_status;
 BEGIN
   -- pull the jwt id status and mcuser status
-  select into qrec a.jwt_id, a.jwt_id_status, m.status, m.admin 
+  select into qrec a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
   from mcuser_audit a join mcuser m on a.uid = m.uid 
   where a.type = 'LOGIN' and a.jwt_id = $1;
 
@@ -144,6 +174,9 @@ BEGIN
   ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
     -- mcuser is bad or inactive
     return 'MCUSER_INACTIVE'::jwt_status;
+  ELSEIF qrec.login_expiration <= now() THEN
+    -- jwt id expired
+    return 'EXPIRED'::jwt_status;
   ELSEIF qrec.admin = true THEN
     -- jwt id is valid with admin priviliges
     return 'VALID_ADMIN'::jwt_status;
