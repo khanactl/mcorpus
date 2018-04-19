@@ -76,9 +76,9 @@ public class LoginRequestHandler implements Handler {
     mcuserLogin.setMcuserUsername(username);
     mcuserLogin.setMcuserPassword(pswd);
     mcuserLogin.setInJwtId(pendingJwtID);
-    mcuserLogin.setInLoginExpiration(new Timestamp(requestInstantMillis));
+    mcuserLogin.setInLoginExpiration(new Timestamp(jwtExpiresMillis));
     mcuserLogin.setInRequestOrigin(requestSnapshot.getClientOrigin());
-    mcuserLogin.setInRequestTimestamp(new Timestamp(jwtExpiresMillis));
+    mcuserLogin.setInRequestTimestamp(new Timestamp(requestInstantMillis));
     
     // call db login
     log.debug("Authenticating: mcuser..");
