@@ -1,22 +1,20 @@
 package com.tll.mcorpus.gql;
 
 import static com.tll.mcorpus.TestUtil.cpr;
+import static com.tll.mcorpus.TestUtil.ds_mcweb;
 import static com.tll.mcorpus.TestUtil.jsonStringToMap;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.UnitTest;
-import com.tll.mcorpus.repo.MCorpusRepoAsync;
+import com.tll.mcorpus.repo.MCorpusRepo;
 
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -27,17 +25,8 @@ import graphql.schema.GraphQLSchema;
 public class MCorpusGraphQLTest {
   private static final Logger log = LoggerFactory.getLogger(MCorpusGraphQLTest.class);
 
-  private static DataSource ds() {
-    PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUrl("jdbc:postgresql://localhost:5432/mcorpus");
-    ds.setUser("mcweb");
-    ds.setPassword("YAcsR6*-L;djIaX1~%zBa");
-    ds.setCurrentSchema("public");
-    return ds;
-  }
-
   private static MCorpusGraphQL mcgql() {
-    return new MCorpusGraphQL("mcorpus.graphqls", new MCorpusRepoAsync(ds()));
+    return new MCorpusGraphQL("mcorpus.graphqls", new MCorpusRepo(ds_mcweb()));
   }
 
   private static ExecutionResult query(final String query) {
