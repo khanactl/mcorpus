@@ -18,13 +18,13 @@ public class MCorpusRepoModule extends AbstractModule {
 
   @Provides
   @Singleton
-  MCorpusUserRepoAsync mcorpusUserRepo(DataSource ds) {
-    return new MCorpusUserRepoAsync(ds);
+  MCorpusUserRepo mcorpusUserRepo(DataSource ds) {
+    return new MCorpusUserRepo(ds);
   }
 
   @Provides
   @Singleton
-  MCorpusRepoAsync mcorpusRepo(DataSource ds) {
-    return new MCorpusRepoAsync(ds);
+  MCorpusRepo mcorpusRepo(DataSource ds) {
+    return new MCorpusRepo(ds);
   }
 }

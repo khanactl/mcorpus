@@ -8,9 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.db.routines.McuserLogout;
-import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
+import ratpack.exec.Blocking;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
@@ -41,7 +42,9 @@ public class LogoutRequestHandler implements Handler {
     mcuserLogout.setJwtId(jwtStatus.jwtId());
     mcuserLogout.setRequestTimestamp(new Timestamp(requestSnapshot.getRequestInstant().toEpochMilli()));
     mcuserLogout.setRequestOrigin(requestSnapshot.getClientOrigin().toString());
-    ctx.get(MCorpusUserRepoAsync.class).logoutAsync(mcuserLogout).then(fetchResult -> {
+    Blocking.get(() -> {
+      return ctx.get(MCorpusUserRepo.class).logout(mcuserLogout);
+    }).then(fetchResult -> {
       if(fetchResult.isSuccess()) {
         // logout success - nix all mcorpus cookies clientside
         expireAllCookies(ctx);

@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.tll.mcorpus.MCorpusServerConfig;
-import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
 
 import ratpack.error.ClientErrorHandler;
 import ratpack.error.ServerErrorHandler;
@@ -35,7 +35,7 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Provides
   @Singleton
-  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepoAsync mcuserRepo) {
+  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
     return new JWT(config.jwtTtlInMillis, JWT.deserialize(config.jwtSalt), mcuserRepo, serverConfig.getPublicAddress().toString());
   }
 }

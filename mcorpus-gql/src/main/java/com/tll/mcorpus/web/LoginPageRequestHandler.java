@@ -12,7 +12,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSession;
 
@@ -64,7 +64,7 @@ public class LoginPageRequestHandler implements Handler {
       
     case VALID:
       Blocking.get(() -> {
-        return ctx.get(MCorpusUserRepoAsync.class).getNumActiveLogins(jwtStatusInst.mcuserId());
+        return ctx.get(MCorpusUserRepo.class).getNumActiveLogins(jwtStatusInst.mcuserId());
       }).then(fetchResult -> {
         // show logged in summary page
         final Map<String, Object> model = new HashMap<>(4);

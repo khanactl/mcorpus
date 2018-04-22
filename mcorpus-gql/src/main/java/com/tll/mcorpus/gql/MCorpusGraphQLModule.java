@@ -3,7 +3,7 @@ package com.tll.mcorpus.gql;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.tll.mcorpus.repo.MCorpusRepoAsync;
+import com.tll.mcorpus.repo.MCorpusRepo;
 
 public class MCorpusGraphQLModule extends AbstractModule {
 
@@ -12,7 +12,7 @@ public class MCorpusGraphQLModule extends AbstractModule {
 
   @Provides
   @Singleton
-  MCorpusGraphQL mCorpusGraphQL(MCorpusRepoAsync mCorpusRepo) {
+  MCorpusGraphQL mCorpusGraphQL(MCorpusRepo mCorpusRepo) {
     return new MCorpusGraphQL("mcorpus.graphqls", mCorpusRepo);
   }
 }

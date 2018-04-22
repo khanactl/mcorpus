@@ -34,7 +34,7 @@ import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.udt.pojos.Mref;
-import com.tll.mcorpus.repo.MCorpusRepoAsync;
+import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.model.FetchResult;
 import com.tll.mcorpus.repo.model.MemberFilter;
 import com.tll.mcorpus.web.GraphQLWebQuery;
@@ -52,7 +52,7 @@ public class MCorpusGraphQL {
 
   private final String graphqlSchemaFilename;
 
-  private final MCorpusRepoAsync mCorpusRepo;
+  private final MCorpusRepo mCorpusRepo;
 
   private GraphQLSchema graphQLSchema = null;
 
@@ -62,7 +62,7 @@ public class MCorpusGraphQL {
    * @param graphqlSchemaFilename the GraphQL schema file name (no path)
    * @param mCorpusRepo required mcorpus repo
    */
-  MCorpusGraphQL(final String graphqlSchemaFilename, final MCorpusRepoAsync mCorpusRepo) {
+  MCorpusGraphQL(final String graphqlSchemaFilename, final MCorpusRepo mCorpusRepo) {
     this.graphqlSchemaFilename = graphqlSchemaFilename;
     this.mCorpusRepo = mCorpusRepo;
   }

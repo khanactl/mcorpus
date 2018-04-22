@@ -15,10 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
-import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
 
+import ratpack.exec.Blocking;
 import ratpack.form.Form;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -74,7 +75,9 @@ public class LoginRequestHandler implements Handler {
     
     // call db login
     log.debug("Authenticating: mcuser..");
-    ctx.get(MCorpusUserRepoAsync.class).loginAsync(mcuserLogin).then(loginResult -> {
+    Blocking.get(() -> {
+      return ctx.get(MCorpusUserRepo.class).login(mcuserLogin);
+    }).then(loginResult -> {
       if(loginResult == null || loginResult.hasErrorMsg()) {
         // login failed
         rerenderLoginPage(ctx, nextRst.toString(), loginResult.getErrorMsg());
