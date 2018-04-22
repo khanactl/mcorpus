@@ -128,7 +128,7 @@ END
 $_$;
 
 /**
-  jwt_mcuser_status()
+  get_jwt_status()
 
   Is the given jwt id valid by way of:
     1) The most recent mcuser_audit record having the given jwt_id 

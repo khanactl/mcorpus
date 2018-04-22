@@ -41,7 +41,7 @@ public class LogoutRequestHandler implements Handler {
     mcuserLogout.setMcuserUid(jwtStatus.mcuserId());
     mcuserLogout.setJwtId(jwtStatus.jwtId());
     mcuserLogout.setRequestTimestamp(new Timestamp(requestSnapshot.getRequestInstant().toEpochMilli()));
-    mcuserLogout.setRequestOrigin(requestSnapshot.getClientOrigin().toString());
+    mcuserLogout.setRequestOrigin(requestSnapshot.getClientOrigin());
     Blocking.get(() -> {
       return ctx.get(MCorpusUserRepo.class).logout(mcuserLogout);
     }).then(fetchResult -> {

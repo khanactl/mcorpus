@@ -241,13 +241,13 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-        "RequestSnapshot [\n"
-        + "  requestInstant=%s,\n"
-        + "  clientOrigin=%s, \n"
-        + "  jwtCookie %s, \n"
-        + "  sidCookie=%s, \n"
-        + "  rstCookie=%s, \n"
-        + "  rstHeader=%s \n"
+        "RequestSnapshot [%n"
+        + "  requestInstant=%s,%n"
+        + "  clientOrigin=%s, %n"
+        + "  jwtCookie %s, %n"
+        + "  sidCookie=%s, %n"
+        + "  rstCookie=%s, %n"
+        + "  rstHeader=%s %n"
         + "]",
         requestInstant, 
         clientOrigin,
