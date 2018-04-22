@@ -36,7 +36,9 @@ public enum JwtStatus implements EnumType {
 
     VALID("VALID"),
 
-    VALID_ADMIN("VALID_ADMIN");
+    VALID_ADMIN("VALID_ADMIN"),
+
+    PRESENT_BAD_STATE("PRESENT_BAD_STATE");
 
     private final String literal;
 

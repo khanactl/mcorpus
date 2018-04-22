@@ -470,11 +470,14 @@ public class JWT {
       return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, false);
     }
     switch(fr.get()) {
-    default:
     case NOT_PRESENT:
       // jwt id not found in db - treat as blocked then
       log.warn("JWT not present on backend.  jwtId: {}", jwtId.toString());
       return jsi(JWTStatus.NOT_PRESENT_BACKEND, mcuserId, jwtId, issued, expires, false);
+    case PRESENT_BAD_STATE:
+      // jwt id found in db but the status could not be determined
+      log.warn("JWT present but status is unknown.  jwtId: {}", jwtId.toString());
+      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, false);
     case BLACKLISTED:
     case MCUSER_INACTIVE:
       // logically blocked
@@ -490,6 +493,10 @@ public class JWT {
     case VALID_ADMIN:
       // valid with admin privs
       return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, true);
+    default:
+      // jwt id not found in db - treat as blocked then
+      log.warn("JWT unhandled status: {}!  jwtId: {}", fr.get());
+      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, false);
     }
   }
 }

@@ -12,9 +12,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tll.mcorpus.repo.MCorpusUserRepoAsync;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSession;
 
+import ratpack.exec.Blocking;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
@@ -61,12 +63,17 @@ public class LoginPageRequestHandler implements Handler {
       return;
       
     case VALID:
-      // show logged in summary page
-      final Map<String, Object> model = new HashMap<>(3);
-      model.put("mcuserId", jwtStatusInst.mcuserId());
-      model.put("loggedInSince", jwtStatusInst.issued());
-      model.put("expires", jwtStatusInst.expires());
-      ctx.render(html("loggedIn.html", model, true));
+      Blocking.get(() -> {
+        return ctx.get(MCorpusUserRepoAsync.class).getNumActiveLogins(jwtStatusInst.mcuserId());
+      }).then(fetchResult -> {
+        // show logged in summary page
+        final Map<String, Object> model = new HashMap<>(4);
+        model.put("mcuserId", jwtStatusInst.mcuserId());
+        model.put("loggedInSince", jwtStatusInst.issued());
+        model.put("expires", jwtStatusInst.expires());
+        model.put("numActiveJwtIds", fetchResult.hasErrorMsg() ? "-error-" : fetchResult.get());
+        ctx.render(html("loggedIn.html", model, true));
+      });
       return;
     }
     

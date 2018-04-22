@@ -111,33 +111,30 @@ CREATE OR REPLACE FUNCTION get_num_active_logins(mcuser_id uuid) RETURNS int
 LANGUAGE plpgsql AS 
 $_$
 DECLARE num_valid_logins int;
-DECLARE the_mcuser_id uuid;
 BEGIN 
-  select 
-    into the_mcuser_id, num_valid_logins a.uid, count(a.jwt_id) 
-  from 
-    mcuser_audit a 
+  select into num_valid_logins count(jwt_id) 
+  from mcuser_audit 
   where 
-    a.type = 'LOGIN' 
-    and a.jwt_id_status = 'OK' 
-    and a.login_expiration >= now() 
-    and a.uid = mcuser_id
-  group by 
-    a.uid;
-  
-  return num_valid_logins;
+        type = 'LOGIN' and jwt_id_status = 'OK' 
+    and login_expiration >= now() 
+    and uid = $1
+    and jwt_id not in (
+      select jwt_id 
+      from mcuser_audit 
+      where (type = 'LOGOUT' or jwt_id_status = 'BLACKLISTED') 
+      and uid = $1); 
+    return num_valid_logins;
 END
 $_$;
 
 /**
-  jwt_id_ok()
+  jwt_mcuser_status()
 
   Is the given jwt id valid by way of:
-    1) The given jwt_id is present and marked as 'OK' in the mcuser_audit table.
-       NOTE: shis -should- (i think) always be the last created record 
-       by uid (the associated mcuser).
+    1) The most recent mcuser_audit record having the given jwt_id 
+       is present and marked as 'OK'.
     2) The associated mcuser's status is valid.
-    3) The login expiration timestamp is in the future
+    3) The login expiration timestamp is in the future.
 */
 CREATE TYPE jwt_mcuser_status AS (
   jwt_id uuid,
@@ -152,23 +149,27 @@ CREATE TYPE jwt_status AS ENUM (
   'EXPIRED',
   'MCUSER_INACTIVE',
   'VALID',
-  'VALID_ADMIN'
+  'VALID_ADMIN',
+  'PRESENT_BAD_STATE'
 );
-CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
-    LANGUAGE plpgsql
-    AS $_$
-  DECLARE qrec jwt_mcuser_status;
+CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status 
+  LANGUAGE plpgsql AS 
+$_$
+  DECLARE qrec jwt_mcuser_status;  
 BEGIN
-  -- pull the jwt id status and mcuser status
-  select into qrec a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
-  from mcuser_audit a join mcuser m on a.uid = m.uid 
-  where a.type = 'LOGIN' and a.jwt_id = $1;
+
+  -- fetch the most recently created mcuser audit record having the given jwt id
+  -- this is the authoritive record as it is the most recent
+  SELECT INTO qrec a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
+  FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid 
+  WHERE a.jwt_id = $1 
+  ORDER BY a.created DESC LIMIT 1; 
 
   IF qrec is null or qrec.jwt_id is null THEN 
     -- the input jwt id was not found
     RAISE NOTICE 'JWT id not found: %', jwt_id;
     return 'NOT_PRESENT'::jwt_status;
-  ELSEIF qrec.jwt_id_status = 'BLACKLISTED'::jwt_id_status THEN
+  ELSEIF qrec.jwt_id_status = 'BLACKLISTED'::jwt_id_status THEN 
     -- jwt id is marked as blacklisted
     return 'BLACKLISTED'::jwt_status;
   ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
@@ -177,13 +178,20 @@ BEGIN
   ELSEIF qrec.login_expiration <= now() THEN
     -- jwt id expired
     return 'EXPIRED'::jwt_status;
-  ELSEIF qrec.admin = true THEN
-    -- jwt id is valid with admin priviliges
-    return 'VALID_ADMIN'::jwt_status;
+  ELSEIF qrec.jwt_id_status = 'OK' THEN
+    IF qrec.admin = true THEN
+      -- jwt id is valid with admin priviliges
+      return 'VALID_ADMIN'::jwt_status;
+    ELSE 
+      -- jwt id is valid with NON-admin priviliges
+      return 'VALID'::jwt_status;
+    END IF;
   ELSE
-    -- jwt id is valid with NON-admin priviliges
-    return 'VALID'::jwt_status;
+    -- error: unresolved jwt status
+    RAISE NOTICE 'JWT id bad state: %', jwt_id;
+    return 'PRESENT_BAD_STATE'::jwt_status;
   END IF;
+
 END 
 $_$;
 

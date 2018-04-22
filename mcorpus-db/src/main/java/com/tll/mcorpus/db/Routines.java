@@ -20,6 +20,7 @@ import com.tll.mcorpus.db.routines.GenRandomUuid;
 import com.tll.mcorpus.db.routines.GenSalt1;
 import com.tll.mcorpus.db.routines.GenSalt2;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
+import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.Hmac1;
 import com.tll.mcorpus.db.routines.Hmac2;
 import com.tll.mcorpus.db.routines.McuserLogin;
@@ -573,6 +574,37 @@ public class Routines {
     public static Field<JwtStatus> getJwtStatus(Field<UUID> jwtId) {
         GetJwtStatus f = new GetJwtStatus();
         f.setJwtId(jwtId);
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.get_num_active_logins</code>
+     */
+    public static Integer getNumActiveLogins(Configuration configuration, UUID mcuserId) {
+        GetNumActiveLogins f = new GetNumActiveLogins();
+        f.setMcuserId(mcuserId);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.get_num_active_logins</code> as a field.
+     */
+    public static Field<Integer> getNumActiveLogins(UUID mcuserId) {
+        GetNumActiveLogins f = new GetNumActiveLogins();
+        f.setMcuserId(mcuserId);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.get_num_active_logins</code> as a field.
+     */
+    public static Field<Integer> getNumActiveLogins(Field<UUID> mcuserId) {
+        GetNumActiveLogins f = new GetNumActiveLogins();
+        f.setMcuserId(mcuserId);
 
         return f.asField();
     }

@@ -42,14 +42,6 @@ public class LoginRequestHandler implements Handler {
   
   private final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
   
-  private static void rerenderLoginPage(final Context ctx, final String nextRst, final String errorMsg) {
-    // re-display login page with error message
-    final Map<String, Object> model = new HashMap<>(2);
-    model.put("rst", nextRst);
-    model.put("statusMsg", errorMsg);
-    ctx.render(html("loginForm.html", model, false));
-  }
-
   @Override
   public void handle(Context ctx) {
     final RequestSnapshot requestSnapshot = ctx.getRequest().get(RequestSnapshot.class);
@@ -123,4 +115,13 @@ public class LoginRequestHandler implements Handler {
       ctx.redirect(301, "index");
     });
   }
+
+  private void rerenderLoginPage(final Context ctx, final String nextRst, final String errorMsg) {
+    // re-display login page with error message
+    final Map<String, Object> model = new HashMap<>(2);
+    model.put("rst", nextRst);
+    model.put("statusMsg", errorMsg);
+    ctx.render(html("loginForm.html", model, false));
+  }
+
 }

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
+import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
@@ -52,6 +53,27 @@ public class MCorpusUserRepo implements Closeable {
       log.debug("Closing..");
       dsl.close();
       log.info("Closed.");
+    }
+  }
+  
+  /**
+   * Call the backend to get the number of valid, non-expired JWT IDs issued for
+   * the given mcuser id.
+   * 
+   * @param uid the mcuser id
+   * @return the number of valid, non-expired JWT IDs held in the backend system
+   */
+  public FetchResult<Integer> getNumActiveLogins(final UUID uid) {
+    if(uid == null) return new FetchResult<>(null, "No mcuser id provided.");
+    try {
+      final GetNumActiveLogins backend = new GetNumActiveLogins();
+      backend.setMcuserId(uid);
+      backend.execute(dsl.configuration());
+      return new FetchResult<>(backend.getReturnValue(), null);
+    }
+    catch(Throwable e) {
+      log.info("JWT number of active logins call error: {}", e.getMessage());
+      return new FetchResult<>(null, "JWT number of active logins call failed.");
     }
   }
   
