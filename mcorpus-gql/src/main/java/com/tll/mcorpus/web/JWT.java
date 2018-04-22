@@ -358,7 +358,7 @@ public class JWT {
    * <b>IMPT</b>: This method issues a call to the backend system (db) to verify
    * the JWT subject (the mcuser id) status and the JWTID status.
    * <p>
-   * NOTE: a backend call to the db happens AFTER these checks:
+   * A backend call to the db happens ONLY AFTER these checks:
    * <ul>
    * <li>a JWT is present in the given request snapshot <code>rs</code>.</li>
    * <li>the JWT signature is verified
@@ -494,7 +494,7 @@ public class JWT {
       // valid with admin privs
       return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, true);
     default:
-      // jwt id not found in db - treat as blocked then
+      // unhandled jwt status so convey status as backend error
       log.warn("JWT unhandled status: {}!  jwtId: {}", fr.get());
       return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, false);
     }
