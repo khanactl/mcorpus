@@ -1,6 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Util.isBlank;
+import static com.tll.mcorpus.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.clearSidCookie;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
@@ -17,6 +18,7 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
+import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
 
 import ratpack.exec.Blocking;
@@ -45,6 +47,7 @@ public class LoginRequestHandler implements Handler {
   
   @Override
   public void handle(Context ctx) {
+    
     final RequestSnapshot requestSnapshot = ctx.getRequest().get(RequestSnapshot.class);
 
     final Form formData = ctx.getRequest().get(Form.class);
@@ -52,6 +55,12 @@ public class LoginRequestHandler implements Handler {
     final String pswd = formData.get("password");
     final UUID nextRst = ctx.getRequest().get(NextRst.class).nextRst;
     
+    // verify the JWT status is either not present or expired
+    if(not(ctx.getRequest().get(JWTStatusInstance.class).isJWTStatusExpiredOrNotPresent())) {
+      rerenderLoginPage(ctx, nextRst.toString(), "Invalid JWT status for login.");
+      return;
+    }
+
     // validate login input
     if(isBlank(username) || isBlank(pswd)) {
       rerenderLoginPage(ctx, nextRst.toString(), "Invalid login credentials.");

@@ -165,6 +165,14 @@ public class JWT {
     public JWTStatus status() { return status; }
     
     /**
+     * @return true if the JWT status is either expired or not present, 
+     *         false otherwise.
+     */
+    public boolean isJWTStatusExpiredOrNotPresent() {
+      return not(status.isPresent()) || status.isExpired();
+    }
+    
+    /**
      * @return the mcuser id 
      */
     public UUID mcuserId() { return mcuserId; }
