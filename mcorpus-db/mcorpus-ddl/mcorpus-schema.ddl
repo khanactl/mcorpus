@@ -61,7 +61,7 @@ create table mcuser (
 
   created                 timestamp not null default now(),
   modified                timestamp null,
-  status                  mcuser_status non null default 'ACTIVE',
+  status                  mcuser_status not null default 'ACTIVE',
 
   name                    text not null,
   email                   text not null,
