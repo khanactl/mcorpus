@@ -27,7 +27,7 @@
   <build>
     <resources>
       <resource>
-        <directory>config/${mcorpusEnv}</directory>
+        <directory>config/${env.MCORPUS_BUILD_MODE}</directory>
         <filtering>false</filtering>
       </resource>
       <resource>
@@ -80,7 +80,7 @@
               <Main-Class>com.tll.mcorpus.Main</Main-Class>
               <Build-Number>${project.version}</Build-Number>
               <Build-Timestamp>${timestamp}</Build-Timestamp>
-              <mode>${environment}</mode>
+              <mode>${env.MCORPUS_BUILD_MODE}</mode>
             </manifestEntries>
           </archive>
         </configuration>
@@ -127,7 +127,7 @@
                     <Main-Class>com.tll.mcorpus.Main</Main-Class>
                     <Build-Number>${project.version}</Build-Number>
                     <Build-Timestamp>${timestamp}</Build-Timestamp>
-                    <mode>${environment}</mode>
+                    <mode>${env.MCORPUS_BUILD_MODE}</mode>
                   </manifestEntries>
                 </transformer>
               </transformers>
