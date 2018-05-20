@@ -39,6 +39,9 @@ SET row_security = off;
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
+-- UUID support
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- CRYPTO and uuid support (https://www.postgresql.org/docs/9.6/static/pgcrypto.html)
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public VERSION "1.3";
 COMMENT ON EXTENSION pgcrypto IS 'pgcrypto v1.3';
@@ -61,13 +64,13 @@ create table mcuser (
 
   created                 timestamp not null default now(),
   modified                timestamp null,
-  status                  mcuser_status not null default 'ACTIVE',
 
   name                    text not null,
   email                   text not null,
   username                text not null,
   pswd                    text not null,
   admin                   boolean not null,
+  status                  mcuser_status not null default 'ACTIVE',
 
   unique(username),
   unique(email)
@@ -95,7 +98,7 @@ create table mcuser_audit (
   request_origin          text not null,
   login_expiration        timestamp,
   jwt_id                  uuid,
-  jwt_id_status           jwt_status,
+  jwt_id_status           jwt_id_status,
 
   primary key (uid, created, type),
   unique(type, jwt_id)
