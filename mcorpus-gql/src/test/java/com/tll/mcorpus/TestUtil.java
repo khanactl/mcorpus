@@ -84,24 +84,8 @@ public class TestUtil {
    *         testing.
    */
   public static DataSource ds_mcwebtest() {
-    Properties dbprops = new Properties();
-    InputStream istream = null;
-    try {
-      istream = Thread.currentThread().getContextClassLoader().getResourceAsStream("testdb.properties");
-      dbprops.load(istream);
-    } catch (IOException e) {
-      throw new IllegalStateException("Failed to load test db props.");
-    } finally {
-      if(istream != null) try {
-        istream.close();
-      } catch (IOException e) {
-      }
-    }
     PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUrl(dbprops.getProperty("testDbUrl"));
-    ds.setUser(dbprops.getProperty("testDbUsername"));
-    ds.setPassword(dbprops.getProperty("testDbPassword"));
-    ds.setCurrentSchema(dbprops.getProperty("testDbSchema"));
+    ds.setUrl(System.getenv("MCORPUS_TEST_DB_URL"));
     return ds;
   }
   
