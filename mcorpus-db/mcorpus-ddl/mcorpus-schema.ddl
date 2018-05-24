@@ -140,6 +140,7 @@ $_$;
     3) The login expiration timestamp is in the future.
 */
 CREATE TYPE jwt_mcuser_status AS (
+  mcuser_audit_record_type mcuser_audit_type,
   jwt_id uuid,
   jwt_id_status jwt_id_status,
   login_expiration timestamp,
@@ -163,7 +164,7 @@ BEGIN
 
   -- fetch the most recently created mcuser audit record having the given jwt id
   -- this is the authoritive record as it is the most recent
-  SELECT INTO qrec a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
+  SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
   FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid 
   WHERE a.jwt_id = $1 
   ORDER BY a.created DESC LIMIT 1; 
@@ -178,8 +179,12 @@ BEGIN
   ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
     -- mcuser is bad or inactive
     return 'MCUSER_INACTIVE'::jwt_status;
-  ELSEIF qrec.login_expiration <= now() THEN
-    -- jwt id expired
+  ELSEIF qrec.mcuser_audit_record_type != 'LOGIN'::mcuser_audit_type THEN
+    -- not a login mcuser audit record! (shouldn't happen but we check to be sure)
+    RAISE NOTICE 'Expected LOGIN type mcuser_audit record';
+    return 'PRESENT_BAD_STATE'::jwt_status;
+  ELSEIF qrec.login_expiration is null or qrec.login_expiration <= now() THEN
+    -- either no login expiration date present or the jwt id has expired
     return 'EXPIRED'::jwt_status;
   ELSEIF qrec.jwt_id_status = 'OK' THEN
     IF qrec.admin = true THEN
