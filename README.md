@@ -13,14 +13,13 @@ Houses the JooQ generated types representing the db-schema and data access api. 
 
 # Features
 - Web session based user login with CSRF protection
-- JWT, signed and ecnrypted, for user authentication via http-only cookie
-- CSRF protection against the GraphQL endpoint (/graphql) via per-request synchronization tokens
-- GraphiQL (the developer, schema-discovery UI to understand the mcorpus GraphQL schema)
-- Asynchronously driven with Java 8
+- JWT, signed and ecnrypted, for token-based user authentication via secure, http-only cookies.
+- Per-request sync tokens (stateless) for every GraphQL (/graphql) request to mitigate CSRF attacks.
+- GraphiQL UI - the 'schema discovery' UI as a means to issue GraphQL requests and understand the mcorpus schema.
 - Postgres db for the backend data repository
 - Minimalist first-principles approach
 - Powered by 
-  - [Ratpack](https://ratpack.io/) / [Netty](https://netty.io/)
-  - [JooQ](https://www.jooq.org/)
   - [Postgres](https://www.postgresql.org/)
+  - [JooQ](https://www.jooq.org/)
   - [graphql-java](https://github.com/graphql-java/graphql-java)
+  - [Ratpack](https://ratpack.io/) / [Netty](https://netty.io/)
