@@ -51,13 +51,13 @@ public class Keys {
 
     public static final UniqueKey<MaddressRecord> MADDRESS_PKEY = UniqueKeys0.MADDRESS_PKEY;
     public static final UniqueKey<MauthRecord> MAUTH_PKEY = UniqueKeys0.MAUTH_PKEY;
-    public static final UniqueKey<MauthRecord> UNIQUE_MEMBER_USERNAME = UniqueKeys0.UNIQUE_MEMBER_USERNAME;
+    public static final UniqueKey<MauthRecord> MAUTH_USERNAME_KEY = UniqueKeys0.MAUTH_USERNAME_KEY;
     public static final UniqueKey<MbenefitsRecord> MBENEFITS_PKEY = UniqueKeys0.MBENEFITS_PKEY;
     public static final UniqueKey<McuserRecord> MCUSER_PKEY = UniqueKeys0.MCUSER_PKEY;
     public static final UniqueKey<McuserRecord> MCUSER_EMAIL_KEY = UniqueKeys0.MCUSER_EMAIL_KEY;
     public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = UniqueKeys0.MCUSER_USERNAME_KEY;
     public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = UniqueKeys0.MCUSER_AUDIT_PKEY;
-    public static final UniqueKey<McuserAuditRecord> TYPE__JWT_ID = UniqueKeys0.TYPE__JWT_ID;
+    public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_TYPE_JWT_ID_KEY = UniqueKeys0.MCUSER_AUDIT_TYPE_JWT_ID_KEY;
     public static final UniqueKey<MemberRecord> MEMBER_PKEY = UniqueKeys0.MEMBER_PKEY;
     public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = UniqueKeys0.MEMBER_EMP_ID_LOCATION_KEY;
     public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = UniqueKeys0.MEMBER_AUDIT_PKEY;
@@ -77,13 +77,13 @@ public class Keys {
     private static class UniqueKeys0 {
         public static final UniqueKey<MaddressRecord> MADDRESS_PKEY = Internal.createUniqueKey(Maddress.MADDRESS, "maddress_pkey", Maddress.MADDRESS.MID, Maddress.MADDRESS.ADDRESS_NAME);
         public static final UniqueKey<MauthRecord> MAUTH_PKEY = Internal.createUniqueKey(Mauth.MAUTH, "mauth_pkey", Mauth.MAUTH.MID);
-        public static final UniqueKey<MauthRecord> UNIQUE_MEMBER_USERNAME = Internal.createUniqueKey(Mauth.MAUTH, "unique_member_username", Mauth.MAUTH.USERNAME);
+        public static final UniqueKey<MauthRecord> MAUTH_USERNAME_KEY = Internal.createUniqueKey(Mauth.MAUTH, "mauth_username_key", Mauth.MAUTH.USERNAME);
         public static final UniqueKey<MbenefitsRecord> MBENEFITS_PKEY = Internal.createUniqueKey(Mbenefits.MBENEFITS, "mbenefits_pkey", Mbenefits.MBENEFITS.MID);
         public static final UniqueKey<McuserRecord> MCUSER_PKEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_pkey", Mcuser.MCUSER.UID);
         public static final UniqueKey<McuserRecord> MCUSER_EMAIL_KEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_email_key", Mcuser.MCUSER.EMAIL);
         public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_username_key", Mcuser.MCUSER.USERNAME);
         public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, "mcuser_audit_pkey", McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE);
-        public static final UniqueKey<McuserAuditRecord> TYPE__JWT_ID = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, "type__jwt_id", McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID);
+        public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_TYPE_JWT_ID_KEY = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, "mcuser_audit_type_jwt_id_key", McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID);
         public static final UniqueKey<MemberRecord> MEMBER_PKEY = Internal.createUniqueKey(Member.MEMBER, "member_pkey", Member.MEMBER.MID);
         public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = Internal.createUniqueKey(Member.MEMBER, "member_emp_id_location_key", Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION);
         public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = Internal.createUniqueKey(MemberAudit.MEMBER_AUDIT, "member_audit_pkey", MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE);

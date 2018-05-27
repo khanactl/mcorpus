@@ -6,6 +6,7 @@ package com.tll.mcorpus.db.udt;
 
 import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.enums.JwtIdStatus;
+import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
 
@@ -32,7 +33,7 @@ import org.jooq.impl.UDTImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
 
-    private static final long serialVersionUID = 1705714748;
+    private static final long serialVersionUID = 1175461663;
 
     /**
      * The reference instance of <code>public.jwt_mcuser_status</code>
@@ -46,6 +47,11 @@ public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
     public Class<JwtMcuserStatusRecord> getRecordType() {
         return JwtMcuserStatusRecord.class;
     }
+
+    /**
+     * The attribute <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
+     */
+    public static final UDTField<JwtMcuserStatusRecord, McuserAuditType> MCUSER_AUDIT_RECORD_TYPE = createField("mcuser_audit_record_type", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.jwt_id</code>.

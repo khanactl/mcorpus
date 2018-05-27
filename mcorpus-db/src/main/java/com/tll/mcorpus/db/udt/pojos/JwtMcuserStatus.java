@@ -5,6 +5,7 @@ package com.tll.mcorpus.db.udt.pojos;
 
 
 import com.tll.mcorpus.db.enums.JwtIdStatus;
+import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
@@ -27,15 +28,17 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus implements Serializable {
 
-    private static final long serialVersionUID = 1036364008;
+    private static final long serialVersionUID = 2095937219;
 
-    private final UUID         jwtId;
-    private final JwtIdStatus  jwtIdStatus;
-    private final Timestamp    loginExpiration;
-    private final McuserStatus mcuserStatus;
-    private final Boolean      admin;
+    private final McuserAuditType mcuserAuditRecordType;
+    private final UUID            jwtId;
+    private final JwtIdStatus     jwtIdStatus;
+    private final Timestamp       loginExpiration;
+    private final McuserStatus    mcuserStatus;
+    private final Boolean         admin;
 
     public JwtMcuserStatus(JwtMcuserStatus value) {
+        this.mcuserAuditRecordType = value.mcuserAuditRecordType;
         this.jwtId = value.jwtId;
         this.jwtIdStatus = value.jwtIdStatus;
         this.loginExpiration = value.loginExpiration;
@@ -44,17 +47,23 @@ public class JwtMcuserStatus implements Serializable {
     }
 
     public JwtMcuserStatus(
-        UUID         jwtId,
-        JwtIdStatus  jwtIdStatus,
-        Timestamp    loginExpiration,
-        McuserStatus mcuserStatus,
-        Boolean      admin
+        McuserAuditType mcuserAuditRecordType,
+        UUID            jwtId,
+        JwtIdStatus     jwtIdStatus,
+        Timestamp       loginExpiration,
+        McuserStatus    mcuserStatus,
+        Boolean         admin
     ) {
+        this.mcuserAuditRecordType = mcuserAuditRecordType;
         this.jwtId = jwtId;
         this.jwtIdStatus = jwtIdStatus;
         this.loginExpiration = loginExpiration;
         this.mcuserStatus = mcuserStatus;
         this.admin = admin;
+    }
+
+    public McuserAuditType getMcuserAuditRecordType() {
+        return this.mcuserAuditRecordType;
     }
 
     public UUID getJwtId() {
@@ -81,7 +90,8 @@ public class JwtMcuserStatus implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder("JwtMcuserStatus (");
 
-        sb.append(jwtId);
+        sb.append(mcuserAuditRecordType);
+        sb.append(", ").append(jwtId);
         sb.append(", ").append(jwtIdStatus);
         sb.append(", ").append(loginExpiration);
         sb.append(", ").append(mcuserStatus);

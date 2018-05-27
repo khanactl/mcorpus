@@ -15,6 +15,7 @@ import com.tll.mcorpus.db.routines.Digest1;
 import com.tll.mcorpus.db.routines.Digest2;
 import com.tll.mcorpus.db.routines.Encrypt;
 import com.tll.mcorpus.db.routines.EncryptIv;
+import com.tll.mcorpus.db.routines.FetchLatestJwtMcuserRec;
 import com.tll.mcorpus.db.routines.GenRandomBytes;
 import com.tll.mcorpus.db.routines.GenRandomUuid;
 import com.tll.mcorpus.db.routines.GenSalt1;
@@ -48,9 +49,20 @@ import com.tll.mcorpus.db.routines.PgpSymEncrypt2;
 import com.tll.mcorpus.db.routines.PgpSymEncryptBytea1;
 import com.tll.mcorpus.db.routines.PgpSymEncryptBytea2;
 import com.tll.mcorpus.db.routines.SetModified;
+import com.tll.mcorpus.db.routines.UuidGenerateV1;
+import com.tll.mcorpus.db.routines.UuidGenerateV1mc;
+import com.tll.mcorpus.db.routines.UuidGenerateV3;
+import com.tll.mcorpus.db.routines.UuidGenerateV4;
+import com.tll.mcorpus.db.routines.UuidGenerateV5;
+import com.tll.mcorpus.db.routines.UuidNil;
+import com.tll.mcorpus.db.routines.UuidNsDns;
+import com.tll.mcorpus.db.routines.UuidNsOid;
+import com.tll.mcorpus.db.routines.UuidNsUrl;
+import com.tll.mcorpus.db.routines.UuidNsX500;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
+import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
 import java.sql.Timestamp;
@@ -428,6 +440,37 @@ public class Routines {
         f.set__2(__2);
         f.set__3(__3);
         f.set__4(__4);
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.fetch_latest_jwt_mcuser_rec</code>
+     */
+    public static JwtMcuserStatusRecord fetchLatestJwtMcuserRec(Configuration configuration, UUID jwtId) {
+        FetchLatestJwtMcuserRec f = new FetchLatestJwtMcuserRec();
+        f.setJwtId(jwtId);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.fetch_latest_jwt_mcuser_rec</code> as a field.
+     */
+    public static Field<JwtMcuserStatusRecord> fetchLatestJwtMcuserRec(UUID jwtId) {
+        FetchLatestJwtMcuserRec f = new FetchLatestJwtMcuserRec();
+        f.setJwtId(jwtId);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.fetch_latest_jwt_mcuser_rec</code> as a field.
+     */
+    public static Field<JwtMcuserStatusRecord> fetchLatestJwtMcuserRec(Field<UUID> jwtId) {
+        FetchLatestJwtMcuserRec f = new FetchLatestJwtMcuserRec();
+        f.setJwtId(jwtId);
 
         return f.asField();
     }
@@ -1548,6 +1591,226 @@ public class Routines {
     @java.lang.Deprecated
     public static Field<Object> setModified() {
         SetModified f = new SetModified();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_generate_v1</code>
+     */
+    public static UUID uuidGenerateV1(Configuration configuration) {
+        UuidGenerateV1 f = new UuidGenerateV1();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v1</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV1() {
+        UuidGenerateV1 f = new UuidGenerateV1();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_generate_v1mc</code>
+     */
+    public static UUID uuidGenerateV1mc(Configuration configuration) {
+        UuidGenerateV1mc f = new UuidGenerateV1mc();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v1mc</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV1mc() {
+        UuidGenerateV1mc f = new UuidGenerateV1mc();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_generate_v3</code>
+     */
+    public static UUID uuidGenerateV3(Configuration configuration, UUID namespace, String name) {
+        UuidGenerateV3 f = new UuidGenerateV3();
+        f.setNamespace(namespace);
+        f.setName_(name);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v3</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV3(UUID namespace, String name) {
+        UuidGenerateV3 f = new UuidGenerateV3();
+        f.setNamespace(namespace);
+        f.setName_(name);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v3</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV3(Field<UUID> namespace, Field<String> name) {
+        UuidGenerateV3 f = new UuidGenerateV3();
+        f.setNamespace(namespace);
+        f.setName_(name);
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_generate_v4</code>
+     */
+    public static UUID uuidGenerateV4(Configuration configuration) {
+        UuidGenerateV4 f = new UuidGenerateV4();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v4</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV4() {
+        UuidGenerateV4 f = new UuidGenerateV4();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_generate_v5</code>
+     */
+    public static UUID uuidGenerateV5(Configuration configuration, UUID namespace, String name) {
+        UuidGenerateV5 f = new UuidGenerateV5();
+        f.setNamespace(namespace);
+        f.setName_(name);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v5</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV5(UUID namespace, String name) {
+        UuidGenerateV5 f = new UuidGenerateV5();
+        f.setNamespace(namespace);
+        f.setName_(name);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.uuid_generate_v5</code> as a field.
+     */
+    public static Field<UUID> uuidGenerateV5(Field<UUID> namespace, Field<String> name) {
+        UuidGenerateV5 f = new UuidGenerateV5();
+        f.setNamespace(namespace);
+        f.setName_(name);
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_nil</code>
+     */
+    public static UUID uuidNil(Configuration configuration) {
+        UuidNil f = new UuidNil();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_nil</code> as a field.
+     */
+    public static Field<UUID> uuidNil() {
+        UuidNil f = new UuidNil();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_ns_dns</code>
+     */
+    public static UUID uuidNsDns(Configuration configuration) {
+        UuidNsDns f = new UuidNsDns();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_ns_dns</code> as a field.
+     */
+    public static Field<UUID> uuidNsDns() {
+        UuidNsDns f = new UuidNsDns();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_ns_oid</code>
+     */
+    public static UUID uuidNsOid(Configuration configuration) {
+        UuidNsOid f = new UuidNsOid();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_ns_oid</code> as a field.
+     */
+    public static Field<UUID> uuidNsOid() {
+        UuidNsOid f = new UuidNsOid();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_ns_url</code>
+     */
+    public static UUID uuidNsUrl(Configuration configuration) {
+        UuidNsUrl f = new UuidNsUrl();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_ns_url</code> as a field.
+     */
+    public static Field<UUID> uuidNsUrl() {
+        UuidNsUrl f = new UuidNsUrl();
+
+        return f.asField();
+    }
+
+    /**
+     * Call <code>public.uuid_ns_x500</code>
+     */
+    public static UUID uuidNsX500(Configuration configuration) {
+        UuidNsX500 f = new UuidNsX500();
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.uuid_ns_x500</code> as a field.
+     */
+    public static Field<UUID> uuidNsX500() {
+        UuidNsX500 f = new UuidNsX500();
 
         return f.asField();
     }

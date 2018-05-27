@@ -4,7 +4,7 @@
 package com.tll.mcorpus.db.tables.pojos;
 
 
-import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -26,7 +26,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser implements Serializable {
 
-    private static final long serialVersionUID = -1321251932;
+    private static final long serialVersionUID = 2106400054;
 
     private final UUID         uid;
     private final Timestamp    created;
@@ -36,7 +36,7 @@ public class Mcuser implements Serializable {
     private final String       username;
     private final String       pswd;
     private final Boolean      admin;
-    private final MemberStatus status;
+    private final McuserStatus status;
 
     public Mcuser(Mcuser value) {
         this.uid = value.uid;
@@ -59,7 +59,7 @@ public class Mcuser implements Serializable {
         String       username,
         String       pswd,
         Boolean      admin,
-        MemberStatus status
+        McuserStatus status
     ) {
         this.uid = uid;
         this.created = created;
@@ -104,7 +104,7 @@ public class Mcuser implements Serializable {
         return this.admin;
     }
 
-    public MemberStatus getStatus() {
+    public McuserStatus getStatus() {
         return this.status;
     }
 

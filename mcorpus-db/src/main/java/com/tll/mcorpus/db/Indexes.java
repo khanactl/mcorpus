@@ -38,13 +38,13 @@ public class Indexes {
 
     public static final Index MADDRESS_PKEY = Indexes0.MADDRESS_PKEY;
     public static final Index MAUTH_PKEY = Indexes0.MAUTH_PKEY;
-    public static final Index UNIQUE_MEMBER_USERNAME = Indexes0.UNIQUE_MEMBER_USERNAME;
+    public static final Index MAUTH_USERNAME_KEY = Indexes0.MAUTH_USERNAME_KEY;
     public static final Index MBENEFITS_PKEY = Indexes0.MBENEFITS_PKEY;
     public static final Index MCUSER_EMAIL_KEY = Indexes0.MCUSER_EMAIL_KEY;
     public static final Index MCUSER_PKEY = Indexes0.MCUSER_PKEY;
     public static final Index MCUSER_USERNAME_KEY = Indexes0.MCUSER_USERNAME_KEY;
     public static final Index MCUSER_AUDIT_PKEY = Indexes0.MCUSER_AUDIT_PKEY;
-    public static final Index TYPE__JWT_ID = Indexes0.TYPE__JWT_ID;
+    public static final Index MCUSER_AUDIT_TYPE_JWT_ID_KEY = Indexes0.MCUSER_AUDIT_TYPE_JWT_ID_KEY;
     public static final Index MEMBER_EMP_ID_LOCATION_KEY = Indexes0.MEMBER_EMP_ID_LOCATION_KEY;
     public static final Index MEMBER_PKEY = Indexes0.MEMBER_PKEY;
     public static final Index MEMBER_AUDIT_PKEY = Indexes0.MEMBER_AUDIT_PKEY;
@@ -56,13 +56,13 @@ public class Indexes {
     private static class Indexes0 {
         public static Index MADDRESS_PKEY = Internal.createIndex("maddress_pkey", Maddress.MADDRESS, new OrderField[] { Maddress.MADDRESS.MID, Maddress.MADDRESS.ADDRESS_NAME }, true);
         public static Index MAUTH_PKEY = Internal.createIndex("mauth_pkey", Mauth.MAUTH, new OrderField[] { Mauth.MAUTH.MID }, true);
-        public static Index UNIQUE_MEMBER_USERNAME = Internal.createIndex("unique_member_username", Mauth.MAUTH, new OrderField[] { Mauth.MAUTH.USERNAME }, true);
+        public static Index MAUTH_USERNAME_KEY = Internal.createIndex("mauth_username_key", Mauth.MAUTH, new OrderField[] { Mauth.MAUTH.USERNAME }, true);
         public static Index MBENEFITS_PKEY = Internal.createIndex("mbenefits_pkey", Mbenefits.MBENEFITS, new OrderField[] { Mbenefits.MBENEFITS.MID }, true);
         public static Index MCUSER_EMAIL_KEY = Internal.createIndex("mcuser_email_key", Mcuser.MCUSER, new OrderField[] { Mcuser.MCUSER.EMAIL }, true);
         public static Index MCUSER_PKEY = Internal.createIndex("mcuser_pkey", Mcuser.MCUSER, new OrderField[] { Mcuser.MCUSER.UID }, true);
         public static Index MCUSER_USERNAME_KEY = Internal.createIndex("mcuser_username_key", Mcuser.MCUSER, new OrderField[] { Mcuser.MCUSER.USERNAME }, true);
         public static Index MCUSER_AUDIT_PKEY = Internal.createIndex("mcuser_audit_pkey", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE }, true);
-        public static Index TYPE__JWT_ID = Internal.createIndex("type__jwt_id", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID }, true);
+        public static Index MCUSER_AUDIT_TYPE_JWT_ID_KEY = Internal.createIndex("mcuser_audit_type_jwt_id_key", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID }, true);
         public static Index MEMBER_EMP_ID_LOCATION_KEY = Internal.createIndex("member_emp_id_location_key", Member.MEMBER, new OrderField[] { Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION }, true);
         public static Index MEMBER_PKEY = Internal.createIndex("member_pkey", Member.MEMBER, new OrderField[] { Member.MEMBER.MID }, true);
         public static Index MEMBER_AUDIT_PKEY = Internal.createIndex("member_audit_pkey", MemberAudit.MEMBER_AUDIT, new OrderField[] { MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE }, true);
