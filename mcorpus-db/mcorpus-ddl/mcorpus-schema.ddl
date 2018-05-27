@@ -52,12 +52,29 @@ SET search_path = public, pg_catalog;
 -- mcorpus user and audit (those who access and mutate this corpus of data)
 ---------------------------------------------------------------------------
 
+/*
+pass_hash()
+
+Use to generate a hash from a raw password to manually create mcuser passwords.
+
+@return the generated hash of a text password
+        with a randomly generated salt.
+*/
+create or replace function pass_hash(pswd text) returns text as $$
+  begin
+    -- NOTE: we use the blowfish algo for the salt
+    -- SEE: https://www.postgresql.org/docs/9.6/static/pgcrypto.html#PGCRYPTO-CRYPT-ALGORITHMS
+    return crypt(pswd, gen_salt('bf'));
+  end;
+$$ language plpgsql
+RETURNS NULL ON NULL INPUT;
+
 create type mcuser_status as enum (
   'ACTIVE',
   'INACTIVE',
   'INVALIDATED'
 );
-comment on type mcuser_status is 'The mcuser status.';
+comment on type mcuser_status is 'The allowed mcuser status values.';
 
 create table mcuser (
   uid                     uuid primary key default gen_random_uuid(),
@@ -81,14 +98,14 @@ create type jwt_id_status as enum (
   'BLACKLISTED',
   'OK'
 );
-comment on type jwt_id_status is 'The JWT ID status.';
+comment on type jwt_id_status is 'The allowed JWT ID status values.';
 
 create type mcuser_audit_type as enum (
   'LOGIN',
   'LOGOUT',
   'GRAPHQL_QUERY'
 );
-comment on type mcuser_audit_type is 'The mcuser audit record/event type.';
+comment on type mcuser_audit_type is 'The allowed mcuser audit types.';
 
 create table mcuser_audit (
   uid                     uuid not null, -- i.e. the mcuser.uid
@@ -108,7 +125,8 @@ comment on type mcuser_audit is 'Log of when mcusers login/out and access the ap
 /**
   get_num_active_logins()
 
-  Calculate the current number of active non-expired JWT IDs held for a given mcuser.
+  Calculate the current number of active non-expired JWT IDs 
+  held in the mcuser_audit table for a given mcuser.
 **/
 CREATE OR REPLACE FUNCTION get_num_active_logins(mcuser_id uuid) RETURNS int
 LANGUAGE plpgsql AS 
@@ -130,15 +148,6 @@ BEGIN
 END
 $_$;
 
-/**
-  get_jwt_status()
-
-  Is the given jwt id valid by way of:
-    1) The most recent mcuser_audit record having the given jwt_id 
-       is present and marked as 'OK'.
-    2) The associated mcuser's status is valid.
-    3) The login expiration timestamp is in the future.
-*/
 CREATE TYPE jwt_mcuser_status AS (
   mcuser_audit_record_type mcuser_audit_type,
   jwt_id uuid,
@@ -147,6 +156,8 @@ CREATE TYPE jwt_mcuser_status AS (
   mcuser_status mcuser_status,
   admin boolean
 );
+comment on type jwt_mcuser_status is 'The pertinent db columns bound to a held JWT ID in the mcuser_audit table.';
+
 CREATE TYPE jwt_status AS ENUM (
   'NOT_PRESENT',
   'BLACKLISTED',
@@ -156,18 +167,42 @@ CREATE TYPE jwt_status AS ENUM (
   'VALID_ADMIN',
   'PRESENT_BAD_STATE'
 );
-CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status 
-  LANGUAGE plpgsql AS 
-$_$
-  DECLARE qrec jwt_mcuser_status;  
-BEGIN
+comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.'
 
-  -- fetch the most recently created mcuser audit record having the given jwt id
-  -- this is the authoritive record as it is the most recent
+/**
+ * Fetch the most recently created mcuser audit record with the given jwt id.
+ * This is the authoritive record regarding its status as it is the most recent.
+*/
+CREATE OR REPLACE FUNCTION fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_mcuser_status 
+  LANGUAGE plpgsql AS
+$_$
+  DECLARE qrec jwt_mcuser_status;
+BEGIN
   SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
   FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid 
   WHERE a.jwt_id = $1 
   ORDER BY a.created DESC LIMIT 1; 
+
+  RETURN qrec;
+END
+$_$;
+
+/**
+  get_jwt_status()
+
+  Is the given jwt id valid by way of:
+    1) The most recent mcuser_audit record having the given jwt_id 
+       is present and marked as 'OK'.
+    2) The associated mcuser's status is valid.
+    3) The login expiration timestamp is in the future.
+*/
+CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status 
+  LANGUAGE plpgsql AS 
+$_$
+  DECLARE qrec jwt_mcuser_status;
+BEGIN
+
+  qrec := fetch_latest_jwt_mcuser_rec(jwt_id);
 
   IF qrec is null or qrec.jwt_id is null THEN 
     -- the input jwt id was not found
@@ -204,34 +239,20 @@ END
 $_$;
 
 /*
-pass_hash()
-
-@return the generated hash of a text password
-        with a randomly generated salt.
-*/
-create or replace function pass_hash(pswd text) returns text as $$
-  begin
-    -- NOTE: we use the blowfish algo for the salt
-    -- SEE: https://www.postgresql.org/docs/9.6/static/pgcrypto.html#PGCRYPTO-CRYPT-ALGORITHMS
-    return crypt(pswd, gen_salt('bf'));
-  end;
-$$ language plpgsql
-RETURNS NULL ON NULL INPUT;
-
-/*
 mcuser_login
 
 Call this function to authenticate mcuser users
-by username/passwoed credentials
-along with the needed meta information.
+by username and password along with 
+http request context information.
 
 When an mcuser authentication is successful,
-a LOGIN-type mcuser_audit record is created.
+a LOGIN-type mcuser_audit record is created
+and the associated mcuser record is returned.
 
 @return:
-  the matching mcuser record upon successfull login
+  the matching mcuser record upon successful login
   -OR-
-  NULL when login fails.
+  NULL when login fails for any reason.
 */
 CREATE OR REPLACE FUNCTION mcuser_login(
   mcuser_username text, 
@@ -314,6 +335,9 @@ $_$;
  * mcuser_logout
  * 
  * Logs an mcuser out.
+ *
+ * mcuser logout is only allowed when the bound jwt id and mcuser id 
+ * are found to be currently logged in.
  * 
  * An mcuser_audit record is created of LOGOUT type.
  */
@@ -324,35 +348,44 @@ CREATE OR REPLACE FUNCTION mcuser_logout(
   request_origin text
 ) RETURNS boolean
     LANGUAGE plpgsql
-    AS $_$
-  BEGIN
+AS $_$
+  DECLARE jsi jwt_status;
+BEGIN
     -- logout is predicated on finding a single mcuser_audit record with the 
     -- given mcuserId *and* jwtId.
     IF EXISTS(SELECT uid FROM mcuser_audit m WHERE m.uid = $1 and m.jwt_id = $2 and m.type = 'LOGIN') THEN
-      INSERT INTO mcuser_audit (
-        uid, 
-        type, 
-        jwt_id,
-        jwt_id_status,
-        request_timestamp, 
-        request_origin
-      )
-      VALUES (
-        $1, 
-        'LOGOUT'::mcuser_audit_type, 
-        $2,
-        'BLACKLISTED'::jwt_id_status,
-        $3, 
-        $4
-      );
-      RAISE NOTICE 'mcuser % logged out', mcuser_uid;
-      return true;
-    ELSE
-      -- default
-      RAISE NOTICE 'mcuser % logout failed', mcuser_uid;
-      return false;
+      -- at this point, we know a LOGIN record was created with the given jwt id and mcuser id.
+
+      -- only allow mcuser logout when the latest jwt id status is valid
+      jsi := get_jwt_status($2);      
+      
+      IF jsi = 'VALID'::jwt_status or jsi = 'VALID_ADMIN'::jwt_status THEN
+        -- add a new LOGOUT type mcuser_audit record
+        INSERT INTO mcuser_audit (
+          uid, 
+          type, 
+          jwt_id,
+          jwt_id_status,
+          request_timestamp, 
+          request_origin
+        )
+        VALUES (
+          $1, 
+          'LOGOUT'::mcuser_audit_type, 
+          $2,
+          'BLACKLISTED'::jwt_id_status,
+          $3, 
+          $4
+        );
+        RAISE NOTICE 'mcuser % logged out', mcuser_uid;
+        return true;
+      END IF;
     END IF;
-  END
+
+    -- default
+    RAISE NOTICE 'mcuser % logout failed', mcuser_uid;
+    return false;
+END
 $_$;
 
 -- ***************
