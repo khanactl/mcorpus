@@ -3,15 +3,17 @@
 -----------------------------------------------------
 -- Author               jkirton
 -- Created:             10/15/17
--- Modified:            03/21/2018
+-- Modified:            07/01/2018
 -- Description:         Prototype member corpus db
--- PostgreSQL Version   10.3
+-- PostgreSQL Version   10.4
 -----------------------------------------------------
 
 -- NOTE: a postgres com.tll.mcorpus.db must already exist for this script to work
 
 -- bash> 'createdb mcorpus -E UTF8'
--- bash> 'psql mcorpus < mcorpus.ddl'
+-- bash> 'psql mcorpus < mcorpus-schema.ddl'
+-- bash> 'psql mcorpus < mcorpus-roles.ddl'
+-- bash> 'psql mcorpus < mcorpus-data.ddl'
 
 -- psql>
 --   COPY mcuser(name,email,username,pswd,admin) FROM '/Users/d2d/dev/mcorpus/mcorpus-ddl/mock/mock-user.csv' DELIMITER ',' CSV HEADER;
@@ -167,7 +169,7 @@ CREATE TYPE jwt_status AS ENUM (
   'VALID_ADMIN',
   'PRESENT_BAD_STATE'
 );
-comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.'
+comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.';
 
 /**
  * Fetch the most recently created mcuser audit record with the given jwt id.
