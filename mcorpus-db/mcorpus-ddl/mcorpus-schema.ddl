@@ -172,8 +172,9 @@ CREATE TYPE jwt_status AS ENUM (
 comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.';
 
 /**
- * Fetch the most recently created mcuser audit record with the given jwt id.
- * This is the authoritive record regarding its status as it is the most recent.
+ * Fetch the most recently created mcuser audit record with the given jwt id 
+ * of either login or logout type.
+ * This is the authoritive record for determining the jwt id's status.
 */
 CREATE OR REPLACE FUNCTION fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_mcuser_status 
   LANGUAGE plpgsql AS
@@ -182,7 +183,7 @@ $_$
 BEGIN
   SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
   FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid 
-  WHERE a.jwt_id = $1 
+  WHERE a.jwt_id = $1 and (a.type = 'LOGIN'::mcuser_audit_type or a.type = 'LOGOUT'::mcuser_audit_type)
   ORDER BY a.created DESC LIMIT 1; 
 
   RETURN qrec;
@@ -211,7 +212,7 @@ BEGIN
     RAISE NOTICE 'JWT id not found: %', jwt_id;
     return 'NOT_PRESENT'::jwt_status;
   ELSEIF qrec.jwt_id_status = 'BLACKLISTED'::jwt_id_status THEN 
-    -- jwt id is marked as blacklisted
+    -- jwt id is marked as blacklisted (jwt_status is set to blacklisted upon logout)
     return 'BLACKLISTED'::jwt_status;
   ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
     -- mcuser is bad or inactive
