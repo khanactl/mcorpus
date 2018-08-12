@@ -11,6 +11,8 @@ The MCorpus GraphQL server endpoint jar app.
 ## mcorpus-db
 Houses the JooQ generated types representing the db-schema and data access api.  Used by mcorpus-gql.
 
+Checkout the [wiki](https://github.com/khanactl/mcorpus/wiki) pages for design details..
+
 # Features
 - Web session based user login with CSRF protection
 - JWT, signed and ecnrypted, for token-based user authentication via secure, http-only cookies.
@@ -23,3 +25,8 @@ Houses the JooQ generated types representing the db-schema and data access api. 
   - [JooQ](https://www.jooq.org/)
   - [graphql-java](https://github.com/graphql-java/graphql-java)
   - [Ratpack](https://ratpack.io/) / [Netty](https://netty.io/)
+	
+# Demo on Heroku
+Check out a working demo on [Heroku](https://mcorpush.herokuapp.com/index)
+- First click Login then use username = 'test' and password = 'jackson'. You will then be logged in based on a JWT cookie for 2 days.
+- Then click the GraphiQL link.  From there, you may issue GraphQL queries through the standard GraphiQL interface.
