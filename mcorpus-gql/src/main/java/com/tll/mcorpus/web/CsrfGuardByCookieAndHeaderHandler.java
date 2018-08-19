@@ -15,13 +15,13 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Anti-CSRF statelessly by comparing http the header rst (request sync token)
- * value to rst cookie value contained in the received request.
+ * Anti-CSRF statelessly by comparing the http header 'rst' (request sync token)
+ * value to the rst cookie value contained in the received request.
  * <p>
- * Note: No http header Origin / Referer header checking is performed as this
- * proves problematic with an xhr server api as incoming requests will actually
- * be directly from client (application instance) origin. <br>
- * Instead, we bind clients by their remote address (no port) and this is
+ * Note: No http header Origin / Referer checking is performed as this
+ * proves problematic with an xhr server api as incoming requests source 
+ * from the application and not the end user. <br>
+ * So instead, we bind clients by their remote address (no port) and this is
  * checked by way of JWT handling.
  * <p>
  * This is a variant on the double submit cookie method to thwart CSRF attacks.
