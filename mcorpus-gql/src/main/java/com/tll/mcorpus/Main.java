@@ -17,7 +17,6 @@ import com.tll.mcorpus.web.LogoutRequestHandler;
 import com.tll.mcorpus.web.MCorpusWebModule;
 import com.tll.mcorpus.web.WebSessionVerifyHandler;
 
-import io.netty.handler.ssl.SslContextBuilder;
 import ratpack.guice.Guice;
 import ratpack.handling.RequestLogger;
 import ratpack.hikari.HikariModule;
@@ -39,10 +38,6 @@ public class Main {
        .sysProps()
        .env()
        .env("MCORPUS_")
-       .ssl(SslContextBuilder.forServer(
-         Thread.currentThread().getContextClassLoader().getResourceAsStream("ssl.crt"),
-         Thread.currentThread().getContextClassLoader().getResourceAsStream("ssl.key")
-       ).build())
        .require("", MCorpusServerConfig.class)
        // .require("/metrics", DropwizardMetricsConfig.class)
      )
