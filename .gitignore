@@ -11,3 +11,4 @@ bin
 *.iml
 .vscode
 .DS_Store
+mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
