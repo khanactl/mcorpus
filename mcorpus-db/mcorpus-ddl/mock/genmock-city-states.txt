@@ -1,0 +1,298 @@
+Birmingham	AL
+Montgomery	AL
+Mobile	AL
+Huntsville	AL
+Anchorage	AK
+Phoenix	AZ
+Tucson	AZ
+Mesa	AZ
+Chandler	AZ
+Gilbert	AZ
+Glendale	AZ
+Scottsdale	AZ
+Tempe	AZ
+Peoria	AZ
+Surprise	AZ
+Little Rock	AR
+Los Angeles	CA
+San Diego	CA
+San Jose	CA
+San Francisco	CA
+Fresno	CA
+Sacramento	CA
+Long Beach	CA
+Oakland	CA
+Bakersfield	CA
+Anaheim	CA
+Santa Ana	CA
+Riverside	CA
+Stockton	CA
+Chula Vista	CA
+Irvine	CA
+Fremont	CA
+San Bernardino	CA
+Modesto	CA
+Oxnard	CA
+Fontana	CA
+Moreno Valley	CA
+Huntington Beach	CA
+Glendale	CA
+Santa Clarita	CA
+Garden Grove	CA
+Oceanside	CA
+Rancho Cucamonga	CA
+Santa Rosa	CA
+Ontario	CA
+Elk Grove	CA
+Corona	CA
+Lancaster	CA
+Palmdale	CA
+Salinas	CA
+Hayward	CA
+Pomona	CA
+Escondido	CA
+Sunnyvale	CA
+Torrance	CA
+Pasadena	CA
+Orange	CA
+Fullerton	CA
+Thousand Oaks	CA
+Visalia	CA
+Roseville	CA
+Concord	CA
+Simi Valley	CA
+Santa Clara	CA
+Victorville	CA
+Vallejo	CA
+Berkeley	CA
+El Monte	CA
+Downey	CA
+Costa Mesa	CA
+Carlsbad	CA
+Inglewood	CA
+Fairfield	CA
+Ventura	CA
+Temecula	CA
+Antioch	CA
+Richmond	CA
+West Covina	CA
+Murrieta	CA
+Norwalk	CA
+Daly City	CA
+Burbank	CA
+Santa Maria	CA
+El Cajon	CA
+San Mateo	CA
+Rialto	CA
+Clovis	CA
+Denver	CO
+Colorado Springs	CO
+Aurora	CO
+Fort Collins	CO
+Lakewood	CO
+Thornton	CO
+Arvada	CO
+Westminster	CO
+Pueblo	CO
+Centennial	CO
+Boulder	CO
+Bridgeport	CT
+New Haven	CT
+Stamford	CT
+Hartford	CT
+Waterbury	CT
+Washington	DC
+Jacksonville	FL
+Miami	FL
+Tampa	FL
+Orlando	FL
+St. Petersburg	FL
+Hialeah	FL
+Tallahassee	FL
+Fort Lauderdale	FL
+Port St. Lucie	FL
+Cape Coral	FL
+Pembroke Pines	FL
+Hollywood	FL
+Miramar	FL
+Gainesville	FL
+Coral Springs	FL
+Miami Gardens	FL
+Clearwater	FL
+Pompano Beach	FL
+Palm Bay	FL
+West Palm Beach	FL
+Lakeland	FL
+Atlanta	GA
+Columbus	GA
+Augusta	GA
+Macon	GA
+Savannah	GA
+Athens	GA
+Sandy Springs	GA
+Honolulu	HI
+Boise	ID
+Chicago	IL
+Aurora	IL
+Rockford	IL
+Joliet	IL
+Naperville	IL
+Springfield	IL
+Peoria	IL
+Elgin	IL
+Indianapolis	IN
+Fort Wayne	IN
+Evansville	IN
+South Bend	IN
+Des Moines	IA
+Cedar Rapids	IA
+Davenport	IA
+Wichita	KS
+Overland Park	KS
+Kansas City	KS
+Olathe	KS
+Topeka	KS
+Louisville	KY
+Lexington	KY
+New Orleans	LA
+Baton Rouge	LA
+Shreveport	LA
+Lafayette	LA
+Baltimore	MD
+Boston	MA
+Worcester	MA
+Springfield	MA
+Lowell	MA
+Cambridge	MA
+Detroit	MI
+Grand Rapids	MI
+Warren	MI
+Sterling Heights	MI
+Ann Arbor	MI
+Lansing	MI
+Farmington Hills	MI
+Minneapolis	MN
+Saint Paul	MN
+Rochester	MN
+Jackson	MS
+Kansas City	MO
+St. Louis	MO
+Springfield	MO
+Independence	MO
+Columbia	MO
+Billings	MT
+Omaha	NE
+Lincoln	NE
+Las Vegas	NV
+Henderson	NV
+Reno	NV
+North Las Vegas	NV
+Manchester	NH
+Newark	NJ
+Jersey City	NJ
+Paterson	NJ
+Elizabeth	NJ
+Edison	NJ
+Albuquerque	NM
+Las Cruces	NM
+New York	NY
+Buffalo	NY
+Rochester	NY
+Yonkers	NY
+Syracuse	NY
+Charlotte	NC
+Raleigh	NC
+Greensboro	NC
+Durham	NC
+Winston–Salem	NC
+Fayetteville	NC
+Cary	NC
+Wilmington	NC
+High Point	NC
+Fargo	ND
+Columbus	OH
+Cleveland	OH
+Cincinnati	OH
+Toledo	OH
+Akron	OH
+Dayton	OH
+Oklahoma City	OK
+Tulsa	OK
+Norman	OK
+Broken Arrow	OK
+Portland	OR
+Salem	OR
+Eugene	OR
+Gresham	OR
+Philadelphia	PA
+Pittsburgh	OR
+Allentown	OR
+Erie	OR
+Providence	RI
+Columbia	SC
+Charleston	SC
+North Charleston	SC
+Sioux Falls	SC
+Memphis	TN
+Nashville	TN
+Knoxville	TN
+Chattanooga	TN
+Clarksville	TN
+Murfreesboro	TN
+Houston	TX
+San Antonio	TX
+Dallas	TX
+Austin	TX
+Fort Worth	TX
+El Paso	TX
+Arlington	TX
+Corpus Christi	TX
+Plano	TX
+Laredo	TX
+Lubbock	TX
+Garland	TX
+Irving	TX
+Amarillo	TX
+Grand Prairie	TX
+Brownsville	TX
+McKinney	TX
+Pasadena	TX
+Frisco	TX
+Mesquite	TX
+McAllen	TX
+Killeen	TX
+Waco	TX
+Carrollton	TX
+Denton	TX
+Midland	TX
+Abilene	TX
+Beaumont	TX
+Odessa	TX
+Round Rock	TX
+Richardson	TX
+Wichita Falls	TX
+College Station	TX
+Pearland	TX
+Lewisville	TX
+Tyler	TX
+Salt Lake City	UT
+West Valley City	UT
+Provo	UT
+West Jordan	UT
+Virginia Beach	VA
+Norfolk	VA
+Chesapeake	VA
+Richmond	VA
+Newport News	VA
+Alexandria	VA
+Hampton	VA
+Seattle	WA
+Spokane	WA
+Tacoma	WA
+Vancouver	WA
+Bellevue	WA
+Kent	WA
+Everett	WA
+Milwaukee	WI
+Madison	WI
+Green Bay	WI

@@ -1,0 +1,1010 @@
+000	Not in use
+001	Destinations outside U.S.	
+002	Not in use
+003	Not in use
+004	Not in use
+005	NY Holtsville IRS	
+006	PR San Juan West
+007	PR San Juan East
+008	VI Virgin Islands
+009	PR San Juan Main
+010	MA Springfield Vicinity
+011	MA Springfield Main
+012	MA Pittsfield
+013	MA Greenfield
+014	MA Fitchburg
+015	MA Worcester Vicinity
+016	MA Worcester Main
+017	MA Framingham
+018	MA Woburn
+019	MA Lynn
+020	MA Brockton West
+021	MA Boston Main 1
+022	MA Boston Main 2
+023	MA Brockton East
+024	MA Lexington
+025	MA Cape Cod West
+026	MA Cape Cod East
+027	MA Providence (RI) East
+028	RI Providence West
+029	RI Providence Main
+030	NH Manchester Vicinity
+031	NH Manchester Main
+032	NH Waterville Valley
+033	NH Concord
+034	NH Keene
+035	NH Littleton
+036	NH Bellows Falls (VT) East
+037	NH White River Junction (VT) East
+038	NH Portsmouth West
+039	ME Portsmouth (NH) East
+040	ME Portland Vicinity
+041	ME Portland Main
+042	ME Auburn
+043	ME Augusta
+044	ME Bangor
+045	ME Bath
+046	ME Ellsworth
+047	ME Houlton
+048	ME Rockland
+049	ME Waterville
+050	VT White River Junction West
+051	VT Bellows Falls West
+052	VT Bennington
+053	VT Brattleboro
+054	VT Burlington
+055	MA Andover IRS
+056	VT Montpelier
+057	VT Rutland
+058	VT St. Johnsbury West
+059	VT St. Johnsbury East
+060	CT Hartford Vicinity
+061	CT Hartford Main
+062	CT Willimantic
+063	CT New London
+064	CT New Haven Vicinity
+065	CT New Haven Main
+066	CT Bridgeport
+067	CT Waterbury
+068	CT Stamford Vicinity
+069	CT Stamford Main
+070	NJ Newark Vicinity
+071	NJ Newark Main
+072	NJ Elizabeth
+073	NJ Jersey City
+074	NJ Paterson Vicinity
+075	NJ Paterson Main
+076	NJ Hackensack
+077	NJ Red Bank
+078	NJ Dover
+079	NJ Summit
+080	NJ Cherry Hill
+081	NJ Camden
+082	NJ Atlantic City Vicinity
+083	NJ Bridgeton
+084	NJ Atlantic City Main
+085	NJ Trenton Vicinity
+086	NJ Trenton Main
+087	NJ Lakewood
+088	NJ New Brunswick Vicinity
+089	NJ New Brunswick Main
+090	AE Military Bases in DE	
+091	AE Military Bases in DE
+092	AE Military Bases in DE
+093	AE Military Bases in IQ, AF, other
+094	AE Military Bases in UK
+095	AE Military Naval/Marine
+096	AE Military Bases in ES, IT
+097	AE Military Bases in EU, GL, CA
+098	AE Military Africa/Middle East
+099	Not in use
+
+100	NY New York Main 1
+101	NY New York Main 2
+102	NY New York Main 3
+103	NY Staten Island
+104	NY The Bronx
+105	NY White Plains Vicinity
+106	NY White Plains Main
+107	NY Yonkers
+108	NY New Rochelle
+109	NY Suffern
+110	NY Floral Park
+111	NY Long Island City
+112	NY Brooklyn
+113	NY Flushing
+114	NY Jamaica
+115	NY Mineola
+116	NY Far Rockaway
+117	NY Amityville
+118	NY Hicksville
+119	NY Riverhead
+120	NY Albany A J
+121	NY Albany K Z
+122	NY Albany Main
+123	NY Schenectady
+124	NY Kingston
+125	NY Poughkeepsie Vicinity
+126	NY Poughkeepsie Main
+127	NY Monticello
+128	NY Glens Falls
+129	NY Plattsburgh
+130	NY Syracuse A-L
+131	NY Syracuse M-Z
+132	NY Syracuse Main
+133	NY Utica A-L
+134	NY Utica M-Z
+135	NY Utica Main
+136	NY Watertown
+137	NY Binghamton A-L
+138	NY Binghamton M-Z
+139	NY Binghamton Main
+140	NY Buffalo A-L
+141	NY Buffalo M-Z
+142	NY Buffalo Main
+143	NY Niagara Falls
+144	NY Rochester A-L
+145	NY Rochester M-Z
+146	NY Rochester Main
+147	NY Jamestown
+148	NY Elmira Vicinity
+149	NY Elmira Main
+150	PA Pittsburgh Distant
+151	PA Pittsburgh Vicinity
+152	PA Pittsburgh Main
+153	PA Washington
+154	PA Uniontown
+155	PA Somerset
+156	PA Greensburg
+157	PA Indiana
+158	PA DuBois
+159	PA Johnstown
+160	PA Butler
+161	PA New Castle
+162	PA Kittanning
+163	PA Oil City
+164	PA Erie Vicinity
+165	PA Erie Main
+166	PA Altoona
+167	PA Bradford
+168	PA State College
+169	PA Wellsboro
+170	PA Harrisburg Vicinity
+171	PA Harrisburg Main
+172	PA Chambersburg 
+173	PA York Vicinity
+174	PA York Main
+175	PA Lancaster Vicinity
+176	PA Lancaster Main
+177	PA Williamsport
+178	PA Sunbury
+179	PA Pottsville
+180	PA Lehigh Valley
+181	PA Allentown
+182	PA Hazleton
+183	PA East Stroudsburg
+184	PA Scranton Vicinity
+185	PA Scranton Main
+186	PA Wilkes-Barre Vicinity
+187	PA Wilkes-Barre Main
+188	PA Montrose
+189	PA Doylestown
+190	PA Philadelphia Vicinity
+191	PA Philadelphia Main
+192	PA Philadelphia IRS
+193	PA Paoli
+194	PA Norristown
+195	PA Reading Vicinity
+196	PA Reading Main
+197	DE Wilmington Vicinity
+198	DE Wilmington Main
+199	DE Dover
+
+200	DC Washington Main
+201	VA Dulles
+202	DC Washington Government 1
+203	DC Washington Government 2
+204	DC Washington Government 3
+205	DC Washington Government 4
+206	MD Waldorf
+207	MD Annapolis Junction
+208	MD Bethesda
+209	MD Silver Spring
+210	MD Baltimore A-L
+211	MD Baltimore M-Z
+212	MD Baltimore Main
+213	Not in use
+214	MD Annapolis
+215	MD Cumberland North
+216	MD Easton
+217	MD Frederick
+218	MD Salisbury
+219	MD Cecil County
+220	VA Washington (DC) A-L
+221	VA Washington (DC) M-Z
+222	VA Arlington
+223	VA Alexandria
+224	VA Fredericksburg A-K
+225	VA Fredericksburg L-Z
+226	VA Winchester
+227	VA Culpeper
+228	VA Harrisonburg
+229	VA Charlottesville
+230	VA Richmond A-L
+231	VA Richmond M-Z
+232	VA Richmond Main
+233	VA Norfolk A-J
+234	VA Norfolk K-Z
+235	VA Norfolk Main
+236	VA Newport News
+237	VA Portsmouth
+238	VA Petersburg
+239	VA Farmville
+240	VA Roanoke Main/A-G
+241	VA Roanoke H-Z
+242	VA Bristol
+243	VA Pulaski
+244	VA Staunton
+245	VA Lynchburg
+246	VA Bluefield (WV) South
+247	WV Bluefield North
+248	WV Welch
+249	WV Lewisburg
+250	WV Charleston A-G
+251	WV Charleston H-S
+252	WV Charleston T-Z/North
+253	WV Charleston Main
+254	WV Martinsburg
+255	WV Huntington Vicinity
+256	WV Logan
+257	WV Huntington Main
+258	WV Beckley A-M
+259	WV Beckley N-Z/East
+260	WV Wheeling
+261	WV Parkersburg
+262	WV Clarksburg South
+263	WV Clarksburg Main/A-L
+264	WV Clarksburg M-Z
+265	WV Morgantown
+266	WV Sutton
+267	WV Cumberland (MD) South
+268	WV Petersburg
+269	Not in use
+270	NC Winston-Salem Vicinity
+271	NC Winston-Salem Main
+272	NC Greensboro A-L
+273	NC Greensboro M-Z
+274	NC Greensboro Main
+275	NC Raleigh Vicinity
+276	NC Raleigh Main
+277	NC Durham
+278	NC Rocky Mount
+279	NC Elizabeth City
+280	NC Charlotte A-L
+281	NC Charlotte M-Z
+282	NC Charlotte Main
+283	NC Fayetteville
+284	NC Wilmington
+285	NC Kinston
+286	NC Hickory
+287	NC Asheville Vicinity
+288	NC Asheville Main
+289	NC Andrews
+290	SC Columbia A-L
+291	SC Columbia M-Z
+292	SC Columbia Main
+293	SC Spartanburg
+294	SC Charleston
+295	SC Florence
+296	SC Greenville
+297	SC Charlotte (NC) South
+298	SC Aiken
+299	SC Beaufort
+
+300	GA Atlanta East
+301	GA Atlanta Northwest
+302	GA Atlanta South
+303	GA Atlanta Main 1
+304	GA Swainsboro
+305	GA Gainesville
+306	GA Athens
+307	GA Chattanooga (TN) South
+308	GA Augusta Vicinity
+309	GA Augusta Main
+310	GA Macon Vicinity
+311	GA Atlanta Main 2
+312	GA Macon Main
+313	GA Savannah Vicinity
+314	GA Savannah Main
+315	GA Waycross
+316	GA Valdosta
+317	GA Albany East
+318	GA Columbus Vicinity
+319	GA Columbus Main
+320	FL Jacksonville Vicinity
+321	FL Daytona Beach
+322	FL Jacksonville Main
+323	FL Tallahassee
+324	FL Panama City
+325	FL Pensacola
+326	FL Gainesville
+327	FL Orlando North
+328	FL Orlando Main
+329	FL Melbourne
+330	FL Miami Vicinity
+331	FL Miami Main 1
+332	FL Miami Main 2
+333	FL Fort Lauderdale
+334	FL West Palm Beach
+335	FL Tampa Vicinity
+336	FL Tampa Main
+337	FL St. Petersburg
+338	FL Lakeland
+339	FL Fort Myers
+340	AA Military Americas
+341	FL Naples
+342	FL Bradenton
+343	Not in use
+344	FL Ocala
+345	Not in use
+346	FL Brooksville
+347	FL Orlando South
+348	Not in use
+349	FL Fort Pierce
+350	AL Birmingham A-L
+351	AL Birmingham M-Z
+352	AL Birmingham Main
+353	Not in use
+354	AL Tuscaloosa
+355	AL Jasper
+356	AL Decatur
+357	AL Huntsville Vicinity
+358	AL Huntsville Main
+359	AL Gadsden
+360	AL Montgomery Vicinity
+361	AL Montgomery Main
+362	AL Anniston
+363	AL Dothan
+364	AL Evergreen
+365	AL Mobile Vicinity
+366	AL Mobile Main
+367	AL Selma
+368	AL Opelika
+369	AL Meridian (MS) East
+370	TN Nashville A-L
+371	TN Nashville M-Z
+372	TN Nashville Main
+373	TN Chattanooga North
+374	TN Chattanooga Main
+375	TN Memphis IRS
+376	TN Johnson City
+377	TN Knoxville A-L
+378	TN Knoxville M-Z
+379	TN Knoxville Main
+380	TN Memphis North
+381	TN Memphis Main
+382	TN McKenzie
+383	TN Jackson
+384	TN Columbia
+385	TN Cookeville
+386	MS Memphis (TN) South
+387	MS Greenville
+388	MS Tupelo
+389	MS Grenada
+390	MS Jackson A-L
+391	MS Jackson M-Z
+392	MS Jackson Main
+393	MS Meridian
+394	MS Hattiesburg
+395	MS Gulfport
+396	MS Brookhaven
+397	MS Columbus
+398	GA Albany West
+399	GA Atlanta IRS
+
+400	KY Louisville East
+401	KY Louisville West
+402	KY Louisville Main
+403	KY Lexington North
+404	KY Lexington South
+405	KY Lexington Main
+406	KY Frankfort
+407	KY Corbin West
+408	KY Corbin East
+409	KY Corbin Central
+410	KY Cincinnati (OH) South
+411	KY Ashland North
+412	KY Ashland South
+413	KY Campton South
+414	KY Campton North
+415	KY Pikeville East
+416	KY Pikeville West
+417	KY Hazard West
+418	KY Hazard East
+419	Not in use
+420	KY Paducah
+421	KY Bowling Green East
+422	KY Bowling Green West
+423	KY Owensboro
+424	KY Evansville (IN) South
+425	KY Somerset
+426	KY Albany
+427	KY Elizabethtown
+428	Not in use
+429	Not in use
+430	OH Columbus North
+431	OH Columbus South
+432	OH Columbus Main
+433	OH Marion
+434	OH Toledo East
+435	OH Toledo West
+436	OH Toledo Main
+437	OH Zanesville South
+438	OH Zanesville North
+439	OH Steubenville
+440	OH Cleveland Vicinity
+441	OH Cleveland Main
+442	OH Akron Vicinity
+443	OH Akron Main
+444	OH Youngstown Vicinity
+445	OH Youngstown Main
+446	OH Canton Vicinity
+447	OH Canton Main
+448	OH Mansfield Vicinity
+449	OH Mansfield Main
+450	OH Cincinnati North
+451	OH Cincinnati East
+452	OH Cincinnati Main
+453	OH Dayton Vicinity
+454	OH Dayton Main
+455	OH Springfield
+456	OH Chillicothe
+457	OH Athens
+458	OH Lima
+459	OH Cincinnati IRS
+460	IN Indianapolis North
+461	IN Indianapolis South
+462	IN Indianapolis Main
+463	IN Gary Vicinity
+464	IN Gary Main
+465	IN South Bend South
+466	IN South Bend Main
+467	IN Fort Wayne Vicinity
+468	IN Fort Wayne Main
+469	IN Kokomo
+470	IN Cincinnati (OH) West
+471	IN Louisville (KY) North
+472	IN Columbus
+473	IN Muncie
+474	IN Bloomington
+475	IN Washington
+476	IN Evansville Vicinity
+477	IN Evansville Main
+478	IN Terre Haute
+479	IN Lafayette
+480	MI Detroit Northeast
+481	MI Detroit Southwest
+482	MI Detroit Main
+483	MI Detroit Northwest
+484	MI Flint Vicinity
+485	MI Flint Main
+486	MI Saginaw West
+487	MI Saginaw East
+488	MI Lansing Vicinity
+489	MI Lansing Main
+490	MI Kalamazoo
+491	MI South Bend (IN) North
+492	MI Jackson
+493	MI Grand Rapids East
+494	MI Grand Rapids West
+495	MI Grand Rapids Main
+496	MI Cadillac
+497	MI Mackinaw City
+498	MI Iron Mountain East
+499	MI Iron Mountain West
+
+500	IA Des Moines A-F
+501	IA Des Moines G-M
+502	IA Des Moines N-Z
+503	IA Des Moines Main 1
+504	IA Mason City
+505	IA Fort Dodge
+506	IA Waterloo Vicinity
+507	IA Waterloo Main
+508	IA Creston
+509	IA Des Moines Main 2
+510	IA Sioux City Vicinity
+511	IA Sioux City Main
+512	IA Sheldon
+513	IA Spencer
+514	IA Carroll
+515	IA Council Bluffs
+516	IA Shenandoah
+517	Not in use
+518	Not in use
+519	Not in use
+520	IA Dubuque West
+521	IA Decorah
+522	IA Cedar Rapids A-L
+523	IA Cedar Rapids M-Z
+524	IA Cedar Rapids Main
+525	IA Ottumwa
+526	IA Burlington
+527	IA Davenport Vicinity
+528	IA Davenport Main
+529	Not in use
+530	WI Milwaukee North
+531	WI Milwaukee South
+532	WI Milwaukee Main
+533	Not in use
+534	WI Racine
+535	WI Madison Vicinity
+536	Not in use
+537	WI Madison Main
+538	WI Dubuque (IA) East
+539	WI Portage
+540	WI St. Paul (MN) East
+541	WI Green Bay West
+542	WI Green Bay East
+543	WI Green Bay Main
+544	WI Wausau
+545	WI Rhinelander
+546	WI La Crosse
+547	WI Eau Claire
+548	WI Spooner
+549	WI Oshkosh
+550	MN St. Paul Vicinity
+551	MN St. Paul Main
+552	Not in use
+553	MN Minneapolis Vicinity 1
+554	MN Minneapolis Main
+555	MN Minneapolis Vicinity 2
+556	MN Duluth East
+557	MN Duluth West
+558	MN Duluth Main
+559	MN Rochester
+560	MN Mankato
+561	MN Windom
+562	MN Willmar
+563	MN St. Cloud
+564	MN Brainerd
+565	MN Detroit Lakes
+566	MN Bemidji
+567	MN Thief River Falls
+568	Not in use
+569	DC Washington Parcel return
+570	SD Sioux Falls Vicinity
+571	SD Sioux Falls Main
+572	SD Watertown
+573	SD Mitchell
+574	SD Aberdeen
+575	SD Pierre
+576	SD Mobridge
+577	SD Rapid City
+578	Not in use
+579	Not in use
+580	ND Fargo Vicinity
+581	ND Fargo Main
+582	ND Grand Forks
+583	ND Devils Lake
+584	ND Jamestown
+585	ND Bismarck
+586	ND Dickinson
+587	ND Minot
+588	ND Williston
+589	Not in use
+590	MT Billings Vicinity
+591	MT Billings Main
+592	MT Wolf Point
+593	MT Miles City
+594	MT Great Falls
+595	MT Havre
+596	MT Helena
+597	MT Butte
+598	MT Missoula
+599	MT Kalispell
+
+600	IL Chicago North
+601	IL Chicago Northwest
+602	IL Evanston
+603	IL Oak Park
+604	IL Chicago South
+605	IL Chicago Southwest
+606	IL Chicago Main 1
+607	IL Chicago Main 2
+608	IL Chicago Main 3
+609	IL Kankakee
+610	IL Rockford Vicinity
+611	IL Rockford Main
+612	IL Rock Island
+613	IL LaSalle
+614	IL Galesburg
+615	IL Peoria Vicinity
+616	IL Peoria Main
+617	IL Bloomington
+618	IL Urbana North
+619	IL Urbana South
+620	IL St. Louis (MO) Northeast
+621	Not in use
+622	IL East St. Louis
+623	IL Quincy
+624	IL Effingham
+625	IL Springfield East
+626	IL Springfield West
+627	IL Springfield Main
+628	IL Centralia
+629	IL Carbondale
+630	MO St. Louis Vicinity
+631	MO St. Louis Main
+632	Not in use
+633	MO St. Charles
+634	MO Hannibal
+635	MO Kirksville
+636	MO Park Hills
+637	MO Cape Girardeau
+638	MO Sikeston
+639	MO Poplar Bluff
+640	MO Kansas City Vicinity
+641	MO Kansas City Main
+642	Not in use
+643	Not in use
+644	MO St. Joseph Vicinity
+645	MO St. Joseph Main
+646	MO Chillicothe
+647	MO Harrisonville
+648	MO Joplin
+649	MO Kansas City IRS
+650	MO Jefferson City Vicinity
+651	MO Jefferson City Main
+652	MO Columbia
+653	MO Sedalia
+654	MO Rolla Main/A-I
+655	MO Rolla J-Z
+656	MO Springfield A-L
+657	MO Springfield M-Z
+658	MO Springfield Main
+659	Not in use
+660	KS Kansas City Vicinity
+661	KS Kansas City Main
+662	KS Overland Park
+663	Not in use
+664	KS Topeka A-L
+665	KS Topeka M-Z
+666	KS Topeka Main
+667	KS Fort Scott
+668	KS Emporia
+669	KS Concordia
+670	KS Wichita A-L
+671	KS Wichita M-Z
+672	KS Wichita Main
+673	KS Independence
+674	KS Salina
+675	KS Hutchinson
+676	KS Hays
+677	KS Colby
+678	KS Dodge City
+679	KS Liberal
+680	NE Omaha Vicinity
+681	NE Omaha Main
+682	Not in use
+683	NE Lincoln A-L
+684	NE Lincoln M-Z
+685	NE Lincoln Main
+686	NE Columbus
+687	NE Norfolk
+688	NE Grand Island
+689	NE Hastings
+690	NE McCook
+691	NE North Platte
+692	NE Valentine
+693	NE Alliance
+694	Not in use
+695	Not in use
+696	Not in use
+697	Not in use
+698	Not in use
+699	Not in use
+
+700	LA Metairie
+701	LA New Orleans
+702	Not in use
+703	LA Thibodaux
+704	LA Hammond
+705	LA Lafayette
+706	LA Lake Charles
+707	LA Baton Rouge Vicinity
+708	LA Baton Rouge Main
+709	Not in use
+710	LA Shreveport Vicinity
+711	LA Shreveport Main
+712	LA Monroe
+713	LA Alexandria East
+714	LA Alexandria West
+715	Not in use
+716	AR Pine Bluff
+717	AR Camden
+718	AR Hope
+719	AR Hot Springs
+720	AR Little Rock A-L
+721	AR Little Rock M-Z
+722	AR Little Rock Main
+723	AR West Memphis
+724	AR Jonesboro
+725	AR Batesville
+726	AR Harrison
+727	AR Fayetteville
+728	AR Russellville
+729	AR Fort Smith East
+730	OK Oklahoma City Vicinity
+731	OK Oklahoma City Main
+732	Not in use
+733	TX Austin IRS
+734	OK Ardmore
+735	OK Lawton
+736	OK Clinton
+737	OK Enid
+738	OK Woodward
+739	OK Liberal (KS) South
+740	OK Tulsa Vicinity
+741	OK Tulsa Main
+742	Not in use
+743	OK Vinita
+744	OK Muskogee
+745	OK McAlester
+746	OK Ponca City
+747	OK Durant
+748	OK Shawnee
+749	OK Fort Smith (AR) West
+750	TX Dallas North
+751	TX Dallas South
+752	TX Dallas Main 1
+753	TX Dallas Main 2
+754	TX Greenville
+755	TX Texarkana
+756	TX Longview
+757	TX Tyler
+758	TX Palestine
+759	TX Lufkin
+760	TX Fort Worth Vicinity
+761	TX Fort Worth Main
+762	TX Denton
+763	TX Wichita Falls
+764	TX Stephenville
+765	TX Temple
+766	TX Waco Vicinity
+767	TX Waco Main
+768	TX Brownwood
+769	TX San Angelo
+770	TX Houston Main 1
+771	Not in use
+772	TX Houston Main 2
+773	TX Conroe
+774	TX Richmond
+775	TX Pasadena
+776	TX Beaumont Vicinity
+777	TX Beaumont Main
+778	TX Bryan
+779	TX Victoria
+780	TX San Antonio West
+781	TX San Antonio East
+782	TX San Antonio Main
+783	TX Corpus Christi Vicinity
+784	TX Corpus Christi Main
+785	TX McAllen
+786	TX Austin Vicinity
+787	TX Austin Main
+788	TX Uvalde
+789	TX La Grange
+790	TX Amarillo Vicinity
+791	TX Amarillo Main
+792	TX Childress
+793	TX Lubbock Vicinity
+794	TX Lubbock Main
+795	TX Abilene Vicinity
+796	TX Abilene Main
+797	TX Midland
+798	TX El Paso Vicinity
+799	TX El Paso Main 1
+
+800	CO Denver North
+801	CO Denver South
+802	CO Denver Main
+803	CO Boulder
+804	CO Golden
+805	CO Longmont
+806	CO Brighton
+807	CO Fort Morgan
+808	CO Colorado Springs Vicinity
+809	CO Colorado Springs Main
+810	CO Pueblo
+811	CO Alamosa
+812	CO Salida
+813	CO Durango
+814	CO Montrose
+815	CO Grand Junction
+816	CO Glenwood Springs
+817	Not in use
+818	Not in use
+819	Not in use
+820	WY Cheyenne
+821	WY Yellowstone
+822	WY Wheatland
+823	WY Rawlins
+824	WY Worland
+825	WY Riverton
+826	WY Casper
+827	WY Newcastle
+828	WY Sheridan
+829	WY Rock Springs
+830	WY Jackson
+831	WY Kemmerer
+832	ID Pocatello
+833	ID Twin Falls
+834	ID Pocatello
+835	ID Lewiston East
+836	ID Boise Vicinity
+837	ID Boise Main
+838	ID Spokane (WA) East
+839	Not in use
+840	UT Salt Lake City Vicinity
+841	UT Salt Lake City Main
+842	UT Ogden IRS
+843	UT Ogden Vicinity
+844	UT Ogden Main
+845	UT Price
+846	UT Provo
+847	UT Richfield
+848	Not in use
+849	Not in use
+850	AZ Phoenix Main
+851	AZ Phoenix Vicinity
+852	AZ Mesa
+853	AZ Glendale
+854	Not in use
+855	AZ Globe
+856	AZ Tucson Vicinity
+857	AZ Tucson Main
+858	Not in use
+859	AZ Show Low
+860	AZ Flagstaff
+861	Not in use
+862	Not in use
+863	AZ Prescott
+864	AZ Kingman
+865	AZ Gallup (NM) West
+866	Not in use
+867	Not in use
+868	Not in use
+869	Not in use
+870	NM Albuquerque Vicinity
+871	NM Albuquerque Main
+872	Not in use
+873	NM Gallup
+874	NM Farmington
+875	NM Santa Fe
+876	Not in use
+877	NM Las Vegas
+878	NM Socorro
+879	NM Truth or Consequences
+880	NM Las Cruces
+881	NM Clovis
+882	NM Roswell
+883	NM Carrizozo
+884	NM Tucumcari
+885	TX El Paso Main 2
+886	Not in use
+887	Not in use
+888	Not in use
+889	NV The Lakes Unique
+890	NV Las Vegas Vicinity
+891	NV Las Vegas Main
+892	Not in use
+893	NV Ely
+894	NV Reno East
+895	NV Reno Main
+896	Not in use
+897	NV Carson City
+898	NV Elko
+899	Not in use
+
+900	CA Los Angeles Main 1
+901	CA Los Angeles Main 2
+902	CA Los Angeles Vicinity
+903	CA Inglewood Main
+904	CA Santa Monica
+905	CA Torrance
+906	CA Whittier
+907	CA Long Beach Vicinity
+908	CA Long Beach Main
+909	Not in use
+910	CA Pasadena Vicinity
+911	CA Pasadena Main
+912	CA Glendale
+913	CA Thousand Oaks
+914	CA Van Nuys Main
+915	CA Burbank
+916	CA North Hollywood
+917	CA Rancho Cucamonga
+918	CA Alhambra
+919	CA San Diego South
+920	CA San Diego North
+921	CA San Diego Main
+922	CA Indio
+923	CA San Bernardino Vicinity
+924	CA San Bernardino Main
+925	CA Riverside
+926	CA Irvine
+927	CA Santa Ana Main
+928	CA Anaheim
+929	Not in use
+930	CA Ventura
+931	CA Santa Barbara
+932	CA Bakersfield Vicinity
+933	CA Bakersfield Main
+934	CA San Luis Obispo
+935	CA Mojave
+936	CA Fresno Vicinity
+937	CA Fresno Main
+938	CA Fresno IRS
+939	CA Salinas
+940	CA San Francisco South
+941	CA San Francisco Main
+942	CA Sacramento
+943	CA Palo Alto
+944	CA San Mateo
+945	CA Oakland Vicinity
+946	CA Oakland Main
+947	CA Berkeley
+948	CA Richmond
+949	CA San Rafael
+950	CA San Jose Vicinity
+951	CA San Jose Main
+952	CA Stockton North
+953	CA Stockton South
+954	CA Santa Rosa
+955	CA Eureka
+956	CA Sacramento Vicinity 1
+957	CA Sacramento Vicinity 2
+958	CA Sacramento Main
+959	CA Marysville
+960	CA Redding
+961	CA Reno (NV) West
+962	AP Military Bases in KR
+963	AP Military Bases in JP
+964	AP Military Bases in PH
+965	AP Military Pacific & Antarctic bases
+966	AP Military Naval/Marine
+967	HI Honolulu Vicinity
+968	HI Honolulu Main/AS
+969	GU Barrigada (PW, FM, MP, MH)
+970	OR Portland Vicinity
+971	OR Portland West
+972	OR Portland Main
+973	OR Salem
+974	OR Eugene
+975	OR Medford
+976	OR Klamath Falls
+977	OR Bend
+978	OR Pendleton
+979	OR Boise (ID) West
+980	WA Seattle Vicinity
+981	WA Seattle Main
+982	WA Everett
+983	WA Tacoma Vicinity
+984	WA Tacoma Main
+985	WA Olympia
+986	WA Portland (OR) North
+987	Not in use
+988	WA Wenatchee
+989	WA Yakima
+990	WA Spokane Vicinity
+991	WA Spokane Distant
+992	WA Spokane Main
+993	WA Pasco
+994	WA Lewiston (ID) West
+995	AK Anchorage Main/A-G
+996	AK Anchorage H-Z
+997	AK Fairbanks
+998	AK Juneau
+999	AK Ketchikan
+
