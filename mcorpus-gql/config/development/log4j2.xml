@@ -3,11 +3,11 @@
 <Configuration status="INFO">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+      <PatternLayout pattern="%d%d{ISO8601} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
     <File name="File" fileName="/logs/mcorpus-gql-server.log">
       <PatternLayout>
-        <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+        <Pattern>%d{ISO8601} [%t] %-5level %logger{36} - %msg%n</Pattern>
       </PatternLayout>
     </File>
   </Appenders>
