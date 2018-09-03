@@ -3,7 +3,7 @@
 -----------------------------------------------------
 -- Author               jkirton
 -- Created:             10/15/17
--- Modified:            07/01/2018
+-- Modified:            09/03/2018
 -- Description:         Prototype member corpus db
 -- PostgreSQL Version   10.4
 -----------------------------------------------------
@@ -26,6 +26,8 @@
 --   UPDATE ... SET pswhash = crypt('new password', gen_salt('bf'));
 --   SELECT (pswhash = crypt('entered password', pswhash)) AS pswmatch FROM ... ;
 
+--   -- set all held member's pswd to 'test123':
+--   UPDATE mauth set pswd = crypt('test123', gen_salt('bf'));
 
 -- set the connection defaults (https://www.postgresql.org/docs/9.6/static/runtime-config-client.html)
 SET statement_timeout = 0;
