@@ -55,7 +55,7 @@ public class TestUtil {
   
   public static final String testRequestOrigin = "https://test-app.com ";
 
-  public static final String testServerPublicAddress = "https://mcorpus.d2d:5150";
+  public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
