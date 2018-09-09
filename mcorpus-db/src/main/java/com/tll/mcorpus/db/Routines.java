@@ -855,13 +855,38 @@ public class Routines {
     /**
      * Call <code>public.member_logout</code>
      */
-    public static void memberLogout(Configuration configuration, UUID mid, Timestamp inRequestTimestamp, String inRequestOrigin) {
-        MemberLogout p = new MemberLogout();
-        p.setMid(mid);
-        p.setInRequestTimestamp(inRequestTimestamp);
-        p.setInRequestOrigin(inRequestOrigin);
+    public static UUID memberLogout(Configuration configuration, UUID mid, Timestamp inRequestTimestamp, String inRequestOrigin) {
+        MemberLogout f = new MemberLogout();
+        f.setMid(mid);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
 
-        p.execute(configuration);
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.member_logout</code> as a field.
+     */
+    public static Field<UUID> memberLogout(UUID mid, Timestamp inRequestTimestamp, String inRequestOrigin) {
+        MemberLogout f = new MemberLogout();
+        f.setMid(mid);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.member_logout</code> as a field.
+     */
+    public static Field<UUID> memberLogout(Field<UUID> mid, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin) {
+        MemberLogout f = new MemberLogout();
+        f.setMid(mid);
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+
+        return f.asField();
     }
 
     /**

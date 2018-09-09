@@ -11,8 +11,9 @@ import static com.tll.mcorpus.TestUtil.generateMaddressToAddPropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMaddressToUpdatePropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMemberToAddPropertyMap;
 import static com.tll.mcorpus.TestUtil.generateMemberToUpdatePropertyMap;
-import static com.tll.mcorpus.TestUtil.testMemberLoginInput;
-import static com.tll.mcorpus.TestUtil.testMemberLogoutInput;
+import static com.tll.mcorpus.TestUtil.testMemberUid;
+import static com.tll.mcorpus.TestUtil.testMemberUsername;
+import static com.tll.mcorpus.TestUtil.testMemberPswd;
 import static com.tll.mcorpus.TestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
@@ -23,9 +24,11 @@ import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddress
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.routines.MemberLogin;
-import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.repo.model.FetchResult;
@@ -114,8 +115,12 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds_mcweb());
-      MemberLogin memberLoginInput = testMemberLoginInput();
-      FetchResult<Mref> mrefFetch = repo.memberLogin(memberLoginInput);
+      FetchResult<Mref> mrefFetch = repo.memberLogin(
+        testMemberUsername, 
+        testMemberPswd,
+        Instant.now(),
+        testRequestOrigin
+      );
       assertNotNull(mrefFetch);
       assertNotNull(mrefFetch.get());
       assertNull(mrefFetch.getErrorMsg());
@@ -135,9 +140,13 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds_mcweb());
-      MemberLogout memberLogoutInput = testMemberLogoutInput();
-      FetchResult<Void> memberLogoutResult = repo.memberLogout(memberLogoutInput);
+      FetchResult<UUID> memberLogoutResult = repo.memberLogout(
+        testMemberUid,
+        Instant.now(),
+        testRequestOrigin
+      );
       assertNotNull(memberLogoutResult);
+      assertTrue(memberLogoutResult.isSuccess());
       assertFalse(memberLogoutResult.hasErrorMsg());
     }
     catch(Exception e) {

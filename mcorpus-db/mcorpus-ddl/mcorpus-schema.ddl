@@ -573,18 +573,23 @@ CREATE OR REPLACE FUNCTION member_login(
   END
 $_$;
 
-/**
- * member_logout
- * 
- * Logs an member out.
- * 
- * A member_audit record is created of LOGOUT type.
- */
+/*
+member_logout
+ 
+Logs a member out.
+ 
+A member_audit record is created of LOGOUT type.
+ 
+@return:
+  the member id of the member that was logged out upon success
+  -OR-
+  NULL when member logout fails for any reason.
+*/
 CREATE OR REPLACE FUNCTION member_logout(
   mid uuid, 
   in_request_timestamp timestamp without time zone, 
   in_request_origin text
-) RETURNS void
+) RETURNS UUID
     LANGUAGE plpgsql
     AS $_$
   DECLARE member_exists BOOLEAN;
@@ -605,10 +610,11 @@ CREATE OR REPLACE FUNCTION member_logout(
         in_request_origin
       );
       RAISE NOTICE 'member % logged out', $1;
-    ELSE
-      -- default
-      RAISE NOTICE 'member logout failed';
+      return $1;
     END IF;
+    -- default
+    RAISE NOTICE 'member logout failed';
+    return null;
   END
 $_$;
 

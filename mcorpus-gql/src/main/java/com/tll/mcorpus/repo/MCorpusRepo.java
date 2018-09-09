@@ -17,6 +17,7 @@ import static com.tll.mcorpus.repo.RepoUtil.fval;
 
 import java.io.Closeable;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -90,29 +91,31 @@ public class MCorpusRepo implements Closeable {
    * <p>
    * Blocking!
    *
-   * @param mlogin
-   *          the member login input credentials
+   * @param username the member username
+   * @param pswd the member password
+   * @param requestInstant the sourcing request timestamp
+   * @param clientOrigin the sourcing request client origin token
    * @return Never null {@link FetchResult} object holding the {@link Mcuser} ref
    *         if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mref> memberLogin(final MemberLogin mlogin) {
-    if(mlogin != null) {
-      try {
-        mlogin.execute(dsl.configuration());
-        final MrefRecord rec = mlogin.getReturnValue();
-        if(rec != null && rec.getMid() != null) {
-          // login success
-          final Mref mref = rec.into(Mref.class);
-          return new FetchResult<>(mref, null);
-        } else {
-          // login fail - no record returned
-          return new FetchResult<>(null, "Member login unsuccessful.");
-        }
+  public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final String clientOrigin) {
+    try {
+      final MemberLogin mlogin = new MemberLogin();
+      mlogin.setMemberUsername(username);
+      mlogin.setMemberPassword(pswd);
+      mlogin.setInRequestTimestamp(new Timestamp(requestInstant.toEpochMilli()));
+      mlogin.setInRequestOrigin(clientOrigin);
+      mlogin.execute(dsl.configuration());
+      final MrefRecord rec = mlogin.getReturnValue();
+      if(rec != null && rec.getMid() != null) {
+        // login success
+        final Mref mref = rec.into(Mref.class);
+        return new FetchResult<>(mref, null);
       }
-      catch(Throwable t) {
-        log.error("Member login error: {}.", t.getMessage());
-      }
+    }
+    catch(Throwable t) {
+      log.error("Member login error: {}.", t.getMessage());
     }
     // default - login fail
     return new FetchResult<>(null, "Member login failed.");
@@ -123,19 +126,27 @@ public class MCorpusRepo implements Closeable {
    * <p>
    * Blocking!
    *
-   * @param memberLogout the member logout instance
-   * @return Never null {@link FetchResult} object holding an error message if unsuccessful.
+   * @param mid the member id of the member to log out
+   * @param requestInstant the sourcing request timestamp
+   * @param clientOrigin the sourcing request client origin token
+   * @return Never null {@link FetchResult} object holding the given member id upon successful member logout 
+   *          -OR- a null member id and a non-null error message if unsuccessful.
    */
-  public FetchResult<Void> memberLogout(final MemberLogout memberLogout) {
-    if(memberLogout != null) {
-      try {
-        memberLogout.execute(dsl.configuration());
-        // logout successful (no exception)
-        return new FetchResult<>(null, null);
+  public FetchResult<UUID> memberLogout(final UUID mid, final Instant requestInstant, final String clientOrigin) {
+    try {
+      final MemberLogout mlogout = new MemberLogout();
+      mlogout.setMid(mid);
+      mlogout.setInRequestTimestamp(new Timestamp(requestInstant.toEpochMilli()));
+      mlogout.setInRequestOrigin(clientOrigin);
+      mlogout.execute(dsl.configuration());
+      final UUID rmid = mlogout.getReturnValue();
+      if(rmid != null) {
+        // logout successful - convey by returning the mid
+        return new FetchResult<>(rmid, null);
       }
-      catch(Throwable t) {
-        log.error("Member logout error: {}.", t.getMessage());
-      }
+    }
+    catch(Throwable t) {
+      log.error("Member logout error: {}.", t.getMessage());
     }
     // default - logout failed
     return new FetchResult<>(null, "Member logout failed.");

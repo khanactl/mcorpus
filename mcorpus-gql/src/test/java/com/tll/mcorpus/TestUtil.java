@@ -5,8 +5,6 @@ import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
@@ -45,8 +42,6 @@ import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
-import com.tll.mcorpus.db.routines.MemberLogin;
-import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
 
 public class TestUtil {
@@ -56,6 +51,12 @@ public class TestUtil {
   public static final String testRequestOrigin = "https://test-app.com ";
 
   public static final String testServerPublicAddress = "https://mcorpus.d2d";
+
+  public static final UUID testMemberUid = UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba");
+
+  public static final String testMemberUsername = "dhookes3f";
+
+  public static final String testMemberPswd = "test123";
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -208,8 +209,8 @@ public class TestUtil {
 
   public static String randomEmpId() {
     String s = String.format("%02d-%07d",
-      Integer.valueOf(rand.nextInt(100) + 1),
-      Integer.valueOf(rand.nextInt(10000000) + 1)
+      Integer.valueOf(rand.nextInt(99)),
+      Integer.valueOf(rand.nextInt(9999999))
     );
     return s;
   }
@@ -311,31 +312,6 @@ public class TestUtil {
     return mcuserLogout;
   }
 
-  /**
-   * @return newly created {@link MemberLogin} instance for a member for testing purposes.
-   */
-  public static MemberLogin testMemberLoginInput() {
-    final long lnow = System.currentTimeMillis();
-    MemberLogin memberLogin = new MemberLogin();
-    memberLogin.setMemberUsername("dhookes3f");
-    memberLogin.setMemberPassword("test123");
-    memberLogin.setInRequestTimestamp(new Timestamp(lnow));
-    memberLogin.setInRequestOrigin(testRequestOrigin);
-    return memberLogin;
-  }
-
-  /**
-   * @return newly created {@link MemberLogout} instance for a member for testing purposes.
-   */
-  public static MemberLogout testMemberLogoutInput() {
-    final long lnow = System.currentTimeMillis();
-    MemberLogout memberLogout = new MemberLogout();
-    memberLogout.setMid(UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba"));
-    memberLogout.setInRequestTimestamp(new Timestamp(lnow));
-    memberLogout.setInRequestOrigin(testRequestOrigin);
-    return memberLogout;
-  }
-  
   /**
    * Add a test mcuser_audit record.
    * 
