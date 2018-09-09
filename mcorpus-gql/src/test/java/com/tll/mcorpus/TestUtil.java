@@ -318,7 +318,7 @@ public class TestUtil {
     final long lnow = System.currentTimeMillis();
     MemberLogin memberLogin = new MemberLogin();
     memberLogin.setMemberUsername("dhookes3f");
-    memberLogin.setMemberPassword("8testItOut9");
+    memberLogin.setMemberPassword("test123");
     memberLogin.setInRequestTimestamp(new Timestamp(lnow));
     memberLogin.setInRequestOrigin(testRequestOrigin);
     return memberLogin;
