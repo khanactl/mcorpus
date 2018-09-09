@@ -13,12 +13,6 @@
     <hashTree>
       <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
         <collectionProp name="Arguments.arguments">
-          <elementProp name="midCount" elementType="Argument">
-            <stringProp name="Argument.name">midCount</stringProp>
-            <stringProp name="Argument.value">500</stringProp>
-            <stringProp name="Argument.desc">The number of member mids to pre-fetch</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="mcorpusHost" elementType="Argument">
             <stringProp name="Argument.name">mcorpusHost</stringProp>
             <stringProp name="Argument.value">mcorpus.d2d</stringProp>
@@ -29,6 +23,18 @@
             <stringProp name="Argument.name">mcorpusDbHost</stringProp>
             <stringProp name="Argument.value">localhost:5432</stringProp>
             <stringProp name="Argument.desc">Where the db is</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="midCount" elementType="Argument">
+            <stringProp name="Argument.name">midCount</stringProp>
+            <stringProp name="Argument.value">1000</stringProp>
+            <stringProp name="Argument.desc">The number of user threads to create</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="rampUpSeconds" elementType="Argument">
+            <stringProp name="Argument.name">rampUpSeconds</stringProp>
+            <stringProp name="Argument.value">100</stringProp>
+            <stringProp name="Argument.desc">The test thread group ramp up time</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -236,13 +242,13 @@ props.put(&quot;jwt&quot;, cookie.getValue());
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Test Thread Group" enabled="true">
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <stringProp name="ThreadGroup.on_sample_error">stopthread</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">${midCount}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampUpSeconds}</stringProp>
         <longProp name="ThreadGroup.start_time">1516483344000</longProp>
         <longProp name="ThreadGroup.end_time">1516483344000</longProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
@@ -373,7 +379,7 @@ vars.put(&quot;rst&quot;, rst);
         <hashTree/>
         <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">true</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
+          <stringProp name="LoopController.loops">2</stringProp>
         </LoopController>
         <hashTree>
           <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="pause (0 - 100ms)" enabled="true">
@@ -664,6 +670,7 @@ vars.put(&quot;rst&quot;, rst);
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
+        <stringProp name="TestPlan.comments">Test teardown thread group</stringProp>
       </PostThreadGroup>
       <hashTree>
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="mcuser logout" enabled="true">
