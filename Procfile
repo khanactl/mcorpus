@@ -1,0 +1,1 @@
+web: java -cp mcorpus-gql/target/log4j-api-2.10.0.jar:mcorpus-gql/target/log4j-core-2.10.0.jar:mcorpus-gql/target/log4j-slf4j-impl-2.10.0.jar:mcorpus-gql/target/disruptor-3.3.4.jar -jar mcorpus-gql/target/mcorpus-gql-server.jar -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
