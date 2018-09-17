@@ -14,13 +14,13 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
+import com.tll.mcorpus.db.udt.pojos.JwtStatusMcuserRole;
 import com.tll.mcorpus.repo.model.FetchResult;
 
 /**
@@ -82,17 +82,19 @@ public class MCorpusUserRepo implements Closeable {
    * <ul>
    * <li>JWT id is known and has 'OK' status on backend (db)
    * <li>the associated mcuser's status is valid
+   * <li>fetch the mcuser's role
    * </ul>
    * @param jwtId the JWT id to check
-   * @return fetch result around a Boolean indicating JWT id validity 
+   * @return fetch result for the JWT status and mcuser role
    */
-  public FetchResult<JwtStatus> getJwtStatus(final UUID jwtId) {
+  public FetchResult<JwtStatusMcuserRole> getJwtStatus(final UUID jwtId) {
     if(jwtId == null) return new FetchResult<>(null, "JWT status check failed: bad input.");
     try {
       final GetJwtStatus backend = new GetJwtStatus();
       backend.setJwtId(jwtId);
       backend.execute(dsl.configuration());
-      return new FetchResult<>(backend.getReturnValue(), null);
+      JwtStatusMcuserRole rval = backend.getReturnValue().into(JwtStatusMcuserRole.class);
+      return new FetchResult<>(rval, null);
     }
     catch(Throwable e) {
       log.info("JWT id validation check error: {}", e.getMessage());

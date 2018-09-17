@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.reflect.TypeToken;
 import com.tll.mcorpus.gql.MCorpusGraphQL;
+import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
 import graphql.ExecutionInput;
 import graphql.GraphQL;
@@ -39,7 +40,8 @@ public class GraphQLHandler implements Handler {
       final String query = ((String) qmap.get("query"));
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
-      final GraphQLWebQuery queryObject = new GraphQLWebQuery(query, vmap, getOrCreateRequestSnapshot(ctx));
+      final JWTStatusInstance jwtStatus = ctx.getRequest().get(JWTStatusInstance.class);
+      final GraphQLWebQuery queryObject = new GraphQLWebQuery(query, vmap, getOrCreateRequestSnapshot(ctx), jwtStatus);
       final GraphQLSchema schema = ctx.get(MCorpusGraphQL.class).getGraphQLSchema();
       final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
       log.info("{}", queryObject);

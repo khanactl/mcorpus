@@ -1,5 +1,7 @@
 scalar Date
 
+directive @auth(role : String!) on FIELD_DEFINITION
+
 schema {
   query: Query
   mutation: Mutation
@@ -9,47 +11,47 @@ schema {
 type Query {
 
   # member reference (mref) by member id
-  mrefByMid(mid: ID!): MRef
+  mrefByMid(mid: ID!): MRef @auth(role: "public")
 
   # member reference (mref) by empId and loc
-  mrefByEmpIdAndLoc(empId: String!, location: Location!): MRef
+  mrefByEmpIdAndLoc(empId: String!, location: Location!): MRef @auth(role: "public")
 
   # all mrefs for a given empId
-  mrefsByEmpId(empId: String!): [MRef]!
+  mrefsByEmpId(empId: String!): [MRef]! @auth(role: "public")
 
   # member by member id
-  memberByMid(mid: ID!): Member
+  memberByMid(mid: ID!): Member @auth(role: "mcorpus") 
 
   # member search - dynamic, filter-able, paginate-able query
-  members(filter: MemberFilter, offset: Int, limit: Int): [Member]
-  
-  # member login (MRef is returned upon member login success and null upon failure) 
-  mlogin(username: String!, pswd: String!): MRef
-  
-  # member logout (the member ID is returned upon success and null upon failure)
-  mlogout(mid: ID!): ID
+  members(filter: MemberFilter, offset: Int, limit: Int): [Member] @auth(role: "mcorpus") 
 }
 
 # the mcorpus mutation methods
 type Mutation {
 
+  # member login (MRef is returned upon member login success and null upon failure) 
+  mlogin(username: String!, pswd: String!): MRef @auth(role: "member")
+  
+  # member logout (the member ID is returned upon success and null upon failure)
+  mlogout(mid: ID!): ID @auth(role: "member")
+  
   # add a member into the corpus
-  addMember(member: MemberToAdd!): Member
+  addMember(member: MemberToAdd!): Member @auth(role: "mcorpus")
 
   # update member properties
-  updateMember(member: MemberToUpdate!): Member
+  updateMember(member: MemberToUpdate!): Member @auth(role: "mcorpus")
 
   # physical removal of a member from the corpus - returns the deleted member id when successful
-  deleteMember(mid: ID!): ID
+  deleteMember(mid: ID!): ID @auth(role: "mcorpus")
 
   # add a member address of a given address name (type)
-  addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress
+  addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress @auth(role: "mcorpus")
 
   # update a member address
-  updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress
+  updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress @auth(role: "mcorpus")
 
   # delete a member address of the given address name (type) returning the member id when successful
-  deleteMemberAddress(mid: ID!, addressName: AddressName!): ID
+  deleteMemberAddress(mid: ID!, addressName: AddressName!): ID @auth(role: "mcorpus")
 
 }
 
@@ -138,21 +140,21 @@ type Member {
   addresses: [MemberAddress]
 
   # date of birth
-  dob: String
+  dob: String @auth(role: "mpii")
   # SSN
-  ssn: String
+  ssn: String @auth(role: "mpii")
 
   # personal email address
-  personalEmail: String
+  personalEmail: String @auth(role: "mpii")
   # work email address
-  workEmail: String
+  workEmail: String @auth(role: "mpii")
 
   # mobile phone
-  mobilePhone: String
+  mobilePhone: String @auth(role: "mpii")
   # home phone
-  homePhone: String
+  homePhone: String @auth(role: "mpii")
   # work phone
-  workPhone: String
+  workPhone: String @auth(role: "mpii")
 
   # member username
   username: String!

@@ -6,9 +6,13 @@ import static com.tll.mcorpus.Util.not;
 
 import java.util.Map;
 
+import com.tll.mcorpus.web.JWT.JWTStatusInstance;
+
 /**
  * Immutable encapsulation of a GraphQL query request
  * for use in the app web layer.
+ * <p>
+ * This is the GraphQL context object for http requests.
  * 
  * @author jkirton
  */
@@ -17,6 +21,7 @@ public class GraphQLWebQuery {
   private final String query;
   private final Map<String, Object> vmap;
   private final RequestSnapshot requestSnapshot;
+  private final JWTStatusInstance jwtStatus;
   
   /**
    * Constructor.
@@ -24,12 +29,14 @@ public class GraphQLWebQuery {
    * @param query the GraphQL query string
    * @param vmap optional query variables expressed as a name/value map
    * @param requestSnapshot snapshot of the sourcing http request
+   * @param jwtStatus the status of the JWT of the sourcing http request
    */
-  public GraphQLWebQuery(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot) {
+  public GraphQLWebQuery(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot, JWTStatusInstance jwtStatus) {
     super();
     this.query = query;
     this.vmap = vmap;
     this.requestSnapshot = requestSnapshot;
+    this.jwtStatus = jwtStatus;
   }
   
   /**
@@ -40,7 +47,8 @@ public class GraphQLWebQuery {
   public boolean isValid() { 
     return 
         not(isNullOrEmpty(query))
-        && not(isNull(requestSnapshot)); 
+        && not(isNull(requestSnapshot))
+        && not(isNull(jwtStatus));
   }
   
   /**
@@ -63,6 +71,11 @@ public class GraphQLWebQuery {
    * @return the snapshot of the sourcing http request.
    */
   public RequestSnapshot getRequestSnapshot() { return requestSnapshot; }
+  
+  /**
+   * @return the JWT status instance of the sourcing http request.
+   */
+  public JWTStatusInstance getJwtStatus() { return jwtStatus; }
   
   @Override
   public String toString() {

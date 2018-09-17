@@ -39,10 +39,15 @@ import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.McuserAuditType;
+import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
+import com.tll.mcorpus.web.JWT;
+import com.tll.mcorpus.web.RequestSnapshot;
+import com.tll.mcorpus.web.JWT.JWTStatus;
+import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
 public class TestUtil {
   
@@ -209,8 +214,8 @@ public class TestUtil {
 
   public static String randomEmpId() {
     String s = String.format("%02d-%07d",
-      Integer.valueOf(rand.nextInt(99)),
-      Integer.valueOf(rand.nextInt(9999999))
+      Integer.valueOf(rand.nextInt(100)),
+      Integer.valueOf(rand.nextInt(10000000))
     );
     return s;
   }
@@ -291,7 +296,7 @@ public class TestUtil {
     final long expiry = lnow + Duration.ofMinutes(30).toMillis();
     McuserLogin mcuserLogin = new McuserLogin();
     mcuserLogin.setMcuserUsername("test");
-    mcuserLogin.setMcuserPassword("jackson");
+    mcuserLogin.setMcuserPassword("test123");
     mcuserLogin.setInJwtId(UUID.randomUUID());
     mcuserLogin.setInRequestTimestamp(new Timestamp(lnow));
     mcuserLogin.setInRequestOrigin(testRequestOrigin);
@@ -354,6 +359,35 @@ public class TestUtil {
     
     return e;
   }
-  
+
+  public static RequestSnapshot testRequestSnapshot() {
+    return new RequestSnapshot(
+        Instant.now(),
+        "127.0.0.1",
+        "localhost",
+        "127.0.0.1|",
+        "https://mcorpus.d2d",
+        "forwarded",
+        "X-Forwarded-For",
+        "X-Forwarded-Proto",
+        "X-Forwarded-Port",
+        null, // jwt cookie
+        null, // sid cookie
+        null, // rst cookie
+        null // rst header
+    );
+  }
+
+  public static JWTStatusInstance testJwtStatus(JWTStatus jwtStatus, McuserRole role) {
+    return JWT.jsi(
+      jwtStatus,
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      new Date(Instant.now().toEpochMilli()),
+      new Date(Instant.now().toEpochMilli()),
+      role
+    );
+  }
+
   private TestUtil() {}
 }

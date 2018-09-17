@@ -16,12 +16,11 @@
 -- bash> 'psql mcorpus < mcorpus-data.ddl'
 
 -- psql>
---   COPY mcuser(name,email,username,pswd,admin) FROM '/Users/d2d/dev/mcorpus/mcorpus-ddl/mock/mock-user.csv' DELIMITER ',' CSV HEADER;
+--   COPY mcuser TO '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-mcuser.ddl';
 
---   COPY member(mid,emp_id,location,name_first,name_middle,name_last,display_name) FROM '/Users/d2d/dev/mcorpus/mcorpus-ddl/mock/mock-member.csv' DELIMITER ',' CSV HEADER;
---    
---   COPY maddress(mid,address_name,attn,street1,street2,city,state,postal_code,country) FROM '/Users/d2d/dev/mcorpus/mcorpus-ddl/mock/mock-maddress-mid.csv' DELIMITER ',' CSV HEADER;
---   COPY mbenefits(mid,foreign_adrs_flag,beli,mcb,med_plan_code,med_opt_out,den_plan_code,den_opt_out,vis_plan_code,vis_opt_out,leg_plan_code,leg_opt_out) FROM '/Users/d2d/dev/mcorpus/mcorpus-ddl/mock/mock-mbenefits-mid.csv' DELIMITER ',' CSV HEADER;
+--   COPY (select * from member order by mid limit 2000) TO '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-member-2000.ddl';
+--   COPY (select * from mauth order by mid limit 2000) to '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-mauth-2000.ddl';
+--   COPY (select * from maddress where mid in (select mid from member order by mid limit 2000)) TO '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-maddress-2000.ddl';
 
 --   UPDATE ... SET pswhash = crypt('new password', gen_salt('bf'));
 --   SELECT (pswhash = crypt('entered password', pswhash)) AS pswmatch FROM ... ;
@@ -73,6 +72,16 @@ create or replace function pass_hash(pswd text) returns text as $$
 $$ language plpgsql
 RETURNS NULL ON NULL INPUT;
 
+create type mcuser_role as enum (
+  -- public - open to all
+  'PUBLIC',
+  -- mcorpus - full read and write over all members
+  'MCORPUS',
+  -- member - read write only for the self-member
+  'MEMBER'
+);
+comment on type mcuser_role is 'The roles defining the level of data access for an mcuser.';
+
 create type mcuser_status as enum (
   'ACTIVE',
   'INACTIVE',
@@ -90,8 +99,8 @@ create table mcuser (
   email                   text not null,
   username                text not null,
   pswd                    text not null,
-  admin                   boolean not null,
-  status                  mcuser_status not null default 'ACTIVE',
+  status                  mcuser_status not null default 'ACTIVE'::mcuser_status,
+  role                    mcuser_role not null default 'PUBLIC'::mcuser_role,
 
   unique(username),
   unique(email)
@@ -158,20 +167,25 @@ CREATE TYPE jwt_mcuser_status AS (
   jwt_id_status jwt_id_status,
   login_expiration timestamp,
   mcuser_status mcuser_status,
-  admin boolean
+  mcuser_role mcuser_role
 );
 comment on type jwt_mcuser_status is 'The pertinent db columns bound to a held JWT ID in the mcuser_audit table.';
 
 CREATE TYPE jwt_status AS ENUM (
+  'PRESENT_BAD_STATE',
   'NOT_PRESENT',
   'BLACKLISTED',
   'EXPIRED',
   'MCUSER_INACTIVE',
-  'VALID',
-  'VALID_ADMIN',
-  'PRESENT_BAD_STATE'
+  'VALID'
 );
 comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.';
+
+CREATE TYPE jwt_status_mcuser_role as (
+  jwt_status jwt_status,
+  mcuser_role mcuser_role
+);
+comment on type jwt_status_mcuser_role is 'Simple wrapper around a jwt_status instance and mcuser_role instance.';
 
 /**
  * Fetch the most recently created mcuser audit record with the given jwt id 
@@ -183,7 +197,7 @@ CREATE OR REPLACE FUNCTION fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_
 $_$
   DECLARE qrec jwt_mcuser_status;
 BEGIN
-  SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.admin 
+  SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.role 
   FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid 
   WHERE a.jwt_id = $1 and (a.type = 'LOGIN'::mcuser_audit_type or a.type = 'LOGOUT'::mcuser_audit_type)
   ORDER BY a.created DESC LIMIT 1; 
@@ -195,16 +209,22 @@ $_$;
 /**
   get_jwt_status()
 
+  Provide the JWT status of the given jwt_id 
+  as well as provide the role of the associated mcuser.
+
   Is the given jwt id valid by way of:
     1) The most recent mcuser_audit record having the given jwt_id 
        is present and marked as 'OK'.
     2) The associated mcuser's status is valid.
     3) The login expiration timestamp is in the future.
 */
-CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status 
+CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status_mcuser_role 
   LANGUAGE plpgsql AS 
 $_$
   DECLARE qrec jwt_mcuser_status;
+  DECLARE mrole mcuser_role;
+  DECLARE jstat jwt_status;
+  DECLARE rval jwt_status_mcuser_role;
 BEGIN
 
   qrec := fetch_latest_jwt_mcuser_rec(jwt_id);
@@ -212,34 +232,31 @@ BEGIN
   IF qrec is null or qrec.jwt_id is null THEN 
     -- the input jwt id was not found
     RAISE NOTICE 'JWT id not found: %', jwt_id;
-    return 'NOT_PRESENT'::jwt_status;
+    jstat := 'NOT_PRESENT'::jwt_status;
   ELSEIF qrec.jwt_id_status = 'BLACKLISTED'::jwt_id_status THEN 
     -- jwt id is marked as blacklisted (jwt_status is set to blacklisted upon logout)
-    return 'BLACKLISTED'::jwt_status;
+    jstat := 'BLACKLISTED'::jwt_status;
   ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
     -- mcuser is bad or inactive
-    return 'MCUSER_INACTIVE'::jwt_status;
+    jstat := 'MCUSER_INACTIVE'::jwt_status;
   ELSEIF qrec.mcuser_audit_record_type != 'LOGIN'::mcuser_audit_type THEN
     -- not a login mcuser audit record! (shouldn't happen but we check to be sure)
     RAISE NOTICE 'Expected LOGIN type mcuser_audit record';
-    return 'PRESENT_BAD_STATE'::jwt_status;
+    jstat := 'PRESENT_BAD_STATE'::jwt_status;
   ELSEIF qrec.login_expiration is null or qrec.login_expiration <= now() THEN
     -- either no login expiration date present or the jwt id has expired
-    return 'EXPIRED'::jwt_status;
+    jstat := 'EXPIRED'::jwt_status;
   ELSEIF qrec.jwt_id_status = 'OK' THEN
-    IF qrec.admin = true THEN
-      -- jwt id is valid with admin priviliges
-      return 'VALID_ADMIN'::jwt_status;
-    ELSE 
-      -- jwt id is valid with NON-admin priviliges
-      return 'VALID'::jwt_status;
-    END IF;
+    jstat := 'VALID'::jwt_status;
+    mrole := qrec.mcuser_role;
   ELSE
     -- error: unresolved jwt status
     RAISE NOTICE 'JWT id bad state: %', jwt_id;
-    return 'PRESENT_BAD_STATE'::jwt_status;
+    jstat := 'PRESENT_BAD_STATE'::jwt_status;
   END IF;
 
+  SELECT INTO rval jstat, mrole;
+  return rval;
 END 
 $_$;
 
@@ -300,8 +317,8 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         email, 
         username, 
         null, 
-        admin, 
-        status 
+        status, 
+        role 
       FROM mcuser 
       INTO row_mcuser 
       WHERE username = $1;
@@ -325,7 +342,7 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         in_jwt_id,
         'OK'::jwt_id_status
       );
-      -- return the user id and admin flag of the matched username
+      -- return the mcuser
       RAISE NOTICE 'mcuser % logged in', row_mcuser.uid;
       RETURN row_mcuser;
     END IF;
@@ -354,7 +371,7 @@ CREATE OR REPLACE FUNCTION mcuser_logout(
 ) RETURNS boolean
     LANGUAGE plpgsql
 AS $_$
-  DECLARE jsi jwt_status;
+  DECLARE jsi jwt_status_mcuser_role;
 BEGIN
     -- logout is predicated on finding a single mcuser_audit record with the 
     -- given mcuserId *and* jwtId.
@@ -364,7 +381,7 @@ BEGIN
       -- only allow mcuser logout when the latest jwt id status is valid
       jsi := get_jwt_status($2);      
       
-      IF jsi = 'VALID'::jwt_status or jsi = 'VALID_ADMIN'::jwt_status THEN
+      IF jsi.jwt_status = 'VALID'::jwt_status THEN
         -- add a new LOGOUT type mcuser_audit record
         INSERT INTO mcuser_audit (
           uid, 

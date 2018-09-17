@@ -24,7 +24,7 @@
 
     <postgres-jdbc.version>42.2.1</postgres-jdbc.version>
     
-    <jooq.version>3.10.5</jooq.version>
+    <jooq.version>3.11.5</jooq.version>
     <hikari-cp.version>2.7.5</hikari-cp.version>
 
     <guava.version>21.0</guava.version>
@@ -37,7 +37,7 @@
     <netty.version>4.1.22.Final</netty.version>
     <ratpack.version>1.5.4</ratpack.version>
     
-    <graphql-java.version>7.0</graphql-java.version>
+    <graphql-java.version>9.0</graphql-java.version>
 
     <junit.version>4.12</junit.version>
   </properties>

@@ -121,33 +121,11 @@ public class MCorpusGraphQL {
     return RuntimeWiring.newRuntimeWiring()
 
       .scalar(new GraphQLDate())
+      .directive("auth", new AuthorizationDirective())
 
       // Query
       .type("Query", typeWiring -> typeWiring
 
-        // member login
-        .dataFetcher("mlogin", env -> {
-          final GraphQLWebQuery webContext = env.getContext();
-          final RequestSnapshot rs = webContext.getRequestSnapshot();
-          final String username = asStringAndClean(env.getArgument("username"));
-          final String pswd = asStringAndClean(env.getArgument("pswd"));
-          final Instant requestInstant = rs.getRequestInstant();
-          final String requestOrigin = rs.getClientOrigin();
-          final FetchResult<Mref> mloginResult = mCorpusRepo.memberLogin(username, pswd, requestInstant, requestOrigin);
-          return mloginResult.isSuccess() ? mloginResult.get() : null;
-        })
-        
-        // member logout
-        .dataFetcher("mlogout", env -> {
-          final GraphQLWebQuery webContext = env.getContext();
-          final RequestSnapshot rs = webContext.getRequestSnapshot();
-          final UUID mid = uuidFromToken(env.getArgument("mid"));
-          final Instant requestInstant = rs.getRequestInstant();
-          final String requestOrigin = rs.getClientOrigin();
-          final FetchResult<UUID> mlogoutResult = mCorpusRepo.memberLogout(mid, requestInstant, requestOrigin);
-          return mlogoutResult.isSuccess() ? uuidToToken(mid) : null;
-        })
-        
         .dataFetcher("mrefByMid", env -> {
           final UUID uuid = uuidFromToken(env.getArgument("mid"));
           final FetchResult<Mref> memberRefFetchResult = mCorpusRepo.fetchMRefByMid(uuid);
@@ -181,6 +159,29 @@ public class MCorpusGraphQL {
       // Mutation
       .type("Mutation", typeWiring -> typeWiring
 
+        // member login
+        .dataFetcher("mlogin", env -> {
+          final GraphQLWebQuery webContext = env.getContext();
+          final RequestSnapshot rs = webContext.getRequestSnapshot();
+          final String username = asStringAndClean(env.getArgument("username"));
+          final String pswd = asStringAndClean(env.getArgument("pswd"));
+          final Instant requestInstant = rs.getRequestInstant();
+          final String requestOrigin = rs.getClientOrigin();
+          final FetchResult<Mref> mloginResult = mCorpusRepo.memberLogin(username, pswd, requestInstant, requestOrigin);
+          return mloginResult.isSuccess() ? mloginResult.get() : null;
+        })
+        
+        // member logout
+        .dataFetcher("mlogout", env -> {
+          final GraphQLWebQuery webContext = env.getContext();
+          final RequestSnapshot rs = webContext.getRequestSnapshot();
+          final UUID mid = uuidFromToken(env.getArgument("mid"));
+          final Instant requestInstant = rs.getRequestInstant();
+          final String requestOrigin = rs.getClientOrigin();
+          final FetchResult<UUID> mlogoutResult = mCorpusRepo.memberLogout(mid, requestInstant, requestOrigin);
+          return mlogoutResult.isSuccess() ? uuidToToken(mid) : null;
+        })
+        
         // add member
         .dataFetcher("addMember", env -> {
           final Map<String, Object> memberMap = env.getArgument("member");
