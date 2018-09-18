@@ -19,7 +19,7 @@ create role mcweb with
   valid until '2020-01-01';
 grant connect on database mcorpus to mcweb;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcweb;
-grant select, insert on mcuser, mcuser_audit, member_audit to mcweb;
+grant select, insert on mcuser, mcuser_audit, mcuser_roles, member_audit to mcweb;
 
 -- Role: mcwebtest
 -- Desc: mcorpus db test role with distinct priviliges 
@@ -31,7 +31,7 @@ create role mcwebtest with
   valid until '2020-01-01';
 grant connect on database mcorpus to mcwebtest;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcwebtest;
-grant select, insert, update, delete on mcuser, mcuser_audit, member_audit to mcwebtest;
+grant select, insert, update, delete on mcuser, mcuser_audit, mcuser_roles, member_audit to mcwebtest;
 
 -- Role: mcadmin
 -- Desc: mcorpus db architect privileges - ddl create/drop

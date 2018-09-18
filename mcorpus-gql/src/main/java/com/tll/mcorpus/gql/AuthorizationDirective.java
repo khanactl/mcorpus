@@ -2,6 +2,12 @@ package com.tll.mcorpus.gql;
 
 import static com.tll.mcorpus.Util.upper;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.tll.mcorpus.Util.isNullOrEmpty;
+import static com.tll.mcorpus.Util.clean;
+
 import com.tll.mcorpus.web.GraphQLWebQuery;
 
 import org.slf4j.Logger;
@@ -32,51 +38,78 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
   static enum Role {
     PUBLIC,
     MEMBER,
-    MCORPUS;
+    MCORPUS,
+    MPII;
 
     /**
-     * Authorize a 'requesting' role against this (the ascribed or target) role.
+     * Authorize a 'requesting' role against this - the ascribed or target role.
      * 
-     * @param requestingRole the role requesting access 
+     * @param requestingRoles the role(s) requesting access 
      * @return true when authorized and false when not authorized.
      */
-    public boolean isAuthorized(final Role requestingRole) {
-      if(requestingRole == null) return false;
-      switch(this) {
-        case MCORPUS:
-          switch(requestingRole) {
-            case MCORPUS:
-              return true;
-            default:
-              return false;
-          }
-        case MEMBER:
-          switch(requestingRole) {
-            case MCORPUS:
-            case MEMBER:
-              return true;
-            default:
-              return false;
-          }
-        case PUBLIC:
-          switch(requestingRole) {
-            case MCORPUS:
-            case MEMBER:
-            case PUBLIC:
-              return true;
-            default:
-              return false;
-          }
-        default: 
-          return false; // deny by default
+    public boolean isAuthorized(final Role[] requestingRoles) {
+      if(requestingRoles == null || requestingRoles.length < 1) return false;
+      for(Role requestingRole : requestingRoles) {
+        switch(this) {
+          case MCORPUS:
+            switch(requestingRole) {
+              case MCORPUS:
+                return true;
+              default:
+                break;
+            }
+            break;
+          case MEMBER:
+            switch(requestingRole) {
+              case MCORPUS:
+              case MEMBER:
+                return true;
+              default:
+                break;
+            }
+            break;
+          case PUBLIC:
+            switch(requestingRole) {
+              case MCORPUS:
+              case MEMBER:
+              case PUBLIC:
+                return true;
+              default:
+                break;
+            }
+            break;
+          case MPII:
+            switch(requestingRole) {
+              case MPII:
+                return true;
+              default:
+                break;
+            }
+            break;
+          default: 
+            break;
+        }
       }
+      return false; // deny by default
     }
 
     public static Role fromString(final String s) {
+      if(isNullOrEmpty(s)) return null;
       for(Role r : Role.values()) if(r.name().equals(s)) return r;
       return null;
     }
 
+    public static Role[] fromCommaDelimitedString(final String s) {
+      if(isNullOrEmpty(s)) return new Role[0];
+      String[] sarr = s.split(",");
+      if(sarr == null || sarr.length < 1) return new Role[0];
+      List<Role> rlist = new ArrayList<Role>(sarr.length);
+      for(int i = 0; i < sarr.length; i++) {
+        Role role = fromString(clean(sarr[i]));
+        if(role != null) rlist.add(role);
+      }
+      return rlist.toArray(new Role[rlist.size()]);
+    }
   } // enum Role
 
   @Override
@@ -89,14 +122,14 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
       public Object get(final DataFetchingEnvironment dataFetchingEnvironment) {
         try {
           final GraphQLWebQuery webContext = dataFetchingEnvironment.getContext();
-          final Role requestingRole = Role.fromString(webContext.getJwtStatus().role().getLiteral());
-          log.debug("Authorizing access to {} requiring role {} for requesting role {}..", f.getName(), targetRole, requestingRole);
-          if(targetRole.isAuthorized(requestingRole)) {
+          final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
+          log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
+          if(targetRole.isAuthorized(requestingRoles)) {
             // authorized
             return f.getDataFetcher().get(dataFetchingEnvironment);
           }
           // not authorized
-          log.warn("Role {} not authorized for {}", requestingRole, f.getName());
+          log.warn("Role(s) {} not authorized for {}", requestingRoles, f.getName());
           return null;
         } catch(Exception e) {
           log.error("Role check for {} error: {}", f.getName(), e.getMessage());

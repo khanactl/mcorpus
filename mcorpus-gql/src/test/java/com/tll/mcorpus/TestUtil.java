@@ -378,14 +378,14 @@ public class TestUtil {
     );
   }
 
-  public static JWTStatusInstance testJwtStatus(JWTStatus jwtStatus, McuserRole role) {
+  public static JWTStatusInstance testJwtStatus(JWTStatus jwtStatus, String roles) {
     return JWT.jsi(
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),
       new Date(Instant.now().toEpochMilli()),
       new Date(Instant.now().toEpochMilli()),
-      role
+      roles
     );
   }
 

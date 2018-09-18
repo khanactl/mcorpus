@@ -6,7 +6,6 @@ package com.tll.mcorpus.db.udt.pojos;
 
 import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
-import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
@@ -29,22 +28,22 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus implements Serializable {
 
-    private static final long serialVersionUID = 1945115782;
+    private static final long serialVersionUID = -1395315066;
 
     private final McuserAuditType mcuserAuditRecordType;
     private final UUID            jwtId;
     private final JwtIdStatus     jwtIdStatus;
     private final Timestamp       loginExpiration;
+    private final UUID            uid;
     private final McuserStatus    mcuserStatus;
-    private final McuserRole      mcuserRole;
 
     public JwtMcuserStatus(JwtMcuserStatus value) {
         this.mcuserAuditRecordType = value.mcuserAuditRecordType;
         this.jwtId = value.jwtId;
         this.jwtIdStatus = value.jwtIdStatus;
         this.loginExpiration = value.loginExpiration;
+        this.uid = value.uid;
         this.mcuserStatus = value.mcuserStatus;
-        this.mcuserRole = value.mcuserRole;
     }
 
     public JwtMcuserStatus(
@@ -52,15 +51,15 @@ public class JwtMcuserStatus implements Serializable {
         UUID            jwtId,
         JwtIdStatus     jwtIdStatus,
         Timestamp       loginExpiration,
-        McuserStatus    mcuserStatus,
-        McuserRole      mcuserRole
+        UUID            uid,
+        McuserStatus    mcuserStatus
     ) {
         this.mcuserAuditRecordType = mcuserAuditRecordType;
         this.jwtId = jwtId;
         this.jwtIdStatus = jwtIdStatus;
         this.loginExpiration = loginExpiration;
+        this.uid = uid;
         this.mcuserStatus = mcuserStatus;
-        this.mcuserRole = mcuserRole;
     }
 
     public McuserAuditType getMcuserAuditRecordType() {
@@ -79,12 +78,12 @@ public class JwtMcuserStatus implements Serializable {
         return this.loginExpiration;
     }
 
-    public McuserStatus getMcuserStatus() {
-        return this.mcuserStatus;
+    public UUID getUid() {
+        return this.uid;
     }
 
-    public McuserRole getMcuserRole() {
-        return this.mcuserRole;
+    public McuserStatus getMcuserStatus() {
+        return this.mcuserStatus;
     }
 
     @Override
@@ -95,8 +94,8 @@ public class JwtMcuserStatus implements Serializable {
         sb.append(", ").append(jwtId);
         sb.append(", ").append(jwtIdStatus);
         sb.append(", ").append(loginExpiration);
+        sb.append(", ").append(uid);
         sb.append(", ").append(mcuserStatus);
-        sb.append(", ").append(mcuserRole);
 
         sb.append(")");
         return sb.toString();

@@ -6,7 +6,6 @@ package com.tll.mcorpus.db.udt;
 
 import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.udt.records.JwtStatusMcuserRoleRecord;
 
 import javax.annotation.Generated;
@@ -29,7 +28,7 @@ import org.jooq.impl.UDTImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtStatusMcuserRole extends UDTImpl<JwtStatusMcuserRoleRecord> {
 
-    private static final long serialVersionUID = -443402025;
+    private static final long serialVersionUID = -127589785;
 
     /**
      * The reference instance of <code>public.jwt_status_mcuser_role</code>
@@ -50,9 +49,9 @@ public class JwtStatusMcuserRole extends UDTImpl<JwtStatusMcuserRoleRecord> {
     public static final UDTField<JwtStatusMcuserRoleRecord, JwtStatus> JWT_STATUS = createField("jwt_status", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), JWT_STATUS_MCUSER_ROLE, "");
 
     /**
-     * The attribute <code>public.jwt_status_mcuser_role.mcuser_role</code>.
+     * The attribute <code>public.jwt_status_mcuser_role.roles</code>.
      */
-    public static final UDTField<JwtStatusMcuserRoleRecord, McuserRole> MCUSER_ROLE = createField("mcuser_role", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class), JWT_STATUS_MCUSER_ROLE, "");
+    public static final UDTField<JwtStatusMcuserRoleRecord, String> ROLES = createField("roles", org.jooq.impl.SQLDataType.CLOB, JWT_STATUS_MCUSER_ROLE, "");
 
     /**
      * No further instances allowed

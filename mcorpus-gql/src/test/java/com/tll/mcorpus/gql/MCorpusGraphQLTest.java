@@ -41,24 +41,24 @@ public class MCorpusGraphQLTest {
    * Issue a GraphQL query with a context of VALID jwt status under role MCORPUS.
    */
   static ExecutionResult query(final String query) {
-    return query(query, JWTStatus.VALID, McuserRole.MCORPUS);
+    return query(query, JWTStatus.VALID, "MCORPUS");
   }
   
   /**
    * Issue a GraphQL query with with a context of VALID jwt status under a given role.
    */
-  static ExecutionResult query(final String query, McuserRole role) {
+  static ExecutionResult query(final String query, String role) {
 	return query(query, JWTStatus.VALID, role);
   }
 	  
   /**
    * Issue a GraphQL query with with a context of the given jwt status and role.
    */
-  static ExecutionResult query(final String query, JWTStatus jwtStatus, McuserRole role) {
+  static ExecutionResult query(final String query, JWTStatus jwtStatus, String roles) {
     final GraphQLSchema schema = mcgql().getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
     final RequestSnapshot requestSnapshot = testRequestSnapshot();
-    final JWTStatusInstance jsi = testJwtStatus(jwtStatus, role);
+    final JWTStatusInstance jsi = testJwtStatus(jwtStatus, roles);
     final GraphQLWebQuery context = new GraphQLWebQuery(query, null, requestSnapshot, jsi);
     final ExecutionInput executionInput = 
       ExecutionInput.newExecutionInput()
@@ -154,7 +154,7 @@ public class MCorpusGraphQLTest {
     final String query = (String) qmap.get("query");
     assertNotNull(query);
 
-    final ExecutionResult result = query(query, McuserRole.PUBLIC);
+    final ExecutionResult result = query(query, "PUBLIC");
     assertNotNull(result);
     assertTrue(result.getErrors().isEmpty());
 
@@ -177,7 +177,7 @@ public class MCorpusGraphQLTest {
     final String query = (String) qmap.get("query");
     assertNotNull(query);
 
-    final ExecutionResult result = query(query, McuserRole.PUBLIC);
+    final ExecutionResult result = query(query, "PUBLIC");
     assertNotNull(result);
     assertTrue(result.getErrors().isEmpty());
 

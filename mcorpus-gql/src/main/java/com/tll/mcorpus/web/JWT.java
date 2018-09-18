@@ -139,7 +139,7 @@ public class JWT {
     private final UUID jwtId;
     private final Date issued;
     private final Date expires;
-    private final McuserRole role;
+    private final String roles;
     
     /**
      * Constructor.
@@ -149,16 +149,16 @@ public class JWT {
      * @param jwtId the bound jwt id claim
      * @param issued the issue date of the associated JWT in the received request
      * @param expires the expiration date of the JWT in the received request
-     * @param role the mcuser role
+     * @param roles the mcuser roles as a comma-delimeter string (if any)
      */
-    private JWTStatusInstance(JWTStatus status, UUID mcuserId, UUID jwtId, Date issued, Date expires, McuserRole role) {
+    private JWTStatusInstance(JWTStatus status, UUID mcuserId, UUID jwtId, Date issued, Date expires, String roles) {
       super();
       this.status = status;
       this.mcuserId = mcuserId;
       this.jwtId = jwtId;
       this.issued = issued;
       this.expires = expires;
-      this.role = role;
+      this.roles = roles;
     }
     
     /**
@@ -195,9 +195,9 @@ public class JWT {
     public Date expires() { return expires == null ? null : new Date(expires.getTime()); }
     
     /**
-     * @return the mcuser role
+     * @return the mcuser roles (may be null)
      */
-    public McuserRole role() { return role; }
+    public String roles() { return roles; }
     
     @Override
     public String toString() { return String.format("status: %s", status); }
@@ -240,8 +240,8 @@ public class JWT {
     return new JWTStatusInstance(status, null, null, null, null, null); 
   }
   
-  public static JWTStatusInstance jsi(JWTStatus status, UUID mcuserId, UUID jwtId, Date issued, Date expires, McuserRole role) { 
-    return new JWTStatusInstance(status, mcuserId, jwtId, issued, expires, role); 
+  public static JWTStatusInstance jsi(JWTStatus status, UUID mcuserId, UUID jwtId, Date issued, Date expires, String roles) { 
+    return new JWTStatusInstance(status, mcuserId, jwtId, issued, expires, roles); 
   }
   
   private final Logger log = LoggerFactory.getLogger(JWT.class);
@@ -481,7 +481,7 @@ public class JWT {
     }
 
     final JwtStatus jwtStatus = fr.get().getJwtStatus();
-    final McuserRole mrole = fr.get().getMcuserRole();
+    final String roles = fr.get().getRoles();
 
     switch(jwtStatus) {
     case NOT_PRESENT:
@@ -496,18 +496,18 @@ public class JWT {
     case MCUSER_INACTIVE:
       // logically blocked
       log.warn("JWT logically blocked.  jwtId: {}", jwtId.toString());
-      return jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, mrole);
+      return jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, roles);
     case EXPIRED:
       // jwt (login) expired
       log.warn("JWT expired.  jwtId: {}", jwtId.toString());
-      return jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, mrole);
+      return jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, roles);
     case VALID:
       // valid non-admin privs (standard mcuser)
-      return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, mrole);
+      return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, roles);
     default:
       // unhandled jwt status so convey status as backend error
       log.warn("JWT unhandled status: {}!  jwtId: {}", fr.get());
-      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, mrole);
+      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, roles);
     }
   }
 }

@@ -5,7 +5,6 @@ package com.tll.mcorpus.db.udt.pojos;
 
 
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.db.enums.McuserRole;
 
 import java.io.Serializable;
 
@@ -25,30 +24,30 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtStatusMcuserRole implements Serializable {
 
-    private static final long serialVersionUID = 350741795;
+    private static final long serialVersionUID = 1468187830;
 
-    private final JwtStatus  jwtStatus;
-    private final McuserRole mcuserRole;
+    private final JwtStatus jwtStatus;
+    private final String    roles;
 
     public JwtStatusMcuserRole(JwtStatusMcuserRole value) {
         this.jwtStatus = value.jwtStatus;
-        this.mcuserRole = value.mcuserRole;
+        this.roles = value.roles;
     }
 
     public JwtStatusMcuserRole(
-        JwtStatus  jwtStatus,
-        McuserRole mcuserRole
+        JwtStatus jwtStatus,
+        String    roles
     ) {
         this.jwtStatus = jwtStatus;
-        this.mcuserRole = mcuserRole;
+        this.roles = roles;
     }
 
     public JwtStatus getJwtStatus() {
         return this.jwtStatus;
     }
 
-    public McuserRole getMcuserRole() {
-        return this.mcuserRole;
+    public String getRoles() {
+        return this.roles;
     }
 
     @Override
@@ -56,7 +55,7 @@ public class JwtStatusMcuserRole implements Serializable {
         StringBuilder sb = new StringBuilder("JwtStatusMcuserRole (");
 
         sb.append(jwtStatus);
-        sb.append(", ").append(mcuserRole);
+        sb.append(", ").append(roles);
 
         sb.append(")");
         return sb.toString();

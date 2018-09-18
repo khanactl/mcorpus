@@ -30,7 +30,9 @@ public enum McuserRole implements EnumType {
 
     MCORPUS("MCORPUS"),
 
-    MEMBER("MEMBER");
+    MEMBER("MEMBER"),
+
+    MPII("MPII");
 
     private final String literal;
 

@@ -171,19 +171,19 @@ type MemberAddress {
   modified: Date!
 
   # attn
-  attn: String
+  attn: String @auth(role: "mpii")
   # street address one
-  street1: String!
+  street1: String! @auth(role: "mpii")
   # street address two
-  street2: String
+  street2: String @auth(role: "mpii")
   # city
-  city: String!
+  city: String! @auth(role: "mpii")
   # state/province
-  state: String!
+  state: String! @auth(role: "mpii")
   # postal/zip code
-  postalCode: String
+  postalCode: String @auth(role: "mpii")
   # country
-  country: String!
+  country: String! @auth(role: "mpii")
 }
 
 # date op

@@ -73,12 +73,14 @@ $$ language plpgsql
 RETURNS NULL ON NULL INPUT;
 
 create type mcuser_role as enum (
-  -- public - open to all
+  -- public - open to all read-only
   'PUBLIC',
   -- mcorpus - full read and write over all members
   'MCORPUS',
   -- member - read write only for the self-member
-  'MEMBER'
+  'MEMBER',
+  -- mpii - ability to see member pii related info
+  'MPII'
 );
 comment on type mcuser_role is 'The roles defining the level of data access for an mcuser.';
 
@@ -100,12 +102,20 @@ create table mcuser (
   username                text not null,
   pswd                    text not null,
   status                  mcuser_status not null default 'ACTIVE'::mcuser_status,
-  role                    mcuser_role not null default 'PUBLIC'::mcuser_role,
+  --role                   mcuser_role not null default 'PUBLIC'::mcuser_role,
 
   unique(username),
   unique(email)
 );
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
+
+create table mcuser_roles (
+  uid                    uuid not null,
+  role                   mcuser_role not null,
+
+  primary key(uid, role)
+);
+comment on type mcuser_roles is 'Related 0-N mcuser roles bound to a single mcuser row.';
 
 create type jwt_id_status as enum (
   'BLACKLISTED',
@@ -166,8 +176,8 @@ CREATE TYPE jwt_mcuser_status AS (
   jwt_id uuid,
   jwt_id_status jwt_id_status,
   login_expiration timestamp,
-  mcuser_status mcuser_status,
-  mcuser_role mcuser_role
+  uid uuid,
+  mcuser_status mcuser_status
 );
 comment on type jwt_mcuser_status is 'The pertinent db columns bound to a held JWT ID in the mcuser_audit table.';
 
@@ -183,7 +193,7 @@ comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_a
 
 CREATE TYPE jwt_status_mcuser_role as (
   jwt_status jwt_status,
-  mcuser_role mcuser_role
+  roles      text -- rollup of the related many mcuser_roles as a comma-delimited string
 );
 comment on type jwt_status_mcuser_role is 'Simple wrapper around a jwt_status instance and mcuser_role instance.';
 
@@ -197,11 +207,10 @@ CREATE OR REPLACE FUNCTION fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_
 $_$
   DECLARE qrec jwt_mcuser_status;
 BEGIN
-  SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.status, m.role 
+  SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.uid, m.status
   FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid 
   WHERE a.jwt_id = $1 and (a.type = 'LOGIN'::mcuser_audit_type or a.type = 'LOGOUT'::mcuser_audit_type)
   ORDER BY a.created DESC LIMIT 1; 
-
   RETURN qrec;
 END
 $_$;
@@ -222,8 +231,8 @@ CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status_mcuser
   LANGUAGE plpgsql AS 
 $_$
   DECLARE qrec jwt_mcuser_status;
-  DECLARE mrole mcuser_role;
   DECLARE jstat jwt_status;
+  DECLARE roles text;
   DECLARE rval jwt_status_mcuser_role;
 BEGIN
 
@@ -248,14 +257,15 @@ BEGIN
     jstat := 'EXPIRED'::jwt_status;
   ELSEIF qrec.jwt_id_status = 'OK' THEN
     jstat := 'VALID'::jwt_status;
-    mrole := qrec.mcuser_role;
+    -- fetch the mcuser roles into a comma delimited string
+    SELECT INTO roles string_agg(mr.role::text, ',') FROM mcuser_roles mr WHERE mr.uid = qrec.uid;
   ELSE
     -- error: unresolved jwt status
     RAISE NOTICE 'JWT id bad state: %', jwt_id;
     jstat := 'PRESENT_BAD_STATE'::jwt_status;
   END IF;
 
-  SELECT INTO rval jstat, mrole;
+  SELECT INTO rval jstat, roles;
   return rval;
 END 
 $_$;
@@ -317,8 +327,7 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         email, 
         username, 
         null, 
-        status, 
-        role 
+        status 
       FROM mcuser 
       INTO row_mcuser 
       WHERE username = $1;
