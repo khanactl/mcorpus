@@ -4,6 +4,7 @@
 package com.tll.mcorpus.db;
 
 
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.routines.Armor1;
 import com.tll.mcorpus.db.routines.Armor2;
 import com.tll.mcorpus.db.routines.Crypt;
@@ -58,10 +59,9 @@ import com.tll.mcorpus.db.routines.UuidNsOid;
 import com.tll.mcorpus.db.routines.UuidNsUrl;
 import com.tll.mcorpus.db.routines.UuidNsX500;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
-import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
-import com.tll.mcorpus.db.udt.records.JwtStatusMcuserRoleRecord;
+import com.tll.mcorpus.db.udt.records.McuserAndRolesRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
 import java.sql.Timestamp;
@@ -591,7 +591,7 @@ public class Routines {
     /**
      * Call <code>public.get_jwt_status</code>
      */
-    public static JwtStatusMcuserRoleRecord getJwtStatus(Configuration configuration, UUID jwtId) {
+    public static JwtStatus getJwtStatus(Configuration configuration, UUID jwtId) {
         GetJwtStatus f = new GetJwtStatus();
         f.setJwtId(jwtId);
 
@@ -602,7 +602,7 @@ public class Routines {
     /**
      * Get <code>public.get_jwt_status</code> as a field.
      */
-    public static Field<JwtStatusMcuserRoleRecord> getJwtStatus(UUID jwtId) {
+    public static Field<JwtStatus> getJwtStatus(UUID jwtId) {
         GetJwtStatus f = new GetJwtStatus();
         f.setJwtId(jwtId);
 
@@ -612,7 +612,7 @@ public class Routines {
     /**
      * Get <code>public.get_jwt_status</code> as a field.
      */
-    public static Field<JwtStatusMcuserRoleRecord> getJwtStatus(Field<UUID> jwtId) {
+    public static Field<JwtStatus> getJwtStatus(Field<UUID> jwtId) {
         GetJwtStatus f = new GetJwtStatus();
         f.setJwtId(jwtId);
 
@@ -727,7 +727,7 @@ public class Routines {
     /**
      * Call <code>public.mcuser_login</code>
      */
-    public static McuserRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
+    public static McuserAndRolesRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
@@ -743,7 +743,7 @@ public class Routines {
     /**
      * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
+    public static Field<McuserAndRolesRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
@@ -758,7 +758,7 @@ public class Routines {
     /**
      * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin, Field<Timestamp> inLoginExpiration, Field<UUID> inJwtId) {
+    public static Field<McuserAndRolesRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin, Field<Timestamp> inLoginExpiration, Field<UUID> inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);

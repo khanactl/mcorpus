@@ -9,6 +9,7 @@ import com.tll.mcorpus.db.tables.Mauth;
 import com.tll.mcorpus.db.tables.Mbenefits;
 import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
+import com.tll.mcorpus.db.tables.McuserRoles;
 import com.tll.mcorpus.db.tables.Member;
 import com.tll.mcorpus.db.tables.MemberAudit;
 
@@ -45,6 +46,7 @@ public class Indexes {
     public static final Index MCUSER_USERNAME_KEY = Indexes0.MCUSER_USERNAME_KEY;
     public static final Index MCUSER_AUDIT_PKEY = Indexes0.MCUSER_AUDIT_PKEY;
     public static final Index MCUSER_AUDIT_TYPE_JWT_ID_KEY = Indexes0.MCUSER_AUDIT_TYPE_JWT_ID_KEY;
+    public static final Index MCUSER_ROLES_PKEY = Indexes0.MCUSER_ROLES_PKEY;
     public static final Index MEMBER_EMP_ID_LOCATION_KEY = Indexes0.MEMBER_EMP_ID_LOCATION_KEY;
     public static final Index MEMBER_PKEY = Indexes0.MEMBER_PKEY;
     public static final Index MEMBER_AUDIT_PKEY = Indexes0.MEMBER_AUDIT_PKEY;
@@ -63,6 +65,7 @@ public class Indexes {
         public static Index MCUSER_USERNAME_KEY = Internal.createIndex("mcuser_username_key", Mcuser.MCUSER, new OrderField[] { Mcuser.MCUSER.USERNAME }, true);
         public static Index MCUSER_AUDIT_PKEY = Internal.createIndex("mcuser_audit_pkey", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE }, true);
         public static Index MCUSER_AUDIT_TYPE_JWT_ID_KEY = Internal.createIndex("mcuser_audit_type_jwt_id_key", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID }, true);
+        public static Index MCUSER_ROLES_PKEY = Internal.createIndex("mcuser_roles_pkey", McuserRoles.MCUSER_ROLES, new OrderField[] { McuserRoles.MCUSER_ROLES.UID, McuserRoles.MCUSER_ROLES.ROLE }, true);
         public static Index MEMBER_EMP_ID_LOCATION_KEY = Internal.createIndex("member_emp_id_location_key", Member.MEMBER, new OrderField[] { Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION }, true);
         public static Index MEMBER_PKEY = Internal.createIndex("member_pkey", Member.MEMBER, new OrderField[] { Member.MEMBER.MID }, true);
         public static Index MEMBER_AUDIT_PKEY = Internal.createIndex("member_audit_pkey", MemberAudit.MEMBER_AUDIT, new OrderField[] { MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE }, true);

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
+import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
@@ -92,8 +93,8 @@ public class LoginRequestHandler implements Handler {
         rerenderLoginPage(ctx, nextRst.toString(), loginResult.getErrorMsg());
         return;
       }
-      final Mcuser mcuser = loginResult.get();
-      if(mcuser == null) throw new IllegalStateException("No mcuser ref returned upon login.");
+      final McuserAndRoles mcuserAndRoles = loginResult.get();
+      if(mcuserAndRoles == null) throw new IllegalStateException("No mcuser ref returned upon login.");
 
       // at this point, we're authenticated
       
@@ -104,10 +105,11 @@ public class LoginRequestHandler implements Handler {
       // the user is now expected to provide this JWT for subsequent mcorpus api requests
       final String jwt = jwtbiz.generate(
           requestSnapshot.getRequestInstant(), 
-          mcuser.getUid(), 
+          mcuserAndRoles.getMcuser().getUid(), 
           pendingJwtID,
           issuer,
-          audience);
+          audience,
+          mcuserAndRoles.getRoles());
       
       // jwt cookie
       addJwtCookieToResponse(ctx, jwt, jwtbiz.jwtCookieTtlInSeconds());
@@ -121,7 +123,7 @@ public class LoginRequestHandler implements Handler {
         WebSessionManager.destroySession(wsi.getWebSession().sid());
 
       log.info("Mcuser '{}' logged in.  JWT issued from server (issuer): '{}' to client (audience): '{}'.", 
-          mcuser.getUid(), issuer, audience);
+          mcuserAndRoles.getMcuser().getUid(), issuer, audience);
       
       // finally, redirect to the home page
       ctx.redirect(301, "index");

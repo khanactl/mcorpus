@@ -30,6 +30,7 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
+import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.repo.model.FetchResult;
 
 /**
@@ -66,19 +67,21 @@ public class MCorpusUserRepoTest {
       repo = new MCorpusUserRepo(ds);
 
       McuserLogin loginInput = testMcuserLoginInput();
-      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      FetchResult<McuserAndRoles> loginResult = repo.login(loginInput);
       log.info("mcorpus LOGIN WITH AUTH SUCCESS TEST result: {}", loginResult);
       
-      Mcuser mcuser = loginResult.get();
-      log.info("mcuser: {}", mcuser);
+      McuserAndRoles mcuser = loginResult.get();
+      log.info("mcuser and roles: {}", mcuser);
       
       assertNotNull(loginResult);
       assertNull(loginResult.getErrorMsg());
       assertFalse(loginResult.hasErrorMsg());
       
       assertNotNull(mcuser);
-      assertNotNull(mcuser.getUsername());
-      assertNull(mcuser.getPswd());
+      assertNotNull(mcuser.getMcuser().getUsername());
+      assertNull(mcuser.getMcuser().getPswd());
+      
+      assertNotNull(mcuser.getRoles());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -103,7 +106,7 @@ public class MCorpusUserRepoTest {
       repo = new MCorpusUserRepo(ds);
       McuserLogin loginInput = testMcuserLoginInput();
       loginInput.setMcuserPassword("bunko");
-      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      FetchResult<McuserAndRoles> loginResult = repo.login(loginInput);
       log.info("mcorpus LOGIN WITH BAD PASSWORD TEST result: {}", loginResult);
       
       assertNotNull(loginResult);
@@ -135,7 +138,7 @@ public class MCorpusUserRepoTest {
       repo = new MCorpusUserRepo(ds);
       McuserLogin loginInput = testMcuserLoginInput();
       loginInput.setMcuserUsername("unknown");
-      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      FetchResult<McuserAndRoles> loginResult = repo.login(loginInput);
       log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
       
       assertNotNull(loginResult);

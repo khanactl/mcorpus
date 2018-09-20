@@ -29,8 +29,6 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.db.enums.McuserRole;
-import com.tll.mcorpus.db.udt.pojos.JwtStatusMcuserRole;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.repo.model.FetchResult;
 
@@ -140,7 +138,7 @@ public class JWT {
     private final Date issued;
     private final Date expires;
     private final String roles;
-    
+
     /**
      * Constructor.
      *
@@ -198,7 +196,7 @@ public class JWT {
      * @return the mcuser roles (may be null)
      */
     public String roles() { return roles; }
-    
+
     @Override
     public String toString() { return String.format("status: %s", status); }
 
@@ -295,10 +293,11 @@ public class JWT {
    * @param audience the ascribed JWT audience claim value which is expected to
    *          match incoming client request's remote host address (the
    *          client's IP).
+   * @param roles the endowed roles of the <code>mcuserId</code>
    * @return newly created, never null JWT as a string.
    * @throws Exception upon any error while generating the JWT
    */
-  public String generate(final Instant requestInstant, final UUID mcuserId, final UUID pendingJwtId, final String issuer, final String audience) 
+  public String generate(final Instant requestInstant, final UUID mcuserId, final UUID pendingJwtId, final String issuer, final String audience, String roles) 
       throws Exception {
     final long requestTimestamp = requestInstant.toEpochMilli();
     final long loginExpirationTimestamp = requestTimestamp + jwtCookieTtlInMillis;
@@ -313,6 +312,7 @@ public class JWT {
         .subject(mcuserId.toString())
         .issueTime(new Date(requestTimestamp))
         .expirationTime(new Date(loginExpirationTimestamp))
+        .claim("roles", roles)
         .build());
     
     try {
@@ -416,10 +416,15 @@ public class JWT {
       return jsi(JWTStatus.BAD_SIGNATURE);
     }
     
-    // verify claims
+    // verify claims and prefetch the jwt held mcuser roles
+    // NOTE: we bake the mcuser roles into the jwt token 
+    //       with the assumption the jwt security and cryptography
+    //       will keep this secret and unaltered.
     final JWTClaimsSet claims;
+    final String roles; // bound to the mcuser
     try {
       claims = sjwt.getJWTClaimsSet();
+      roles = (String) claims.getClaim("roles");
     }
     catch (Exception e) {
       log.error("JWT bad claims: {}", e.getMessage());
@@ -474,40 +479,48 @@ public class JWT {
     // 1) the jwt id is *known* and *not blacklisted*
     // 2) the associated mcuser has a valid status
     
-    final FetchResult<JwtStatusMcuserRole> fr = mcuserRepo.getJwtStatus(jwtId);
+    final FetchResult<JwtStatus> fr = mcuserRepo.getJwtStatus(jwtId);
     if(fr == null || not(fr.isSuccess())) {
       log.error("JWT (jwtId: {}) fetch backend status error: {}", jwtId.toString(), fr.getErrorMsg());
       return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, null);
     }
 
-    final JwtStatus jwtStatus = fr.get().getJwtStatus();
-    final String roles = fr.get().getRoles();
+    final JwtStatus jwtStatus = fr.get();
+    final JWTStatusInstance jsi;
 
     switch(jwtStatus) {
     case NOT_PRESENT:
       // jwt id not found in db - treat as blocked then
       log.warn("JWT not present on backend.  jwtId: {}", jwtId.toString());
-      return jsi(JWTStatus.NOT_PRESENT_BACKEND, mcuserId, jwtId, issued, expires, null);
+      jsi = jsi(JWTStatus.NOT_PRESENT_BACKEND, mcuserId, jwtId, issued, expires, null);
+      break;
     case PRESENT_BAD_STATE:
       // jwt id found in db but the status could not be determined
       log.warn("JWT present but status is unknown.  jwtId: {}", jwtId.toString());
-      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, null);
+      jsi = jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, null);
+      break;
     case BLACKLISTED:
     case MCUSER_INACTIVE:
       // logically blocked
       log.warn("JWT logically blocked.  jwtId: {}", jwtId.toString());
-      return jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, roles);
+      jsi = jsi(JWTStatus.BLOCKED, mcuserId, jwtId, issued, expires, null);
+      break;
     case EXPIRED:
       // jwt (login) expired
       log.warn("JWT expired.  jwtId: {}", jwtId.toString());
-      return jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, roles);
+      jsi = jsi(JWTStatus.EXPIRED, mcuserId, jwtId, issued, expires, null);
+      break;
     case VALID:
-      // valid non-admin privs (standard mcuser)
-      return jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, roles);
+      // valid - provide roles
+      jsi = jsi(JWTStatus.VALID, mcuserId, jwtId, issued, expires, roles);
+      break;
     default:
       // unhandled jwt status so convey status as backend error
       log.warn("JWT unhandled status: {}!  jwtId: {}", fr.get());
-      return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, roles);
+      jsi = jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, null);
+      break;
     }
+
+    return jsi;
   }
 }

@@ -55,9 +55,10 @@ public class JWTTest {
     UUID jwtId = UUID.randomUUID();
     String issuer = testServerPublicAddress;
     String audience = "127.0.0.1|127.0.0.1";
+    String roles = "MCORPUS";
     
     // generate
-    String jwt = jwti.generate(now, TestUtil.testMcuserUid, jwtId, issuer, audience);
+    String jwt = jwti.generate(now, TestUtil.testMcuserUid, jwtId, issuer, audience, roles);
     log.info("JWT generated: {}", jwt);
     
     // parse

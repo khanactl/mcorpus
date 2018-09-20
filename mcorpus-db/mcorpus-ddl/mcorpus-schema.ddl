@@ -191,12 +191,6 @@ CREATE TYPE jwt_status AS ENUM (
 );
 comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.';
 
-CREATE TYPE jwt_status_mcuser_role as (
-  jwt_status jwt_status,
-  roles      text -- rollup of the related many mcuser_roles as a comma-delimited string
-);
-comment on type jwt_status_mcuser_role is 'Simple wrapper around a jwt_status instance and mcuser_role instance.';
-
 /**
  * Fetch the most recently created mcuser audit record with the given jwt id 
  * of either login or logout type.
@@ -227,13 +221,11 @@ $_$;
     2) The associated mcuser's status is valid.
     3) The login expiration timestamp is in the future.
 */
-CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status_mcuser_role 
+CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
   LANGUAGE plpgsql AS 
 $_$
   DECLARE qrec jwt_mcuser_status;
   DECLARE jstat jwt_status;
-  DECLARE roles text;
-  DECLARE rval jwt_status_mcuser_role;
 BEGIN
 
   qrec := fetch_latest_jwt_mcuser_rec(jwt_id);
@@ -257,18 +249,21 @@ BEGIN
     jstat := 'EXPIRED'::jwt_status;
   ELSEIF qrec.jwt_id_status = 'OK' THEN
     jstat := 'VALID'::jwt_status;
-    -- fetch the mcuser roles into a comma delimited string
-    SELECT INTO roles string_agg(mr.role::text, ',') FROM mcuser_roles mr WHERE mr.uid = qrec.uid;
   ELSE
     -- error: unresolved jwt status
     RAISE NOTICE 'JWT id bad state: %', jwt_id;
     jstat := 'PRESENT_BAD_STATE'::jwt_status;
   END IF;
 
-  SELECT INTO rval jstat, roles;
-  return rval;
+  return jstat;
 END 
 $_$;
+
+CREATE TYPE mcuser_and_roles as (
+  mcuser     mcuser,
+  roles      text -- rollup of the related many mcuser_roles as a comma-delimited string
+);
+comment on type mcuser_and_roles is 'Simple wrapper around an mcuser row and the associated roles of that mcuser.';
 
 /*
 mcuser_login
@@ -293,12 +288,14 @@ CREATE OR REPLACE FUNCTION mcuser_login(
   in_request_origin text, 
   in_login_expiration timestamp without time zone, 
   in_jwt_id uuid
-) RETURNS public.mcuser
+) RETURNS mcuser_and_roles
     LANGUAGE plpgsql
     AS $_$
   DECLARE existing_jwt_id uuid;
   DECLARE passed BOOLEAN;
-  DECLARE row_mcuser mcuser%ROWTYPE;
+  DECLARE mcuser mcuser%ROWTYPE;
+  DECLARE roles text;
+  DECLARE rval mcuser_and_roles;
   BEGIN
     -- verify the given in_jwt_id is unique against the existing jwt ids held
     -- in the mcuser_audit table
@@ -318,19 +315,21 @@ CREATE OR REPLACE FUNCTION mcuser_login(
     IF passed THEN
       -- mcuser authenticated
 
-      -- fetch mcuser record
+      -- fetch mcuser record and roles (comma-delim rollup of roles)
       SELECT 
-        uid, 
-        created, 
-        modified, 
-        name, 
-        email, 
-        username, 
+        m.uid, 
+        m.created, 
+        m.modified, 
+        m.name, 
+        m.email, 
+        m.username, 
         null, 
-        status 
-      FROM mcuser 
-      INTO row_mcuser 
-      WHERE username = $1;
+        m.status 
+      INTO mcuser 
+      FROM mcuser m 
+      WHERE m.username = $1; 
+
+      SELECT string_agg(role::text, ',') INTO roles FROM mcuser_roles WHERE uid = mcuser.uid;
 
       -- add mcuser_audit LOGIN record upon successful login
       INSERT INTO mcuser_audit (
@@ -343,7 +342,7 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         jwt_id_status
       )
       VALUES (
-        row_mcuser.uid, 
+        mcuser.uid, 
         'LOGIN', 
         in_request_timestamp, 
         in_request_origin,
@@ -351,9 +350,10 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         in_jwt_id,
         'OK'::jwt_id_status
       );
-      -- return the mcuser
-      RAISE NOTICE 'mcuser % logged in', row_mcuser.uid;
-      RETURN row_mcuser;
+      -- return the mcuser and roles
+      select into rval mcuser, roles;
+      RAISE NOTICE 'mcuser % logged in', mcuser.uid;
+      RETURN rval;
     END IF;
 
     -- default
@@ -380,7 +380,7 @@ CREATE OR REPLACE FUNCTION mcuser_logout(
 ) RETURNS boolean
     LANGUAGE plpgsql
 AS $_$
-  DECLARE jsi jwt_status_mcuser_role;
+  DECLARE jsi jwt_status;
 BEGIN
     -- logout is predicated on finding a single mcuser_audit record with the 
     -- given mcuserId *and* jwtId.
@@ -388,9 +388,9 @@ BEGIN
       -- at this point, we know a LOGIN record was created with the given jwt id and mcuser id.
 
       -- only allow mcuser logout when the latest jwt id status is valid
-      jsi := get_jwt_status($2);      
+      jsi := get_jwt_status($2);
       
-      IF jsi.jwt_status = 'VALID'::jwt_status THEN
+      IF jsi = 'VALID'::jwt_status THEN
         -- add a new LOGOUT type mcuser_audit record
         INSERT INTO mcuser_audit (
           uid, 

@@ -14,13 +14,14 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
-import com.tll.mcorpus.db.tables.records.McuserRecord;
-import com.tll.mcorpus.db.udt.pojos.JwtStatusMcuserRole;
+import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
+import com.tll.mcorpus.db.udt.records.McuserAndRolesRecord;
 import com.tll.mcorpus.repo.model.FetchResult;
 
 /**
@@ -87,13 +88,13 @@ public class MCorpusUserRepo implements Closeable {
    * @param jwtId the JWT id to check
    * @return fetch result for the JWT status and mcuser role
    */
-  public FetchResult<JwtStatusMcuserRole> getJwtStatus(final UUID jwtId) {
+  public FetchResult<JwtStatus> getJwtStatus(final UUID jwtId) {
     if(jwtId == null) return new FetchResult<>(null, "JWT status check failed: bad input.");
     try {
       final GetJwtStatus backend = new GetJwtStatus();
       backend.setJwtId(jwtId);
       backend.execute(dsl.configuration());
-      JwtStatusMcuserRole rval = backend.getReturnValue().into(JwtStatusMcuserRole.class);
+      JwtStatus rval = backend.getReturnValue();
       return new FetchResult<>(rval, null);
     }
     catch(Throwable e) {
@@ -111,15 +112,15 @@ public class MCorpusUserRepo implements Closeable {
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final McuserLogin mcuserLogin) {
+  public FetchResult<McuserAndRoles> login(final McuserLogin mcuserLogin) {
     if(mcuserLogin != null) {
       try {
         mcuserLogin.execute(dsl.configuration());
-        final McuserRecord rec = mcuserLogin.getReturnValue();
-        if(rec != null && rec.getUid() != null) {
+        final McuserAndRolesRecord rec = mcuserLogin.getReturnValue();
+        if(rec != null && rec.getMcuser() != null) {
           // login success
-          final Mcuser mcuser = rec.into(Mcuser.class);
-          return new FetchResult<>(mcuser, null);
+          final McuserAndRoles rval = rec.into(McuserAndRoles.class);
+          return new FetchResult<>(rval, null);
         } else {
           // login fail - no record returned
           return new FetchResult<>(null, "Login unsuccessful.");
