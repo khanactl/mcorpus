@@ -20,11 +20,6 @@ import net.jcip.annotations.ThreadSafe;
 public final class WebSessionManager {
   
   /**
-   *  The amount of time a newly created web session lasts by design.
-   */
-  public static final Duration webSessionDuration = Duration.ofMinutes(10);
-  
-  /**
    * Definition of the possible web sesssion status states.
    */
   public static enum WebSessionStatus {
@@ -102,17 +97,6 @@ public final class WebSessionManager {
     public RequestSnapshot initiatingRequest() { return initiatingRequest; }
     
     /**
-     * Is this web session expired based in the current request snapshot?
-     * 
-     * @param currentRequest the current request snapshot
-     * @return true if this web session is expired
-     */
-    public boolean isExpired(RequestSnapshot currentRequest) {
-      return currentRequest.getRequestInstant()
-        .isAfter(initiatingRequest.getRequestInstant().plus(webSessionDuration));
-    }
-    
-    /**
      * @return a physical copy of the currently held request sync token or null if
      *         it is not set.
      */
@@ -143,21 +127,34 @@ public final class WebSessionManager {
     return new WebSessionInstance(status, webSession);
   }
   
-  private static final Cache<UUID, WebSession> cache;
+  private final Cache<UUID, WebSession> cache;
+
+  private final Duration webSessionDuration;
   
-  static {
+  /**
+   * Constructor.
+   * 
+   * @param maxSessions the max number of web sessions allowed in any given instant of time
+   * @param webSessionDuration the time duration a web session is allowed to live
+   */
+  public WebSessionManager(int maxSessions, Duration webSessionDuration) {
     // we set the max web session size here
     // we allow only {maxSize} clients to have a session at a time
     // this is a good memery escalation constraint if we end up getting ddos'd
-    final int maxSize = 20;
     cache = Caffeine.newBuilder()
-      .maximumSize(20)
+      .maximumSize(maxSessions)
       .expireAfterWrite(webSessionDuration)
       // TODO add listener when sessions expire for logging
       .build();
-    glog().info("Web session manager created (Max. size: {}, Session duration: {}).", maxSize, webSessionDuration.toString());
+    this.webSessionDuration = webSessionDuration;
+    glog().info("Web session manager created (Max. size: {}, Session duration: {}).", maxSessions, webSessionDuration.toString());
   }
-  
+
+  /**
+   * @return The configured web session {@link Duration}.
+   */
+  public Duration getWebSessionDuration() { return webSessionDuration; }
+
   /**
    * Get the web session by the given session id.
    * <p>
@@ -166,7 +163,7 @@ public final class WebSessionManager {
    * @param sid the web session id
    * @return the cached {@link WebSession} instance -OR- null if not present in the cache.
    */
-  public static WebSession getSession(UUID sid) { return cache.getIfPresent(sid); }
+  public WebSession getSession(UUID sid) { return cache.getIfPresent(sid); }
   
   /**
    * Get the WebSession or call the given function when it isn't there initially.
@@ -175,7 +172,7 @@ public final class WebSessionManager {
    * @param whenNotPresent function that is called when not in cache
    * @return Never null {@link WebSession}.
    */
-  public static WebSession getSession(UUID sid, Function<UUID, WebSession> whenNotPresent) {
+  public WebSession getSession(UUID sid, Function<UUID, WebSession> whenNotPresent) {
     return cache.get(sid, whenNotPresent);
   }
   
@@ -184,8 +181,21 @@ public final class WebSessionManager {
    * 
    * @param sid the id of the session to invalidate
    */
-  public static void destroySession(final UUID sid) {
+  public void destroySession(final UUID sid) {
     cache.invalidate(sid);
   }
 
+  /**
+   * Is the given web session expired based on the given request snapshot?
+   * 
+   * @param webSession the web session to check
+   * @param requestSnapshot the request snapshot to check against
+   * @return true if the given <code>webSession</code> is expired and false if not expired
+   */
+  /*
+  public boolean isWebSessionExpired(final WebSession webSession, final RequestSnapshot requestSnapshot) {
+    return requestSnapshot.getRequestInstant()
+      .isAfter(webSession.initiatingRequest.getRequestInstant().plus(webSessionDuration));
+  }
+  */
 }

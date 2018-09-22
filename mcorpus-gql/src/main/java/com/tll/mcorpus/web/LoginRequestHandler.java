@@ -4,6 +4,7 @@ import static com.tll.mcorpus.Util.isBlank;
 import static com.tll.mcorpus.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.clearSidCookie;
+import static com.tll.mcorpus.web.RequestUtil.webSessionManager;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
 
 import java.sql.Timestamp;
@@ -11,15 +12,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ratpack.exec.Blocking;
 import ratpack.form.Form;
@@ -118,8 +119,8 @@ public class LoginRequestHandler implements Handler {
 
       // invalidate the current web session as we no longer need it
       final WebSessionInstance wsi = ctx.getRequest().get(WebSessionInstance.class);
-      if(wsi != null && wsi.getWebSession() != null)
-        WebSessionManager.destroySession(wsi.getWebSession().sid());
+      if(wsi != null && wsi.getWebSession() != null) 
+        webSessionManager(ctx).destroySession(wsi.getWebSession().sid());
 
       log.info("Mcuser '{}' logged in.  JWT issued from server (issuer): '{}' to client (audience): '{}'.", 
           mcuserAndRoles.getMcuser().getUid(), issuer, audience);

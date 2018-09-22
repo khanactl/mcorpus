@@ -3,18 +3,18 @@ package com.tll.mcorpus.web;
 import static com.tll.mcorpus.web.RequestUtil.addRstCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.addSidCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateWebSession;
+import static com.tll.mcorpus.web.RequestUtil.webSessionManager;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
-import static com.tll.mcorpus.web.WebSessionManager.webSessionDuration;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ratpack.exec.Blocking;
 import ratpack.handling.Context;
@@ -103,7 +103,7 @@ public class LoginPageRequestHandler implements Handler {
     // 1) the current web session id (sid)
     // 2) freshly generated and strong rst
     addSidCookieToResponse(ctx, webSession.sid());
-    addRstCookieToResponse(ctx, nextRst, (int) webSessionDuration.getSeconds());
+    addRstCookieToResponse(ctx, nextRst, (int) webSessionManager(ctx).getWebSessionDuration().getSeconds());
     
     // render the login form
     final Map<String, Object> model = new HashMap<>(2);

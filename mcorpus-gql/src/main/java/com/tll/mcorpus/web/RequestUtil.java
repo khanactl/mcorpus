@@ -2,7 +2,6 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Util.glog;
 import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.web.WebSessionManager.webSessionDuration;
 import static com.tll.mcorpus.web.WebSessionManager.wsi;
 
 import java.util.UUID;
@@ -91,7 +90,8 @@ public class RequestUtil {
         sid = UUID.randomUUID();
       }
 
-      final WebSession webSession = WebSessionManager.getSession(sid, nsid -> {
+      final WebSessionManager wsm = ctx.get(WebSessionManager.class);
+      final WebSession webSession = wsm.getSession(sid, nsid -> {
         final WebSession ws = new WebSession(nsid, requestSnapshot);
         glog().info("Web session created: {}", ws);
         return ws;
@@ -124,7 +124,8 @@ public class RequestUtil {
       final RequestSnapshot requestSnapshot = getOrCreateRequestSnapshot(ctx);
       if (requestSnapshot.hasSidCookie()) {
         try {
-          webSession = WebSessionManager.getSession(UUID.fromString(requestSnapshot.getSidCookie()));
+          final WebSessionManager wsm = ctx.get(WebSessionManager.class);
+          webSession = wsm.getSession(UUID.fromString(requestSnapshot.getSidCookie()));
         } catch (Exception ex) {
           glog().error("Invalid session cookie: {}", requestSnapshot.getSidCookie());
           status = WebSessionStatus.BAD_SESSION_ID;
@@ -144,6 +145,13 @@ public class RequestUtil {
     glog().info("Web session status '{}' cached in request.", status);
     return wsi;
   }
+
+  /**
+   * @return The configured {@link WebSessionManager} of the app.
+   */
+  public static WebSessionManager webSessionManager(final Context ctx) {
+    return ctx.get(WebSessionManager.class);
+  }
   
   /**
    * Add a web session tracking cookie to the response in the given request
@@ -156,12 +164,13 @@ public class RequestUtil {
    * @throws Exception when trying to resolve the web session
    */
   public static void addSidCookieToResponse(final Context ctx, final UUID sid) throws Exception {
+    final WebSessionManager wsm = ctx.get(WebSessionManager.class);
     final Cookie sidCookieRef = ctx.getResponse().cookie("sid", sid.toString());
     sidCookieRef.setSecure(true);
     sidCookieRef.setHttpOnly(true);
     sidCookieRef.setDomain(getServerDomainName(ctx));
     sidCookieRef.setPath("/");
-    sidCookieRef.setMaxAge(webSessionDuration.getSeconds());
+    sidCookieRef.setMaxAge(wsm.getWebSessionDuration().getSeconds());
   }
   
   /**

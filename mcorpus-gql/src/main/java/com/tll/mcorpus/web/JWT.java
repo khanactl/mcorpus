@@ -1,5 +1,6 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.mcorpus.Util.isNull;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 
@@ -11,9 +12,6 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -32,6 +30,9 @@ import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.repo.model.FetchResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * JWT (Json Web Token) business rules and public methods for supporting them in
  * app web layer.
@@ -39,14 +40,14 @@ import com.tll.mcorpus.repo.model.FetchResult;
  * JWTs are used as a means to authenticate users over http before granting
  * access to the mcorpus api.
  * <p>
- * Specifically, this class assess the JWT status for incoming http requests and
- * also generates them.  JWTs are generated after a successful user authentication
+ * Specifically, this class assesses the JWT status for incoming http requests and
+ * also generates them.  JWTs are generated after successful user authentication
  * by username and password.
  * 
  * @author jkirton
  */
 public class JWT {
-  
+
   /**
    * The supported states for an mcorpus JWT.
    */
@@ -64,25 +65,9 @@ public class JWT {
      */
     BAD_SIGNATURE,
     /**
-     * The JWT claims are not parseable.
+     * The JWT claims are not parseable or the resolved claims are invalid.
      */
     BAD_CLAIMS,
-    /**
-     * The JWT issuer claim is bad.
-     */
-    BAD_ISSUER,
-    /**
-     * The JWT audience claim is bad.
-     */
-    BAD_AUDIENCE,
-    /**
-     * The JWT subject claim is bad.
-     */
-    BAD_SUBJECT,
-    /**
-     * The JWT ID claim is bad.
-     */
-    BAD_JWTID,
     /**
      * The JWT ID was not found in the backend database.
      */
@@ -147,7 +132,7 @@ public class JWT {
      * @param jwtId the bound jwt id claim
      * @param issued the issue date of the associated JWT in the received request
      * @param expires the expiration date of the JWT in the received request
-     * @param roles the mcuser roles as a comma-delimeter string (if any)
+     * @param roles the mcuser roles as a comma-delimeted string (if any)
      */
     private JWTStatusInstance(JWTStatus status, UUID mcuserId, UUID jwtId, Date issued, Date expires, String roles) {
       super();
@@ -193,7 +178,7 @@ public class JWT {
     public Date expires() { return expires == null ? null : new Date(expires.getTime()); }
     
     /**
-     * @return the mcuser roles (may be null)
+     * @return the comma-delimited mcuser roles (may be null).
      */
     public String roles() { return roles; }
 
@@ -416,57 +401,57 @@ public class JWT {
       return jsi(JWTStatus.BAD_SIGNATURE);
     }
     
-    // verify claims and prefetch the jwt held mcuser roles
+    // extract and verify the held JWT claims
     // NOTE: we bake the mcuser roles into the jwt token 
     //       with the assumption the jwt security and cryptography
     //       will keep this secret and unaltered.
-    final JWTClaimsSet claims;
+    final UUID jwtId;
+    final UUID mcuserId;
+    final Date issued;
+    final Date expires;
+    final String issuer;
+    final String audience;
     final String roles; // bound to the mcuser
     try {
-      claims = sjwt.getJWTClaimsSet();
+      final JWTClaimsSet claims = sjwt.getJWTClaimsSet();
+      
+      jwtId = UUID.fromString(claims.getJWTID());
+      mcuserId = UUID.fromString(claims.getSubject());
+      issued = claims.getIssueTime();
+      expires = claims.getExpirationTime();
+      issuer = claims.getIssuer();
+      audience = claims.getAudience().isEmpty() ? "" : claims.getAudience().get(0);
       roles = (String) claims.getClaim("roles");
+
+      if(
+        isNull(jwtId)
+        || isNull(mcuserId) 
+        || isNull(issued)
+        || isNull(expires)
+        || isNullOrEmpty(issuer)
+        || isNullOrEmpty(audience)
+        // NOTE: roles claim is optional
+      ) {
+        throw new Exception("One or more missing required claims.");
+      }
+      
+      log.debug("JWT issuer: {}, audience: {}", issuer, audience);
     }
     catch (Exception e) {
       log.error("JWT bad claims: {}", e.getMessage());
       return jsi(JWTStatus.BAD_CLAIMS);
     }
     
-    final Date issued = claims.getIssueTime();
-    final Date expires = claims.getExpirationTime();
-    final String issuer = claims.getIssuer();
-    final String audience = claims.getAudience().isEmpty() ? "" : claims.getAudience().get(0);
-    log.debug("JWT issuer: {}, audience: {}", issuer, audience);
-    
     // verify issuer (this server's public host name)
-    if(isNullOrEmpty(issuer) || not(issuer.equals(serverIssuer))) {
+    if(not(issuer.equals(serverIssuer))) {
       log.error("JWT bad issuer: {} (expected: {})", issuer, serverIssuer);
-      return jsi(JWTStatus.BAD_ISSUER);
+      return jsi(JWTStatus.BAD_CLAIMS);
     }
     
     // verify audience (client origin)
     if(not(verifyClientOrigin(audience, rs.getClientOrigin()))) {
       log.error("JWT bad audience: {} (expected: {})", audience, rs.getClientOrigin());
-      return jsi(JWTStatus.BAD_AUDIENCE);
-    }
-    
-    // JWT subject (mcuser id)
-    final UUID mcuserId;
-    try {
-      mcuserId = UUID.fromString(claims.getSubject());
-    }
-    catch(Exception e) {
-      log.error("JWT bad subject (mcuserId): {}", claims.getSubject());
-      return jsi(JWTStatus.BAD_SUBJECT);
-    }
-    
-    // JWT ID
-    final UUID jwtId;
-    try {
-      jwtId = UUID.fromString(claims.getJWTID());
-    }
-    catch(Exception e) {
-      log.error("JWT bad JWTID: {}", claims.getJWTID());
-      return jsi(JWTStatus.BAD_JWTID);
+      return jsi(JWTStatus.BAD_CLAIMS);
     }
     
     // expired? (check for exp. time in the past)
