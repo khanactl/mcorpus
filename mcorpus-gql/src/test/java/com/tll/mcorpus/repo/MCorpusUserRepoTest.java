@@ -28,7 +28,6 @@ import com.tll.mcorpus.TestUtil;
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
-import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
 import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.repo.model.FetchResult;

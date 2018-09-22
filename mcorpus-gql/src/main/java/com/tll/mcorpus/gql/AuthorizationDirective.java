@@ -13,8 +13,6 @@ import com.tll.mcorpus.web.GraphQLWebQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.idl.SchemaDirectiveWiring;
 import graphql.schema.idl.SchemaDirectiveWiringEnvironment;
@@ -117,24 +115,21 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
     final String roletok = (String) env.getDirective().getArgument("role").getValue();
     final Role targetRole = Role.fromString(upper(roletok));
     final GraphQLFieldDefinition f = env.getElement();
-    return f.transform(builder -> builder.dataFetcher(new DataFetcher() {
-      @Override
-      public Object get(final DataFetchingEnvironment dataFetchingEnvironment) {
-        try {
-          final GraphQLWebQuery webContext = dataFetchingEnvironment.getContext();
-          final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
-          log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
-          if(targetRole.isAuthorized(requestingRoles)) {
-            // authorized
-            return f.getDataFetcher().get(dataFetchingEnvironment);
-          }
-          // not authorized
-          log.warn("Role(s) {} not authorized for {}", requestingRoles, f.getName());
-          return null;
-        } catch(Exception e) {
-          log.error("Role check for {} error: {}", f.getName(), e.getMessage());
-          return null;
+    return f.transform(builder -> builder.dataFetcher(dataFetchingEnvironment -> {
+      try {
+        final GraphQLWebQuery webContext = dataFetchingEnvironment.getContext();
+        final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
+        log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
+        if(targetRole.isAuthorized(requestingRoles)) {
+          // authorized
+          return f.getDataFetcher().get(dataFetchingEnvironment);
         }
+        // not authorized
+        log.warn("Role(s) {} not authorized for {}", requestingRoles, f.getName());
+        return null;
+      } catch(Exception e) {
+        log.error("Role check for {} error: {}", f.getName(), e.getMessage());
+        return null;
       }
     }));
   }

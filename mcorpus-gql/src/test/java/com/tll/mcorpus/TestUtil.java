@@ -39,7 +39,6 @@ import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.McuserAuditType;
-import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;

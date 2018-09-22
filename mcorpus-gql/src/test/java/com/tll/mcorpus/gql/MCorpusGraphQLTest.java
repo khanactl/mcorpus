@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.UnitTest;
-import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.web.GraphQLWebQuery;
 import com.tll.mcorpus.web.RequestSnapshot;

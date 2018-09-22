@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.db.routines.McuserLogin;
-import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler.NextRst;
