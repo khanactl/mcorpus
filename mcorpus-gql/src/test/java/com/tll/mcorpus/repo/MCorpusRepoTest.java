@@ -28,6 +28,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import static com.tll.mcorpus.repo.RepoUtil.fval;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -226,11 +228,15 @@ public class MCorpusRepoTest {
 
       FetchResult<Map<String, Object>> fetchResult = repo.addMember(memberMap);
 
-      if(fetchResult.isSuccess()) mid = (UUID) fetchResult.get().get(MEMBER.MID.getName());
-
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
+
+      mid = fval(MEMBER.MID, fetchResult.get());
+      
+      // verify we have an mid and created timestamp present
+      assertNotNull(mid);
+      assertNotNull(fval(MEMBER.CREATED, fetchResult.get()));
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -263,6 +269,11 @@ public class MCorpusRepoTest {
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
+      
+      // verify we have an mid and modified timestamp present
+      assertNotNull(fval(MEMBER.MID, fetchResult.get()));
+      assertNotNull(fval(MEMBER.CREATED, fetchResult.get()));
+      assertNotNull(fval(MEMBER.MODIFIED, fetchResult.get()));
     }
     catch(Exception e) {
       fail(e.getMessage());
@@ -316,11 +327,12 @@ public class MCorpusRepoTest {
 
       FetchResult<Map<String, Object>> fetchResult = repo.addMemberAddress(maddressMap);
 
-      if(fetchResult.isSuccess()) mid = (UUID) fetchResult.get().get(MADDRESS.MID.getName());
-
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
+
+      assertEquals(mid, fval(MADDRESS.MID, fetchResult.get()));
+      assertNotNull(fval(MADDRESS.MODIFIED, fetchResult.get()));
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -353,6 +365,9 @@ public class MCorpusRepoTest {
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
+
+      assertEquals(mid, fval(MADDRESS.MID, fetchResult.get()));
+      assertNotNull(fval(MADDRESS.MODIFIED, fetchResult.get()));
     }
     catch(Exception e) {
       fail(e.getMessage());

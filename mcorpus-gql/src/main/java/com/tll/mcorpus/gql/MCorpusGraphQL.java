@@ -2,6 +2,7 @@ package com.tll.mcorpus.gql;
 
 import static com.tll.mcorpus.Util.asStringAndClean;
 import static com.tll.mcorpus.Util.dflt;
+import static com.tll.mcorpus.Util.not;
 import static com.tll.mcorpus.Util.emptyIfNull;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.lower;
@@ -13,6 +14,7 @@ import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.repo.RepoUtil.fput;
 import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotBlank;
 import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotNull;
+import static com.tll.mcorpus.repo.RepoUtil.fval;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,11 +40,14 @@ import com.tll.mcorpus.repo.model.MemberFilter;
 import com.tll.mcorpus.web.GraphQLWebQuery;
 import com.tll.mcorpus.web.RequestSnapshot;
 
+import graphql.language.SourceLocation;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.validation.ValidationError;
+import graphql.validation.ValidationErrorType;
 
 public class MCorpusGraphQL {
 
@@ -225,7 +230,13 @@ public class MCorpusGraphQL {
           fput(MAUTH.PSWD, pswd, memberMapDomain);
 
           final FetchResult<Map<String, Object>> fetchResult = mCorpusRepo.addMember(memberMapDomain);
-          return fetchResult.isSuccess() ? fetchResult.get() : null;
+          if(fetchResult.isSuccess()) {
+            return fetchResult.get();
+          } else {
+            final String emsg = fetchResult.getErrorMsg();
+            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
+            return null;
+          }
         })
 
         // update member
@@ -267,7 +278,13 @@ public class MCorpusGraphQL {
           fputWhenNotBlank(MAUTH.WORK_PHONE, workPhone, memberMapDomain);
 
           final FetchResult<Map<String, Object>> fetchResult = mCorpusRepo.updateMember(memberMapDomain);
-          return fetchResult.isSuccess() ? fetchResult.get() : null;
+          if(fetchResult.isSuccess()) {
+            return fetchResult.get();
+          } else {
+            final String emsg = fetchResult.getErrorMsg();
+            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
+            return null;
+          }
         })
 
         // delete member
@@ -305,7 +322,13 @@ public class MCorpusGraphQL {
           fput(MADDRESS.COUNTRY, country, maddressMap);
 
           final FetchResult<Map<String, Object>> fetchResult = mCorpusRepo.addMemberAddress(maddressMap);
-          return fetchResult.isSuccess() ? fetchResult.get() : null;
+          if(fetchResult.isSuccess()) {
+            return fetchResult.get();
+          } else {
+            final String emsg = fetchResult.getErrorMsg();
+            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
+            return null;
+          }
         })
         // update member address
         .dataFetcher("updateMemberAddress", env -> {
@@ -335,7 +358,13 @@ public class MCorpusGraphQL {
           fputWhenNotBlank(MADDRESS.COUNTRY, country, maddressMap);
 
           final FetchResult<Map<String, Object>> fetchResult = mCorpusRepo.updateMemberAddress(maddressMap);
-          return fetchResult.isSuccess() ? fetchResult.get() : null;
+          if(fetchResult.isSuccess()) {
+            return fetchResult.get();
+          } else {
+            final String emsg = fetchResult.getErrorMsg();
+            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
+            return null;
+          }
         })
         // delete member address
         .dataFetcher("deleteMemberAddress", env -> {
@@ -366,81 +395,81 @@ public class MCorpusGraphQL {
       .type("Member", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
           final Map<String, Object> m = env.getSource();
-          final UUID mid = m == null ? null : (UUID) m.get(MEMBER.MID.getName());
+          final UUID mid = m == null ? null : fval(MEMBER.MID, m);
           return mid == null ? null : uuidToToken(mid);
         })
         .dataFetcher("created", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.CREATED.getName());
+          return m == null ? null : fval(MEMBER.CREATED, m);
         })
         .dataFetcher("modified", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.MODIFIED.getName());
+          return m == null ? null : fval(MEMBER.MODIFIED, m);
         })
         .dataFetcher("empId", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.EMP_ID.getName());
+          return m == null ? null : fval(MEMBER.EMP_ID, m);
         })
         .dataFetcher("location", env -> {
           final Map<String, Object> m = env.getSource();
-          final Location loc = m == null ? null : (Location) m.get(MEMBER.LOCATION.getName());
+          final Location loc = m == null ? null : fval(MEMBER.LOCATION, m);
           return locationToString(loc);
         })
         .dataFetcher("nameFirst", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.NAME_FIRST.getName());
+          return m == null ? null : fval(MEMBER.NAME_FIRST, m);
         })
         .dataFetcher("nameMiddle", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.NAME_MIDDLE.getName());
+          return m == null ? null : fval(MEMBER.NAME_MIDDLE, m);
         })
         .dataFetcher("nameLast", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.NAME_LAST.getName());
+          return m == null ? null : fval(MEMBER.NAME_LAST, m);
         })
         .dataFetcher("displayName", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MEMBER.DISPLAY_NAME.getName());
+          return m == null ? null : fval(MEMBER.DISPLAY_NAME, m);
         })
         .dataFetcher("status", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : memberStatusToString((MemberStatus) m.get(MEMBER.STATUS.getName()));
+          return m == null ? null : memberStatusToString(fval(MEMBER.STATUS, m));
         })
         .dataFetcher("dob", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.DOB.getName());
+          return m == null ? null : fval(MAUTH.DOB, m);
         })
         .dataFetcher("ssn", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.SSN.getName());
+          return m == null ? null : fval(MAUTH.SSN, m);
         })
         .dataFetcher("personalEmail", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.EMAIL_PERSONAL.getName());
+          return m == null ? null : fval(MAUTH.EMAIL_PERSONAL, m);
         })
         .dataFetcher("workEmail", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.EMAIL_WORK.getName());
+          return m == null ? null : fval(MAUTH.EMAIL_WORK, m);
         })
         .dataFetcher("mobilePhone", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.MOBILE_PHONE.getName());
+          return m == null ? null : fval(MAUTH.MOBILE_PHONE, m);
         })
         .dataFetcher("homePhone", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.HOME_PHONE.getName());
+          return m == null ? null : fval(MAUTH.HOME_PHONE, m);
         })
         .dataFetcher("workPhone", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.WORK_PHONE.getName());
+          return m == null ? null : fval(MAUTH.WORK_PHONE, m);
         })
         .dataFetcher("username", env -> {
           final Map<String, Object> m = env.getSource();
-          return m == null ? null : m.get(MAUTH.USERNAME.getName());
+          return m == null ? null : fval(MAUTH.USERNAME, m);
         })
         .dataFetcher("addresses", env -> {
           final Map<String, Object> m = env.getSource();
-          final FetchResult<List<Map<String, Object>>> memberAddressesFetchResult = mCorpusRepo.fetchMemberAddresses((UUID) m.get(MADDRESS.MID.getName()));
+          final FetchResult<List<Map<String, Object>>> memberAddressesFetchResult = mCorpusRepo.fetchMemberAddresses(fval(MADDRESS.MID, m));
           return memberAddressesFetchResult.isSuccess() ? memberAddressesFetchResult.get() : null;
         })
       )
@@ -449,45 +478,45 @@ public class MCorpusGraphQL {
       .type("MemberAddress", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
           final Map<String, Object> ma = env.getSource();
-          final UUID mid = ma == null ? null : (UUID) ma.get(MADDRESS.MID.getName());
+          final UUID mid = ma == null ? null : fval(MADDRESS.MID, ma);
           return mid == null ? null : uuidToToken(mid);
         })
         .dataFetcher("addressName", env -> {
           final Map<String, Object> ma = env.getSource();
-          final Addressname aname = ma == null ? null : (Addressname) ma.get(MADDRESS.ADDRESS_NAME.getName());
+          final Addressname aname = ma == null ? null : fval(MADDRESS.ADDRESS_NAME, ma);
           return addressNameToString(aname);
         })
         .dataFetcher("modified", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.MODIFIED.getName());
+          return ma == null ? null : fval(MADDRESS.MODIFIED, ma);
         })
         .dataFetcher("attn", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.ATTN.getName());
+          return ma == null ? null : fval(MADDRESS.ATTN, ma);
         })
         .dataFetcher("street1", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.STREET1.getName());
+          return ma == null ? null : fval(MADDRESS.STREET1, ma);
         })
         .dataFetcher("street2", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.STREET2.getName());
+          return ma == null ? null : fval(MADDRESS.STREET2, ma);
         })
         .dataFetcher("city", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.CITY.getName());
+          return ma == null ? null : fval(MADDRESS.CITY, ma);
         })
         .dataFetcher("state", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.STATE.getName());
+          return ma == null ? null : fval(MADDRESS.STATE, ma);
         })
         .dataFetcher("postalCode", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.POSTAL_CODE.getName());
+          return ma == null ? null : fval(MADDRESS.POSTAL_CODE, ma);
         })
         .dataFetcher("country", env -> {
           final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : ma.get(MADDRESS.COUNTRY.getName());
+          return ma == null ? null : fval(MADDRESS.COUNTRY, ma);
         })
       )
 

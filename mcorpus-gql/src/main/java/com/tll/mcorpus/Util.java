@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -61,6 +62,14 @@ public class Util {
    * @return true if the given collection is null or empty, false otherwise
    */
   public static boolean isNullOrEmpty(final Collection<?> clc) { return clc == null || clc.isEmpty(); }
+
+  /**
+   * Is the given map null or empty?
+   * 
+   * @param clc the map to check
+   * @return true if the given map is null or empty, false otherwise
+   */
+  public static boolean isNullOrEmpty(final Map<?, ?> map) { return map == null || map.isEmpty(); }
 
   /**
    * Is the given string blank? (I.e. null or 0-length or contains only whitespace)

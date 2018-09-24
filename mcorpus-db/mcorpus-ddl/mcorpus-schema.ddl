@@ -159,7 +159,7 @@ BEGIN
   select into num_valid_logins count(jwt_id) 
   from mcuser_audit 
   where 
-        type = 'LOGIN' and jwt_id_status = 'OK' 
+    type = 'LOGIN' and jwt_id_status = 'OK' 
     and login_expiration >= now() 
     and uid = $1
     and jwt_id not in (

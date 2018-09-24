@@ -1,6 +1,7 @@
 package com.tll.mcorpus.repo;
 
 import static com.tll.mcorpus.Util.flatten;
+import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
@@ -12,7 +13,6 @@ import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberAddressToA
 import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberAddressToUpdate;
 import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberToAdd;
 import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberToUpdate;
-import static com.tll.mcorpus.repo.RepoUtil.fput;
 import static com.tll.mcorpus.repo.RepoUtil.fval;
 
 import java.io.Closeable;
@@ -20,7 +20,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +27,18 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
+import com.tll.mcorpus.db.tables.pojos.Mcuser;
+import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.db.udt.records.MrefRecord;
+import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.MemberFilter;
+import com.tll.mcorpus.repo.model.MemberRef;
+
 import org.jooq.DSLContext;
-import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
 import org.jooq.conf.RenderNameStyle;
@@ -38,19 +47,6 @@ import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.enums.Location;
-import com.tll.mcorpus.db.routines.MemberLogin;
-import com.tll.mcorpus.db.routines.MemberLogout;
-import com.tll.mcorpus.db.tables.pojos.Mcuser;
-import com.tll.mcorpus.db.tables.records.MaddressRecord;
-import com.tll.mcorpus.db.tables.records.MemberRecord;
-import com.tll.mcorpus.db.udt.pojos.Mref;
-import com.tll.mcorpus.db.udt.records.MrefRecord;
-import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.MemberFilter;
-import com.tll.mcorpus.repo.model.MemberRef;
 
 /**
  * MCorpus Repository (data access).
@@ -170,9 +166,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(mref, null);
     }
     catch(DataAccessException dae) {
-      emsg = dae.getMessage();
+      log.error(dae.getMessage());
+      emsg = "A data access exception occurred.";
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred fetching member ref by member id.";
     }
     // error
@@ -199,9 +197,11 @@ public class MCorpusRepo implements Closeable {
         return new FetchResult<>(mref, null);
       }
       catch(DataAccessException dae) {
-        emsg = dae.getMessage();
+        log.error(dae.getMessage());
+        emsg = "A data access exception occurred.";
       }
       catch(Throwable t) {
+        log.error(t.getMessage());
         emsg = "A technical error occurred fetching member ref by member id.";
       }
     }
@@ -231,9 +231,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(mref, null);
     }
     catch(DataAccessException dae) {
-      emsg = dae.getMessage();
+      log.error(dae.getMessage());
+      emsg = "A data access exception occurred.";
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred fetching member refs by emp id.";
     }
     // error
@@ -258,9 +260,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(null, emsg);
     }
     catch(DataAccessException dae) {
-      emsg = dae.getMessage();
+      log.error(dae.getMessage());
+      emsg = "A data access exception occurred.";
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred fetching member.";
     }
     // error
@@ -291,9 +295,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(Collections.emptyList(), null);
     }
     catch(DataAccessException dae) {
-      emsg = dae.getMessage();
+      log.error(dae.getMessage());
+      emsg = "A data access exception occurred.";
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred fetching member addresses.";
     }
     // error
@@ -339,7 +345,7 @@ public class MCorpusRepo implements Closeable {
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
-      emsg = dae.getMessage();
+      emsg = "A data access error occurred fetching members.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
@@ -377,11 +383,11 @@ public class MCorpusRepo implements Closeable {
    *          created: the member's record created timestamp
    */
   public FetchResult<Map<String, Object>> addMember(final Map<String, Object> memberMap) {
-    if(memberMap == null || memberMap.isEmpty())
-      return new FetchResult<>(null, "No member properties provided.");
+    if(isNullOrEmpty(memberMap)) return new FetchResult<>(null, "No member properties provided.");
+
+    final List<String> emsgs = new ArrayList<>();
 
     // validate the member properties
-    final List<String> emsgs = new ArrayList<>();
     validateMemberToAdd(memberMap, emsgs);
     if(not(emsgs.isEmpty())) {
       return new FetchResult<>(null, flatten(emsgs, ","));
@@ -392,12 +398,12 @@ public class MCorpusRepo implements Closeable {
     final Map<String, Object> cmapMember = cmapList.get(0);
     final Map<String, Object> cmapMauth = cmapList.get(1);
 
-    final StringBuilder emsg = new StringBuilder();
-    final List<FetchResult<Map<String, Object>>> fetchResultList = new ArrayList<>(1);
+    final Map<String, Object> rmap = new HashMap<>();
+    
     try {
       dsl.transaction(configuration -> {
         // add member record
-        final Result<MemberRecord> result =
+        final Map<String, Object> rmapMember =
           DSL.using(configuration)
             .insertInto(MEMBER, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS)
             .values(
@@ -409,15 +415,14 @@ public class MCorpusRepo implements Closeable {
               fval(MEMBER.DISPLAY_NAME, cmapMember),
               fval(MEMBER.STATUS, cmapMember)
             )
-            .returning(MEMBER.MID, MEMBER.CREATED) // :o
-            .fetch();
+            .returning() // :o
+            .fetchOne().intoMap();
 
         // acquire the inserted member record's PK and created timestamp
-        final MemberRecord memberRecord = result == null ? null : (MemberRecord) result.get(0);
-        if(memberRecord == null) throw new DataAccessException("No post-insert member key present.");
+        if(rmapMember == null) throw new DataAccessException("No post-insert member record returned.");
 
-        final UUID mid = memberRecord.getMid();
-        final Timestamp created = memberRecord.getCreated();
+        final UUID mid = fval(MEMBER.MID, rmapMember);
+        final Timestamp created = fval(MEMBER.CREATED, rmapMember);
 
         if(mid == null || created == null) {
           // bad insert return values (force rollback)
@@ -425,7 +430,7 @@ public class MCorpusRepo implements Closeable {
         }
 
         // create mauth record
-        final int mauthNumInserted =
+        final Map<String, Object> rmapMauth =
           DSL.using(configuration)
             .insertInto(MAUTH,
               MAUTH.MID, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME, MAUTH.PSWD)
@@ -441,44 +446,44 @@ public class MCorpusRepo implements Closeable {
               fval(MAUTH.USERNAME, cmapMauth),
               fval(MAUTH.PSWD, cmapMauth)
             )
-            .execute();
+            .returning(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
+            .fetchOne().intoMap();
 
-        if(mauthNumInserted != 1) {
+        if(rmapMauth == null) {
           // mauth insert failed (rollback)
-          throw new DataAccessException("Downstream member insert failed.");
+          throw new DataAccessException("No post-insert member record returned.");
         }
 
-        final Map<String, Object> rmap = new HashMap<>(cmapMember.size() + cmapMauth.size());
-        rmap.putAll(cmapMember);
-        rmap.putAll(cmapMauth);
-        rmap.remove(MAUTH.PSWD.getName());
-        // add returned new member PK and created timestamp to the cleaned member map
-        fput(MEMBER.MID, mid, rmap);
-        fput(MEMBER.CREATED, created, rmap);
-
-        // successful member add
-        fetchResultList.add(new FetchResult<>(rmap, null));
+        // success
+        // NOTE: the order of adding the maps the returning map is important
+        rmap.putAll(rmapMauth);
+        rmap.putAll(rmapMember);
       });
     }
     catch(DataAccessException e) {
-      emsg.append(e.getMessage());
+      log.error(e.getMessage());
+      emsgs.add("A data access exception occurred.");
     }
     catch(Throwable t) {
-      emsg.append("A technical error occurred adding member.");
+      log.error(t.getMessage());
+      emsgs.add("A technical error occurred adding member.");
     }
 
-    if(emsg.length() > 0) {
+    if(not(isNullOrEmpty(emsgs))) {
       // member add fail
-      return new FetchResult<>(null, emsg.toString());
+      return new FetchResult<>(null, flatten(emsgs, ","));
     }
 
     // success (presuming actually)
-    return fetchResultList.get(0);
+    return new FetchResult<>(rmap, null);
   }
 
   public FetchResult<Map<String, Object>> updateMember(final Map<String, Object> memberMap) {
-    // validate the member properties
+    if(isNullOrEmpty(memberMap)) return new FetchResult<>(null, "No member properties provided.");
+    
     final List<String> emsgs = new ArrayList<>();
+    
+    // validate the member properties
     validateMemberToUpdate(memberMap, emsgs);
     if(not(emsgs.isEmpty())) {
       return new FetchResult<>(null, flatten(emsgs, ","));
@@ -489,71 +494,74 @@ public class MCorpusRepo implements Closeable {
     final Map<String, Object> cmapMember = cmaps.get(0);
     final Map<String, Object> cmapMauth = cmaps.get(1);
 
-    final UUID mid = (UUID) memberMap.get(MEMBER.MID.getName());
+    final UUID mid = fval(MEMBER.MID, memberMap);
 
-    final StringBuilder emsg = new StringBuilder();
+    final Map<String, Object> rmap = new HashMap<>();
 
     try {
       dsl.transaction(configuration -> {
 
-        if(not(cmapMember.isEmpty())) {
-          // update member record
-          final int numMemberRecordsUpdated =
-            DSL.using(configuration)
-                    .update(MEMBER)
-                    .set(cmapMember)
-                    .where(MEMBER.MID.eq(mid))
-                    .execute();
-
-          // acquire the inserted member record's modified timestamp
-          if (numMemberRecordsUpdated != 1) {
-            // bad insert return values (force rollback)
-            throw new DataAccessException("Bad member update return values.");
-          }
-        }
-
+        // update mauth
         if(not(cmapMauth.isEmpty())) {
           // update mauth record
-          final int numMauthRecordsUpdated =
+          final Map<String, Object> rmapMauth =
             DSL.using(configuration)
                     .update(MAUTH)
                     .set(cmapMauth)
                     .where(MAUTH.MID.eq(mid))
-                    .execute();
+                    .returning(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
+                    .fetchOne().intoMap();
 
-          if (numMauthRecordsUpdated != 1) {
+          if (rmapMauth == null) {
             // mauth insert failed (rollback)
-            throw new DataAccessException("Downstream member update failed - mauth record insert failed.");
+            throw new DataAccessException("No post-update mauth record returned.");
           }
+          rmap.putAll(rmapMauth);
         }
+        
+        // update member last
+        if(not(cmapMember.isEmpty())) {
+          // update member record
+          final Map<String, Object> rmapMember = 
+            DSL.using(configuration)
+                    .update(MEMBER)
+                    .set(cmapMember)
+                    .where(MEMBER.MID.eq(mid))
+                    .returning()
+                    .fetchOne().intoMap();
+
+          // acquire the inserted member record's modified timestamp
+          if (rmapMember == null) {
+            // bad insert return values (force rollback)
+            throw new DataAccessException("No post-update member record returned.");
+          }
+          rmap.putAll(rmapMember);
+        }
+
         // successful member update at this point
         // implicit commit happens now
       });
     }
     catch(DataAccessException e) {
-      emsg.append(e.getMessage());
+      log.error(e.getMessage());
+      emsgs.add("A data access exception occurred.");
     }
     catch(Throwable t) {
-      emsg.append("A technical error occurred updating member.");
+      log.error(t.getMessage());
+      emsgs.add("A technical error occurred updating member.");
     }
 
-    if(emsg.length() > 0) {
-      // member add fail
-      return new FetchResult<>(null, emsg.toString());
+    if(not(isNullOrEmpty(emsgs))) {
+      // error fetching updated member
+      return new FetchResult<>(null, flatten(emsgs, ","));
     }
 
-    // now fetch updated member for return value
-    final FetchResult<Map<String, Object>> memberFetchResult = fetchMember(mid);
-    if(memberFetchResult.isSuccess()) {
-      return memberFetchResult;
-    }
-
-    // error fetching updated member record(s)
-    throw new DataAccessException("Member fetch failed after successful update.");
+    // success
+    return new FetchResult<>(rmap, null);
   }
 
   /**
-   * Delete a member from the sytem (physical record removal).
+   * Delete a member from the system (physical record removal).
    *
    * @param mid the id of the member to delete
    * @return FetchResult of the member id upon successful deletion,
@@ -561,6 +569,7 @@ public class MCorpusRepo implements Closeable {
    */
   public FetchResult<UUID> deleteMember(final UUID mid) {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    
     String emsg;
     try {
       final int numDeleted =
@@ -575,9 +584,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(mid, null);
     }
     catch(DataAccessException e) {
-      emsg = e.getMessage();
+      log.error(e.getMessage());
+      emsg = "A data access exception occurred.";
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred deleting member.";
     }
 
@@ -586,10 +597,11 @@ public class MCorpusRepo implements Closeable {
   }
 
   public FetchResult<Map<String, Object>> addMemberAddress(final Map<String, Object> maddressMap) {
-    if(maddressMap == null) return new FetchResult<>(null, "No member id provided.");
+    if(isNullOrEmpty(maddressMap)) return new FetchResult<>(null, "No member address properties provided.");
 
-    // validate the member properties
     final List<String> emsgs = new ArrayList<>();
+    
+    // validate the member properties
     validateMemberAddressToAdd(maddressMap, emsgs);
     if(not(emsgs.isEmpty())) {
       return new FetchResult<>(null, flatten(emsgs, ","));
@@ -597,10 +609,10 @@ public class MCorpusRepo implements Closeable {
 
     // transform property map param to serve as a data cleanse/prep operation before record insert
     final Map<String, Object> cmap = transformMemberAddressForAdd(maddressMap);
-    String emsg;
+    
     try {
       // add record
-      final int numAdded =
+      final Map<String, Object> rmap =
         dsl
           .insertInto(MADDRESS,
             MADDRESS.MID,
@@ -623,30 +635,34 @@ public class MCorpusRepo implements Closeable {
             fval(MADDRESS.POSTAL_CODE, cmap),
             fval(MADDRESS.COUNTRY, cmap)
           )
-          .execute();
+          .returning()
+          .fetchOne().intoMap();
 
-      if(numAdded != 1) throw new DataAccessException("Invalid member address insert return value.");
+      if(isNullOrEmpty(rmap)) 
+        throw new DataAccessException("Invalid member address insert return value.");
 
       // successful
-      return new FetchResult<>(cmap, null);
+      return new FetchResult<>(rmap, null);
     }
     catch(DataAccessException e) {
-      emsg = e.getMessage();
+      log.error(e.getMessage());
+      emsgs.add("A data access exception occurred.");
     }
     catch(Throwable t) {
-      emsg = "A technical error occurred adding member address.";
+      log.error(t.getMessage());
+      emsgs.add("A technical error occurred adding member address.");
     }
 
     // fail
-    return new FetchResult<>(null, emsg);
+    return new FetchResult<>(null, flatten(emsgs, ","));
   }
 
   public FetchResult<Map<String, Object>> updateMemberAddress(final Map<String, Object> maddressMap) {
-    if(maddressMap == null || maddressMap.isEmpty())
-      return new FetchResult<>(null, "No member address properties provided.");
+    if(isNullOrEmpty(maddressMap)) return new FetchResult<>(null, "No member address properties provided.");
 
-    // validate
     final List<String> emsgs = new ArrayList<>();
+    
+    // validate
     validateMemberAddressToUpdate(maddressMap, emsgs);
     if(not(emsgs.isEmpty())) {
       return new FetchResult<>(null, flatten(emsgs, ","));
@@ -658,52 +674,34 @@ public class MCorpusRepo implements Closeable {
     final Addressname addressname = (Addressname) clist.get(1);
     @SuppressWarnings("unchecked")
     final Map<String, Object> cmap = (Map<String, Object>) clist.get(2);
-
-    final StringBuilder emsg = new StringBuilder();
-    @SuppressWarnings("unchecked")
-    final FetchResult<Map<String, Object>>[] arrFetchResult = new FetchResult[1];
+    
     try {
-      dsl.transaction(configuration -> {
-        // update
-        final MaddressRecord record =
-          DSL.using(configuration)
-            .update(MADDRESS)
-            .set(cmap)
-            .where(MADDRESS.MID.eq(mid)).and(MADDRESS.ADDRESS_NAME.eq(addressname))
-            .returning(MADDRESS.MODIFIED) // :o
-            .fetchOne();
+      // update
+      final Map<String, Object> rmap =
+        dsl
+          .update(MADDRESS)
+          .set(cmap)
+          .where(MADDRESS.MID.eq(mid)).and(MADDRESS.ADDRESS_NAME.eq(addressname))
+          .returning() // :o
+          .fetchOne().intoMap();
 
-        // get the inserted record's modified timestamp
-        final Date modified = record == null ? null : record.getModified();
-        if(record == null || modified == null) {
-          // bad insert return values (force rollback)
-          throw new DataAccessException("Bad member address update return value.");
-        }
+      if(isNullOrEmpty(rmap))
+        throw new DataAccessException("Bad member address update return value.");
 
-        // add returned new member modified timestamp to the cleaned member map
-        cmap.put(MEMBER.MODIFIED.getName(), modified);
-
-        // successful member update
-        arrFetchResult[0] = new FetchResult<>(cmap, null);
-      });
+      // successful
+      return new FetchResult<>(rmap, null);
     }
     catch(DataAccessException e) {
-      emsg.append(e.getMessage());
+      log.error(e.getMessage());
+      emsgs.add("A data access exception occurred.");
     }
     catch(Throwable t) {
-      emsg.append("A technical error occurred updating member address.");
+      log.error(t.getMessage());
+      emsgs.add("A technical error occurred updating member address.");
     }
 
-    if(emsg.length() > 0) {
-      return new FetchResult<>(null, emsg.toString());
-    }
-    else if(arrFetchResult[0] == null) {
-      // sanity check: verify non-null
-      return new FetchResult<>(null, "");
-    }
-
-    // success
-    return arrFetchResult[0];
+    // fail
+    return new FetchResult<>(null, flatten(emsgs, ","));
   }
 
   /**
@@ -730,9 +728,11 @@ public class MCorpusRepo implements Closeable {
       return new FetchResult<>(mid, null);
     }
     catch(DataAccessException e) {
-      emsg = e.getMessage();
+      log.error(e.getMessage());
+      emsg = "A data access exception occurred.";
     }
     catch(Throwable t) {
+      log.error(t.getMessage());
       emsg = "A technical error occurred deleting member address.";
     }
 
