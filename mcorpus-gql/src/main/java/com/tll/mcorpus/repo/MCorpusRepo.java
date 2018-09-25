@@ -501,28 +501,41 @@ public class MCorpusRepo implements Closeable {
     try {
       dsl.transaction(configuration -> {
 
+        final Map<String, Object> rmapMauth;
+        
         // update mauth
         if(not(cmapMauth.isEmpty())) {
           // update mauth record
-          final Map<String, Object> rmapMauth =
+          rmapMauth = 
             DSL.using(configuration)
                     .update(MAUTH)
                     .set(cmapMauth)
                     .where(MAUTH.MID.eq(mid))
                     .returning(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
                     .fetchOne().intoMap();
-
-          if (rmapMauth == null) {
-            // mauth insert failed (rollback)
-            throw new DataAccessException("No post-update mauth record returned.");
-          }
-          rmap.putAll(rmapMauth);
+        }
+        else {
+          // otherwise select to get current snapshot
+          rmapMauth = 
+            DSL.using(configuration)
+                    .select(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
+                    .from(MAUTH)
+                    .where(MAUTH.MID.eq(mid))
+                    .fetchOne().intoMap();
         }
         
+        if (rmapMauth == null) {
+          // mauth insert failed (rollback)
+          throw new DataAccessException("No post-update mauth record returned.");
+        }
+        rmap.putAll(rmapMauth);
+
+        final Map<String, Object> rmapMember;
+
         // update member last
         if(not(cmapMember.isEmpty())) {
           // update member record
-          final Map<String, Object> rmapMember = 
+          rmapMember = 
             DSL.using(configuration)
                     .update(MEMBER)
                     .set(cmapMember)
@@ -536,6 +549,15 @@ public class MCorpusRepo implements Closeable {
             throw new DataAccessException("No post-update member record returned.");
           }
           rmap.putAll(rmapMember);
+        }
+        else {
+          // otherwise select to get current snapshot
+          rmapMember = 
+            DSL.using(configuration)
+                    .select(MEMBER.fields())
+                    .from(MEMBER)
+                    .where(MEMBER.MID.eq(mid))
+                    .fetchOne().intoMap();
         }
 
         // successful member update at this point
