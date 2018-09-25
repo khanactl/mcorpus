@@ -548,7 +548,6 @@ public class MCorpusRepo implements Closeable {
             // bad insert return values (force rollback)
             throw new DataAccessException("No post-update member record returned.");
           }
-          rmap.putAll(rmapMember);
         }
         else {
           // otherwise select to get current snapshot
@@ -559,6 +558,7 @@ public class MCorpusRepo implements Closeable {
                     .where(MEMBER.MID.eq(mid))
                     .fetchOne().intoMap();
         }
+        rmap.putAll(rmapMember);
 
         // successful member update at this point
         // implicit commit happens now
