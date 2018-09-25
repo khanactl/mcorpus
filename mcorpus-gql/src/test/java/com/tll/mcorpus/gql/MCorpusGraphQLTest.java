@@ -145,7 +145,7 @@ public class MCorpusGraphQLTest {
 
   @Test
   public void testAuthorization_success() throws Exception {
-    final String gql = "{\"query\":\"{\\n  mrefByMid(mid: \\\"bLYU_FNrT6O3T917UPSAbw==\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}";
+    final String gql = "{\"query\":\"{\\n  mrefByMid(mid: \\\"001ea236-12be-410a-9586-1bc6c2b2c89c\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}";
 
     final Map<String, Object> qmap = jsonStringToMap(gql);
     log.info("qmap: {}", qmap);

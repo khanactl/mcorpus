@@ -165,7 +165,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds_mcweb());
-      FetchResult<Mref> mrefFetch = repo.fetchMRefByMid(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
+      FetchResult<Mref> mrefFetch = repo.fetchMRefByMid(UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c"));
       assertNotNull(mrefFetch);
       assertNotNull(mrefFetch.get());
       assertNull(mrefFetch.getErrorMsg());
@@ -184,7 +184,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds_mcweb());
-      FetchResult<Map<String, Object>> memberFetch = repo.fetchMember(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
+      FetchResult<Map<String, Object>> memberFetch = repo.fetchMember(UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c"));
       assertNotNull(memberFetch);
       assertNotNull(memberFetch.get());
       assertNull(memberFetch.getErrorMsg());
@@ -203,7 +203,7 @@ public class MCorpusRepoTest {
     MCorpusRepo repo = null;
     try {
       repo = new MCorpusRepo(ds_mcweb());
-      FetchResult<List<Map<String, Object>>> fetchResult = repo.fetchMemberAddresses(UUID.fromString("3e983661-62b6-440c-96e9-f2637fa8b4e8"));
+      FetchResult<List<Map<String, Object>>> fetchResult = repo.fetchMemberAddresses(UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c"));
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());

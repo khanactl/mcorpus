@@ -52,13 +52,13 @@ public class TestUtil {
   
   public static final UUID testMcuserUid = UUID.fromString("d712f2d3-5494-472d-bdcc-4a1722a8c818");
   
-  public static final String testRequestOrigin = "https://test-app.com ";
+  public static final String testRequestOrigin = "https://test-app.com";
 
   public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
-  public static final UUID testMemberUid = UUID.fromString("394b6d00-cf1e-40c8-ac44-0e4e49f956ba");
+  public static final UUID testMemberUid = UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c");
 
-  public static final String testMemberUsername = "dhookes3f";
+  public static final String testMemberUsername = "zqwiHSbB";
 
   public static final String testMemberPswd = "test123";
 
