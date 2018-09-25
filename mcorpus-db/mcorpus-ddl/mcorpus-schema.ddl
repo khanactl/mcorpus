@@ -55,6 +55,21 @@ SET search_path = public, pg_catalog;
 -- mcorpus user and audit (those who access and mutate this corpus of data)
 ---------------------------------------------------------------------------
 
+/**
+ * set_modified()
+ *
+ * Function to set the [TABLE].[modified] column to current timestamp.
+ * NOTE: The TABLE name/ref is not explicitly called out here.
+ */
+CREATE OR REPLACE FUNCTION set_modified() RETURNS TRIGGER
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.modified := CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$;
+
 /*
 pass_hash()
 
@@ -108,6 +123,14 @@ create table mcuser (
   unique(email)
 );
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
+
+/**
+ * trigger_mcuser_updated
+ */
+CREATE TRIGGER trigger_mcuser_updated
+  BEFORE UPDATE ON mcuser
+  FOR EACH ROW
+  EXECUTE PROCEDURE set_modified();
 
 create table mcuser_roles (
   uid                    uuid not null,
@@ -465,6 +488,14 @@ create table member (
 );
 comment on type member is 'The core member table.';
 
+/**
+ * trigger_member_updated
+ */
+CREATE TRIGGER trigger_member_updated
+  BEFORE UPDATE ON member
+  FOR EACH ROW
+  EXECUTE PROCEDURE set_modified();
+
 create type mref AS (
   mid                     uuid,
   emp_id                  text,
@@ -498,24 +529,10 @@ create table mauth (
 comment on type mauth is 'The mauth table holds security sensitive member data.';
 
 /**
- * set_modified()
- *
- * Function to set the member.modified column to current timestamp.
+ * trigger_mauth_updated
  */
-CREATE OR REPLACE FUNCTION set_modified() RETURNS TRIGGER
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  NEW.modified := CURRENT_TIMESTAMP;
-  RETURN NEW;
-END;
-$$;
-
-/**
- * trigger_member_updated
- */
-CREATE TRIGGER trigger_member_updated
-  BEFORE UPDATE ON member
+CREATE TRIGGER trigger_mauth_updated
+  BEFORE UPDATE ON mauth
   FOR EACH ROW
   EXECUTE PROCEDURE set_modified();
 
@@ -713,3 +730,10 @@ create table mbenefits (
 );
 comment on type mbenefits is 'The mbenefits table holds member benefits related data.';
 
+/**
+ * trigger_mbenefits_updated
+ */
+CREATE TRIGGER trigger_mbenefits_updated
+  BEFORE UPDATE ON mbenefits
+  FOR EACH ROW
+  EXECUTE PROCEDURE set_modified();
