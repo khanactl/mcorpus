@@ -691,6 +691,14 @@ create table maddress (
 );
 comment on type maddress is 'The maddress table holds physical addresses of members.';
 
+/**
+ * trigger_maddress_updated
+ */
+CREATE TRIGGER trigger_maddress_updated
+  BEFORE UPDATE ON maddress
+  FOR EACH ROW
+  EXECUTE PROCEDURE set_modified();
+
 
 -- ********************************
 -- *** member benefits related  ***
