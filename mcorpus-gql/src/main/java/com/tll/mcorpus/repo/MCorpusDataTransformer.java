@@ -5,10 +5,13 @@ import static com.tll.mcorpus.Util.digits;
 import static com.tll.mcorpus.db.tables.Maddress.MADDRESS;
 import static com.tll.mcorpus.db.tables.Mauth.MAUTH;
 import static com.tll.mcorpus.db.tables.Member.MEMBER;
+import static com.tll.mcorpus.repo.RepoUtil.fput;
 import static com.tll.mcorpus.repo.RepoUtil.fval;
 import static com.tll.mcorpus.repo.RepoUtil.hasField;
 import static java.util.Arrays.asList;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +19,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-import org.jooq.Field;
-
 import com.tll.mcorpus.Util;
 import com.tll.mcorpus.db.enums.Addressname;
+
+import org.jooq.Field;
 
 /**
  * Responsible for transforming datastore-bound (about to be persisted) member data to a 'datastore-ready' state.
@@ -80,6 +83,8 @@ public class MCorpusDataTransformer {
     final Map<String, Object> cmapMauth = new HashMap<>(9);
 
     // member
+    // set the member modified field always
+    fput(MEMBER.MODIFIED, Timestamp.from(Instant.now()), cmapMember);
     mcopy(MEMBER.EMP_ID, memberMap, cmapMember);
     mcopy(MEMBER.LOCATION, memberMap, cmapMember);
     mcopy(MEMBER.NAME_FIRST, memberMap, cmapMember, Util::upper);

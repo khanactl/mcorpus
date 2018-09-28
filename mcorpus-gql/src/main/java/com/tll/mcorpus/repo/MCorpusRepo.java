@@ -532,31 +532,19 @@ public class MCorpusRepo implements Closeable {
 
         final Map<String, Object> rmapMember;
 
-        // update member last
-        if(not(cmapMember.isEmpty())) {
-          // update member record
-          rmapMember = 
-            DSL.using(configuration)
-                    .update(MEMBER)
-                    .set(cmapMember)
-                    .where(MEMBER.MID.eq(mid))
-                    .returning()
-                    .fetchOne().intoMap();
+        // update member record (we are guaranteed at least one field to update)
+        rmapMember = 
+          DSL.using(configuration)
+                  .update(MEMBER)
+                  .set(cmapMember)
+                  .where(MEMBER.MID.eq(mid))
+                  .returning()
+                  .fetchOne().intoMap();
 
-          // acquire the inserted member record's modified timestamp
-          if (rmapMember == null) {
-            // bad insert return values (force rollback)
-            throw new DataAccessException("No post-update member record returned.");
-          }
-        }
-        else {
-          // otherwise select to get current snapshot
-          rmapMember = 
-            DSL.using(configuration)
-                    .select(MEMBER.fields())
-                    .from(MEMBER)
-                    .where(MEMBER.MID.eq(mid))
-                    .fetchOne().intoMap();
+        // acquire the inserted member record's modified timestamp
+        if (rmapMember == null) {
+          // bad insert return values (force rollback)
+          throw new DataAccessException("No post-update member record returned.");
         }
         rmap.putAll(rmapMember);
 
