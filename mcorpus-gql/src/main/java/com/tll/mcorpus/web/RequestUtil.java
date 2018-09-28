@@ -6,6 +6,7 @@ import static com.tll.mcorpus.web.WebSessionManager.wsi;
 
 import java.util.UUID;
 
+import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.web.WebSessionManager.WebSession;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionInstance;
 import com.tll.mcorpus.web.WebSessionManager.WebSessionStatus;
@@ -165,8 +166,9 @@ public class RequestUtil {
    */
   public static void addSidCookieToResponse(final Context ctx, final UUID sid) throws Exception {
     final WebSessionManager wsm = ctx.get(WebSessionManager.class);
+    final boolean secure = ctx.get(MCorpusServerConfig.class).cookieSecure;
     final Cookie sidCookieRef = ctx.getResponse().cookie("sid", sid.toString());
-    sidCookieRef.setSecure(true);
+    sidCookieRef.setSecure(secure);
     sidCookieRef.setHttpOnly(true);
     sidCookieRef.setDomain(getServerDomainName(ctx));
     sidCookieRef.setPath("/");
@@ -193,8 +195,9 @@ public class RequestUtil {
    * @param maxAge the cookie max age in seconds
    */
   public static void addRstCookieToResponse(final Context ctx, final String rst, final long maxAge) {
+    final boolean secure = ctx.get(MCorpusServerConfig.class).cookieSecure;
     final Cookie rstCookieRef = ctx.getResponse().cookie("rst", rst);
-    rstCookieRef.setSecure(true);
+    rstCookieRef.setSecure(secure);
     rstCookieRef.setHttpOnly(true);
     rstCookieRef.setDomain(getServerDomainName(ctx));
     rstCookieRef.setPath("/");
@@ -209,11 +212,12 @@ public class RequestUtil {
    * @param maxAge the cookie max age in seconds
    */
   public static void addJwtCookieToResponse(final Context ctx, final String jwt, final long maxAge) {
+    final boolean secure = ctx.get(MCorpusServerConfig.class).cookieSecure;
     final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);
     jwtCookieRef.setDomain(getServerDomainName(ctx));
     jwtCookieRef.setMaxAge(maxAge);
     jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
-    jwtCookieRef.setSecure(true); // secure
+    jwtCookieRef.setSecure(secure);
     jwtCookieRef.setPath("/");
   }
   

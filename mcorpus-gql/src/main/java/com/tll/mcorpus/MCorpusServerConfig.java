@@ -15,4 +15,6 @@ public class MCorpusServerConfig {
   // jwt
   public String jwtSalt;
   public long jwtTtlInMillis;
+  // cookie
+  public boolean cookieSecure;
 }
