@@ -36,7 +36,6 @@ import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 import com.tll.mcorpus.repo.model.FetchResult;
 import com.tll.mcorpus.repo.model.MemberFilter;
-import com.tll.mcorpus.repo.model.MemberRef;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -149,7 +148,7 @@ public class MCorpusRepo implements Closeable {
   }
 
   /**
-   * Fetch the {@link MemberRef} by member id.
+   * Fetch the {@link Mref} by member id.
    *
    * @param mid the member id
    * @return newly created {@link FetchResult} wrapping a property map.
@@ -178,7 +177,7 @@ public class MCorpusRepo implements Closeable {
   }
 
   /**
-   * Fetch the {@link MemberRef} by emp id and location.
+   * Fetch the {@link Mref} by emp id and location.
    *
    * @param empId the emp id
    * @param loc the location
@@ -213,7 +212,7 @@ public class MCorpusRepo implements Closeable {
   }
 
   /**
-   * Fetch all matching {@link MemberRef}s having the given emp id.
+   * Fetch all matching {@link Mref}s having the given emp id.
    *
    * @param empId the member emp id
    * @return newly created {@link FetchResult} wrapping a list of property map mref elements upon success
