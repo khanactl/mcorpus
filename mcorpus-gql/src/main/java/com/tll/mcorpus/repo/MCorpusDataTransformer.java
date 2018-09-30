@@ -73,7 +73,7 @@ public class MCorpusDataTransformer {
    *
    * <p>This is a way to accommodate database field/column constraints.</p>
    *
-   * @param memberMap map of member properties keyed by the associated Jooq com.tll.mcorpus.db table/column field ref
+   * @param memberMap map of member properties keyed by the associated Jooq db table/column field ref
    * @return newly created list of two maps:<br>
    *          index 0: member table fields<br>
    *          index 1: mauth table fields
@@ -148,7 +148,7 @@ public class MCorpusDataTransformer {
    *
    *         [0]    -> mid
    *         [1]    -> addressName
-   *         [2]    -> map of cleansed member address properties that are com.tll.mcorpus.db persist ready
+   *         [2]    -> map of cleansed member address properties that are db persist ready
    */
   public static List<Object> transformMemberAddressForUpdate(final Map<String, Object> maddressMap) {
     final Map<String, Object> cmapMaddress = new HashMap<>(8);

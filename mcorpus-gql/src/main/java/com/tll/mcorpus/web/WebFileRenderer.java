@@ -17,7 +17,6 @@ import java.util.Objects;
 
 import ratpack.exec.Blocking;
 import ratpack.handling.Context;
-import ratpack.http.MutableHeaders;
 import ratpack.render.Renderable;
 
 /**
@@ -94,10 +93,10 @@ public class WebFileRenderer implements Renderable {
             fileStr = fileStr.replace(String.format("${%s}", pentry.getKey()), asString(pentry.getValue()).trim());
       }
       if(noCache) {
-        final MutableHeaders responseHeaders = context.getResponse().getHeaders();
-        responseHeaders.add("Expires", "Sun, 01 Jan 2018 06:00:00 GMT");
-        responseHeaders.add("Last-Modified", ZonedDateTime.now(ZoneOffset.UTC).toString());
-        responseHeaders.add("Cache-Control", "max-age=0, no-cache, must-revalidate, proxy-revalidate");
+        context.getResponse().getHeaders()
+          .add("Expires", "Sun, 01 Jan 2018 06:00:00 GMT")
+          .add("Last-Modified", ZonedDateTime.now(ZoneOffset.UTC).toString())
+          .add("Cache-Control", "max-age=0, no-cache, must-revalidate, proxy-revalidate");
       }
       context.getResponse().send(contentType, fileStr);
     });
