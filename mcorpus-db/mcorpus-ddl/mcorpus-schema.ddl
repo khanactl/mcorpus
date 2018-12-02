@@ -8,7 +8,7 @@
 -- PostgreSQL Version   10.4
 -----------------------------------------------------
 
--- NOTE: a postgres com.tll.mcorpus.db must already exist for this script to work
+-- NOTE: a postgres db must already exist for this script to work
 
 -- bash> 'createdb mcorpus -E UTF8'
 -- bash> 'psql mcorpus < mcorpus-schema.ddl'
