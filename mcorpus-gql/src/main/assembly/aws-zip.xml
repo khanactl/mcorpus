@@ -1,0 +1,26 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+  <id>aws-deploy</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory></outputDirectory><!-- i.e. root -->
+      <includes>
+        <include>mcorpus-gql-server.jar</include>
+        <include>disruptor-*.jar</include>
+        <include>log4j-*.jar</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  <files>
+    <file>
+      <source>${project.basedir}/src/main/assembly/aws-Procfile</source>
+      <outputDirectory></outputDirectory><!-- i.e. root -->
+      <destName>Procfile</destName>
+    </file>
+  </files>
+</assembly>

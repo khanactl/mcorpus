@@ -12,3 +12,17 @@ bin
 .vscode
 .DS_Store
 mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
+
+aws-env.txt
+mcorpus-db/mcorpus-ddl/aws-mcorpus-db-psql.sh
+mcorpus-dev-aws.sh
+
+# cert files
+*.pem
+*.crt
+
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
