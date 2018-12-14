@@ -11,6 +11,7 @@ The MCorpus GraphQL server endpoint packaged as an über jar (16M at present).
 ## mcorpus-db
 Houses the JooQ generated types representing the db-schema and data access api in the form of Java classes.  Used by mcorpus-gql.
 
+# docs
 Checkout the [wiki](https://github.com/khanactl/mcorpus/wiki) pages for design details..
 
 # Features
