@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jmeterTestPlan version="1.2" properties="4.0" jmeter="4.0 r1823414">
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.0 r1840935">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="MCorpusLoadTest" enabled="true">
       <stringProp name="TestPlan.comments">Issues randomly selected graphql queries from a set of test-defined http request definitions. </stringProp>
@@ -27,13 +27,13 @@
           </elementProp>
           <elementProp name="midCount" elementType="Argument">
             <stringProp name="Argument.name">midCount</stringProp>
-            <stringProp name="Argument.value">1000</stringProp>
+            <stringProp name="Argument.value">5</stringProp>
             <stringProp name="Argument.desc">The number of user threads to create</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="rampUpSeconds" elementType="Argument">
             <stringProp name="Argument.name">rampUpSeconds</stringProp>
-            <stringProp name="Argument.value">100</stringProp>
+            <stringProp name="Argument.value">1</stringProp>
             <stringProp name="Argument.desc">The test thread group ramp up time</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -377,6 +377,23 @@ vars.put(&quot;rst&quot;, rst);
           <stringProp name="RandomTimer.range">100.0</stringProp>
         </UniformRandomTimer>
         <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="gen random srch str" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import java.util.Random;
+
+Random r = new Random();
+char[] c = new char[] {
+	r.nextInt(26) + 97,
+	r.nextInt(26) + 97
+}
+String stoken = new String(c);
+vars.put(&quot;stoken&quot;, 	stoken);
+</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
         <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <stringProp name="LoopController.loops">2</stringProp>
@@ -545,7 +562,7 @@ vars.put(&quot;rst&quot;, rst);
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    nameLast: {\n      value: \&quot;Anderson\&quot;\n      operation: EQUALS\n    }\n  }, offset: 123, limit: 7) {\n    mid\n    dob\n    status\n    personalEmail\n    addresses {\n      modified\n      addressName\n      street1\n      attn\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
+                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    nameLast: {\n      value: \&quot;*${stoken}*\&quot;\n      operation: LIKE\n    }\n  }, offset: 0, limit: 30) {\n    mid\n    dob\n    status\n    personalEmail\n    addresses {\n      modified\n      addressName\n      street1\n      attn\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
                 </collectionProp>
@@ -582,7 +599,7 @@ vars.put(&quot;rst&quot;, rst);
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    displayName: {\n      value: \&quot;*cs*\&quot;\n      operation: LIKE\n     ignoreCase: true\n    }\n    orderByList: {\n      value: \&quot;displayName\&quot;\n      direction: DESCENDING\n    }\n  }, offset: 0, limit:20) {\n    mid\n    created\n    modified\n    displayName\n    addresses {\n      addressName\n      modified\n      attn\n      street1\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}&#xd;
+                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    displayName: {\n      value: \&quot;*${stoken}*\&quot;\n      operation: LIKE\n     ignoreCase: true\n    }\n    orderByList: {\n      value: \&quot;displayName\&quot;\n      direction: DESCENDING\n    }\n  }, offset: 0, limit:20) {\n    mid\n    created\n    modified\n    displayName\n    addresses {\n      addressName\n      modified\n      attn\n      street1\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}&#xd;
 </stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
