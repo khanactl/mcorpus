@@ -2,7 +2,6 @@ package com.tll.mcorpus.gql;
 
 import static com.tll.mcorpus.Util.asStringAndClean;
 import static com.tll.mcorpus.Util.dflt;
-import static com.tll.mcorpus.Util.not;
 import static com.tll.mcorpus.Util.emptyIfNull;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.lower;
