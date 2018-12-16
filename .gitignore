@@ -14,8 +14,8 @@ bin
 mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
 
 aws-env.txt
-mcorpus-db/mcorpus-ddl/aws-mcorpus-db-psql.sh
-mcorpus-dev-aws.sh
+aws-mcorpus-db-psql.sh
+aws-mcorpus-dev.sh
 
 # cert files
 *.pem
