@@ -27,15 +27,17 @@
     <jooq.version>3.11.8</jooq.version>
     <hikari-cp.version>3.2.0</hikari-cp.version>
 
+    <nimbus-jose-jwt.version>6.5.1</nimbus-jose-jwt.version>
+
     <guava.version>21.0</guava.version>
     <guice.version>4.1.0</guice.version>
     
     <caffeine.version>2.6.2</caffeine.version>
     
-    <jackson.version>2.9.7</jackson.version>
+    <jackson.version>2.9.8</jackson.version>
     
-    <netty.version>4.1.31.Final</netty.version>
-    <ratpack.version>1.6.0-rc-2</ratpack.version>
+    <netty.version>4.1.32.Final</netty.version>
+    <ratpack.version>1.6.0</ratpack.version>
     
     <graphql-java.version>11.0</graphql-java.version>
 
@@ -163,14 +165,14 @@
 
 			<!-- nimbus jwt -->
 	    <dependency>
+	      <groupId>com.nimbusds</groupId>
+	      <artifactId>nimbus-jose-jwt</artifactId>
+	      <version>${nimbus-jose-jwt.version}</version>
+	    </dependency>
+	    <dependency>
 	      <groupId>com.github.stephenc.jcip</groupId>
 	      <artifactId>jcip-annotations</artifactId>
 	      <version>1.0-1</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>com.nimbusds</groupId>
-	      <artifactId>nimbus-jose-jwt</artifactId>
-	      <version>5.5</version>
 	    </dependency>
 			
       <dependency><!-- (Ratpack logs via SLF4J API) -->

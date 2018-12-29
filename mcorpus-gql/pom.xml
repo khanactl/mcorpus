@@ -21,7 +21,7 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-db.version>1.3</mcorpus-db.version>
+    <mcorpus-db.version>1.3.1</mcorpus-db.version>
   </properties>
 
   <build>
@@ -238,13 +238,20 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
     </dependency>
+
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.jooq</groupId>
       <artifactId>jooq</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.2.12</version>
     </dependency>
 
     <dependency>
@@ -286,10 +293,12 @@
       <artifactId>jcip-annotations</artifactId>
     </dependency>
 
+    <!--
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
     </dependency>
+    -->
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec-http</artifactId>
