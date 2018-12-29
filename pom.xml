@@ -24,7 +24,7 @@
 
     <postgres-jdbc.version>42.2.5</postgres-jdbc.version>
     
-    <jooq.version>3.11.5</jooq.version>
+    <jooq.version>3.11.8</jooq.version>
     <hikari-cp.version>3.2.0</hikari-cp.version>
 
     <guava.version>21.0</guava.version>

@@ -117,10 +117,8 @@ create table mcuser (
   username                text not null,
   pswd                    text not null,
   status                  mcuser_status not null default 'ACTIVE'::mcuser_status,
-  --role                   mcuser_role not null default 'PUBLIC'::mcuser_role,
 
-  unique(username),
-  unique(email)
+  unique(username)
 );
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
 
@@ -163,9 +161,9 @@ create table mcuser_audit (
   jwt_id                  uuid,
   jwt_id_status           jwt_id_status,
 
-  primary key (uid, created, type),
-  unique(type, jwt_id)
+  primary key (uid, created, type)
 );
+create index mcuser_audit__jwt_id on mcuser_audit (jwt_id);
 comment on type mcuser_audit is 'Log of when mcusers login/out and access the api.';
 
 /**
