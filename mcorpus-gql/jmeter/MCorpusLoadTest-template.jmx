@@ -43,6 +43,17 @@
             <stringProp name="Argument.desc">The test thread group ramp up time</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="mcusername" elementType="Argument">
+            <stringProp name="Argument.name">mcusername</stringProp>
+            <stringProp name="Argument.value">loadtest</stringProp>
+            <stringProp name="Argument.desc">The username of the mcuser for this jmeter teset</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="mcuserpswd" elementType="Argument">
+            <stringProp name="Argument.name">mcuserpswd</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -184,14 +195,14 @@ props.put(&quot;usernames&quot;, usernames);
               <collectionProp name="Arguments.arguments">
                 <elementProp name="username" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">loadtest</stringProp>
+                  <stringProp name="Argument.value">${mcusername}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">username</stringProp>
                 </elementProp>
                 <elementProp name="password" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">loadtestcPptaIn0&amp;</stringProp>
+                  <stringProp name="Argument.value">${mcuserpswd}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">password</stringProp>
