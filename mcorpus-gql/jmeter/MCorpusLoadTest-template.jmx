@@ -15,25 +15,31 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="mcorpusHost" elementType="Argument">
             <stringProp name="Argument.name">mcorpusHost</stringProp>
-            <stringProp name="Argument.value">mcorpus.d2d</stringProp>
+            <stringProp name="Argument.value"></stringProp>
             <stringProp name="Argument.desc">The target host of mcorpus-gql-server</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="mcorpusDbHost" elementType="Argument">
             <stringProp name="Argument.name">mcorpusDbHost</stringProp>
-            <stringProp name="Argument.value">localhost:5432</stringProp>
+            <stringProp name="Argument.value"></stringProp>
             <stringProp name="Argument.desc">Where the db is</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="mcorpusDbName" elementType="Argument">
+            <stringProp name="Argument.name">mcorpusDbName</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.desc">The name of the mcorpus db (jdbc)</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="midCount" elementType="Argument">
             <stringProp name="Argument.name">midCount</stringProp>
-            <stringProp name="Argument.value">5</stringProp>
+            <stringProp name="Argument.value">500</stringProp>
             <stringProp name="Argument.desc">The number of user threads to create</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="rampUpSeconds" elementType="Argument">
             <stringProp name="Argument.name">rampUpSeconds</stringProp>
-            <stringProp name="Argument.value">1</stringProp>
+            <stringProp name="Argument.value">50</stringProp>
             <stringProp name="Argument.desc">The test thread group ramp up time</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -46,15 +52,15 @@
         <stringProp name="checkQuery"></stringProp>
         <stringProp name="connectionAge">5000</stringProp>
         <stringProp name="dataSource">dbc-mcorpus</stringProp>
-        <stringProp name="dbUrl">jdbc:postgresql://${mcorpusDbHost}/mcorpus</stringProp>
+        <stringProp name="dbUrl">jdbc:postgresql://${mcorpusDbHost}/${mcorpusDbName}</stringProp>
         <stringProp name="driver">org.postgresql.Driver</stringProp>
         <boolProp name="keepAlive">true</boolProp>
-        <stringProp name="password">aPvumfTgxv2A/butD/9WrApiF93swos890X5YFOKwQFZ</stringProp>
+        <stringProp name="password"></stringProp>
         <stringProp name="poolMax">0</stringProp>
         <stringProp name="timeout">10000</stringProp>
         <stringProp name="transactionIsolation">DEFAULT</stringProp>
         <stringProp name="trimInterval">60000</stringProp>
-        <stringProp name="username">mcweb</stringProp>
+        <stringProp name="username"></stringProp>
       </JDBCDataSource>
       <hashTree/>
       <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
@@ -178,14 +184,14 @@ props.put(&quot;usernames&quot;, usernames);
               <collectionProp name="Arguments.arguments">
                 <elementProp name="username" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">test</stringProp>
+                  <stringProp name="Argument.value">loadtest</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">username</stringProp>
                 </elementProp>
                 <elementProp name="password" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">jackson</stringProp>
+                  <stringProp name="Argument.value">loadtestcPptaIn0&amp;</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <stringProp name="Argument.name">password</stringProp>
@@ -220,20 +226,22 @@ props.put(&quot;usernames&quot;, usernames);
               <stringProp name="parameters"></stringProp>
               <stringProp name="script">import org.apache.jmeter.protocol.http.control.*
 
-log.info(&quot;Getting rst and jwt cookies..&quot;);
+log.info(&quot;Extracting rst and jwt cookies..&quot;);
 
 CookieManager cm = sampler.getCookieManager()
 Cookie cookie;
+String cname;
 
-// pull rst cookie
-cookie = cm.get(0);
-log.info(&quot;rst cookie: &quot; + cookie);
-props.put(&quot;rst&quot;, cookie.getValue());
-
-// pull jwt cookie
-cookie = cm.get(1); // pull the &apos;jwt&apos; cookie (rst - fist, jwt - second)
-log.info(&quot;jwt cookie: &quot; + cookie);
-props.put(&quot;jwt&quot;, cookie.getValue());
+for(int i = 0; i &lt; cm.getCookieCount(); i++) {
+  cookie = cm.get(i);
+  // log.debug(&quot;cookie: &quot; + cookie);
+  cname = cookie.getName();
+  if(&quot;rst&quot;.equals(cname)) {
+    props.put(&quot;rst&quot;, cookie.getValue());
+  } else if(&quot;jwt&quot;.equals(cname)) {
+    props.put(&quot;jwt&quot;, cookie.getValue());
+  }
+}
 </stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223PostProcessor>
@@ -274,11 +282,11 @@ props.put(&quot;jwt&quot;, cookie.getValue());
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Counter" enabled="true">
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="mindex" enabled="true">
           <stringProp name="CounterConfig.start">1</stringProp>
-          <stringProp name="CounterConfig.end">${midCount} </stringProp>
+          <stringProp name="CounterConfig.end">${midCount}</stringProp>
           <stringProp name="CounterConfig.incr">1</stringProp>
-          <stringProp name="CounterConfig.name">C</stringProp>
+          <stringProp name="CounterConfig.name">mindex</stringProp>
           <stringProp name="CounterConfig.format"></stringProp>
           <boolProp name="CounterConfig.per_user">false</boolProp>
           <stringProp name="TestPlan.comments">Used to pluck out a single mid from the mids array (created during Init phase)</stringProp>
@@ -288,19 +296,19 @@ props.put(&quot;jwt&quot;, cookie.getValue());
           <stringProp name="TestPlan.comments">set the mid variable</stringProp>
           <stringProp name="BeanShellSampler.query">// set the mid variable for this test loop run
 String[] mids = props.get(&quot;mids&quot;);
-String mid = mids[${C}];
+String mid = mids[${mindex}-1];
 vars.put(&quot;mid&quot;, mid);
 
 String[] usernames = props.get(&quot;usernames&quot;);
-String username = usernames[${C}];
+String username = usernames[${mindex}-1];
 vars.put(&quot;username&quot;, username);
 
 String[] emp_ids = props.get(&quot;emp_ids&quot;);
-String emp_id = emp_ids[${C}];
+String emp_id = emp_ids[${mindex}-1];
 vars.put(&quot;emp_id&quot;, emp_id);
 
 String[] locations = props.get(&quot;locations&quot;);
-String location = locations[${C}];
+String location = locations[${mindex}-1];
 vars.put(&quot;location&quot;, location);
 </stringProp>
           <stringProp name="BeanShellSampler.filename"></stringProp>
@@ -314,7 +322,7 @@ vars.put(&quot;location&quot;, location);
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  mlogin(username: \&quot;${username}\&quot;, pswd: \&quot;test123\&quot;) {\n    mid\n    empId\n    location\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
+                <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  mlogin(username: \&quot;${username}\&quot;, pswd: \&quot;test123\&quot;) {\n    mid\n    empId\n    location\n  }\n}&quot;,&quot;variables&quot;:null}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -384,14 +392,14 @@ vars.put(&quot;rst&quot;, rst);
           <stringProp name="script">import java.util.Random;
 
 Random r = new Random();
-char[] c = new char[] {
-	r.nextInt(26) + 97,
-	r.nextInt(26) + 97
-}
+char[] c = { 
+	r.nextInt(26) + 97, 
+	r.nextInt(26) + 97 
+};
 String stoken = new String(c);
 vars.put(&quot;stoken&quot;, 	stoken);
 </stringProp>
-          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="scriptLanguage">java</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
         <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
@@ -556,7 +564,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
               </RegexExtractor>
               <hashTree/>
             </hashTree>
-            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP (members search: last name of Anderson - offset: 123, limit: 7)" enabled="true">
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP (members search: last name like *stoken* - offset: 0, limit: 30)" enabled="true">
               <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
@@ -593,7 +601,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
               </RegexExtractor>
               <hashTree/>
             </hashTree>
-            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP (members search: displayName like *cs* - offset: 0, limit: 20)" enabled="true">
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP (members search: displayName like *stoken* - offset: 0, limit: 20)" enabled="true">
               <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
@@ -644,7 +652,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  mlogout(mid: \&quot;${mid}\&quot;)\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
+                <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  mlogout(mid: \&quot;${mid}\&quot;)\n}&quot;,&quot;variables&quot;:null}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
