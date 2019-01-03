@@ -13,12 +13,6 @@
         <include>mcorpus-gql-server.jar</include>
         <include>log4j-*.jar</include>
         <include>disruptor-*.jar</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <directory></directory>
-      <outputDirectory></outputDirectory><!-- i.e. root -->
-      <includes>
         <include>log4j2-aws.xml</include>
       </includes>
     </fileSet>

@@ -155,6 +155,27 @@
         </executions>
       </plugin>
 			
+      <!-- aws zip assembly -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <appendAssemblyId>true</appendAssemblyId>
+              <attach>false</attach>
+              <descriptors>
+                <descriptor>src/main/assembly/aws-zip.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
       <plugin>
         <groupId>com.coderplus.maven.plugins</groupId>
         <artifactId>copy-rename-maven-plugin</artifactId>
@@ -188,30 +209,24 @@
               </fileSets>
             </configuration>
           </execution>
-        </executions>
-      </plugin>
-
-      <!-- aws zip assembly -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
           <execution>
+            <id>rename-aws-zip</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>rename</goal>
             </goals>
             <configuration>
-              <appendAssemblyId>true</appendAssemblyId>
-              <attach>false</attach>
-              <descriptors>
-                <descriptor>src/main/assembly/aws-zip.xml</descriptor>
-              </descriptors>
+              <fileSets>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/${project.artifactId}-${project.version}-aws-deploy.zip</sourceFile>
+                  <destinationFile>${project.build.directory}/aws-deploy.zip</destinationFile>
+                </fileSet>
+              </fileSets>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
