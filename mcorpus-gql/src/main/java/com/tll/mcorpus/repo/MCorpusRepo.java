@@ -250,13 +250,10 @@ public class MCorpusRepo implements Closeable {
               .from(MEMBER).join(MAUTH).onKey()
               .where(MEMBER.MID.eq(mid))
               .fetchOneMap();
-      if(mmap != null) {
-        // found
-        return new FetchResult<>(mmap, null);
-      }
-      // not found
-      emsg = String.format("No member found with mid: '%s'.", mid);
-      return new FetchResult<>(null, emsg);
+
+      return mmap != null ?
+        new FetchResult<>(mmap, null)
+        : new FetchResult<>(null, String.format("No member found with mid: '%s'.", mid));
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
