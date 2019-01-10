@@ -1,21 +1,14 @@
 package com.tll.mcorpus;
 
-import static com.tll.mcorpus.Util.glog;
 import static ratpack.handling.Handlers.redirect;
 
 import com.tll.mcorpus.gql.MCorpusGraphQLModule;
 import com.tll.mcorpus.repo.MCorpusRepoModule;
 import com.tll.mcorpus.web.CsrfGuardByCookieAndHeaderHandler;
-import com.tll.mcorpus.web.CsrfGuardByWebSessionAndPostHandler;
 import com.tll.mcorpus.web.GraphQLHandler;
 import com.tll.mcorpus.web.GraphQLIndexHandler;
-import com.tll.mcorpus.web.JWTRequireValidHandler;
 import com.tll.mcorpus.web.JWTStatusHandler;
-import com.tll.mcorpus.web.LoginPageRequestHandler;
-import com.tll.mcorpus.web.LoginRequestHandler;
-import com.tll.mcorpus.web.LogoutRequestHandler;
 import com.tll.mcorpus.web.MCorpusWebModule;
-import com.tll.mcorpus.web.WebSessionVerifyHandler;
 
 import ratpack.guice.Guice;
 import ratpack.handling.RequestLogger;
@@ -62,44 +55,17 @@ public class Main {
          
          // the mcorpus GraphQL api (post only)
          .post(JWTStatusHandler.class)
-         .post(JWTRequireValidHandler.class)
          .post(CsrfGuardByCookieAndHeaderHandler.class)
          .post(GraphQLHandler.class)
          
          // the GraphiQL developer interface (get only)
-         .get("index", JWTStatusHandler.class)
-         .get("index", JWTRequireValidHandler.class)
          .get("index", GraphQLIndexHandler.class)
          
          .files(f -> f.dir("templates/graphql"))
        )
 
-       // login page
-       .prefix("loginPage", chainsub -> chainsub
-         .get(JWTStatusHandler.class)
-         .get(LoginPageRequestHandler.class)
-       )
-
-       // login (post only)
-       .prefix("login", chainsub -> chainsub 
-         .post(JWTStatusHandler.class)
-         .post(WebSessionVerifyHandler.class)
-         .post(CsrfGuardByWebSessionAndPostHandler.class)
-         .post(LoginRequestHandler.class)
-       )
-
-       // logout (post only)
-       .prefix("logout", chainsub -> chainsub
-         .post(JWTStatusHandler.class)
-         .post(JWTRequireValidHandler.class)
-         .post(LogoutRequestHandler.class)
-       )
-
-       // mcorpus graphql api landing page
-       .get("index", ctx -> {
-         glog().debug("mcorpus index.");
-         ctx.render(ctx.file("templates/index.html"));
-       })
+       // mcorpus graphql api html landing page
+       .get("index", ctx -> { ctx.render(ctx.file("templates/index.html")); })
 
        .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")))
      )

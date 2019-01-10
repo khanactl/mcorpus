@@ -371,7 +371,6 @@ public class TestUtil {
         "X-Forwarded-Proto",
         "X-Forwarded-Port",
         null, // jwt cookie
-        null, // sid cookie
         null, // rst cookie
         null // rst header
     );

@@ -1,7 +1,5 @@
 package com.tll.mcorpus.web;
 
-import java.time.Duration;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -22,15 +20,9 @@ public class MCorpusWebModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(JWTStatusHandler.class);
-    bind(JWTRequireValidHandler.class);
     bind(GraphQLHandler.class);
     bind(GraphQLIndexHandler.class);
-    bind(LoginPageRequestHandler.class);
-    bind(LoginRequestHandler.class);
-    bind(LogoutRequestHandler.class);
-    bind(WebSessionVerifyHandler.class);
     bind(CsrfGuardByCookieAndHeaderHandler.class);
-    bind(CsrfGuardByWebSessionAndPostHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
   }
@@ -39,11 +31,5 @@ public class MCorpusWebModule extends AbstractModule {
   @Singleton
   JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
     return new JWT(config.jwtTtlInMillis, JWT.deserialize(config.jwtSalt), mcuserRepo, serverConfig.getPublicAddress().toString());
-  }
-
-  @Provides
-  @Singleton
-  WebSessionManager wsm(MCorpusServerConfig config) {
-    return new WebSessionManager(config.maxWebSessions, Duration.ofMinutes(config.webSessionDurationInMinutes));
   }
 }

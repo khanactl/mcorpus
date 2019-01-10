@@ -49,11 +49,21 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
       return;
     }
     
-    // send a no content response if either the cookie or header rst are not present
-    // this serves as a way for http clients to sync the per request rst exchange
-    if(isNull(cookieRst) || isNull(headerRst)) {
-      log.error("rst absent: cookieRst: {}, headerRst: {}.", cookieRst, headerRst);
+    // send a no content response if *both* the cookie or header rst are not present
+    // this serves as a way for the clients to sync up and issue a valid subsequent request
+    if(isNull(cookieRst) && isNull(headerRst)) {
+      final String nextRst = UUID.randomUUID().toString();
+      log.warn("No rst(s) present.  Re-setting with short-lived rst: {}..", nextRst);
+      addRstCookieToResponse(ctx, nextRst, 120); // you got 2 mins to re-submit
+      ctx.getResponse().getHeaders().add("rst", nextRst);
       ctx.clientError(205); // 205 - Reset Content
+      return;
+    }
+    
+    // one of expected 2 rst(s) not present
+    if(isNull(cookieRst) || isNull(headerRst)) {
+      log.error("rst missing: cookieRst: {}, headerRst: {}).", cookieRst, headerRst);
+      ctx.clientError(400); // bad request
       return;
     }
     
@@ -64,14 +74,14 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
       return;
     }
     // rst now verified
-    
-    log.info("Received rst ({}) verified.", headerRst);
+    log.info("rst(s) verified ({}).", headerRst);
     
     // reset the current rst and provide the new rst in the response
     final String nextRst = UUID.randomUUID().toString();
+    // here we set the rst time to live to equal the time to live of the JWT cookie
     addRstCookieToResponse(ctx, nextRst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
     ctx.getResponse().getHeaders().add("rst", nextRst);
-    log.info("rst (next) added to response: {}.", nextRst);
+    log.info("long-lived next rst added to response: {}.", nextRst);
 
     ctx.next(); // we may proceed forward
   }

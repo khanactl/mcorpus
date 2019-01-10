@@ -73,7 +73,6 @@ public class JWTTest {
         "https",
         "5150",
         jwt,
-        "sid",
         "rst",
         "rsth"));
     assertEquals(JWTStatus.NOT_PRESENT_BACKEND, jwtStatus.status());

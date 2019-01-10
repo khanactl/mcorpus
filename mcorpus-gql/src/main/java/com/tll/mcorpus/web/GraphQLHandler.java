@@ -35,32 +35,61 @@ public class GraphQLHandler implements Handler {
   @Override
   public void handle(Context ctx) throws Exception {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
-      // graphql (the api via http post)
+      
+      final JWTStatusInstance jwtStatusInst = ctx.getRequest().get(JWTStatusInstance.class);
+      
       // grab the http request info
       final String query = ((String) qmap.get("query"));
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
-      final JWTStatusInstance jwtStatus = ctx.getRequest().get(JWTStatusInstance.class);
-      final GraphQLWebQuery queryObject = new GraphQLWebQuery(query, vmap, getOrCreateRequestSnapshot(ctx), jwtStatus);
-      final GraphQLSchema schema = ctx.get(MCorpusGraphQL.class).getGraphQLSchema();
-      final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-      log.info("{}", queryObject);
-
+      
+      final GraphQLWebContext gqlWebCtx = new GraphQLWebContext(query, vmap, getOrCreateRequestSnapshot(ctx), jwtStatusInst, ctx);
+      log.info("{}", gqlWebCtx);
+      
       // validate graphql query request
-      if (not(queryObject.isValid())) {
+      if(not(gqlWebCtx.isValid())) {
         log.error("Invalid graphql query.");
         ctx.clientError(403);
         return;
       }
       
+      switch(jwtStatusInst.status()) {
+      case NOT_PRESENT_IN_REQUEST:
+      case EXPIRED:
+        // only mclogin and introspection queries are allowed when no valid JWT present
+        if(not(gqlWebCtx.isMcuserLoginOrIntrospectionQuery())) {
+          ctx.clientError(401); // unauthorized
+          return;
+        }
+        break;
+
+      case VALID:
+        // mcuser logged in by jwt - you may proceed
+        break;
+        
+      case BLOCKED:
+        ctx.clientError(401); // unauthorized
+        return;
+      
+      case ERROR:
+        ctx.clientError(500); // server error
+        return;
+
+      default:
+        ctx.clientError(403); // forbidden
+        return;          
+      }
+      
       // execute the query
       final ExecutionInput executionInput =
           ExecutionInput.newExecutionInput()
-                        .query(queryObject.getQuery())
-                        .variables(queryObject.getVariables())
-                        // the graphql context: GraphQLWebQuery type
-                        .context(queryObject)
+                        .query(gqlWebCtx.getQuery())
+                        .variables(gqlWebCtx.getVariables())
+                        .operationName(gqlWebCtx.getOperationName())
+                        .context(gqlWebCtx)
                         .build();
+      final GraphQLSchema schema = ctx.get(MCorpusGraphQL.class).getGraphQLSchema();
+      final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {
           ctx.render(json(executionResult.toSpecification()));
@@ -72,5 +101,4 @@ public class GraphQLHandler implements Handler {
       });
     });
   }
-
 }

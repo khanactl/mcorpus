@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.repo.MCorpusRepo;
-import com.tll.mcorpus.web.GraphQLWebQuery;
+import com.tll.mcorpus.web.GraphQLWebContext;
 import com.tll.mcorpus.web.RequestSnapshot;
 import com.tll.mcorpus.web.JWT.JWTStatus;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
@@ -58,7 +58,7 @@ public class MCorpusGraphQLTest {
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
     final RequestSnapshot requestSnapshot = testRequestSnapshot();
     final JWTStatusInstance jsi = testJwtStatus(jwtStatus, roles);
-    final GraphQLWebQuery context = new GraphQLWebQuery(query, null, requestSnapshot, jsi);
+    final GraphQLWebContext context = new GraphQLWebContext(query, null, requestSnapshot, jsi, null);
     final ExecutionInput executionInput = 
       ExecutionInput.newExecutionInput()
         .query(query)

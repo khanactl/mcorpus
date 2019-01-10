@@ -10,6 +10,9 @@ schema {
 # the mcorpus queries
 type Query {
 
+  # mcuser login status
+  mcstatus: Mcstatus!
+
   # member reference (mref) by member id
   mrefByMid(mid: ID!): MRef @auth(role: "public")
 
@@ -28,6 +31,12 @@ type Query {
 
 # the mcorpus mutation methods
 type Mutation {
+
+  # mcuser login - Generate a JWT and send to client upon successful mcuser login
+  mclogin(username: String!, pswd: String!): Boolean!
+
+  # mcuser logout - Invalidate a valid JWT bound to the logged in mcuser
+  mclogout: Boolean!
 
   # member login (MRef is returned upon member login success and null upon failure) 
   mlogin(username: String!, pswd: String!): MRef @auth(role: "member")
@@ -54,6 +63,19 @@ type Mutation {
   deleteMemberAddress(mid: ID!, addressName: AddressName!): ID @auth(role: "mcorpus")
 
 }
+
+# mcuser JWT login status
+type Mcstatus {
+  # the mcuser id
+  mcuserId: ID!
+  # when the bound mcuser logged in
+  since: Date!
+  # when the issued mcusr login JWT expires
+  expires: Date!
+  # the total number of valid (non-expired) JWTs presently issued to the bound mcuser
+  numActiveJWTs: Int!
+}
+
 
 # member locations
 enum Location {

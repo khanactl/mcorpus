@@ -26,3 +26,5 @@ aws-mcorpus-dev.sh
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+mcorpus-gql/jmeter/MCorpusLoadTest-localdev.jmx

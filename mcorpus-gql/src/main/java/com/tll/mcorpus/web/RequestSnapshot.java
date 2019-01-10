@@ -62,7 +62,6 @@ public class RequestSnapshot {
   private final String xForwardedPort;
   
   private final String jwtCookie;
-  private final String sidCookie;
   private final String rstCookie;
   
   private final String rstHeader;
@@ -82,14 +81,13 @@ public class RequestSnapshot {
    * @param xForwardedProto the X-Forwarded-Proto http header value
    * @param xForwardedPort the X-Forwarded-Port http header value
    * @param jwtCookie the mcorpus JWT token cookie value
-   * @param sidCookie the mcorpus session id token cookie value
    * @param rstCookie the mcorpus request sync token cookie value
    * @param rstHeader the mcorpus request sync token http header value
    */
   public RequestSnapshot(Instant requestInstant, String remoteAddressHost, String httpHost, String httpOrigin,
       String httpReferer, String httpForwarded, 
       String xForwardedFor, String xForwardedProto, String xForwardedPort,
-      String jwtCookie, String sidCookie, String rstCookie, String rstHeader) {
+      String jwtCookie, String rstCookie, String rstHeader) {
     super();
     this.requestInstant = requestInstant;
     this.remoteAddressHost = remoteAddressHost;
@@ -104,7 +102,6 @@ public class RequestSnapshot {
     this.xForwardedPort = xForwardedPort;
     
     this.jwtCookie = jwtCookie;
-    this.sidCookie = sidCookie;
     this.rstCookie = rstCookie;
     this.rstHeader = rstHeader;
     
@@ -191,18 +188,6 @@ public class RequestSnapshot {
   }
 
   /**
-   * @return true if a web session id cookie value is present, false otherwise.
-   */
-  public boolean hasSidCookie() { return not(isNullwiseOrEmpty(sidCookie)); }
-
-  /**
-   * @return the mcorpus session id from cookie value.
-   */
-  public String getSidCookie() {
-    return sidCookie;
-  }
-
-  /**
    * @return true if an mcorpus JWT cookie value is present, false otherwise
    */
   public boolean hasJwtCookie() { return not(isNullwiseOrEmpty(jwtCookie)); }
@@ -245,14 +230,12 @@ public class RequestSnapshot {
         + "  requestInstant=%s,%n"
         + "  clientOrigin=%s, %n"
         + "  jwtCookie %s, %n"
-        + "  sidCookie=%s, %n"
         + "  rstCookie=%s, %n"
         + "  rstHeader=%s %n"
         + "]",
         requestInstant, 
         clientOrigin,
         jwtCookie == null ? "--NOT present--" : "-present-", 
-        sidCookie, 
         rstCookie, 
         rstHeader);
   }

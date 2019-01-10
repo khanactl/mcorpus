@@ -8,7 +8,7 @@ import java.util.List;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.clean;
 
-import com.tll.mcorpus.web.GraphQLWebQuery;
+import com.tll.mcorpus.web.GraphQLWebContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +117,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
     final GraphQLFieldDefinition f = env.getElement();
     return f.transform(builder -> builder.dataFetcher(dataFetchingEnvironment -> {
       try {
-        final GraphQLWebQuery webContext = dataFetchingEnvironment.getContext();
+        final GraphQLWebContext webContext = dataFetchingEnvironment.getContext();
         final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
         log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
         if(targetRole.isAuthorized(requestingRoles)) {

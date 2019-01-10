@@ -12,7 +12,7 @@ public class MCorpusGraphQLModule extends AbstractModule {
 
   @Provides
   @Singleton
-  MCorpusGraphQL mCorpusGraphQL(MCorpusRepo mCorpusRepo) {
-    return new MCorpusGraphQL("mcorpus.graphqls", mCorpusRepo);
+  MCorpusGraphQL mCorpusGraphQL(MCorpusRepo mcorpusRepo) {
+    return new MCorpusGraphQL("mcorpus.graphqls", mcorpusRepo);
   }
 }
