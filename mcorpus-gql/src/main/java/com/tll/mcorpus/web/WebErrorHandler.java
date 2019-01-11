@@ -11,12 +11,11 @@ import ratpack.handling.Context;
  * The global error handler for the mcorpus web app.
  * 
  * @author jkirton
- *
  */
 public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
 
   private final Logger log = LoggerFactory.getLogger(WebErrorHandler.class);
-  
+
   /**
    * The client error handler.
    */
@@ -25,22 +24,21 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
     ctx.getResponse().status(statusCode);
     switch(statusCode) {
     case 205: // reset content 
-      ctx.getResponse().send("Reset Content");
+      ctx.getResponse().send("Reset Content (205)");
       break;
     case 400: // bad request
-      ctx.render(ctx.file("templates/error400.html"));
+      ctx.getResponse().send("Bad Request (400)");
       break;
     case 401: // unauthorized
-      ctx.render(ctx.file("templates/error401.html"));
+      ctx.getResponse().send("Unauthorized (401)");
       break;
     case 403: // forbidden
-      ctx.render(ctx.file("templates/error403.html"));
+      ctx.getResponse().send("Forbidden (403)");
       break;
     case 404: // not found
-      ctx.render(ctx.file("templates/error404.html"));
+      ctx.getResponse().send("Not Found (404)");
       break;
-    default:
-      // default client error response
+    default: // default client error response
       ctx.getResponse().send("Bad Client");
       break;
     }
@@ -55,8 +53,8 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
    */
   @Override
   public void error(Context ctx, Throwable error) throws Exception {
-    ctx.render(ctx.file("templates/error500.html"));
-    log.error("Server error: {} for request: {}.", 
+    ctx.getResponse().send("Server error (500)");
+    log.error("Server error: {} for {} request.", 
         error == null ? "-" : error.getMessage(),
         ctx.getRequest().getPath());
   }
