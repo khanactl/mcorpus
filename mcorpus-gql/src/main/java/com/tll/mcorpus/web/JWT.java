@@ -27,8 +27,8 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.IJwtStatusProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,7 +231,7 @@ public class JWT {
   
   private final long jwtCookieTtlInMillis; 
   private final long jwtCookieTtlInSeconds;
-  private final MCorpusUserRepo mcuserRepo;
+  private final IJwtStatusProvider jsp;
   private final SecretKey secretKey;
   private final String serverIssuer; 
 
@@ -242,15 +242,15 @@ public class JWT {
    * @param jwtSharedSecret
    *          the cryptographically strong salt (or shared secret) to be used for
    *          signing and later verifying JWTs
-   * @param mcuserRepo
-   *          the mcorpus mcuser repo needed for backend JWT verification
+   * @param jsp
+   *          backend JWT verification provider
    * @param serverIssuer the expected JWT issuer used to verify received JWTs
    */
-  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, MCorpusUserRepo mcuserRepo, String serverIssuer) {
+  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, IJwtStatusProvider jsp, String serverIssuer) {
     super();
     this.jwtCookieTtlInMillis = jwtCookieTtlInMillis;
     this.jwtCookieTtlInSeconds = Math.floorDiv(jwtCookieTtlInMillis, 1000);
-    this.mcuserRepo = mcuserRepo;
+    this.jsp = jsp;
     this.secretKey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = serverIssuer;
     log.info("JWT configured.  JWT cookie time-to-live: {} seconds.", jwtCookieTtlInSeconds);
@@ -293,7 +293,7 @@ public class JWT {
         new JWTClaimsSet.Builder()
         .issuer(issuer)
         .audience(audience)
-        .jwtID(pendingJwtId.toString()) // i.e. the nonce
+        .jwtID(pendingJwtId.toString())
         .subject(mcuserId.toString())
         .issueTime(new Date(requestTimestamp))
         .expirationTime(new Date(loginExpirationTimestamp))
@@ -464,7 +464,7 @@ public class JWT {
     // 1) the jwt id is *known* and *not blacklisted*
     // 2) the associated mcuser has a valid status
     
-    final FetchResult<JwtStatus> fr = mcuserRepo.getJwtStatus(jwtId);
+    final FetchResult<JwtStatus> fr = jsp.getJwtStatus(jwtId);
     if(fr == null || not(fr.isSuccess())) {
       log.error("JWT (jwtId: {}) fetch backend status error: {}", jwtId.toString(), fr.getErrorMsg());
       return jsi(JWTStatus.ERROR, mcuserId, jwtId, issued, expires, null);

@@ -13,4 +13,4 @@ elif ls *.log > /dev/null 2>&1; then
 fi
 
 # run the jmeter script
-jmeter -n -t MCorpusLoadTest.jmx -e -o testoutput -l mcorpus-jmeter.log
+jmeter -n -t MCorpusLoadTest-aws.jmx -e -o testoutput -l mcorpus-jmeter.log

@@ -23,6 +23,7 @@ import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.db.udt.records.McuserAndRolesRecord;
 import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.IJwtStatusProvider;
 
 /**
  * MCorpus User Repository (data access).
@@ -31,7 +32,7 @@ import com.tll.mcorpus.repo.model.FetchResult;
  *
  * @author jpk
  */
-public class MCorpusUserRepo implements Closeable {
+public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
   protected final Logger log = LoggerFactory.getLogger("MCorpusUserRepo");
 
   protected final DSLContext dsl;

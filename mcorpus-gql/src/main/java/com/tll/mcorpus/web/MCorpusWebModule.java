@@ -30,6 +30,12 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
-    return new JWT(config.jwtTtlInMillis, JWT.deserialize(config.jwtSalt), mcuserRepo, serverConfig.getPublicAddress().toString());
+    return new JWT(
+      config.jwtTtlInMillis, 
+      JWT.deserialize(config.jwtSalt), 
+      config.jwtStatusCacheTimeoutInMinutes <= 0 ? mcuserRepo : 
+        new CachingJwtStatusProvider(mcuserRepo, config.jwtStatusCacheTimeoutInMinutes), 
+      serverConfig.getPublicAddress().toString()
+    );
   }
 }
