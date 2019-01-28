@@ -2,18 +2,15 @@ package com.tll.mcorpus;
 
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
-import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,6 +22,16 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.web.JWT;
+import com.tll.mcorpus.web.JWT.JWTStatus;
+import com.tll.mcorpus.web.JWT.JWTStatusInstance;
+import com.tll.mcorpus.web.RequestSnapshot;
+
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
@@ -33,26 +40,9 @@ import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.postgresql.ds.PGSimpleDataSource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.enums.JwtIdStatus;
-import com.tll.mcorpus.db.enums.Location;
-import com.tll.mcorpus.db.enums.McuserAuditType;
-import com.tll.mcorpus.db.enums.MemberStatus;
-import com.tll.mcorpus.db.routines.McuserLogin;
-import com.tll.mcorpus.db.routines.McuserLogout;
-import com.tll.mcorpus.db.tables.pojos.McuserAudit;
-import com.tll.mcorpus.web.JWT;
-import com.tll.mcorpus.web.RequestSnapshot;
-import com.tll.mcorpus.web.JWT.JWTStatus;
-import com.tll.mcorpus.web.JWT.JWTStatusInstance;
-
 public class TestUtil {
   
-  public static final UUID testMcuserUid = UUID.fromString("d712f2d3-5494-472d-bdcc-4a1722a8c818");
-  
-  public static final String testRequestOrigin = "https://test-app.com";
+  public static final String testRequestOrigin = "localhost|localhost";
 
   public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
@@ -285,78 +275,6 @@ public class TestUtil {
     Map<String, Object> maddressMap = new HashMap<>();
     addMaddressTableProperties(maddressMap, mid, addressname);
     return maddressMap;
-  }
-  
-  /**
-   * @return newly created {@link McuserLogin} instance for an mcuser for testing purposes.
-   */
-  public static McuserLogin testMcuserLoginInput() {
-    final long lnow = System.currentTimeMillis();
-    final long expiry = lnow + Duration.ofMinutes(30).toMillis();
-    McuserLogin mcuserLogin = new McuserLogin();
-    mcuserLogin.setMcuserUsername("test");
-    mcuserLogin.setMcuserPassword("test123");
-    mcuserLogin.setInJwtId(UUID.randomUUID());
-    mcuserLogin.setInRequestTimestamp(new Timestamp(lnow));
-    mcuserLogin.setInRequestOrigin(testRequestOrigin);
-    mcuserLogin.setInLoginExpiration(new Timestamp(expiry));
-    return mcuserLogin;
-  }
-
-  /**
-   * @return newly created {@link McuserLogout} instance for an mcuser for testing purposes.
-   */
-  public static McuserLogout testMcuserLogoutInput() {
-    final long lnow = System.currentTimeMillis();
-    McuserLogout mcuserLogout = new McuserLogout();
-    mcuserLogout.setJwtId((UUID)null);
-    mcuserLogout.setMcuserUid((UUID)null);
-    mcuserLogout.setRequestTimestamp(new Timestamp(lnow));
-    mcuserLogout.setRequestOrigin(testRequestOrigin);
-    return mcuserLogout;
-  }
-
-  /**
-   * Add a test mcuser_audit record.
-   * 
-   * @return Newly created McuserAudit pojo corresponding to the added
-   *         MCUSER_AUDIT test record.
-   * @throws Exception upon test record insert failure
-   */
-  public static McuserAudit addTestMcuserAuditRecord() throws Exception {
-    long lnow = Instant.now().toEpochMilli();
-    final long expiry = lnow + Duration.ofMinutes(30).toMillis();
-    
-    McuserAudit e = new McuserAudit(
-        UUID.randomUUID(),
-        null,
-        McuserAuditType.LOGIN,
-        new Timestamp(lnow),
-        testRequestOrigin,
-        new Timestamp(expiry),
-        UUID.randomUUID(),
-        JwtIdStatus.OK);
-    
-    final int numInserted = testDslMcweb().insertInto(MCUSER_AUDIT,
-        MCUSER_AUDIT.TYPE,
-        MCUSER_AUDIT.JWT_ID, 
-        MCUSER_AUDIT.JWT_ID_STATUS,
-        MCUSER_AUDIT.UID,
-        MCUSER_AUDIT.REQUEST_TIMESTAMP,
-        MCUSER_AUDIT.REQUEST_ORIGIN,
-        MCUSER_AUDIT.LOGIN_EXPIRATION
-      ).values(
-          McuserAuditType.LOGIN,
-          e.getJwtId(),
-          e.getJwtIdStatus(),
-          testMcuserUid,
-          e.getRequestTimestamp(),
-          e.getRequestOrigin(),
-          e.getLoginExpiration()
-      ).execute();
-    if(numInserted != 1) throw new Exception("Num inserted MCUSER_AUDIT records: " + numInserted);
-    
-    return e;
   }
 
   public static RequestSnapshot testRequestSnapshot() {

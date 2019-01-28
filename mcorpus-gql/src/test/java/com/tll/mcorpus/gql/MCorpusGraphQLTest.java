@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.repo.MCorpusRepo;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.GraphQLWebContext;
 import com.tll.mcorpus.web.RequestSnapshot;
 import com.tll.mcorpus.web.JWT.JWTStatus;
@@ -33,7 +34,7 @@ public class MCorpusGraphQLTest {
   private static final Logger log = LoggerFactory.getLogger(MCorpusGraphQLTest.class);
 
   static MCorpusGraphQL mcgql() {
-    return new MCorpusGraphQL("mcorpus.graphqls", new MCorpusRepo(ds_mcweb()));
+    return new MCorpusGraphQL(new MCorpusUserRepo(ds_mcweb()), new MCorpusRepo(ds_mcweb()));
   }
 
   /**

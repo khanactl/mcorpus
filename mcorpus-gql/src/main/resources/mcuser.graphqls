@@ -1,0 +1,150 @@
+# mcuser queries
+extend type Query {
+
+  # fetch an mcuser and assigned roles
+  fetchMcuser(uid: ID!): Mcuser @auth(role: "admin")
+
+  # mcuser login status
+  mcstatus: Mcstatus!
+
+  # mcuser history of activity
+  mchistory(uid: ID!): McuserHistory @auth(role: "admin")
+}
+
+# mcuser mutation methods
+extend type Mutation {
+
+  # mcuser login - Generate a JWT and send to client upon successful mcuser login
+  mclogin(username: String!, pswd: String!): Boolean!
+
+  # mcuser logout - Invalidate a valid JWT bound to the logged in mcuser
+  mclogout: Boolean!
+
+  # add a new mcuser to the system
+  addMcuser(mcuser: McuserToAdd!): Mcuser @auth(role: "admin")
+
+  # update an existing mcuser
+  updateMcuser(mcuser: McuserToUpdate!): Mcuser @auth(role: "admin")
+
+  # physically remove an mcuser entirely from the system
+  deleteMcuser(uid: ID!): Boolean @auth(role: "admin")
+
+  # set/reset an mucser pswd by mcuser id
+  mcpswd(uid: ID!, pswd: String!): Boolean! @auth(role: "admin")
+
+  # invalidate all active JWTs issued to an mcuser
+  invalidateJwtsFor(uid: ID!): Boolean! @auth(role: "admin")
+
+}
+
+# mcuser type
+type Mcuser {
+  # the mcuser id
+  uid: ID
+  # mcuser creation date
+  created: Date
+  # mcuser last modified date
+  modified: Date
+  # mcuser name
+  name: String
+  # mcuser email address
+  email: String
+  # mcuser username
+  username: String
+  # mcuser status
+  status: McuserStatus
+  # the assigned mcuser roles
+  roles: [McuserRole]
+}
+
+# mcuser history
+type McuserHistory {
+  # the mcuser id
+  uid: ID
+  # the mcuser login history
+  logins: [McuserLoginEvent]
+  # the mcuser logout history
+  logouts: [McuserLogoutEvent]
+}
+
+# a single mcuser login event
+type McuserLoginEvent {
+  # the JWT id
+  jwtId: ID
+  # the login timestamp
+  timestamp: Date
+}
+
+# a single mcuser logout event
+type McuserLogoutEvent {
+  # the JWT id
+  jwtId: ID
+  # the logout timestamp
+  timestamp: Date
+}
+
+# mcuser status
+enum McuserStatus {
+  # mcuser active
+  ACTIVE
+  # mcuser inactive (No mcorpus api interaction presently allowed)
+  INACTIVE
+  # mcuser invalidated (No mcorpus api interaction allowed)
+  INVALIDATED
+}
+
+# the allowed roles an mcuser may have
+enum McuserRole {
+  # mcorpus - full read and write over all members
+  MCORPUS
+  # member - member login and logout capability
+  MEMBER
+  # mpii - ability for non-admins to see member PII fields
+  MPII
+  # admin - only an mcuser admininstrator may invoke the bound operation
+  ADMIN
+}
+
+# mcuser JWT login status
+type Mcstatus {
+  # the mcuser id
+  uid: ID!
+  # when the bound mcuser logged in
+  since: Date!
+  # when the issued mcorpus JWT expires
+  expires: Date!
+  # the total number of valid and non-expired JWTs presently issued to the bound mcuser
+  numActiveJWTs: Int!
+}
+
+# required properties for adding a new mcuser
+input McuserToAdd {
+  # mcuser name
+  name: String!
+  # mcuser email address
+  email: String!
+  # mcuser username
+  username: String!
+  # mcuser password
+  pswd: String!
+  # mcuser initial status
+  initialStatus: McuserStatus!
+  # the optional mcuser roles to set
+  roles: [McuserRole]
+}
+
+# required properties for updating an existing mcuser
+input McuserToUpdate {
+  # the id of the mcuser to update
+  uid: ID!
+  # mcuser name
+  name: String
+  # mcuser email address
+  email: String
+  # mcuser username
+  username: String
+  # mcuser status
+  status: McuserStatus
+  # the optional mcuser roles to set where, if specified, forces existing roles to first be deleted
+  roles: [McuserRole]
+}

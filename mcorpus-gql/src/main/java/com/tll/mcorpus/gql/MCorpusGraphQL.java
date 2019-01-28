@@ -18,6 +18,8 @@ import static com.tll.mcorpus.repo.RepoUtil.fval;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +30,16 @@ import java.util.UUID;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.repo.MCorpusRepo;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.repo.model.FetchResult;
+import com.tll.mcorpus.repo.model.McuserHistory;
+import com.tll.mcorpus.repo.model.McuserToAdd;
+import com.tll.mcorpus.repo.model.McuserToUpdate;
+import com.tll.mcorpus.repo.model.McuserHistory.LoginEvent;
+import com.tll.mcorpus.repo.model.McuserHistory.LogoutEvent;
 import com.tll.mcorpus.repo.model.MemberFilter;
 import com.tll.mcorpus.web.GraphQLWebContext;
 import com.tll.mcorpus.web.RequestSnapshot;
@@ -51,7 +60,7 @@ public class MCorpusGraphQL {
 
   private final Logger log = LoggerFactory.getLogger(MCorpusGraphQL.class);
 
-  private final String graphqlSchemaFilename;
+  private final MCorpusUserRepo mcuserRepo;
 
   private final MCorpusRepo mcorpusRepo;
 
@@ -61,10 +70,11 @@ public class MCorpusGraphQL {
    * Constructor.
    *
    * @param graphqlSchemaFilename the GraphQL schema file name (no path)
+   * @param mcuserRepo required mcuser repo
    * @param mcorpusRepo required mcorpus repo
    */
-  MCorpusGraphQL(final String graphqlSchemaFilename, final MCorpusRepo mcorpusRepo) {
-    this.graphqlSchemaFilename = graphqlSchemaFilename;
+  MCorpusGraphQL(final MCorpusUserRepo mcuserRepo, final MCorpusRepo mcorpusRepo) {
+    this.mcuserRepo = mcuserRepo;
     this.mcorpusRepo = mcorpusRepo;
   }
 
@@ -77,8 +87,8 @@ public class MCorpusGraphQL {
   public GraphQLSchema getGraphQLSchema() throws RuntimeException {
     if(graphQLSchema == null) {
       loadSchema();
+      if(graphQLSchema == null) throw new RuntimeException("No GraphQL schema loaded.");
     }
-    if(graphQLSchema == null) throw new RuntimeException("No GraphQL schema loaded.");
     return graphQLSchema;
   }
 
@@ -91,20 +101,24 @@ public class MCorpusGraphQL {
     final SchemaParser schemaParser = new SchemaParser();
     final SchemaGenerator schemaGenerator = new SchemaGenerator();
     try (
-      final InputStreamReader greader = new InputStreamReader(
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(graphqlSchemaFilename),
-          StandardCharsets.UTF_8);
-    ) {
-      log.debug("Loading GraphQL schema file '{}'..", graphqlSchemaFilename);
+      final InputStreamReader rdrMcuser = new InputStreamReader(
+            Thread.currentThread().getContextClassLoader().getResourceAsStream("mcuser.graphqls"), StandardCharsets.UTF_8);
+      final InputStreamReader rdrMcorpus = new InputStreamReader(
+          Thread.currentThread().getContextClassLoader().getResourceAsStream("mcorpus.graphqls"), StandardCharsets.UTF_8);
+      ) {
+      log.debug("Loading mcorpus GraphQL schema(s)..");
 
-      TypeDefinitionRegistry typeRegistry = schemaParser.parse(greader);
-      RuntimeWiring wiring = buildRuntimeWiring();
-
+      final TypeDefinitionRegistry typeRegistry = new TypeDefinitionRegistry();
+      typeRegistry.merge(schemaParser.parse(rdrMcuser));
+      typeRegistry.merge(schemaParser.parse(rdrMcorpus));
+      
+      final RuntimeWiring wiring = buildRuntimeWiring();
       graphQLSchema = schemaGenerator.makeExecutableSchema(typeRegistry, wiring);
-      log.info("GraphQL schema loaded from '{}'.", graphqlSchemaFilename);
+
+      log.info("GraphQL mcorpus schema(s) loaded.");
     }
     catch (Exception e) {
-      log.error(e.getMessage(), e);
+      log.error("GraphQL load schema error: {}", e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -118,10 +132,29 @@ public class MCorpusGraphQL {
       // Query
       .type("Query", typeWiring -> typeWiring
 
+        // mcuser
+
+        // mcuser status
         .dataFetcher("mcstatus", env -> {
           final GraphQLWebContext webContext = env.getContext();
           return webContext.mcstatus();
         })
+
+        // mcuser history
+        .dataFetcher("mchistory", env -> {
+          final UUID uid = uuidFromToken(env.getArgument("uid"));
+          final FetchResult<McuserHistory> fr = mcuserRepo.mcuserHistory(uid);
+          return fr.isSuccess() ? fr.get() : null;
+        })
+
+        // fetch mcuser
+        .dataFetcher("fetchMcuser", env -> {
+          final UUID uid = uuidFromToken(env.getArgument("uid"));
+          final FetchResult<McuserAndRoles> fr = mcuserRepo.fetchMcuser(uid);
+          return fr.isSuccess() ? fr.get() : null;
+        })
+
+        // mcorpus
 
         .dataFetcher("mrefByMid", env -> {
           final UUID uuid = uuidFromToken(env.getArgument("mid"));
@@ -156,6 +189,8 @@ public class MCorpusGraphQL {
       // Mutation
       .type("Mutation", typeWiring -> typeWiring
 
+        // mcuser
+
         // mcuser login
         .dataFetcher("mclogin", env -> {
           final GraphQLWebContext webContext = env.getContext();
@@ -169,6 +204,50 @@ public class MCorpusGraphQL {
           final GraphQLWebContext webContext = env.getContext();
           return webContext.mcuserLogout();
         })
+
+        // add mcuser
+        .dataFetcher("addMcuser", env -> {
+          final Map<String, Object> mcuserMap = env.getArgument("mcuser");
+          final McuserToAdd mta = McuserToAdd.fromMap(mcuserMap);
+          final FetchResult<McuserAndRoles> fr = mcuserRepo.addMcuser(mta);
+          return fr.isSuccess() ? fr.get() : null;
+        })
+
+        // update mcuser
+        .dataFetcher("updateMcuser", env -> {
+          final Map<String, Object> mcuserMap = env.getArgument("mcuser");
+          final McuserToUpdate mtu = McuserToUpdate.fromMap(mcuserMap);
+          final FetchResult<McuserAndRoles> fr = mcuserRepo.updateMcuser(mtu);
+          return fr.isSuccess() ? fr.get() : null;
+        })
+
+        // delete mcuser
+        .dataFetcher("deleteMcuser", env -> {
+          final UUID uid = uuidFromToken(env.getArgument("uid"));
+          final FetchResult<Boolean> fr = mcuserRepo.deleteMcuser(uid);
+          return fr.isSuccess() ? fr.get() : Boolean.FALSE;
+        })
+
+        // mcpswd
+        .dataFetcher("mcpswd", env -> {
+          final UUID uid = uuidFromToken(env.getArgument("uid"));
+          final String pswd = env.getArgument("pswd");
+          final FetchResult<Boolean> fr = mcuserRepo.setPswd(uid, pswd);
+          return fr.isSuccess() ? fr.get() : Boolean.FALSE;
+        })
+        
+        // invalidateJwtsFor
+        .dataFetcher("invalidateJwtsFor", env -> {
+          final UUID uid = uuidFromToken(env.getArgument("uid"));
+          final GraphQLWebContext webContext = env.getContext();
+          final RequestSnapshot rs = webContext.getRequestSnapshot();
+          final Instant requestInstant = rs.getRequestInstant();
+          final String requestOrigin = rs.getClientOrigin();
+          final FetchResult<Boolean> fr = mcuserRepo.invalidateJwtsFor(uid, requestInstant, requestOrigin);
+          return fr.isSuccess() ? fr.get() : Boolean.FALSE;
+        })
+        
+        // mcorpus
 
         // member login
         .dataFetcher("mlogin", env -> {
@@ -190,7 +269,7 @@ public class MCorpusGraphQL {
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
           final FetchResult<UUID> mlogoutResult = mcorpusRepo.memberLogout(mid, requestInstant, requestOrigin);
-          return mlogoutResult.isSuccess() ? uuidToToken(mid) : null;
+          return mlogoutResult.isSuccess();
         })
         
         // add member
@@ -235,11 +314,11 @@ public class MCorpusGraphQL {
           fput(MAUTH.USERNAME, username, memberMapDomain);
           fput(MAUTH.PSWD, pswd, memberMapDomain);
 
-          final FetchResult<Map<String, Object>> fetchResult = mcorpusRepo.addMember(memberMapDomain);
-          if(fetchResult.isSuccess()) {
-            return fetchResult.get();
+          final FetchResult<Map<String, Object>> fr = mcorpusRepo.addMember(memberMapDomain);
+          if(fr.isSuccess()) {
+            return fr.get();
           } else {
-            final String emsg = fetchResult.getErrorMsg();
+            final String emsg = fr.getErrorMsg();
             env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
             return null;
           }
@@ -283,11 +362,11 @@ public class MCorpusGraphQL {
           fputWhenNotBlank(MAUTH.HOME_PHONE, homePhone, memberMapDomain);
           fputWhenNotBlank(MAUTH.WORK_PHONE, workPhone, memberMapDomain);
 
-          final FetchResult<Map<String, Object>> fetchResult = mcorpusRepo.updateMember(memberMapDomain);
-          if(fetchResult.isSuccess()) {
-            return fetchResult.get();
+          final FetchResult<Map<String, Object>> fr = mcorpusRepo.updateMember(memberMapDomain);
+          if(fr.isSuccess()) {
+            return fr.get();
           } else {
-            final String emsg = fetchResult.getErrorMsg();
+            final String emsg = fr.getErrorMsg();
             env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
             return null;
           }
@@ -296,8 +375,8 @@ public class MCorpusGraphQL {
         // delete member
         .dataFetcher("deleteMember", env -> {
           final UUID mid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<UUID> fetchResult = mcorpusRepo.deleteMember(mid);
-          return fetchResult.isSuccess() ? uuidToToken(fetchResult.get()) : null;
+          final FetchResult<UUID> fr = mcorpusRepo.deleteMember(mid);
+          return fr.isSuccess() ? uuidToToken(fr.get()) : null;
         })
 
         // add member address
@@ -327,15 +406,16 @@ public class MCorpusGraphQL {
           fput(MADDRESS.POSTAL_CODE, postalCode, maddressMap);
           fput(MADDRESS.COUNTRY, country, maddressMap);
 
-          final FetchResult<Map<String, Object>> fetchResult = mcorpusRepo.addMemberAddress(maddressMap);
-          if(fetchResult.isSuccess()) {
-            return fetchResult.get();
+          final FetchResult<Map<String, Object>> fr = mcorpusRepo.addMemberAddress(maddressMap);
+          if(fr.isSuccess()) {
+            return fr.get();
           } else {
-            final String emsg = fetchResult.getErrorMsg();
+            final String emsg = fr.getErrorMsg();
             env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
             return null;
           }
         })
+
         // update member address
         .dataFetcher("updateMemberAddress", env -> {
           final Map<String, Object> memberAddress = env.getArgument("memberAddress");
@@ -363,27 +443,30 @@ public class MCorpusGraphQL {
           fputWhenNotBlank(MADDRESS.POSTAL_CODE, postalCode, maddressMap);
           fputWhenNotBlank(MADDRESS.COUNTRY, country, maddressMap);
 
-          final FetchResult<Map<String, Object>> fetchResult = mcorpusRepo.updateMemberAddress(maddressMap);
-          if(fetchResult.isSuccess()) {
-            return fetchResult.get();
+          final FetchResult<Map<String, Object>> fr = mcorpusRepo.updateMemberAddress(maddressMap);
+          if(fr.isSuccess()) {
+            return fr.get();
           } else {
-            final String emsg = fetchResult.getErrorMsg();
+            final String emsg = fr.getErrorMsg();
             env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
             return null;
           }
         })
+
         // delete member address
         .dataFetcher("deleteMemberAddress", env -> {
           final UUID mid = uuidFromToken(env.getArgument("mid"));
           final Addressname addressname = addressNameFromString(env.getArgument("addressName"));
-          final FetchResult<UUID> fetchResult = mcorpusRepo.deleteMemberAddress(mid, addressname);
-          return fetchResult.isSuccess() ? uuidToToken(fetchResult.get()) : null;
+          final FetchResult<UUID> fr = mcorpusRepo.deleteMemberAddress(mid, addressname);
+          return fr.isSuccess() ? uuidToToken(fr.get()) : null;
         })
       )
 
+      // mcuser types
+
       // Mcstatus
       .type("Mcstatus", typeWiring -> typeWiring
-        .dataFetcher("mcuserId", env -> {
+        .dataFetcher("uid", env -> {
           final Mcstatus mcstatus = env.getSource();
           return uuidToToken(mcstatus.mcuserId);
         })
@@ -400,6 +483,86 @@ public class MCorpusGraphQL {
           return mcstatus.numActiveJWTs;
         })
       )
+
+      // Mcuser
+      .type("Mcuser", typeWiring -> typeWiring
+        .dataFetcher("uid", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return uuidToToken(mar.getMcuser().getUid());
+        })
+        .dataFetcher("created", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return mar.getMcuser().getCreated();
+        })
+        .dataFetcher("modified", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return mar.getMcuser().getModified();
+        })
+        .dataFetcher("name", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return mar.getMcuser().getName();
+        })
+        .dataFetcher("email", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return mar.getMcuser().getEmail();
+        })
+        .dataFetcher("username", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return mar.getMcuser().getUsername();
+        })
+        .dataFetcher("status", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return mar.getMcuser().getStatus();
+        })
+        .dataFetcher("roles", env -> {
+          final McuserAndRoles mar = env.getSource();
+          return isNullOrEmpty(mar.getRoles()) ? 
+            Collections.emptyList() :
+            Arrays.asList(mar.getRoles().split("\\s*,\\s*"));
+        })
+      )
+
+      // McuserHistory
+      .type("McuserHistory", typeWiring -> typeWiring
+        .dataFetcher("uid", env -> {
+          final McuserHistory mh = env.getSource();
+          return mh.uid;
+        })
+        .dataFetcher("logins", env -> {
+          final McuserHistory mh = env.getSource();
+          return mh.logins;
+        })
+        .dataFetcher("logouts", env -> {
+          final McuserHistory mh = env.getSource();
+          return mh.logouts;
+        })
+      )
+
+      // McuserLoginEvent
+      .type("McuserLoginEvent", typeWiring -> typeWiring
+        .dataFetcher("jwtId", env -> {
+          final LoginEvent le = env.getSource();
+          return le.jwtId;
+        })
+        .dataFetcher("timestamp", env -> {
+          final LoginEvent le = env.getSource();
+          return le.timestamp;
+        })
+      )
+
+      // McuserLogoutEvent
+      .type("McuserLogoutEvent", typeWiring -> typeWiring
+        .dataFetcher("jwtId", env -> {
+          final LogoutEvent le = env.getSource();
+          return le.jwtId;
+        })
+        .dataFetcher("timestamp", env -> {
+          final LogoutEvent le = env.getSource();
+          return le.timestamp;
+        })
+      )
+
+      // mcorpus types
 
       // MRef
       .type("MRef", typeWiring -> typeWiring

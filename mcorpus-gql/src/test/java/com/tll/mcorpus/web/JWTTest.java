@@ -15,7 +15,6 @@ import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tll.mcorpus.TestUtil;
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.JWT.JWTStatus;
@@ -44,7 +43,7 @@ public class JWTTest {
     final String s = JWT.serialize(randarr);
     final byte[] derandarr = JWT.deserialize(s);
     assertTrue("JWT serialize/de-serialize mis-match.", Arrays.equals(randarr, derandarr));
-    System.out.println(String.format("Random 32-byte hex token: %s", s));
+    log.info("Random 32-byte hex token: {}", s);
   }
 
   @Test
@@ -56,9 +55,10 @@ public class JWTTest {
     String issuer = testServerPublicAddress;
     String audience = "127.0.0.1|127.0.0.1";
     String roles = "MCORPUS";
+    UUID mcuserId = UUID.randomUUID();
     
     // generate
-    String jwt = jwti.generate(now, TestUtil.testMcuserUid, jwtId, issuer, audience, roles);
+    String jwt = jwti.generate(now, mcuserId, jwtId, issuer, audience, roles);
     log.info("JWT generated: {}", jwt);
     
     // parse

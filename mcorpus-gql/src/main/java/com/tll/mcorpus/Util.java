@@ -143,6 +143,16 @@ public class Util {
   public static String clean(final String s) { return s == null ? "" : s.trim(); }
 
   /**
+   * Clean a string when NOT NULL.
+   * If it is null, null is returned.
+   * Otherwise, the string is trimmed on both sides and returned.
+   *
+   * @param s the string to nclean
+   * @return Null when the input is null or the trimmed string
+   */
+  public static String nclean(final String s) { return s == null ? null : s.trim(); }
+
+  /**
    * Convert an arbitrary object to a string, then trim it on both sides.
    *
    * @param o the object to clean and trim

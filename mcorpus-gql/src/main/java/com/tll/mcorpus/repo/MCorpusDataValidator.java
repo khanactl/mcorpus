@@ -20,6 +20,9 @@ import java.util.regex.Pattern;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.enums.McuserStatus;
+import com.tll.mcorpus.repo.model.McuserToAdd;
+import com.tll.mcorpus.repo.model.McuserToUpdate;
 
 /**
  * Non-mutating validation methods for incoming member data.
@@ -74,7 +77,17 @@ public class MCorpusDataValidator {
    */
   private static final Pattern pswdPattern = Pattern.compile("^\\S{8,50}$");
 
-  // member
+  // mcuser
+
+  public static boolean mcuserNameValid(final String name) {
+    return not(isNullOrEmpty(name)) && not(isBlank(name)) && lenchk(name, 64) && namePattern.matcher(name).matches();
+  }
+
+  public static boolean mcuserStatusValid(final McuserStatus status) {
+    return not(isNull(status));
+  }
+
+  // mcorpus
 
   /**
    * empId
@@ -116,8 +129,6 @@ public class MCorpusDataValidator {
   public static boolean displayNameValid(final String name) {
     return isNullOrEmpty(name) || not(isBlank(name)) && lenchk(name, 64) && namePattern.matcher(name).matches();
   }
-
-  // mauth
 
   /**
    * Verify a birth date satisfies:
@@ -298,6 +309,47 @@ public class MCorpusDataValidator {
     return not(isNullOrEmpty(country)) && lenchk(country, 120) && namePattern.matcher(country).matches();
   }
 
+  ////// aggregate methods ///////
+
+  // mcuser
+
+  /**
+   * Validate an mcuser for add op.
+   * 
+   * @param mcuser
+   * @param emsgs errors the list that is appended 
+   *              with field error messages when a 
+   *              field is found to be invalid
+   */
+  public static void validateMcuserToAdd(final McuserToAdd mcuser, final List<String> emsgs) {
+    if(not(mcuserNameValid(mcuser.getName()))) emsgs.add("Invalid mcuser name.");
+    if(not(emailValid(mcuser.getEmail(), true))) emsgs.add("Invalid mcuser email.");
+    if(not(usernameValid(mcuser.getUsername()))) emsgs.add("Invalid mcuser username.");
+    if(not(pswdValid(mcuser.getPswd()))) emsgs.add("Invalid mcuser pswd.");
+    if(not(mcuserStatusValid(mcuser.getInitialStatus()))) emsgs.add("Invalid mcuser status.");
+  }
+
+  /**
+   * Validate mcuser fields for update op.
+   * <p>
+   * Any null fields are taken to mean: not subject to updating 
+   * with the exception of mcuser.uid which is required.
+   * 
+   * @param mcuser the mcuser to update
+   * @param emsgs errors the list that is appended 
+   *              with field error messages when a 
+   *              field is found to be invalid
+   */
+  public static void validateMcuserToUpdate(final McuserToUpdate mcuser, final List<String> emsgs) {
+    if(isNull(mcuser.uid)) emsgs.add("No mcuser id specified.");
+    if(isNotNull(mcuser.name) && not(mcuserNameValid(mcuser.name))) emsgs.add("Invalid mcuser name.");
+    if(isNotNull(mcuser.email) && not(emailValid(mcuser.email, true))) emsgs.add("Invalid mcuser email.");
+    if(isNotNull(mcuser.username) && not(usernameValid(mcuser.username))) emsgs.add("Invalid mcuser username.");
+    if(isNotNull(mcuser.status) && not(mcuserStatusValid(mcuser.status))) emsgs.add("Invalid mcuser status.");
+  }
+
+  // member
+
   /**
    * Validate member fields for adding a member record to the underlying datastore.
    *
@@ -388,6 +440,8 @@ public class MCorpusDataValidator {
     if(hasField(MAUTH.WORK_PHONE, memberMap) && not(phoneValid(fval(MAUTH.WORK_PHONE, memberMap), false)))
       emsgs.add("Invalid work phone number.");
   }
+
+  // member address
 
   /**
    * Validate member address fields for record insert.

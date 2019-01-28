@@ -398,9 +398,12 @@ public class MCorpusRepo implements Closeable {
     
     try {
       dsl.transaction(configuration -> {
+
+        final DSLContext trans = DSL.using(configuration);
+
         // add member record
         final Map<String, Object> rmapMember =
-          DSL.using(configuration)
+          trans
             .insertInto(MEMBER, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS)
             .values(
               fval(MEMBER.EMP_ID, cmapMember),
@@ -427,7 +430,7 @@ public class MCorpusRepo implements Closeable {
 
         // create mauth record
         final Map<String, Object> rmapMauth =
-          DSL.using(configuration)
+          trans
             .insertInto(MAUTH,
               MAUTH.MID, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME, MAUTH.PSWD)
             .values(
@@ -497,13 +500,14 @@ public class MCorpusRepo implements Closeable {
     try {
       dsl.transaction(configuration -> {
 
+        final DSLContext trans = DSL.using(configuration);
+
         final Map<String, Object> rmapMauth;
         
         // update mauth
         if(not(cmapMauth.isEmpty())) {
           // update mauth record
-          rmapMauth = 
-            DSL.using(configuration)
+          rmapMauth = trans
                     .update(MAUTH)
                     .set(cmapMauth)
                     .where(MAUTH.MID.eq(mid))
@@ -512,8 +516,7 @@ public class MCorpusRepo implements Closeable {
         }
         else {
           // otherwise select to get current snapshot
-          rmapMauth = 
-            DSL.using(configuration)
+          rmapMauth = trans
                     .select(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
                     .from(MAUTH)
                     .where(MAUTH.MID.eq(mid))
@@ -529,8 +532,7 @@ public class MCorpusRepo implements Closeable {
         final Map<String, Object> rmapMember;
 
         // update member record (we are guaranteed at least one field to update)
-        rmapMember = 
-          DSL.using(configuration)
+        rmapMember = trans
                   .update(MEMBER)
                   .set(cmapMember)
                   .where(MEMBER.MID.eq(mid))

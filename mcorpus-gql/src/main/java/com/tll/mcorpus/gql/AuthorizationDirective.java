@@ -34,10 +34,10 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
    * The GraphQL query/mutation field defined roles for the mcorpus graphql schema.
    */
   static enum Role {
-    PUBLIC,
     MEMBER,
     MCORPUS,
-    MPII;
+    MPII,
+    ADMIN;
 
     /**
      * Authorize a 'requesting' role against this - the ascribed or target role.
@@ -52,6 +52,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
           case MCORPUS:
             switch(requestingRole) {
               case MCORPUS:
+              case ADMIN:
                 return true;
               default:
                 break;
@@ -61,16 +62,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
             switch(requestingRole) {
               case MCORPUS:
               case MEMBER:
-                return true;
-              default:
-                break;
-            }
-            break;
-          case PUBLIC:
-            switch(requestingRole) {
-              case MCORPUS:
-              case MEMBER:
-              case PUBLIC:
+              case ADMIN:
                 return true;
               default:
                 break;
@@ -79,6 +71,15 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
           case MPII:
             switch(requestingRole) {
               case MPII:
+              case ADMIN:
+                return true;
+              default:
+                break;
+            }
+            break;
+          case ADMIN:
+            switch(requestingRole) {
+              case ADMIN:
                 return true;
               default:
                 break;
