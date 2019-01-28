@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserRoles extends TableImpl<McuserRolesRecord> {
 
-    private static final long serialVersionUID = 1061255730;
+    private static final long serialVersionUID = 1914982026;
 
     /**
      * The reference instance of <code>public.mcuser_roles</code>
@@ -130,6 +130,18 @@ public class McuserRoles extends TableImpl<McuserRolesRecord> {
     @Override
     public List<UniqueKey<McuserRolesRecord>> getKeys() {
         return Arrays.<UniqueKey<McuserRolesRecord>>asList(Keys.MCUSER_ROLES_PKEY);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ForeignKey<McuserRolesRecord, ?>> getReferences() {
+        return Arrays.<ForeignKey<McuserRolesRecord, ?>>asList(Keys.MCUSER_ROLES__UID_MUST_EXIST);
+    }
+
+    public Mcuser mcuser() {
+        return new Mcuser(this, Keys.MCUSER_ROLES__UID_MUST_EXIST);
     }
 
     /**

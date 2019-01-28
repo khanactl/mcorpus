@@ -88,14 +88,14 @@ $$ language plpgsql
 RETURNS NULL ON NULL INPUT;
 
 create type mcuser_role as enum (
-  -- public - open to all read-only
-  'PUBLIC',
   -- mcorpus - full read and write over all members
   'MCORPUS',
-  -- member - read write only for the self-member
+  -- member - member login and logout capability
   'MEMBER',
-  -- mpii - ability to see member pii related info
-  'MPII'
+  -- mpii - ability to see member PII field values
+  'MPII',
+  -- admin - only mcuser administrators may invoke the bound operation
+  'ADMIN'
 );
 comment on type mcuser_role is 'The roles defining the level of data access for an mcuser.';
 
@@ -123,6 +123,30 @@ create table mcuser (
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
 
 /**
+ * insert an mcuser record.
+ * 
+ * @return the inserted mcuser record.
+ */
+CREATE OR REPLACE FUNCTION insert_mcuser(
+    in_name text,
+    in_email text,
+    in_username text,
+    in_pswd text,
+    in_status mcuser_status
+) RETURNS mcuser 
+LANGUAGE plpgsql AS 
+$_$
+DECLARE arec mcuser;
+BEGIN 
+  INSERT INTO mcuser (name, email, username, pswd, status) 
+  VALUES (in_name, in_email, in_username, pass_hash(in_pswd), in_status) 
+  RETURNING uid, created, modified, name, email, username, null, status 
+  INTO arec;
+  RETURN arec;
+END
+$_$;
+
+/**
  * trigger_mcuser_updated
  */
 CREATE TRIGGER trigger_mcuser_updated
@@ -131,7 +155,7 @@ CREATE TRIGGER trigger_mcuser_updated
   EXECUTE PROCEDURE set_modified();
 
 create table mcuser_roles (
-  uid                    uuid not null,
+  uid                    uuid not null REFERENCES mcuser ON DELETE CASCADE,
   role                   mcuser_role not null,
 
   primary key(uid, role)
@@ -139,20 +163,19 @@ create table mcuser_roles (
 comment on type mcuser_roles is 'Related 0-N mcuser roles bound to a single mcuser row.';
 
 create type jwt_id_status as enum (
-  'BLACKLISTED',
-  'OK'
+  'OK',
+  'BLACKLISTED'
 );
 comment on type jwt_id_status is 'The allowed JWT ID status values.';
 
 create type mcuser_audit_type as enum (
   'LOGIN',
-  'LOGOUT',
-  'GRAPHQL_QUERY'
+  'LOGOUT'
 );
 comment on type mcuser_audit_type is 'The allowed mcuser audit types.';
 
 create table mcuser_audit (
-  uid                     uuid not null, -- i.e. the mcuser.uid
+  uid                     uuid not null REFERENCES mcuser ON DELETE SET NULL,
   created                 timestamp not null default now(),
   type                    mcuser_audit_type not null,
   request_timestamp       timestamp not null,
@@ -272,12 +295,61 @@ BEGIN
     jstat := 'VALID'::jwt_status;
   ELSE
     -- error: unresolved jwt status
-    RAISE NOTICE 'JWT id bad state: %', jwt_id;
+    RAISE NOTICE 'JWT id known but indeterminate state: %', jwt_id;
     jstat := 'PRESENT_BAD_STATE'::jwt_status;
   END IF;
 
   return jstat;
 END 
+$_$;
+
+/**
+ * blacklist_jwt_ids_for
+ * 
+ * Insert new mcuser_audit records for each jwt_id held 
+ * by the given mcuser id so that subsequent jwt id status queries 
+ * will report them as blacklisted.
+ *
+ * @param uid the mcuser id for whom the jwt ids apply
+ * @param in_request_timestamp the instigating http request timestamp
+ * @param in_request_origin the instigating http request origin 
+ */
+CREATE OR REPLACE FUNCTION blacklist_jwt_ids_for(
+  uid uuid, 
+  in_request_timestamp timestamp without time zone, 
+  in_request_origin text 
+) RETURNS void 
+LANGUAGE plpgsql AS 
+$_$
+BEGIN
+  insert into mcuser_audit 
+  (type, request_timestamp, request_origin, jwt_id, jwt_id_status) 
+  select 'LOGOUT'::mcuser_audit_type, $2, $3, adt.jwt_id, 'BLACKLISTED'::jwt_id_status 
+  from mcuser_audit adt 
+  where 
+    adt.uid = $1 
+    and adt.type = 'LOGIN'::mcuser_audit_type 
+    and adt.login_expiration >= now() 
+    and adt.jwt_id_status = 'OK'::jwt_id_status 
+  ;
+END
+$_$;
+
+/**
+ * mcuser_pswd
+ * 
+ * @param in_uid the subject mcuser id 
+ * @param in_pswd the pswd to set
+ */
+CREATE OR REPLACE FUNCTION mcuser_pswd(
+  in_uid uuid, 
+  in_pswd text  
+) RETURNS void 
+LANGUAGE plpgsql AS 
+$_$
+BEGIN
+  update mcuser set pswd = pass_hash($2) where uid = $1;
+END
 $_$;
 
 CREATE TYPE mcuser_and_roles as (
@@ -440,6 +512,7 @@ BEGIN
 END
 $_$;
 
+
 -- ***************
 -- *** mcorpus ***
 -- ***************
@@ -521,7 +594,6 @@ create table mauth (
   pswd                    text not null,
   
   unique(username),
-
   foreign key ("mid") references member ("mid") on delete cascade
 );
 comment on type mauth is 'The mauth table holds security sensitive member data.';
@@ -547,7 +619,8 @@ create table member_audit (
   request_timestamp       timestamp not null,
   request_origin          text not null,
 
-  primary key (created, type)
+  primary key (created, type),
+  foreign key ("mid") references member ("mid") on delete set null
 );
 comment on type member_audit is 'Log of member events.';
 

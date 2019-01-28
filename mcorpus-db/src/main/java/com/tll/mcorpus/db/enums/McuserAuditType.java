@@ -28,9 +28,7 @@ public enum McuserAuditType implements EnumType {
 
     LOGIN("LOGIN"),
 
-    LOGOUT("LOGOUT"),
-
-    GRAPHQL_QUERY("GRAPHQL_QUERY");
+    LOGOUT("LOGOUT");
 
     private final String literal;
 

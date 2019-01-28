@@ -5,8 +5,10 @@ package com.tll.mcorpus.db;
 
 
 import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.routines.Armor1;
 import com.tll.mcorpus.db.routines.Armor2;
+import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
 import com.tll.mcorpus.db.routines.Crypt;
 import com.tll.mcorpus.db.routines.Dearmor;
 import com.tll.mcorpus.db.routines.Decrypt;
@@ -24,8 +26,10 @@ import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.Hmac1;
 import com.tll.mcorpus.db.routines.Hmac2;
+import com.tll.mcorpus.db.routines.InsertMcuser;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
+import com.tll.mcorpus.db.routines.McuserPswd;
 import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.routines.PassHash;
@@ -59,6 +63,7 @@ import com.tll.mcorpus.db.routines.UuidNsOid;
 import com.tll.mcorpus.db.routines.UuidNsUrl;
 import com.tll.mcorpus.db.routines.UuidNsX500;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
+import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
 import com.tll.mcorpus.db.udt.records.McuserAndRolesRecord;
@@ -153,6 +158,18 @@ public class Routines {
         f.set__3(__3);
 
         return f.asField();
+    }
+
+    /**
+     * Call <code>public.blacklist_jwt_ids_for</code>
+     */
+    public static void blacklistJwtIdsFor(Configuration configuration, UUID uid, Timestamp inRequestTimestamp, String inRequestOrigin) {
+        BlacklistJwtIdsFor p = new BlacklistJwtIdsFor();
+        p.setUid(uid);
+        p.setInRequestTimestamp(inRequestTimestamp);
+        p.setInRequestOrigin(inRequestOrigin);
+
+        p.execute(configuration);
     }
 
     /**
@@ -725,6 +742,49 @@ public class Routines {
     }
 
     /**
+     * Call <code>public.insert_mcuser</code>
+     */
+    public static McuserRecord insertMcuser(Configuration configuration, String inName, String inEmail, String inUsername, String inPswd, McuserStatus inStatus) {
+        InsertMcuser f = new InsertMcuser();
+        f.setInName(inName);
+        f.setInEmail(inEmail);
+        f.setInUsername(inUsername);
+        f.setInPswd(inPswd);
+        f.setInStatus(inStatus);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.insert_mcuser</code> as a field.
+     */
+    public static Field<McuserRecord> insertMcuser(String inName, String inEmail, String inUsername, String inPswd, McuserStatus inStatus) {
+        InsertMcuser f = new InsertMcuser();
+        f.setInName(inName);
+        f.setInEmail(inEmail);
+        f.setInUsername(inUsername);
+        f.setInPswd(inPswd);
+        f.setInStatus(inStatus);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.insert_mcuser</code> as a field.
+     */
+    public static Field<McuserRecord> insertMcuser(Field<String> inName, Field<String> inEmail, Field<String> inUsername, Field<String> inPswd, Field<McuserStatus> inStatus) {
+        InsertMcuser f = new InsertMcuser();
+        f.setInName(inName);
+        f.setInEmail(inEmail);
+        f.setInUsername(inUsername);
+        f.setInPswd(inPswd);
+        f.setInStatus(inStatus);
+
+        return f.asField();
+    }
+
+    /**
      * Call <code>public.mcuser_login</code>
      */
     public static McuserAndRolesRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
@@ -808,6 +868,17 @@ public class Routines {
         f.setRequestOrigin(requestOrigin);
 
         return f.asField();
+    }
+
+    /**
+     * Call <code>public.mcuser_pswd</code>
+     */
+    public static void mcuserPswd(Configuration configuration, UUID inUid, String inPswd) {
+        McuserPswd p = new McuserPswd();
+        p.setInUid(inUid);
+        p.setInPswd(inPswd);
+
+        p.execute(configuration);
     }
 
     /**

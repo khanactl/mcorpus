@@ -25,7 +25,6 @@ import org.jooq.Record;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
-import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
@@ -43,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit extends TableImpl<MemberAuditRecord> {
 
-    private static final long serialVersionUID = -213338735;
+    private static final long serialVersionUID = -791644707;
 
     /**
      * The reference instance of <code>public.member_audit</code>
@@ -136,16 +135,12 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
      * {@inheritDoc}
      */
     @Override
-    public UniqueKey<MemberAuditRecord> getPrimaryKey() {
-        return Keys.MEMBER_AUDIT_PKEY;
+    public List<ForeignKey<MemberAuditRecord, ?>> getReferences() {
+        return Arrays.<ForeignKey<MemberAuditRecord, ?>>asList(Keys.MEMBER_AUDIT__FKEY_MID_MEMBER);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<UniqueKey<MemberAuditRecord>> getKeys() {
-        return Arrays.<UniqueKey<MemberAuditRecord>>asList(Keys.MEMBER_AUDIT_PKEY);
+    public Member member() {
+        return new Member(this, Keys.MEMBER_AUDIT__FKEY_MID_MEMBER);
     }
 
     /**

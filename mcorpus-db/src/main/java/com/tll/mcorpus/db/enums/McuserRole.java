@@ -26,13 +26,13 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum McuserRole implements EnumType {
 
-    PUBLIC("PUBLIC"),
-
     MCORPUS("MCORPUS"),
 
     MEMBER("MEMBER"),
 
-    MPII("MPII");
+    MPII("MPII"),
+
+    ADMIN("ADMIN");
 
     private final String literal;
 

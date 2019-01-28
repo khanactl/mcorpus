@@ -18,8 +18,13 @@ create role mcweb with
   connection limit 500 
   valid until '2020-01-01';
 grant connect on database mcorpus to mcweb;
+-- mcorpus related
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcweb;
-grant select, insert on mcuser, mcuser_audit, mcuser_roles, member_audit to mcweb;
+grant select, insert on member_audit to mcweb;
+-- mcuser related
+grant select on mcuser, mcuser_audit, mcuser_roles to mcweb;
+grant insert, update, delete on mcuser, mcuser_roles to mcweb;
+grant insert on mcuser_audit to mcweb;
 
 -- Role: mcwebtest
 -- Desc: mcorpus db test role with distinct priviliges 
