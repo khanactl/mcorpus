@@ -5,10 +5,8 @@ import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.TestUtil.testDslMcweb;
 import static com.tll.mcorpus.TestUtil.testDslMcwebTest;
 import static com.tll.mcorpus.TestUtil.testRequestOrigin;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
-import static com.tll.mcorpus.db.Tables.MCUSER_ROLES;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -18,23 +16,18 @@ import static org.junit.Assert.fail;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
+import com.tll.mcorpus.db.routines.InsertMcuser;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
-import com.tll.mcorpus.db.tables.records.McuserRecord;
-import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
 import com.tll.mcorpus.repo.model.FetchResult;
 import com.tll.mcorpus.repo.model.McuserToAdd;
 import com.tll.mcorpus.repo.model.McuserToUpdate;
@@ -76,12 +69,16 @@ public class MCorpusUserRepoTest {
 
   static final String TEST_MCUSER_PSWD = "pswd33*7yuI";
 
+  static final McuserStatus TEST_MCUSER_STATUS = McuserStatus.ACTIVE;
+  
+  static final McuserRole[] TEST_MCUSER_ROLES = new McuserRole[] { McuserRole.MCORPUS, McuserRole.MPII };
+
   /**
    * @return Newly created {@link McuserAndRoles} instance 
    *         suitable for insert into mcuser table 
    *         temporarily for testing.
    */
-  static McuserAndRoles testNewMcuserAndRoles() {
+  static Mcuser testNewMcuserAndRoles() {
     final Mcuser mcuser = new Mcuser(
       null, 
       null, 
@@ -90,37 +87,26 @@ public class MCorpusUserRepoTest {
       TEST_MCUSER_EMAIL, 
       TEST_MCUSER_USERNAME, 
       TEST_MCUSER_PSWD, 
-      McuserStatus.ACTIVE
+      TEST_MCUSER_STATUS,
+      TEST_MCUSER_ROLES
     );
-    final String roles = McuserRole.MPII.getLiteral() + "," + McuserRole.MCORPUS.getLiteral();
-    return new McuserAndRoles(mcuser, roles);
+    return mcuser;
   }
 
-  static McuserAndRoles insertTestMcuser() {
+  static Mcuser insertTestMcuser() {
     try {
-      final McuserAndRoles mcuserAndRoles = testNewMcuserAndRoles();
-      
-      // insert mcuser record
-      final String sql = String.format(
-        "insert into mcuser (name, email, username, pswd, status) values ('%s', '%s', '%s', pass_hash('%s'), '%s') RETURNING uid, created, modified, name, email, username, null, status", 
-        TEST_MCUSER_NAME, TEST_MCUSER_EMAIL, TEST_MCUSER_USERNAME, TEST_MCUSER_PSWD, McuserStatus.ACTIVE
-      );
-      final McuserRecord addresult = testDslMcwebTest().fetchOne(sql).into(McuserRecord.class);
-      log.info("mcuser test record added: {}", addresult);
-      final Mcuser addedMcuser = addresult.into(Mcuser.class);
-      final UUID uid = addedMcuser.getUid();
-      assertNotNull(uid);
-
-      // add related roles
-      Set<McuserRole> roles = rolesToSet(mcuserAndRoles.getRoles());
-      for(McuserRole role : roles)  {
-        testDslMcwebTest()
-          .insertInto(MCUSER_ROLES, MCUSER_ROLES.UID, MCUSER_ROLES.ROLE)
-          .values(uid, role)
-          .execute();
-      }
-      
-      return new McuserAndRoles(addedMcuser, mcuserAndRoles.getRoles());
+      InsertMcuser imu = new InsertMcuser();
+      imu.setInName(TEST_MCUSER_NAME);
+      imu.setInEmail(TEST_MCUSER_EMAIL);
+      imu.setInUsername(TEST_MCUSER_USERNAME);
+      imu.setInPswd(TEST_MCUSER_PSWD);
+      imu.setInStatus(TEST_MCUSER_STATUS);
+      imu.setInRoles(TEST_MCUSER_ROLES);
+      imu.execute(testDslMcwebTest().configuration());
+      final Mcuser mcuser = imu.getReturnValue().into(Mcuser.class);
+      log.info("mcuser test record added: {}", mcuser);
+      assertNotNull(mcuser.getUid());
+      return mcuser;
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -189,37 +175,28 @@ public class MCorpusUserRepoTest {
     return e;
   }
 
-  public static McuserToAdd asMcuserToAdd(final McuserAndRoles mar) {
+  public static McuserToAdd asMcuserToAdd(final Mcuser mar) {
     return new McuserToAdd(
-      mar.getMcuser().getName(),
-      mar.getMcuser().getEmail(),
-      mar.getMcuser().getUsername(),
-      mar.getMcuser().getPswd(),
-      mar.getMcuser().getStatus(),
-      rolesToSet(mar.getRoles())
+      mar.getName(),
+      mar.getEmail(),
+      mar.getUsername(),
+      mar.getPswd(),
+      mar.getStatus(),
+      mar.getRoles()
     );
   }
 
-  public static McuserToUpdate asMcuserToUpdate(final McuserAndRoles mar) {
+  public static McuserToUpdate asMcuserToUpdate(final Mcuser mar) {
     return new McuserToUpdate(
-      mar.getMcuser().getUid(),
-      mar.getMcuser().getName(),
-      mar.getMcuser().getEmail(),
-      mar.getMcuser().getUsername(),
-      mar.getMcuser().getStatus(),
-      rolesToSet(mar.getRoles())
+      mar.getUid(),
+      mar.getName(),
+      mar.getEmail(),
+      mar.getUsername(),
+      mar.getStatus(),
+      mar.getRoles()
     );
   }
 
-  public static Set<McuserRole> rolesToSet(final String roles) {
-    return isNullOrEmpty(roles) ? 
-      Collections.emptySet() : 
-      Arrays.asList(roles.split("\\s*,\\s*"))
-        .stream()
-        .map(srole -> { return McuserRole.valueOf(srole); })
-        .collect(Collectors.toSet());
-  }
-  
   /**
    * @return newly created {@link McuserLogin} instance for an mcuser for testing purposes.
    */
@@ -257,16 +234,16 @@ public class MCorpusUserRepoTest {
     MCorpusUserRepo repo = null;
     UUID uid = null;
     try {
-      final McuserAndRoles mar = insertTestMcuser();
-      uid = mar.getMcuser().getUid();
+      final Mcuser mar = insertTestMcuser();
+      uid = mar.getUid();
       
       repo = mcuserRepo();
 
       McuserLogin loginInput = testMcuserLoginInput();
-      FetchResult<McuserAndRoles> loginResult = repo.login(loginInput);
+      FetchResult<Mcuser> loginResult = repo.login(loginInput);
       log.info("mcorpus LOGIN WITH AUTH SUCCESS TEST result: {}", loginResult);
       
-      McuserAndRoles mcuser = loginResult.get();
+      Mcuser mcuser = loginResult.get();
       log.info("mcuser and roles: {}", mcuser);
       
       assertNotNull(loginResult);
@@ -274,8 +251,8 @@ public class MCorpusUserRepoTest {
       assertFalse(loginResult.hasErrorMsg());
       
       assertNotNull(mcuser);
-      assertNotNull(mcuser.getMcuser().getUsername());
-      assertNull(mcuser.getMcuser().getPswd());
+      assertNotNull(mcuser.getUsername());
+      assertNull(mcuser.getPswd());
       
       assertNotNull(mcuser.getRoles());
     }
@@ -304,7 +281,7 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
       McuserLogin loginInput = testMcuserLoginInput();
       loginInput.setMcuserPassword("bunko");
-      FetchResult<McuserAndRoles> loginResult = repo.login(loginInput);
+      FetchResult<Mcuser> loginResult = repo.login(loginInput);
       log.info("mcorpus LOGIN WITH BAD PASSWORD TEST result: {}", loginResult);
       
       assertNotNull(loginResult);
@@ -335,7 +312,7 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
       McuserLogin loginInput = testMcuserLoginInput();
       loginInput.setMcuserUsername("unknown");
-      FetchResult<McuserAndRoles> loginResult = repo.login(loginInput);
+      FetchResult<Mcuser> loginResult = repo.login(loginInput);
       log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
       
       assertNotNull(loginResult);
@@ -363,8 +340,8 @@ public class MCorpusUserRepoTest {
     UUID uid = null;
     try {
       // establish the condition that a target test mcuser is validly logged in on the backend
-      final McuserAndRoles mar = insertTestMcuser();
-      uid = mar.getMcuser().getUid();
+      final Mcuser mar = insertTestMcuser();
+      uid = mar.getUid();
       McuserAudit mcuserAudit = addTestMcuserAuditRecord(uid);
       
       repo = mcuserRepo();
@@ -404,8 +381,8 @@ public class MCorpusUserRepoTest {
     MCorpusUserRepo repo = null;
     UUID uid = null;
     try {
-      final McuserAndRoles mar = insertTestMcuser();
-      uid = mar.getMcuser().getUid();
+      final Mcuser mar = insertTestMcuser();
+      uid = mar.getUid();
       
       repo = mcuserRepo();
 
@@ -443,19 +420,17 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
 
       // insert test mcuser record
-      McuserAndRoles testMcuserAndRoles = insertTestMcuser();
-      final Mcuser mcuser = testMcuserAndRoles.getMcuser();
+      Mcuser mcuser = insertTestMcuser();
       // final Set<McuserRole> roles = rolesToSet(testMcuserAndRoles.getRoles());
       uid = mcuser.getUid();
       assertNotNull(uid);
 
-      FetchResult<McuserAndRoles> fr = repo.fetchMcuser(uid);
+      FetchResult<Mcuser> fr = repo.fetchMcuser(uid);
       assertNotNull(fr);
       assertTrue("mcuser fetch test failed", fr.isSuccess());
-      assertNotNull("mcuser fetch test - no mcuserandroles", fr.get());
-      assertNotNull("mcuser fetch test - no mcuser", fr.get().getMcuser());
-      assertNotNull("mcuser fetch test - no mcuser.uid", fr.get().getMcuser().getUid());
-      assertNotNull("mcuser fetch test - no mcuser.created", fr.get().getMcuser().getCreated());
+      assertNotNull("mcuser fetch test - no mcuser", fr.get());
+      assertNotNull("mcuser fetch test - no mcuser.uid", fr.get().getUid());
+      assertNotNull("mcuser fetch test - no mcuser.created", fr.get().getCreated());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -476,17 +451,16 @@ public class MCorpusUserRepoTest {
     try {
       repo = mcuserRepo();
       
-      final McuserAndRoles testMcuserAndRoles = testNewMcuserAndRoles();
-      final McuserToAdd mcuserToAdd = asMcuserToAdd(testMcuserAndRoles);
-      final FetchResult<McuserAndRoles> fr = repo.addMcuser(mcuserToAdd);
-      try { uid = fr.get().getMcuser().getUid(); } catch(Exception e) {}
+      final Mcuser testMcuser = testNewMcuserAndRoles();
+      final McuserToAdd mcuserToAdd = asMcuserToAdd(testMcuser);
+      final FetchResult<Mcuser> fr = repo.addMcuser(mcuserToAdd);
+      try { uid = fr.get().getUid(); } catch(Exception e) {}
       
       assertNotNull(fr);
       assertTrue("mcuser add test failed", fr.isSuccess());
-      assertNotNull("mcuser add test - no mcuserandroles", fr.get());
-      assertNotNull("mcuser add test - no mcuser", fr.get().getMcuser());
-      assertNotNull("mcuser add test - no mcuser.uid", fr.get().getMcuser().getUid());
-      assertNotNull("mcuser add test - no mcuser.created", fr.get().getMcuser().getCreated());
+      assertNotNull("mcuser add test - no mcuser", fr.get());
+      assertNotNull("mcuser add test - no mcuser.uid", fr.get().getUid());
+      assertNotNull("mcuser add test - no mcuser.created", fr.get().getCreated());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -508,20 +482,18 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
 
       // insert test mcuser record
-      McuserAndRoles testMcuserAndRoles = insertTestMcuser();
-      final Mcuser mcuser = testMcuserAndRoles.getMcuser();
-      final McuserToUpdate mcuserToUpdate = asMcuserToUpdate(testMcuserAndRoles);
+      final Mcuser mcuser = insertTestMcuser();
+      final McuserToUpdate mcuserToUpdate = asMcuserToUpdate(mcuser);
       uid = mcuser.getUid();
       assertNotNull(uid);
 
-      final FetchResult<McuserAndRoles> fr = repo.updateMcuser(mcuserToUpdate);
+      final FetchResult<Mcuser> fr = repo.updateMcuser(mcuserToUpdate);
       assertNotNull(fr);
       assertTrue("mcuser add test failed", fr.isSuccess());
-      assertNotNull("mcuser add test - no mcuserandroles", fr.get());
-      assertNotNull("mcuser add test - no mcuser", fr.get().getMcuser());
-      assertNotNull("mcuser add test - no mcuser.uid", fr.get().getMcuser().getUid());
-      assertNotNull("mcuser add test - no mcuser.created", fr.get().getMcuser().getCreated());
-      assertNotNull("mcuser add test - no mcuser.modified", fr.get().getMcuser().getModified());
+      assertNotNull("mcuser add test - no mcuser", fr.get());
+      assertNotNull("mcuser add test - no mcuser.uid", fr.get().getUid());
+      assertNotNull("mcuser add test - no mcuser.created", fr.get().getCreated());
+      assertNotNull("mcuser add test - no mcuser.modified", fr.get().getModified());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -541,8 +513,8 @@ public class MCorpusUserRepoTest {
     UUID uid = null;
     try {
       repo = mcuserRepo();
-      McuserAndRoles testMcuser = insertTestMcuser();
-      uid = testMcuser.getMcuser().getUid();
+      Mcuser testMcuser = insertTestMcuser();
+      uid = testMcuser.getUid();
       assertNotNull(uid);
 
       FetchResult<Boolean> fetchResult = repo.deleteMcuser(uid);
@@ -567,8 +539,8 @@ public class MCorpusUserRepoTest {
     UUID uid = null;
     try {
       repo = mcuserRepo();
-      McuserAndRoles testMcuser = insertTestMcuser();
-      uid = testMcuser.getMcuser().getUid();
+      Mcuser testMcuser = insertTestMcuser();
+      uid = testMcuser.getUid();
       Instant requestInstant = Instant.now();
       String clientOrigin = testRequestOrigin;
 

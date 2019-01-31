@@ -8,6 +8,8 @@ import static com.tll.mcorpus.Util.uuidFromToken;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotNull;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +35,7 @@ public class McuserToUpdate {
       String name = null;
       String email = null;
       String username = null;
-      String pswd = null;
-      McuserStatus initialStatus = null;
+      McuserStatus status = null;
       Set<McuserRole> roles = null;
       for(final Entry<String, Object> entry : map.entrySet()) {
         String key = entry.getKey();
@@ -52,11 +53,8 @@ public class McuserToUpdate {
             case "username":
               username = (String) entry.getValue();
               break;
-            case "pswd":
-              pswd = (String) entry.getValue();
-              break;
-            case "initialStatus":
-              initialStatus = McuserStatus.valueOf((String) entry.getValue());
+            case "status":
+              status = McuserStatus.valueOf((String) entry.getValue());
               break;
             case "roles":
               @SuppressWarnings("unchecked")
@@ -70,7 +68,7 @@ public class McuserToUpdate {
           }
         }
       }
-      mta = new McuserToUpdate(uid, name, email, username, initialStatus, roles);
+      mta = new McuserToUpdate(uid, name, email, username, status, roles);
     }
     return mta;
   }
@@ -101,6 +99,24 @@ public class McuserToUpdate {
     this.roles = roles;
   }
 
+  /**
+   * Constructor.
+   * 
+   * @param uid
+   * @param name
+   * @param email
+   * @param username
+   * @param status
+   * @param roles array
+   */
+  public McuserToUpdate(UUID uid, String name, String email, String username, McuserStatus status, McuserRole[] roles) {
+    this(uid, name, email, username, status, 
+      isNullOrEmpty(roles) ? 
+        Collections.emptySet() : 
+        Arrays.stream(roles).collect(Collectors.toSet())
+    );
+  }
+
   public Map<String, Object> asUpdateMap() {
     Map<String, Object> rmap = new HashMap<>(4);
     fputWhenNotNull(MCUSER.NAME, nclean(name), rmap);
@@ -115,6 +131,10 @@ public class McuserToUpdate {
       roles.stream()
         .map(role -> { return role.getLiteral(); })
         .collect(Collectors.joining(","));
+  }
+
+  public McuserRole[] rolesAsArray() {
+    return isNullOrEmpty(roles) ? new McuserRole[0] : roles.toArray(new McuserRole[0]);
   }
 
   @Override

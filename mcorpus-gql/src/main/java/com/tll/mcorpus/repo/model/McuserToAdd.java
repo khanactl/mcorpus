@@ -5,6 +5,8 @@ import static com.tll.mcorpus.Util.isBlank;
 import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -90,6 +92,24 @@ public class McuserToAdd {
     this.pswd = pswd;
     this.initialStatus = initialStatus;
     this.roles = roles;
+  }
+
+  /**
+   * Constructor.
+   * 
+   * @param name
+   * @param email
+   * @param username
+   * @param pswd
+   * @param initialStatus
+   * @param roles
+   */
+  public McuserToAdd(String name, String email, String username, String pswd, McuserStatus initialStatus, McuserRole[] roles) {
+    this(name, email, username, pswd, initialStatus, 
+      isNullOrEmpty(roles) ? 
+        Collections.emptySet() : 
+        Arrays.stream(roles).collect(Collectors.toSet())
+    );
   }
 
   public String getName() { return clean(name); }

@@ -21,7 +21,7 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-db.version>1.4.0-SNAPSHOT</mcorpus-db.version>
+    <mcorpus-db.version>1.4.5-SNAPSHOT</mcorpus-db.version>
   </properties>
 
   <build>

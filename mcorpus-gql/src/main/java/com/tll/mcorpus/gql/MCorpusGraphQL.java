@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
-import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
+import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
@@ -150,7 +151,7 @@ public class MCorpusGraphQL {
         // fetch mcuser
         .dataFetcher("fetchMcuser", env -> {
           final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final FetchResult<McuserAndRoles> fr = mcuserRepo.fetchMcuser(uid);
+          final FetchResult<Mcuser> fr = mcuserRepo.fetchMcuser(uid);
           return fr.isSuccess() ? fr.get() : null;
         })
 
@@ -209,7 +210,7 @@ public class MCorpusGraphQL {
         .dataFetcher("addMcuser", env -> {
           final Map<String, Object> mcuserMap = env.getArgument("mcuser");
           final McuserToAdd mta = McuserToAdd.fromMap(mcuserMap);
-          final FetchResult<McuserAndRoles> fr = mcuserRepo.addMcuser(mta);
+          final FetchResult<Mcuser> fr = mcuserRepo.addMcuser(mta);
           return fr.isSuccess() ? fr.get() : null;
         })
 
@@ -217,7 +218,7 @@ public class MCorpusGraphQL {
         .dataFetcher("updateMcuser", env -> {
           final Map<String, Object> mcuserMap = env.getArgument("mcuser");
           final McuserToUpdate mtu = McuserToUpdate.fromMap(mcuserMap);
-          final FetchResult<McuserAndRoles> fr = mcuserRepo.updateMcuser(mtu);
+          final FetchResult<Mcuser> fr = mcuserRepo.updateMcuser(mtu);
           return fr.isSuccess() ? fr.get() : null;
         })
 
@@ -487,38 +488,40 @@ public class MCorpusGraphQL {
       // Mcuser
       .type("Mcuser", typeWiring -> typeWiring
         .dataFetcher("uid", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return uuidToToken(mar.getMcuser().getUid());
+          final Mcuser mc = env.getSource();
+          return uuidToToken(mc.getUid());
         })
         .dataFetcher("created", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return mar.getMcuser().getCreated();
+          final Mcuser mc = env.getSource();
+          return mc.getCreated();
         })
         .dataFetcher("modified", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return mar.getMcuser().getModified();
+          final Mcuser mc = env.getSource();
+          return mc.getModified();
         })
         .dataFetcher("name", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return mar.getMcuser().getName();
+          final Mcuser mc = env.getSource();
+          return mc.getName();
         })
         .dataFetcher("email", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return mar.getMcuser().getEmail();
+          final Mcuser mc = env.getSource();
+          return mc.getEmail();
         })
         .dataFetcher("username", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return mar.getMcuser().getUsername();
+          final Mcuser mc = env.getSource();
+          return mc.getUsername();
         })
         .dataFetcher("status", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return mar.getMcuser().getStatus();
+          final Mcuser mc = env.getSource();
+          return mc.getStatus();
         })
         .dataFetcher("roles", env -> {
-          final McuserAndRoles mar = env.getSource();
-          return isNullOrEmpty(mar.getRoles()) ? 
+          final Mcuser mc = env.getSource();
+          return isNullOrEmpty(mc.getRoles()) ? 
             Collections.emptyList() :
-            Arrays.asList(mar.getRoles().split("\\s*,\\s*"));
+            Arrays.stream(mc.getRoles()).map(role -> {
+              return role.getLiteral();
+            }).collect(Collectors.toList());
         })
       )
 

@@ -56,6 +56,14 @@ public class Util {
   public static boolean isNullOrEmpty(final String s) { return s == null || s.isEmpty(); }
   
   /**
+   * Is the given array null or 0-length?
+   *
+   * @param a the array to check
+   * @return true if the given array null 0-length, false otherwise.
+   */
+  public static boolean isNullOrEmpty(final Object[] a) { return a == null || a.length == 0; }
+  
+  /**
    * Is the given collection null or empty?
    * 
    * @param clc the collection to check

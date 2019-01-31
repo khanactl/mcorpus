@@ -9,15 +9,17 @@ import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.expireAllCookies;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
-import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
+import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.gql.Mcstatus;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.repo.model.FetchResult;
@@ -237,7 +239,7 @@ public class GraphQLWebContext {
 
     // call db login
     log.debug("Authenticating mcuser '{}'..", username);
-    final FetchResult<McuserAndRoles> loginResult = ctx.get(MCorpusUserRepo.class).login(mcuserLogin);
+    final FetchResult<Mcuser> loginResult = ctx.get(MCorpusUserRepo.class).login(mcuserLogin);
     if(not(loginResult.isSuccess())) {
       log.error("Mcuser login failed: {}", loginResult.getErrorMsg());
       return false;
@@ -246,7 +248,7 @@ public class GraphQLWebContext {
     // at this point, we're authenticated
     
     log.debug("Generating JWT for mcuser '{}'..", username);
-    final McuserAndRoles mcuserAndRoles = loginResult.get();
+    final Mcuser mcuser = loginResult.get();
     try {
       // create the JWT - and set as a cookie to go back to user
       // the user is now expected to provide this JWT for subsequent mcorpus api requests
@@ -254,21 +256,25 @@ public class GraphQLWebContext {
       final String audience = requestSnapshot.getClientOrigin();
       final String jwt = jwtbiz.generate(
           requestSnapshot.getRequestInstant(), 
-          mcuserAndRoles.getMcuser().getUid(), 
+          mcuser.getUid(), 
           pendingJwtID,
           issuer,
           audience,
-          mcuserAndRoles.getRoles());
+          isNullOrEmpty(mcuser.getRoles()) ? "" : 
+            Arrays.stream(mcuser.getRoles())
+            .map(role -> { return role.getLiteral(); })
+            .collect(Collectors.joining(","))
+      );
       
       // jwt cookie
       addJwtCookieToResponse(ctx, jwt, jwtbiz.jwtCookieTtlInSeconds());
       
       log.info("Mcuser {} logged in.  JWT {} generated from server (issuer): '{}' to client origin (audience:) '{}'.", 
-          mcuserAndRoles.getMcuser().getUid(), pendingJwtID, issuer, audience);
+          mcuser.getUid(), pendingJwtID, issuer, audience);
       return true;
     }
     catch(Exception e) {
-      log.error("Mcuser {} login error: {}", mcuserAndRoles.getMcuser().getUid(), e.getMessage());
+      log.error("Mcuser {} login error: {}", mcuser.getUid(), e.getMessage());
     }
     
     // default

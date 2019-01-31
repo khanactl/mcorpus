@@ -10,7 +10,6 @@ import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMcuserToUpdate;
 
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
-import static com.tll.mcorpus.db.Tables.MCUSER_ROLES;
 
 import java.io.Closeable;
 import java.sql.Timestamp;
@@ -19,9 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -48,8 +45,6 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
-import com.tll.mcorpus.db.udt.pojos.McuserAndRoles;
-import com.tll.mcorpus.db.udt.records.McuserAndRolesRecord;
 import com.tll.mcorpus.repo.model.McuserToUpdate;
 import com.tll.mcorpus.repo.model.FetchResult;
 import com.tll.mcorpus.repo.model.IJwtStatusProvider;
@@ -191,14 +186,13 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<McuserAndRoles> login(final McuserLogin mcuserLogin) {
+  public FetchResult<Mcuser> login(final McuserLogin mcuserLogin) {
     if(mcuserLogin != null) {
       try {
         mcuserLogin.execute(dsl.configuration());
-        final McuserAndRolesRecord rec = mcuserLogin.getReturnValue();
-        if(rec != null && rec.getMcuser() != null) {
+        final Mcuser rval = mcuserLogin.getReturnValue().into(Mcuser.class);
+        if(rval != null && rval.getUid() != null) {
           // login success
-          final McuserAndRoles rval = rec.into(McuserAndRoles.class);
           return new FetchResult<>(rval, null);
         } else {
           // login fail - no record returned
@@ -244,29 +238,18 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
    * @return Never null fetch result containing the fetched 
    *         {@link Mcuser} or an error message if unsuccessful.
    */
-  public FetchResult<McuserAndRoles> fetchMcuser(final UUID uid) {
+  public FetchResult<Mcuser> fetchMcuser(final UUID uid) {
     if(uid == null) return new FetchResult<>(null, "No mcuser id provided.");
     String emsg;
     try {
       final Mcuser mcuser = dsl
-              .select(MCUSER.UID, MCUSER.CREATED, MCUSER.MODIFIED, MCUSER.NAME, MCUSER.EMAIL, MCUSER.USERNAME, DSL.val((String) null), MCUSER.STATUS)
+              .select(MCUSER.UID, MCUSER.CREATED, MCUSER.MODIFIED, MCUSER.NAME, MCUSER.EMAIL, MCUSER.USERNAME, DSL.val((String) null), MCUSER.STATUS, MCUSER.ROLES)
               .from(MCUSER)
               .where(MCUSER.UID.eq(uid))
               .fetchOne().into(Mcuser.class);
 
-      final List<McuserRole> roles = mcuser == null ? null : dsl
-        .select()
-        .from(MCUSER_ROLES)
-        .where(MCUSER_ROLES.UID.eq(uid))
-        .fetch(MCUSER_ROLES.ROLE);
-
-      final String sroles = isNullOrEmpty(roles) ? "" : 
-        roles.stream()
-          .map(role -> { return role.getLiteral(); })
-          .collect(Collectors.joining(","));
-
       return mcuser != null ? 
-        new FetchResult<>(new McuserAndRoles(mcuser, sroles) , null) 
+        new FetchResult<>(mcuser, null) 
       : new FetchResult<>(null, String.format("No mcuser found with uid: '%s'.", uid));
     }
     catch(DataAccessException dae) {
@@ -288,7 +271,7 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
    * @return Never null fetch result containing an {@link McuserAndRoles} instance
    *         conveying the added mcuser and associated roles if successful
    */
-  public FetchResult<McuserAndRoles> addMcuser(final McuserToAdd mcuserToAdd) {
+  public FetchResult<Mcuser> addMcuser(final McuserToAdd mcuserToAdd) {
     if(isNull(mcuserToAdd)) return new FetchResult<>(null, "No mcuser provided.");
 
     final List<String> emsgs = new ArrayList<>();
@@ -299,13 +282,13 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
       return new FetchResult<>(null, flatten(emsgs, ","));
     }
 
-    final Set<McuserRole> roles = mcuserToAdd.getRoles();
-    
     final List<Object> rlist = new ArrayList<>(1);
     
     try {
       dsl.transaction(configuration -> {
-        final DSLContext trans = DSL.using(configuration);
+        final McuserRole[] aroles = 
+          isNullOrEmpty(mcuserToAdd.getRoles()) ? 
+            null : mcuserToAdd.getRoles().toArray(new McuserRole[0]);
 
         InsertMcuser routine = new InsertMcuser();
         routine.setInName(mcuserToAdd.getName());
@@ -313,23 +296,12 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
         routine.setInUsername(mcuserToAdd.getUsername());
         routine.setInPswd(mcuserToAdd.getPswd());
         routine.setInStatus(mcuserToAdd.getInitialStatus());
+        routine.setInRoles(aroles);
         routine.execute(configuration);
         final Mcuser mcuserAdded = routine.getReturnValue().into(Mcuser.class);
         if(isNull(mcuserAdded) || isNull(mcuserAdded.getUid())) 
           throw new DataAccessException("No post-insert mcuser record returned.");
         rlist.add(mcuserAdded);
-
-        // add roles
-        if(not(isNullOrEmpty(roles))) {
-          for(final McuserRole role : roles) {
-            if(1 != trans
-              .insertInto(MCUSER_ROLES, MCUSER_ROLES.UID, MCUSER_ROLES.ROLE)
-              .values(mcuserAdded.getUid(), role)
-              .execute()) {
-                throw new DataAccessException("Bad mcuser role insert count.");
-            }
-          }
-        }
       });
     }
     catch(DataAccessException e) {
@@ -348,8 +320,7 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
 
     // success
     final Mcuser addedMcuser = (Mcuser) rlist.get(0);
-    final McuserAndRoles rval = new McuserAndRoles(addedMcuser, mcuserToAdd.rolesToken());
-    return new FetchResult<McuserAndRoles>(rval, null);
+    return new FetchResult<Mcuser>(addedMcuser, null);
   }
 
   /**
@@ -362,7 +333,7 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
    *         conveying the updated mcuser and associated roles or an error message
    *         if unsuccessful.
    */
-  public FetchResult<McuserAndRoles> updateMcuser(final McuserToUpdate mcuserToUpdate) {
+  public FetchResult<Mcuser> updateMcuser(final McuserToUpdate mcuserToUpdate) {
     if(isNull(mcuserToUpdate)) return new FetchResult<>(null, "No mcuser provided.");
     
     final List<String> emsgs = new ArrayList<>();
@@ -376,7 +347,6 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
     // transform for persistence
     final UUID uid = mcuserToUpdate.uid;
     final Map<String, Object> mcuserUpdateMap = mcuserToUpdate.asUpdateMap();
-    final Set<McuserRole> roles = mcuserToUpdate.roles;
 
     final List<Object> rlist = new ArrayList<>(1);
     
@@ -390,23 +360,8 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
           .update(MCUSER)
           .set(mcuserUpdateMap)
           .where(MCUSER.UID.eq(uid))
-          .returningResult(MCUSER.UID, MCUSER.CREATED, MCUSER.MODIFIED, MCUSER.NAME, MCUSER.EMAIL, MCUSER.USERNAME, DSL.val((String) null), MCUSER.STATUS).fetchOne().into(Mcuser.class);
+          .returningResult(MCUSER.UID, MCUSER.CREATED, MCUSER.MODIFIED, MCUSER.NAME, MCUSER.EMAIL, MCUSER.USERNAME, DSL.val((String) null), MCUSER.STATUS, MCUSER.ROLES).fetchOne().into(Mcuser.class);
         rlist.add(mcuserUpdated);
-
-        // update roles if specified
-        if(not(isNullOrEmpty(roles))) {
-          // delete existing roles first
-          trans.delete(MCUSER_ROLES).where(MCUSER_ROLES.UID.eq(uid)).execute();
-          // add roles
-          for(final McuserRole role : roles) {
-            if(1 != trans
-              .insertInto(MCUSER_ROLES, MCUSER_ROLES.UID, MCUSER_ROLES.ROLE)
-              .values(uid, role)
-              .execute()) {
-                throw new DataAccessException("mcuser role insert mismatch (for update).");
-            }
-          }
-        }
 
         // successful update at this point
         // implicit commit happens now
@@ -428,8 +383,7 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
 
     // success
     final Mcuser updatedMcuser = (Mcuser) rlist.get(0);
-    final McuserAndRoles rval = new McuserAndRoles(updatedMcuser, mcuserToUpdate.rolesToken());
-    return new FetchResult<McuserAndRoles>(rval, null);
+    return new FetchResult<Mcuser>(updatedMcuser, null);
   }
 
   /**
