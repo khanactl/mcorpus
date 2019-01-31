@@ -26,9 +26,9 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum JwtIdStatus implements EnumType {
 
-    BLACKLISTED("BLACKLISTED"),
+    OK("OK"),
 
-    OK("OK");
+    BLACKLISTED("BLACKLISTED");
 
     private final String literal;
 

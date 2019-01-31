@@ -9,7 +9,6 @@ import com.tll.mcorpus.db.tables.Mauth;
 import com.tll.mcorpus.db.tables.Mbenefits;
 import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
-import com.tll.mcorpus.db.tables.McuserRoles;
 import com.tll.mcorpus.db.tables.Member;
 import com.tll.mcorpus.db.tables.MemberAudit;
 import com.tll.mcorpus.db.tables.PgpArmorHeaders;
@@ -59,11 +58,6 @@ public class Tables {
      * The table <code>public.mcuser_audit</code>.
      */
     public static final McuserAudit MCUSER_AUDIT = com.tll.mcorpus.db.tables.McuserAudit.MCUSER_AUDIT;
-
-    /**
-     * The table <code>public.mcuser_roles</code>.
-     */
-    public static final McuserRoles MCUSER_ROLES = com.tll.mcorpus.db.tables.McuserRoles.MCUSER_ROLES;
 
     /**
      * The table <code>public.member</code>.

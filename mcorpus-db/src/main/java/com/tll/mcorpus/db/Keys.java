@@ -9,7 +9,6 @@ import com.tll.mcorpus.db.tables.Mauth;
 import com.tll.mcorpus.db.tables.Mbenefits;
 import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
-import com.tll.mcorpus.db.tables.McuserRoles;
 import com.tll.mcorpus.db.tables.Member;
 import com.tll.mcorpus.db.tables.MemberAudit;
 import com.tll.mcorpus.db.tables.records.MaddressRecord;
@@ -17,7 +16,6 @@ import com.tll.mcorpus.db.tables.records.MauthRecord;
 import com.tll.mcorpus.db.tables.records.MbenefitsRecord;
 import com.tll.mcorpus.db.tables.records.McuserAuditRecord;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
-import com.tll.mcorpus.db.tables.records.McuserRolesRecord;
 import com.tll.mcorpus.db.tables.records.MemberAuditRecord;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
 
@@ -58,9 +56,9 @@ public class Keys {
     public static final UniqueKey<McuserRecord> MCUSER_PKEY = UniqueKeys0.MCUSER_PKEY;
     public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = UniqueKeys0.MCUSER_USERNAME_KEY;
     public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = UniqueKeys0.MCUSER_AUDIT_PKEY;
-    public static final UniqueKey<McuserRolesRecord> MCUSER_ROLES_PKEY = UniqueKeys0.MCUSER_ROLES_PKEY;
     public static final UniqueKey<MemberRecord> MEMBER_PKEY = UniqueKeys0.MEMBER_PKEY;
     public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = UniqueKeys0.MEMBER_EMP_ID_LOCATION_KEY;
+    public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = UniqueKeys0.MEMBER_AUDIT_PKEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -69,9 +67,7 @@ public class Keys {
     public static final ForeignKey<MaddressRecord, MemberRecord> MADDRESS__MADDRESS_MID_FKEY = ForeignKeys0.MADDRESS__MADDRESS_MID_FKEY;
     public static final ForeignKey<MauthRecord, MemberRecord> MAUTH__MAUTH_MID_FKEY = ForeignKeys0.MAUTH__MAUTH_MID_FKEY;
     public static final ForeignKey<MbenefitsRecord, MemberRecord> MBENEFITS__MBENEFITS_MID_FKEY = ForeignKeys0.MBENEFITS__MBENEFITS_MID_FKEY;
-    public static final ForeignKey<McuserAuditRecord, McuserRecord> MCUSER_AUDIT__FKEY_UID_MCUSER = ForeignKeys0.MCUSER_AUDIT__FKEY_UID_MCUSER;
-    public static final ForeignKey<McuserRolesRecord, McuserRecord> MCUSER_ROLES__UID_MUST_EXIST = ForeignKeys0.MCUSER_ROLES__UID_MUST_EXIST;
-    public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__FKEY_MID_MEMBER = ForeignKeys0.MEMBER_AUDIT__FKEY_MID_MEMBER;
+    public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY = ForeignKeys0.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -85,17 +81,15 @@ public class Keys {
         public static final UniqueKey<McuserRecord> MCUSER_PKEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_pkey", Mcuser.MCUSER.UID);
         public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_username_key", Mcuser.MCUSER.USERNAME);
         public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, "mcuser_audit_pkey", McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE);
-        public static final UniqueKey<McuserRolesRecord> MCUSER_ROLES_PKEY = Internal.createUniqueKey(McuserRoles.MCUSER_ROLES, "mcuser_roles_pkey", McuserRoles.MCUSER_ROLES.UID, McuserRoles.MCUSER_ROLES.ROLE);
         public static final UniqueKey<MemberRecord> MEMBER_PKEY = Internal.createUniqueKey(Member.MEMBER, "member_pkey", Member.MEMBER.MID);
         public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = Internal.createUniqueKey(Member.MEMBER, "member_emp_id_location_key", Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION);
+        public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = Internal.createUniqueKey(MemberAudit.MEMBER_AUDIT, "member_audit_pkey", MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE);
     }
 
     private static class ForeignKeys0 {
         public static final ForeignKey<MaddressRecord, MemberRecord> MADDRESS__MADDRESS_MID_FKEY = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MEMBER_PKEY, Maddress.MADDRESS, "maddress__maddress_mid_fkey", Maddress.MADDRESS.MID);
         public static final ForeignKey<MauthRecord, MemberRecord> MAUTH__MAUTH_MID_FKEY = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MEMBER_PKEY, Mauth.MAUTH, "mauth__mauth_mid_fkey", Mauth.MAUTH.MID);
         public static final ForeignKey<MbenefitsRecord, MemberRecord> MBENEFITS__MBENEFITS_MID_FKEY = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MEMBER_PKEY, Mbenefits.MBENEFITS, "mbenefits__mbenefits_mid_fkey", Mbenefits.MBENEFITS.MID);
-        public static final ForeignKey<McuserAuditRecord, McuserRecord> MCUSER_AUDIT__FKEY_UID_MCUSER = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MCUSER_PKEY, McuserAudit.MCUSER_AUDIT, "mcuser_audit__fkey_uid_mcuser", McuserAudit.MCUSER_AUDIT.UID);
-        public static final ForeignKey<McuserRolesRecord, McuserRecord> MCUSER_ROLES__UID_MUST_EXIST = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MCUSER_PKEY, McuserRoles.MCUSER_ROLES, "mcuser_roles__uid_must_exist", McuserRoles.MCUSER_ROLES.UID);
-        public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__FKEY_MID_MEMBER = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MEMBER_PKEY, MemberAudit.MEMBER_AUDIT, "member_audit__fkey_mid_member", MemberAudit.MEMBER_AUDIT.MID);
+        public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY = Internal.createForeignKey(com.tll.mcorpus.db.Keys.MEMBER_PKEY, MemberAudit.MEMBER_AUDIT, "member_audit__member_audit_mid_fkey", MemberAudit.MEMBER_AUDIT.MID);
     }
 }

@@ -118,6 +118,8 @@ create table mcuser (
   pswd                    text not null,
   status                  mcuser_status not null default 'ACTIVE'::mcuser_status,
 
+  roles                   mcuser_role[]
+
   unique(username)
 );
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
@@ -132,15 +134,16 @@ CREATE OR REPLACE FUNCTION insert_mcuser(
     in_email text,
     in_username text,
     in_pswd text,
-    in_status mcuser_status
+    in_status mcuser_status,
+    in_roles mcuser_role[] 
 ) RETURNS mcuser 
 LANGUAGE plpgsql AS 
 $_$
 DECLARE arec mcuser;
 BEGIN 
-  INSERT INTO mcuser (name, email, username, pswd, status) 
-  VALUES (in_name, in_email, in_username, pass_hash(in_pswd), in_status) 
-  RETURNING uid, created, modified, name, email, username, null, status 
+  INSERT INTO mcuser (name, email, username, pswd, status, roles) 
+  VALUES (in_name, in_email, in_username, pass_hash(in_pswd), in_status, in_roles) 
+  RETURNING uid, created, modified, name, email, username, null, status, roles 
   INTO arec;
   RETURN arec;
 END
@@ -153,14 +156,6 @@ CREATE TRIGGER trigger_mcuser_updated
   BEFORE UPDATE ON mcuser
   FOR EACH ROW
   EXECUTE PROCEDURE set_modified();
-
-create table mcuser_roles (
-  uid                    uuid not null REFERENCES mcuser ON DELETE CASCADE,
-  role                   mcuser_role not null,
-
-  primary key(uid, role)
-);
-comment on type mcuser_roles is 'Related 0-N mcuser roles bound to a single mcuser row.';
 
 create type jwt_id_status as enum (
   'OK',
@@ -352,12 +347,6 @@ BEGIN
 END
 $_$;
 
-CREATE TYPE mcuser_and_roles as (
-  mcuser     mcuser,
-  roles      text -- rollup of the related many mcuser_roles as a comma-delimited string
-);
-comment on type mcuser_and_roles is 'Simple wrapper around an mcuser row and the associated roles of that mcuser.';
-
 /*
 mcuser_login
 
@@ -381,14 +370,12 @@ CREATE OR REPLACE FUNCTION mcuser_login(
   in_request_origin text, 
   in_login_expiration timestamp without time zone, 
   in_jwt_id uuid
-) RETURNS mcuser_and_roles
+) RETURNS mcuser
     LANGUAGE plpgsql
     AS $_$
   DECLARE existing_jwt_id uuid;
   DECLARE passed BOOLEAN;
-  DECLARE mcuser mcuser%ROWTYPE;
-  DECLARE roles text;
-  DECLARE rval mcuser_and_roles;
+  DECLARE rval mcuser%ROWTYPE;
   BEGIN
     -- verify the given in_jwt_id is unique against the existing jwt ids held
     -- in the mcuser_audit table
@@ -408,7 +395,7 @@ CREATE OR REPLACE FUNCTION mcuser_login(
     IF passed THEN
       -- mcuser authenticated
 
-      -- fetch mcuser record and roles (comma-delim rollup of roles)
+      -- fetch mcuser record and roles
       SELECT 
         m.uid, 
         m.created, 
@@ -417,12 +404,11 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         m.email, 
         m.username, 
         null, 
-        m.status 
-      INTO mcuser 
+        m.status, 
+        m.roles 
+      INTO rval 
       FROM mcuser m 
       WHERE m.username = $1; 
-
-      SELECT string_agg(role::text, ',') INTO roles FROM mcuser_roles WHERE uid = mcuser.uid;
 
       -- add mcuser_audit LOGIN record upon successful login
       INSERT INTO mcuser_audit (
@@ -435,7 +421,7 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         jwt_id_status
       )
       VALUES (
-        mcuser.uid, 
+        rval.uid, 
         'LOGIN', 
         in_request_timestamp, 
         in_request_origin,
@@ -444,8 +430,7 @@ CREATE OR REPLACE FUNCTION mcuser_login(
         'OK'::jwt_id_status
       );
       -- return the mcuser and roles
-      select into rval mcuser, roles;
-      RAISE NOTICE 'mcuser % logged in', mcuser.uid;
+      RAISE NOTICE 'mcuser % logged in', rval.uid;
       RETURN rval;
     END IF;
 

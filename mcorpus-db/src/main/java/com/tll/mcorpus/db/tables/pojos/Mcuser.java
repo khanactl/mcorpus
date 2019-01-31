@@ -4,10 +4,12 @@
 package com.tll.mcorpus.db.tables.pojos;
 
 
+import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -26,7 +28,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser implements Serializable {
 
-    private static final long serialVersionUID = -300553189;
+    private static final long serialVersionUID = 2068944617;
 
     private final UUID         uid;
     private final Timestamp    created;
@@ -36,6 +38,7 @@ public class Mcuser implements Serializable {
     private final String       username;
     private final String       pswd;
     private final McuserStatus status;
+    private final McuserRole[] roles;
 
     public Mcuser(Mcuser value) {
         this.uid = value.uid;
@@ -46,6 +49,7 @@ public class Mcuser implements Serializable {
         this.username = value.username;
         this.pswd = value.pswd;
         this.status = value.status;
+        this.roles = value.roles;
     }
 
     public Mcuser(
@@ -56,7 +60,8 @@ public class Mcuser implements Serializable {
         String       email,
         String       username,
         String       pswd,
-        McuserStatus status
+        McuserStatus status,
+        McuserRole[] roles
     ) {
         this.uid = uid;
         this.created = created;
@@ -66,6 +71,7 @@ public class Mcuser implements Serializable {
         this.username = username;
         this.pswd = pswd;
         this.status = status;
+        this.roles = roles;
     }
 
     public UUID getUid() {
@@ -100,6 +106,10 @@ public class Mcuser implements Serializable {
         return this.status;
     }
 
+    public McuserRole[] getRoles() {
+        return this.roles;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Mcuser (");
@@ -112,6 +122,7 @@ public class Mcuser implements Serializable {
         sb.append(", ").append(username);
         sb.append(", ").append(pswd);
         sb.append(", ").append(status);
+        sb.append(", ").append(Arrays.toString(roles));
 
         sb.append(")");
         return sb.toString();

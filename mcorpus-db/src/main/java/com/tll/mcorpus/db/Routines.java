@@ -5,6 +5,7 @@ package com.tll.mcorpus.db;
 
 
 import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.routines.Armor1;
 import com.tll.mcorpus.db.routines.Armor2;
@@ -66,7 +67,6 @@ import com.tll.mcorpus.db.tables.PgpArmorHeaders;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
-import com.tll.mcorpus.db.udt.records.McuserAndRolesRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
 import java.sql.Timestamp;
@@ -317,7 +317,7 @@ public class Routines {
     /**
      * Call <code>public.digest</code>
      */
-    public static byte[] digest1(Configuration configuration, byte[] __1, String __2) {
+    public static byte[] digest1(Configuration configuration, String __1, String __2) {
         Digest1 f = new Digest1();
         f.set__1(__1);
         f.set__2(__2);
@@ -329,7 +329,7 @@ public class Routines {
     /**
      * Get <code>public.digest</code> as a field.
      */
-    public static Field<byte[]> digest1(byte[] __1, String __2) {
+    public static Field<byte[]> digest1(String __1, String __2) {
         Digest1 f = new Digest1();
         f.set__1(__1);
         f.set__2(__2);
@@ -340,7 +340,7 @@ public class Routines {
     /**
      * Get <code>public.digest</code> as a field.
      */
-    public static Field<byte[]> digest1(Field<byte[]> __1, Field<String> __2) {
+    public static Field<byte[]> digest1(Field<String> __1, Field<String> __2) {
         Digest1 f = new Digest1();
         f.set__1(__1);
         f.set__2(__2);
@@ -351,7 +351,7 @@ public class Routines {
     /**
      * Call <code>public.digest</code>
      */
-    public static byte[] digest2(Configuration configuration, String __1, String __2) {
+    public static byte[] digest2(Configuration configuration, byte[] __1, String __2) {
         Digest2 f = new Digest2();
         f.set__1(__1);
         f.set__2(__2);
@@ -363,7 +363,7 @@ public class Routines {
     /**
      * Get <code>public.digest</code> as a field.
      */
-    public static Field<byte[]> digest2(String __1, String __2) {
+    public static Field<byte[]> digest2(byte[] __1, String __2) {
         Digest2 f = new Digest2();
         f.set__1(__1);
         f.set__2(__2);
@@ -374,7 +374,7 @@ public class Routines {
     /**
      * Get <code>public.digest</code> as a field.
      */
-    public static Field<byte[]> digest2(Field<String> __1, Field<String> __2) {
+    public static Field<byte[]> digest2(Field<byte[]> __1, Field<String> __2) {
         Digest2 f = new Digest2();
         f.set__1(__1);
         f.set__2(__2);
@@ -670,7 +670,7 @@ public class Routines {
     /**
      * Call <code>public.hmac</code>
      */
-    public static byte[] hmac1(Configuration configuration, byte[] __1, byte[] __2, String __3) {
+    public static byte[] hmac1(Configuration configuration, String __1, String __2, String __3) {
         Hmac1 f = new Hmac1();
         f.set__1(__1);
         f.set__2(__2);
@@ -683,7 +683,7 @@ public class Routines {
     /**
      * Get <code>public.hmac</code> as a field.
      */
-    public static Field<byte[]> hmac1(byte[] __1, byte[] __2, String __3) {
+    public static Field<byte[]> hmac1(String __1, String __2, String __3) {
         Hmac1 f = new Hmac1();
         f.set__1(__1);
         f.set__2(__2);
@@ -695,7 +695,7 @@ public class Routines {
     /**
      * Get <code>public.hmac</code> as a field.
      */
-    public static Field<byte[]> hmac1(Field<byte[]> __1, Field<byte[]> __2, Field<String> __3) {
+    public static Field<byte[]> hmac1(Field<String> __1, Field<String> __2, Field<String> __3) {
         Hmac1 f = new Hmac1();
         f.set__1(__1);
         f.set__2(__2);
@@ -707,7 +707,7 @@ public class Routines {
     /**
      * Call <code>public.hmac</code>
      */
-    public static byte[] hmac2(Configuration configuration, String __1, String __2, String __3) {
+    public static byte[] hmac2(Configuration configuration, byte[] __1, byte[] __2, String __3) {
         Hmac2 f = new Hmac2();
         f.set__1(__1);
         f.set__2(__2);
@@ -720,7 +720,7 @@ public class Routines {
     /**
      * Get <code>public.hmac</code> as a field.
      */
-    public static Field<byte[]> hmac2(String __1, String __2, String __3) {
+    public static Field<byte[]> hmac2(byte[] __1, byte[] __2, String __3) {
         Hmac2 f = new Hmac2();
         f.set__1(__1);
         f.set__2(__2);
@@ -732,7 +732,7 @@ public class Routines {
     /**
      * Get <code>public.hmac</code> as a field.
      */
-    public static Field<byte[]> hmac2(Field<String> __1, Field<String> __2, Field<String> __3) {
+    public static Field<byte[]> hmac2(Field<byte[]> __1, Field<byte[]> __2, Field<String> __3) {
         Hmac2 f = new Hmac2();
         f.set__1(__1);
         f.set__2(__2);
@@ -744,13 +744,14 @@ public class Routines {
     /**
      * Call <code>public.insert_mcuser</code>
      */
-    public static McuserRecord insertMcuser(Configuration configuration, String inName, String inEmail, String inUsername, String inPswd, McuserStatus inStatus) {
+    public static McuserRecord insertMcuser(Configuration configuration, String inName, String inEmail, String inUsername, String inPswd, McuserStatus inStatus, McuserRole[] inRoles) {
         InsertMcuser f = new InsertMcuser();
         f.setInName(inName);
         f.setInEmail(inEmail);
         f.setInUsername(inUsername);
         f.setInPswd(inPswd);
         f.setInStatus(inStatus);
+        f.setInRoles(inRoles);
 
         f.execute(configuration);
         return f.getReturnValue();
@@ -759,13 +760,14 @@ public class Routines {
     /**
      * Get <code>public.insert_mcuser</code> as a field.
      */
-    public static Field<McuserRecord> insertMcuser(String inName, String inEmail, String inUsername, String inPswd, McuserStatus inStatus) {
+    public static Field<McuserRecord> insertMcuser(String inName, String inEmail, String inUsername, String inPswd, McuserStatus inStatus, McuserRole[] inRoles) {
         InsertMcuser f = new InsertMcuser();
         f.setInName(inName);
         f.setInEmail(inEmail);
         f.setInUsername(inUsername);
         f.setInPswd(inPswd);
         f.setInStatus(inStatus);
+        f.setInRoles(inRoles);
 
         return f.asField();
     }
@@ -773,13 +775,14 @@ public class Routines {
     /**
      * Get <code>public.insert_mcuser</code> as a field.
      */
-    public static Field<McuserRecord> insertMcuser(Field<String> inName, Field<String> inEmail, Field<String> inUsername, Field<String> inPswd, Field<McuserStatus> inStatus) {
+    public static Field<McuserRecord> insertMcuser(Field<String> inName, Field<String> inEmail, Field<String> inUsername, Field<String> inPswd, Field<McuserStatus> inStatus, Field<McuserRole[]> inRoles) {
         InsertMcuser f = new InsertMcuser();
         f.setInName(inName);
         f.setInEmail(inEmail);
         f.setInUsername(inUsername);
         f.setInPswd(inPswd);
         f.setInStatus(inStatus);
+        f.setInRoles(inRoles);
 
         return f.asField();
     }
@@ -787,7 +790,7 @@ public class Routines {
     /**
      * Call <code>public.mcuser_login</code>
      */
-    public static McuserAndRolesRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
+    public static McuserRecord mcuserLogin(Configuration configuration, String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
@@ -803,7 +806,7 @@ public class Routines {
     /**
      * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserAndRolesRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
+    public static Field<McuserRecord> mcuserLogin(String mcuserUsername, String mcuserPassword, Timestamp inRequestTimestamp, String inRequestOrigin, Timestamp inLoginExpiration, UUID inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);
@@ -818,7 +821,7 @@ public class Routines {
     /**
      * Get <code>public.mcuser_login</code> as a field.
      */
-    public static Field<McuserAndRolesRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin, Field<Timestamp> inLoginExpiration, Field<UUID> inJwtId) {
+    public static Field<McuserRecord> mcuserLogin(Field<String> mcuserUsername, Field<String> mcuserPassword, Field<Timestamp> inRequestTimestamp, Field<String> inRequestOrigin, Field<Timestamp> inLoginExpiration, Field<UUID> inJwtId) {
         McuserLogin f = new McuserLogin();
         f.setMcuserUsername(mcuserUsername);
         f.setMcuserPassword(mcuserPassword);

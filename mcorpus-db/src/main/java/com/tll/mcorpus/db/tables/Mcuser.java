@@ -7,6 +7,7 @@ package com.tll.mcorpus.db.tables;
 import com.tll.mcorpus.db.Indexes;
 import com.tll.mcorpus.db.Keys;
 import com.tll.mcorpus.db.Public;
+import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 
@@ -43,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser extends TableImpl<McuserRecord> {
 
-    private static final long serialVersionUID = 426805879;
+    private static final long serialVersionUID = -1291453279;
 
     /**
      * The reference instance of <code>public.mcuser</code>
@@ -97,6 +98,11 @@ public class Mcuser extends TableImpl<McuserRecord> {
      * The column <code>public.mcuser.status</code>.
      */
     public final TableField<McuserRecord, McuserStatus> STATUS = createField("status", org.jooq.impl.SQLDataType.VARCHAR.nullable(false).defaultValue(org.jooq.impl.DSL.field("'ACTIVE'::mcuser_status", org.jooq.impl.SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), this, "");
+
+    /**
+     * The column <code>public.mcuser.roles</code>.
+     */
+    public final TableField<McuserRecord, McuserRole[]> ROLES = createField("roles", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), this, "");
 
     /**
      * Create a <code>public.mcuser</code> table reference

@@ -12,11 +12,11 @@
   </parent>
 
   <artifactId>mcorpus-db</artifactId>
-  <version>1.4.0-SNAPSHOT</version>
+  <version>1.4.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-db</name>
-  <description>The MCorpus JooQ generated db types and api.</description>
+  <description>The MCorpus jooQ generated db types and api.</description>
 
   <build>
 
@@ -76,7 +76,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <skip>false</skip>
+          <skip>true</skip>
           <jdbc>
             <driver>org.postgresql.Driver</driver>
             <url>${env.MCORPUS_DB_URL}</url>

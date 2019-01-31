@@ -5,6 +5,7 @@ package com.tll.mcorpus.db.routines;
 
 
 import com.tll.mcorpus.db.Public;
+import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 
@@ -29,7 +30,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class InsertMcuser extends AbstractRoutine<McuserRecord> {
 
-    private static final long serialVersionUID = -160042134;
+    private static final long serialVersionUID = 341880195;
 
     /**
      * The parameter <code>public.insert_mcuser.RETURN_VALUE</code>.
@@ -62,6 +63,11 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     public static final Parameter<McuserStatus> IN_STATUS = Internal.createParameter("in_status", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), false, false);
 
     /**
+     * The parameter <code>public.insert_mcuser.in_roles</code>.
+     */
+    public static final Parameter<McuserRole[]> IN_ROLES = Internal.createParameter("in_roles", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), false, false);
+
+    /**
      * Create a new routine call instance
      */
     public InsertMcuser() {
@@ -73,6 +79,7 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
         addInParameter(IN_USERNAME);
         addInParameter(IN_PSWD);
         addInParameter(IN_STATUS);
+        addInParameter(IN_ROLES);
     }
 
     /**
@@ -143,5 +150,19 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
      */
     public void setInStatus(Field<McuserStatus> field) {
         setField(IN_STATUS, field);
+    }
+
+    /**
+     * Set the <code>in_roles</code> parameter IN value to the routine
+     */
+    public void setInRoles(McuserRole... value) {
+        setValue(IN_ROLES, value);
+    }
+
+    /**
+     * Set the <code>in_roles</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     */
+    public void setInRoles(Field<McuserRole[]> field) {
+        setField(IN_ROLES, field);
     }
 }

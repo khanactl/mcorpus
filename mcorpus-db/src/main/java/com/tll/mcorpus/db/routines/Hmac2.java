@@ -27,7 +27,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Hmac2 extends AbstractRoutine<byte[]> {
 
-    private static final long serialVersionUID = -476102666;
+    private static final long serialVersionUID = 502540976;
 
     /**
      * The parameter <code>public.hmac.RETURN_VALUE</code>.
@@ -37,12 +37,12 @@ public class Hmac2 extends AbstractRoutine<byte[]> {
     /**
      * The parameter <code>public.hmac._1</code>.
      */
-    public static final Parameter<String> _1 = Internal.createParameter("_1", org.jooq.impl.SQLDataType.CLOB, false, true);
+    public static final Parameter<byte[]> _1 = Internal.createParameter("_1", org.jooq.impl.SQLDataType.BLOB, false, true);
 
     /**
      * The parameter <code>public.hmac._2</code>.
      */
-    public static final Parameter<String> _2 = Internal.createParameter("_2", org.jooq.impl.SQLDataType.CLOB, false, true);
+    public static final Parameter<byte[]> _2 = Internal.createParameter("_2", org.jooq.impl.SQLDataType.BLOB, false, true);
 
     /**
      * The parameter <code>public.hmac._3</code>.
@@ -65,28 +65,28 @@ public class Hmac2 extends AbstractRoutine<byte[]> {
     /**
      * Set the <code>_1</code> parameter IN value to the routine
      */
-    public void set__1(String value) {
+    public void set__1(byte... value) {
         setValue(_1, value);
     }
 
     /**
      * Set the <code>_1</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void set__1(Field<String> field) {
+    public void set__1(Field<byte[]> field) {
         setField(_1, field);
     }
 
     /**
      * Set the <code>_2</code> parameter IN value to the routine
      */
-    public void set__2(String value) {
+    public void set__2(byte... value) {
         setValue(_2, value);
     }
 
     /**
      * Set the <code>_2</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void set__2(Field<String> field) {
+    public void set__2(Field<byte[]> field) {
         setField(_2, field);
     }
 

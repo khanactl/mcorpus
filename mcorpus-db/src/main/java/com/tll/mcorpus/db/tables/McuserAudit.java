@@ -44,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = -205786350;
+    private static final long serialVersionUID = 1503573674;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -162,18 +162,6 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     @Override
     public List<UniqueKey<McuserAuditRecord>> getKeys() {
         return Arrays.<UniqueKey<McuserAuditRecord>>asList(Keys.MCUSER_AUDIT_PKEY);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<ForeignKey<McuserAuditRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<McuserAuditRecord, ?>>asList(Keys.MCUSER_AUDIT__FKEY_UID_MCUSER);
-    }
-
-    public Mcuser mcuser() {
-        return new Mcuser(this, Keys.MCUSER_AUDIT__FKEY_UID_MCUSER);
     }
 
     /**

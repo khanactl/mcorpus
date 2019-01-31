@@ -27,7 +27,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Digest2 extends AbstractRoutine<byte[]> {
 
-    private static final long serialVersionUID = 159538511;
+    private static final long serialVersionUID = -1456233807;
 
     /**
      * The parameter <code>public.digest.RETURN_VALUE</code>.
@@ -37,7 +37,7 @@ public class Digest2 extends AbstractRoutine<byte[]> {
     /**
      * The parameter <code>public.digest._1</code>.
      */
-    public static final Parameter<String> _1 = Internal.createParameter("_1", org.jooq.impl.SQLDataType.CLOB, false, true);
+    public static final Parameter<byte[]> _1 = Internal.createParameter("_1", org.jooq.impl.SQLDataType.BLOB, false, true);
 
     /**
      * The parameter <code>public.digest._2</code>.
@@ -59,14 +59,14 @@ public class Digest2 extends AbstractRoutine<byte[]> {
     /**
      * Set the <code>_1</code> parameter IN value to the routine
      */
-    public void set__1(String value) {
+    public void set__1(byte... value) {
         setValue(_1, value);
     }
 
     /**
      * Set the <code>_1</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void set__1(Field<String> field) {
+    public void set__1(Field<byte[]> field) {
         setField(_1, field);
     }
 
