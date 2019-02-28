@@ -1,6 +1,6 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.glog;
+import static com.tll.mcorpus.Main.glog;
 
 import com.tll.mcorpus.MCorpusServerConfig;
 

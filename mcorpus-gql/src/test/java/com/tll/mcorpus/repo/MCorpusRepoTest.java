@@ -1,52 +1,47 @@
 package com.tll.mcorpus.repo;
 
-import static com.tll.mcorpus.TestUtil.addMaddressTableProperties;
-import static com.tll.mcorpus.TestUtil.addMauthTableProperties;
-import static com.tll.mcorpus.TestUtil.addMemberTableProperties;
+
 import static com.tll.mcorpus.TestUtil.ds_mcweb;
+import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
+import static com.tll.mcorpus.TestUtil.randomEmpId;
+import static com.tll.mcorpus.TestUtil.randomLocation;
 import static com.tll.mcorpus.TestUtil.testDslMcweb;
 import static com.tll.mcorpus.TestUtil.testDslMcwebTest;
-import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
-import static com.tll.mcorpus.TestUtil.generateMaddressToAddPropertyMap;
-import static com.tll.mcorpus.TestUtil.generateMaddressToUpdatePropertyMap;
-import static com.tll.mcorpus.TestUtil.generateMemberToAddPropertyMap;
-import static com.tll.mcorpus.TestUtil.generateMemberToUpdatePropertyMap;
-import static com.tll.mcorpus.TestUtil.testMemberUid;
-import static com.tll.mcorpus.TestUtil.testMemberUsername;
-import static com.tll.mcorpus.TestUtil.testMemberPswd;
 import static com.tll.mcorpus.TestUtil.testRequestOrigin;
+import static com.tll.mcorpus.TestUtil.toSqlDate;
+import static com.tll.mcorpus.Util.asSqlDate;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.db.Tables.MEMBER_AUDIT;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMember;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddressForAdd;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import static com.tll.mcorpus.repo.RepoUtil.fval;
-
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
+import com.tll.mcorpus.db.routines.PassHash;
+import com.tll.mcorpus.UnitTest;
+import com.tll.mcorpus.db.enums.Addressname;
+import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.enums.MemberStatus;
+import com.tll.mcorpus.db.tables.pojos.Maddress;
+import com.tll.mcorpus.db.tables.pojos.Mauth;
+import com.tll.mcorpus.db.tables.pojos.Member;
+import com.tll.mcorpus.db.tables.records.MemberRecord;
+import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.dmodel.MemberAndMauth;
 
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.tll.mcorpus.UnitTest;
-import com.tll.mcorpus.db.enums.Addressname;
-import com.tll.mcorpus.db.tables.records.MemberRecord;
-import com.tll.mcorpus.db.udt.pojos.Mref;
-import com.tll.mcorpus.repo.model.FetchResult;
 
 /**
  * Unit test for {@link MCorpusRepo}.
@@ -56,53 +51,244 @@ public class MCorpusRepoTest {
 
   private static final Logger log = LoggerFactory.getLogger(MCorpusRepoTest.class);
 
-  private static UUID insertTestMember() {
-    Map<String, Object> memberMap = new HashMap<>();
+  static final String           TEST_MEMBER_EMP_ID = randomEmpId();
+  static final Location         TEST_MEMBER_LOCATION = randomLocation();
+  static final String           TEST_MEMBER_FIRST_NAME = "Jake";
+  static final String           TEST_MEMBER_MIDDLE_NAME = "Arthur";
+  static final String           TEST_MEMBER_LAST_NAME = "McGidrich";
+  static final String           TEST_MEMBER_DISPLAY_NAME = "JAMFMan";
+  static final MemberStatus     TEST_MEMBER_STATUS = MemberStatus.ACTIVE;
+  
+  static final String           TEST_MEMBER_FIRST_NAME_U = "JakeU";
+  static final String           TEST_MEMBER_MIDDLE_NAME_U = "ArthurU";
+  static final String           TEST_MEMBER_LAST_NAME_U = "McGidrichU";
+  static final MemberStatus     TEST_MEMBER_STATUS_U = MemberStatus.INACTIVE;
+  
+  static final java.sql.Date    TEST_MAUTH_DOB = toSqlDate("1977-09-04");
+  static final String           TEST_MAUTH_SSN = "101010101";
+  static final String           TEST_MAUTH_EMAIL_HOME = "jam@ggl.com";
+  static final String           TEST_MAUTH_EMAIL_WORK = "jam-work@ggl.com";
+  static final String           TEST_MAUTH_MOBILE_PHONE = "4156747832";
+  static final String           TEST_MAUTH_HOME_PHONE = "4156747833";
+  static final String           TEST_MAUTH_WORK_PHONE = "4156747834";
+  static final String           TEST_MAUTH_FAX = "4156747835";
+  static final String           TEST_MAUTH_USERNAME = "jamuser";
+  static final String           TEST_MAUTH_PSWD = "nixem567ert";
+  
+  static final java.sql.Date    TEST_MAUTH_DOB_U = toSqlDate("1977-09-05");
+  static final String           TEST_MAUTH_SSN_U = "101010102";
+  static final String           TEST_MAUTH_EMAIL_HOME_U = "jamU@ggl.com";
+  static final String           TEST_MAUTH_EMAIL_WORK_U = "jam-workU@ggl.com";
+  static final String           TEST_MAUTH_MOBILE_PHONE_U = "4156747833";
+  static final String           TEST_MAUTH_HOME_PHONE_U = "4156747834";
+  static final String           TEST_MAUTH_WORK_PHONE_U = "4156747835";
+  
+  static MemberAndMauth generateMemberToAdd() {
+    return new MemberAndMauth(
+      new Member(
+        null, 
+        null, 
+        null, 
+        TEST_MEMBER_EMP_ID, 
+        TEST_MEMBER_LOCATION, 
+        TEST_MEMBER_FIRST_NAME, 
+        TEST_MEMBER_MIDDLE_NAME, 
+        TEST_MEMBER_LAST_NAME, 
+        TEST_MEMBER_DISPLAY_NAME, 
+        TEST_MEMBER_STATUS 
+      ),
+      new Mauth(
+        null,
+        null,
+        TEST_MAUTH_DOB, 
+        TEST_MAUTH_SSN, 
+        TEST_MAUTH_EMAIL_HOME, 
+        TEST_MAUTH_EMAIL_WORK, 
+        TEST_MAUTH_MOBILE_PHONE, 
+        TEST_MAUTH_HOME_PHONE, 
+        TEST_MAUTH_WORK_PHONE, 
+        TEST_MAUTH_FAX, 
+        TEST_MAUTH_USERNAME, 
+        TEST_MAUTH_PSWD 
+      )
+    );
+  }
 
-    addMemberTableProperties(memberMap);
-    addMauthTableProperties(memberMap);
+  static MemberAndMauth generateMemberToUpdate(final UUID mid) {
+    return new MemberAndMauth(
+      new Member(
+        mid, 
+        null, 
+        null, 
+        null, 
+        null, 
+        TEST_MEMBER_FIRST_NAME_U, 
+        TEST_MEMBER_MIDDLE_NAME_U, 
+        TEST_MEMBER_LAST_NAME_U, 
+        null, 
+        MemberStatus.INACTIVE 
+      ),
+      new Mauth(
+        null,
+        null,
+        TEST_MAUTH_DOB_U, 
+        TEST_MAUTH_SSN_U, 
+        TEST_MAUTH_EMAIL_HOME_U, 
+        TEST_MAUTH_EMAIL_WORK_U, 
+        TEST_MAUTH_MOBILE_PHONE_U, 
+        TEST_MAUTH_HOME_PHONE_U, 
+        TEST_MAUTH_WORK_PHONE_U, 
+        null, 
+        null, 
+        null
+      )
+    );
+  }
 
-    List<Map<String, Object>> cmaps = transformMember(memberMap);
-    Map<String, Object> cmapMember = cmaps.get(0);
-    Map<String, Object> cmapMauth = cmaps.get(1);
+  static Maddress generateMemberAddressToAdd(UUID mid, Addressname addressname) {
+    return new Maddress(
+      mid,
+      addressname,
+      null,
+      "attn",
+      "88 bway",
+      "#3",
+      "city",
+      "MS",
+      "99876",
+      "USA"
+    );
+  }
+
+  static Maddress generateMemberAddressToUpdate(UUID mid, Addressname addressname) {
+    return new Maddress(
+      mid,
+      addressname,
+      null,
+      "attnU",
+      "88 bwayU",
+      "#3U",
+      "cityU",
+      "MI",
+      "99877",
+      "USA"
+    );
+  }
+
+  static UUID insertTestMember() {
+    MemberAndMauth maa = generateMemberToAdd();
 
     // add member record
-    MemberRecord memberRecord = testDslMcweb().insertInto(MEMBER).set(cmapMember).returning(MEMBER.MID).fetchOne();
+    MemberRecord memberRecord = testDslMcweb()
+      .insertInto(MEMBER,
+        MEMBER.EMP_ID,
+        MEMBER.LOCATION,
+        MEMBER.NAME_FIRST,
+        MEMBER.NAME_MIDDLE,
+        MEMBER.NAME_LAST,
+        MEMBER.DISPLAY_NAME,
+        MEMBER.STATUS
+      )
+      .values(
+        maa.dbMember.getEmpId(),
+        maa.dbMember.getLocation(),
+        maa.dbMember.getNameFirst(),
+        maa.dbMember.getNameMiddle(),
+        maa.dbMember.getNameLast(),
+        maa.dbMember.getDisplayName(),
+        maa.dbMember.getStatus()
+      )
+      .returning(MEMBER.MID)
+      .fetchOne();
+    
+    assertNotNull(memberRecord);
     UUID mid = memberRecord.getMid();
+    assertNotNull(mid);
+
+    // pswd
+    final PassHash ph = new PassHash();
+    ph.setPswd(TEST_MAUTH_PSWD);
+    ph.execute(testDslMcweb().configuration());
+    final String phash = ph.getReturnValue();
 
     // add mauth record
-    cmapMauth.put(MAUTH.MID.getName(), mid);
-    testDslMcweb().insertInto(MAUTH).set(cmapMauth).execute();
+    testDslMcweb()
+      .insertInto(MAUTH, 
+        MAUTH.MID,
+        MAUTH.DOB,
+        MAUTH.SSN,
+        MAUTH.EMAIL_PERSONAL,
+        MAUTH.EMAIL_WORK,
+        MAUTH.MOBILE_PHONE,
+        MAUTH.HOME_PHONE,
+        MAUTH.WORK_PHONE,
+        MAUTH.USERNAME,
+        MAUTH.PSWD
+      )
+      .values(
+        mid,
+        asSqlDate(maa.dbMauth.getDob()),
+        maa.dbMauth.getSsn(),
+        maa.dbMauth.getEmailPersonal(),
+        maa.dbMauth.getEmailWork(),
+        maa.dbMauth.getMobilePhone(),
+        maa.dbMauth.getHomePhone(),
+        maa.dbMauth.getWorkPhone(),
+        maa.dbMauth.getUsername(),
+        phash
+      )
+      .execute();
 
     return mid;
   }
 
-  private static void deleteTestMember(UUID mid) {
+  static void deleteTestMember(UUID mid) {
     if(mid != null) testDslMcweb().delete(MEMBER).where(MEMBER.MID.eq(mid)).execute();
   }
 
-  private static void insertTestMemberAddress(UUID mid) {
-    Map<String, Object> maddressMap = new HashMap<>();
-
-    addMaddressTableProperties(maddressMap, mid, Addressname.other);
-
-    Map<String, Object> cmap = transformMemberAddressForAdd(maddressMap);
-    cmap.put(MADDRESS.MID.getName(), mid);
+  static void insertTestMemberAddress(UUID mid, Addressname addressname) {
+    Maddress maddress = generateMemberAddressToAdd(mid, addressname);
 
     // add member address record
-    testDslMcweb().insertInto(MADDRESS).set(cmap).returning(MADDRESS.MID).execute();
+    testDslMcweb().insertInto(MADDRESS, 
+      MADDRESS.MID,
+      MADDRESS.ADDRESS_NAME,
+      MADDRESS.ATTN, 
+      MADDRESS.STREET1, 
+      MADDRESS.STREET2, 
+      MADDRESS.CITY, 
+      MADDRESS.STATE, 
+      MADDRESS.POSTAL_CODE, 
+      MADDRESS.COUNTRY)
+    .values(
+      mid,
+      addressname,
+      maddress.getAttn(),
+      maddress.getStreet1(),
+      maddress.getStreet2(),
+      maddress.getCity(),
+      maddress.getState(),
+      maddress.getPostalCode(),
+      maddress.getCountry()
+    )
+    .execute();
   }
 
-  private static void deleteTestMemberAddress(UUID mid) {
-    if(mid != null) testDslMcweb().delete(MADDRESS).where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(Addressname.other))).execute();
+  static void deleteTestMemberAddress(UUID mid, Addressname addressname) {
+    if(mid != null && addressname != null) 
+      testDslMcweb().delete(MADDRESS).where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(addressname))).execute();
   }
 
   @AfterClass
   public static void clearBackend() {
     try {
-      // using mcwebtest db creds - 
-      //   remove any test generated member audit records (if any).
-      log.info("Num member audit records deleted after test: {}.", testDslMcwebTest().deleteFrom(MEMBER_AUDIT).where(MEMBER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
+      // delete test member_audit records
+      log.info("Num member_audit records deleted after test: {}.", 
+        testDslMcwebTest().deleteFrom(MEMBER_AUDIT).where(MEMBER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
+
+      // delete test member records
+      log.info("Num member records deleted after test: {}.", 
+        testDslMcwebTest().deleteFrom(MEMBER).where(MEMBER.DISPLAY_NAME.eq("JAMFMan")).execute());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -117,11 +303,14 @@ public class MCorpusRepoTest {
   @Test
   public void testMemberLogin() {
     MCorpusRepo repo = null;
+    UUID mid = null;
     try {
       repo = mcorpusRepo();
+      mid = insertTestMember();
+
       FetchResult<Mref> mrefFetch = repo.memberLogin(
-        testMemberUsername, 
-        testMemberPswd,
+        TEST_MAUTH_USERNAME, 
+        TEST_MAUTH_PSWD,
         Instant.now(),
         testRequestOrigin
       );
@@ -135,17 +324,23 @@ public class MCorpusRepoTest {
       fail(e.getMessage());
     }
     finally {
-      if(repo != null) repo.close();
+      if(repo != null) {
+        if(mid != null) deleteTestMember(mid);
+        repo.close();
+      }
     }
   }
   
   @Test
   public void testMemberLogout() {
     MCorpusRepo repo = null;
+    UUID mid = null;
     try {
       repo = mcorpusRepo();
+      mid = insertTestMember();
+      
       FetchResult<UUID> memberLogoutResult = repo.memberLogout(
-        testMemberUid,
+        mid,
         Instant.now(),
         testRequestOrigin
       );
@@ -158,17 +353,24 @@ public class MCorpusRepoTest {
       fail(e.getMessage());
     }
     finally {
-      if(repo != null) repo.close();
+      if(repo != null) {
+        deleteTestMember(mid);
+        repo.close();
+      }
     }
   }
 
   @Test
   public void testFetchMRefByMid() {
     MCorpusRepo repo = null;
+    UUID mid = null;
     try {
       repo = mcorpusRepo();
-      FetchResult<Mref> mrefFetch = repo.fetchMRefByMid(UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c"));
+      mid = insertTestMember();
+
+      FetchResult<Mref> mrefFetch = repo.fetchMRefByMid(mid);
       assertNotNull(mrefFetch);
+      assertTrue(mrefFetch.isSuccess());
       assertNotNull(mrefFetch.get());
       assertNull(mrefFetch.getErrorMsg());
     }
@@ -177,17 +379,24 @@ public class MCorpusRepoTest {
       fail(e.getMessage());
     }
     finally {
-      if(repo != null) repo.close();
+      if(repo != null) {
+        deleteTestMember(mid);
+        repo.close();
+      }
     }
   }
 
   @Test
   public void testFetchMember() {
     MCorpusRepo repo = null;
+    UUID mid = null;
     try {
       repo = mcorpusRepo();
-      FetchResult<Map<String, Object>> memberFetch = repo.fetchMember(UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c"));
+      mid = insertTestMember();
+
+      FetchResult<MemberAndMauth> memberFetch = repo.fetchMember(mid);
       assertNotNull(memberFetch);
+      assertTrue(memberFetch.isSuccess());
       assertNotNull(memberFetch.get());
       assertNull(memberFetch.getErrorMsg());
     }
@@ -196,26 +405,42 @@ public class MCorpusRepoTest {
       fail(e.getMessage());
     }
     finally {
-      if(repo != null) repo.close();
+      if(repo != null) {
+        deleteTestMember(mid);
+        repo.close();
+      }
     }
   }
 
   @Test
   public void testFetchMemberAddresses() {
     MCorpusRepo repo = null;
+    UUID mid = null;
+    Addressname addressname = Addressname.other;
     try {
       repo = mcorpusRepo();
-      FetchResult<List<Map<String, Object>>> fetchResult = repo.fetchMemberAddresses(UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c"));
+      
+      mid = insertTestMember();
+      insertTestMemberAddress(mid, addressname);
+      
+      FetchResult<List<Maddress>> fetchResult = repo.fetchMemberAddresses(mid);
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
+
+      List<Maddress> malist = fetchResult.get();
+      assertTrue(malist.size() == 1);
+      assertTrue(malist.get(0).getAddressName() == Addressname.other);
     }
     catch(Exception e) {
       log.error(e.getMessage());
       fail(e.getMessage());
     }
     finally {
-      if(repo != null) repo.close();
+      if(repo != null) {
+        deleteTestMember(mid); // NOTE: maddress are cascade deleted
+        repo.close();
+      }
     }
   }
 
@@ -226,19 +451,18 @@ public class MCorpusRepoTest {
     try {
       repo = mcorpusRepo();
 
-      Map<String, Object> memberMap = generateMemberToAddPropertyMap();
+      MemberAndMauth memberToAdd = generateMemberToAdd();
 
-      FetchResult<Map<String, Object>> fetchResult = repo.addMember(memberMap);
+      FetchResult<MemberAndMauth> fetchResult = repo.addMember(memberToAdd);
 
       assertNotNull(fetchResult);
-      assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
+      assertNotNull(fetchResult.get());
 
-      mid = fval(MEMBER.MID, fetchResult.get());
-      
-      // verify we have an mid and created timestamp present
+      mid = fetchResult.get().dbMember.getMid();
       assertNotNull(mid);
-      assertNotNull(fval(MEMBER.CREATED, fetchResult.get()));
+
+      assertNotNull(fetchResult.get().dbMember.getCreated());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -263,19 +487,20 @@ public class MCorpusRepoTest {
 
       mid = insertTestMember();
 
-      Map<String, Object> memberMap = generateMemberToUpdatePropertyMap();
-      memberMap.put(MEMBER.MID.getName(), mid);
+      MemberAndMauth memberToUpdate = generateMemberToUpdate(mid);
 
-      FetchResult<Map<String, Object>> fetchResult = repo.updateMember(memberMap);
+      FetchResult<MemberAndMauth> fetchResult = repo.updateMember(memberToUpdate);
 
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
       
       // verify we have an mid and modified timestamp present
-      assertNotNull(fval(MEMBER.MID, fetchResult.get()));
-      assertNotNull(fval(MEMBER.CREATED, fetchResult.get()));
-      assertNotNull(fval(MEMBER.MODIFIED, fetchResult.get()));
+      assertNotNull(fetchResult.get().dbMember.getMid());
+      assertNotNull(fetchResult.get().dbMember.getCreated());
+      assertNotNull(fetchResult.get().dbMember.getModified());
+      
+      assertNotNull(fetchResult.get().dbMauth);
     }
     catch(Exception e) {
       fail(e.getMessage());
@@ -295,17 +520,11 @@ public class MCorpusRepoTest {
     try {
       repo = mcorpusRepo();
 
-      FetchResult<UUID> fetchResult = repo.deleteMember(mid);
+      FetchResult<Boolean> fetchResult = repo.deleteMember(mid);
 
       assertNotNull(fetchResult);
-      assertNotNull(fetchResult.get());
+      assertEquals(Boolean.TRUE, fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
-
-      UUID midDeleted;
-      if(fetchResult.isSuccess()) {
-        midDeleted = fetchResult.get();
-        assertEquals(mid, midDeleted);
-      }
     }
     catch(Exception e) {
       fail(e.getMessage());
@@ -325,16 +544,15 @@ public class MCorpusRepoTest {
     try {
       repo = mcorpusRepo();
 
-      Map<String, Object> maddressMap = generateMaddressToAddPropertyMap(mid, Addressname.other);
+      Maddress maddress = generateMemberAddressToAdd(mid, Addressname.other);
 
-      FetchResult<Map<String, Object>> fetchResult = repo.addMemberAddress(maddressMap);
+      FetchResult<Maddress> fetchResult = repo.addMemberAddress(maddress);
 
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
-
-      assertEquals(mid, fval(MADDRESS.MID, fetchResult.get()));
-      assertNotNull(fval(MADDRESS.MODIFIED, fetchResult.get()));
+      assertEquals(mid, fetchResult.get().getMid());
+      assertNotNull(fetchResult.get().getModified());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -342,10 +560,7 @@ public class MCorpusRepoTest {
     }
     finally {
       if(repo != null) {
-        if(mid != null) {
-          deleteTestMemberAddress(mid);
-          deleteTestMember(mid);
-        }
+        deleteTestMember(mid); // NOTE: maddress records are cascade deleted
         repo.close();
       }
     }
@@ -355,29 +570,25 @@ public class MCorpusRepoTest {
   public void testUpdateMemberAddress() {
     MCorpusRepo repo = null;
     UUID mid = insertTestMember();
-    insertTestMemberAddress(mid);
+    insertTestMemberAddress(mid, Addressname.other);
     try {
       repo = mcorpusRepo();
 
-      Map<String, Object> maddressMap = generateMaddressToUpdatePropertyMap(mid, Addressname.other);
-      maddressMap.put(MEMBER.MID.getName(), mid);
-
-      FetchResult<Map<String, Object>> fetchResult = repo.updateMemberAddress(maddressMap);
+      Maddress ma = generateMemberAddressToUpdate(mid, Addressname.other);
+      
+      FetchResult<Maddress> fetchResult = repo.updateMemberAddress(ma);
 
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
-
-      assertEquals(mid, fval(MADDRESS.MID, fetchResult.get()));
-      assertNotNull(fval(MADDRESS.MODIFIED, fetchResult.get()));
+      assertNotNull(fetchResult.get().getModified());
     }
     catch(Exception e) {
       fail(e.getMessage());
     }
     finally {
       if(repo != null) {
-        deleteTestMemberAddress(mid);
-        deleteTestMember(mid);
+        deleteTestMember(mid); // NOTE: maddress records are cascade deleted
         repo.close();
       }
     }
@@ -386,28 +597,24 @@ public class MCorpusRepoTest {
   @Test
   public void testDeleteMemberAddress() {
     MCorpusRepo repo = null;
-    UUID mid = insertTestMember();
-    insertTestMemberAddress(mid);
+    UUID mid = null;
     try {
       repo = mcorpusRepo();
 
-      FetchResult<UUID> fetchResult = repo.deleteMemberAddress(mid, Addressname.other);
+      mid = insertTestMember();
+      insertTestMemberAddress(mid, Addressname.other);
+      
+      FetchResult<Boolean> fetchResult = repo.deleteMemberAddress(mid, Addressname.other);
 
       assertNotNull(fetchResult);
-      assertNotNull(fetchResult.get());
+      assertEquals(Boolean.TRUE, fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
 
-      UUID midDeleted;
-      if (fetchResult.isSuccess()) {
-        midDeleted = fetchResult.get();
-        assertEquals(mid, midDeleted);
-      }
     } catch (Exception e) {
       fail(e.getMessage());
     } finally {
       if (repo != null) {
-        deleteTestMemberAddress(mid);
-        deleteTestMember(mid);
+        deleteTestMember(mid); // NOTE: maddress records are cascade deleted
         repo.close();
       }
     }

@@ -3,26 +3,26 @@ package com.tll.mcorpus.gql;
 import static com.tll.mcorpus.TestUtil.cpr;
 import static com.tll.mcorpus.TestUtil.ds_mcweb;
 import static com.tll.mcorpus.TestUtil.jsonStringToMap;
-import static com.tll.mcorpus.TestUtil.testRequestSnapshot;
 import static com.tll.mcorpus.TestUtil.testJwtStatus;
+import static com.tll.mcorpus.TestUtil.testRequestSnapshot;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.GraphQLWebContext;
-import com.tll.mcorpus.web.RequestSnapshot;
 import com.tll.mcorpus.web.JWT.JWTStatus;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
+import com.tll.mcorpus.web.RequestSnapshot;
+
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -48,7 +48,7 @@ public class MCorpusGraphQLTest {
    * Issue a GraphQL query with with a context of VALID jwt status under a given role.
    */
   static ExecutionResult query(final String query, String role) {
-	return query(query, JWTStatus.VALID, role);
+	  return query(query, JWTStatus.VALID, role);
   }
 	  
   /**

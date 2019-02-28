@@ -8,9 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * General 'project-level' utility methods.
  *
@@ -18,19 +15,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Util {
 
-  /**
-   * The app-wide global logger.
-   * <p>
-   * Use this sole static logger to issue application level logging
-   * when logging at class/global level (i.e. inside static methods).
-   */
-  private static final Logger appLog = LoggerFactory.getLogger("mcorpus-gql-server");
-  
-  /**
-   * @return the global app logger.
-   */
-  public static Logger glog() { return appLog; }
-  
   /**
    * Is the given object ref null?
    *
@@ -56,12 +40,28 @@ public class Util {
   public static boolean isNullOrEmpty(final String s) { return s == null || s.isEmpty(); }
   
   /**
+   * Is the given string non-null and not-empty (greater than zero-length)?
+   *
+   * @param s the string to check
+   * @return true if the given string is no-null and not empty, false otherwise.
+   */
+  public static boolean isNotNullOrEmpty(final String s) { return s != null && !s.isEmpty(); }
+  
+  /**
    * Is the given array null or 0-length?
    *
    * @param a the array to check
    * @return true if the given array null 0-length, false otherwise.
    */
   public static boolean isNullOrEmpty(final Object[] a) { return a == null || a.length == 0; }
+  
+  /**
+   * Is the given array non-null and has at least one element?
+   *
+   * @param a the array to check
+   * @return true if the given array null 0-length, false otherwise.
+   */
+  public static boolean isNotNullOrEmpty(final Object[] a) { return a != null && a.length > 0; }
   
   /**
    * Is the given collection null or empty?
@@ -72,6 +72,14 @@ public class Util {
   public static boolean isNullOrEmpty(final Collection<?> clc) { return clc == null || clc.isEmpty(); }
 
   /**
+   * Is the given collection non-null and not empty?
+   * 
+   * @param clc the collection to check
+   * @return true if the given collection is non-null and not empty, false otherwise
+   */
+  public static boolean isNotNullOrEmpty(final Collection<?> clc) { return clc != null && !clc.isEmpty(); }
+
+  /**
    * Is the given map null or empty?
    * 
    * @param clc the map to check
@@ -80,6 +88,14 @@ public class Util {
   public static boolean isNullOrEmpty(final Map<?, ?> map) { return map == null || map.isEmpty(); }
 
   /**
+   * Is the given map non-null and not empty?
+   * 
+   * @param clc the map to check
+   * @return true if the given map is non-null and not empty, false otherwise
+   */
+  public static boolean isNotNullOrEmpty(final Map<?, ?> map) { return map != null && !map.isEmpty(); }
+  
+  /**
    * Is the given string blank? (I.e. null or 0-length or contains only whitespace)
    *
    * @param s the string to check
@@ -87,6 +103,16 @@ public class Util {
    */
   public static boolean isBlank(final String s) {
     return isNullOrEmpty(s) || s.trim().length() == 0;
+  }
+
+  /**
+   * Is the given string not blank?
+   *
+   * @param s the string to check
+   * @return true if NOT blank, false otherwise.
+   */
+  public static boolean isNotBlank(final String s) {
+    return !isNullOrEmpty(s) && s.trim().length() > 0;
   }
 
   /**
@@ -161,6 +187,16 @@ public class Util {
   public static String nclean(final String s) { return s == null ? null : s.trim(); }
 
   /**
+   * Clean a string when NOT EMPTY.
+   * If it is null or empty, null is returned.
+   * Otherwise, the string is trimmed on both sides and returned.
+   *
+   * @param s the string to nclean
+   * @return Null when the input is null or empty otherwise the trimmed string
+   */
+  public static String neclean(final String s) { return isNullOrEmpty(s) ? null : s.trim(); }
+
+  /**
    * Convert an arbitrary object to a string, then trim it on both sides.
    *
    * @param o the object to clean and trim
@@ -168,13 +204,9 @@ public class Util {
    */
   public static String asStringAndClean(final Object o) { return o == null ? "" : o.toString().trim(); }
 
-  public static String upper(final String s) { return s == null ? "" : s.toUpperCase(Locale.US); }
+  public static String upper(final String s) { return s == null ? null : s.toUpperCase(Locale.getDefault()); }
 
-  public static String lower(final String s) { return s == null ? "" : s.toLowerCase(Locale.US); }
-
-  public static String upper(final Object o) { return upper(asStringAndClean(o)); }
-
-  public static String lower(final Object o) { return lower(asStringAndClean(o)); }
+  public static String lower(final String s) { return s == null ? null : s.toLowerCase(Locale.getDefault()); }
 
   /**
    * Takes a list as input and adds each list element to a string
@@ -191,6 +223,20 @@ public class Util {
     final StringBuilder sb = new StringBuilder();
     for(final String s : list) sb.append(clean(s)).append(delim);
     return sb.toString();
+  }
+
+  /**
+   * Takes a list as input and adds each list element to a string
+   * along with the given delimiter for every list element.
+   *
+   * <p>If the list is null or empty, <code>null</code> is returned.</p>
+   *
+   * @param list the list to express as a single string
+   * @param delim the delimiter token to append to each element in the list
+   * @return Possibly null string
+   */
+  public static String nflatten(final List<String> list, final String delim) {
+    return isNullOrEmpty(list) ? null : flatten(list, delim);
   }
 
   /**
@@ -232,11 +278,13 @@ public class Util {
 
   /**
    * RegEx filter that removes all NON-digit characters.
-   *
+   * <p>
+   * Null input begets null output.
+   * 
    * @param s the string s
-   * @return the filtered string -OR- empty string when given string is null.
+   * @return the filtered string -OR- null when the given string is null.
    */
-  public static String digits(final String s) { return emptyIfNull(s).replaceAll("[\\D]", ""); }
+  public static String digits(final String s) { return isNull(s) ? null : s.replaceAll("[\\D]", ""); }
   
   /**
    * Converts a java.util.Date to a java.sql.Date.

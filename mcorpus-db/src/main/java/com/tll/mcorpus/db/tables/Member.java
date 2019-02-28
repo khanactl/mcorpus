@@ -44,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Member extends TableImpl<MemberRecord> {
 
-    private static final long serialVersionUID = -50835014;
+    private static final long serialVersionUID = -599844325;
 
     /**
      * The reference instance of <code>public.member</code>
@@ -72,7 +72,7 @@ public class Member extends TableImpl<MemberRecord> {
     /**
      * The column <code>public.member.modified</code>.
      */
-    public final TableField<MemberRecord, Timestamp> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMP)), this, "");
+    public final TableField<MemberRecord, Timestamp> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>public.member.emp_id</code>.

@@ -3,9 +3,9 @@
 -----------------------------------------------------
 -- Author               jkirton
 -- Created:             10/15/17
--- Modified:            09/03/2018
+-- Modified:            02/26/19
 -- Description:         Prototype member corpus db
--- PostgreSQL Version   10.4
+-- PostgreSQL Version   11.2
 -----------------------------------------------------
 
 -- NOTE: a postgres db must already exist for this script to work
@@ -528,7 +528,7 @@ create table member (
   mid                     uuid primary key default gen_random_uuid(),
 
   created                 timestamp not null default now(),
-  modified                timestamp not null default now(),
+  modified                timestamp null,
 
   emp_id                  text not null,
   location                Location not null,
@@ -590,6 +590,68 @@ CREATE TRIGGER trigger_mauth_updated
   BEFORE UPDATE ON mauth
   FOR EACH ROW
   EXECUTE PROCEDURE set_modified();
+
+/**
+ * Add a member and mauth record (insert member).
+ * 
+ * @return the added member fields as OUT params.
+ */
+CREATE OR REPLACE FUNCTION insert_member(
+  in_emp_id text,
+  in_location Location,
+  in_name_first text,
+  in_name_middle text,
+  in_name_last text,
+  in_display_name text,
+  in_status member_status,
+  in_dob date,
+  in_ssn char(9),
+  in_email_personal text,
+  in_email_work text,
+  in_mobile_phone text,
+  in_home_phone text,
+  in_work_phone text,
+  in_fax text,
+  in_username text,
+  in_pswd text,
+
+  OUT out_mid UUID,
+  OUT out_created timestamp,
+  OUT out_modified timestamp,
+  OUT out_emp_id text,
+  OUT out_location Location,
+  OUT out_name_first text,
+  OUT out_name_middle text,
+  OUT out_name_last text,
+  OUT out_display_name text,
+  OUT out_status member_status,
+  OUT out_dob date,
+  OUT out_ssn char(9),
+  OUT out_email_personal text,
+  OUT out_email_work text,
+  OUT out_mobile_phone text,
+  OUT out_home_phone text,
+  OUT out_work_phone text,
+  OUT out_fax text,
+  OUT out_username text
+)
+LANGUAGE plpgsql AS 
+$_$
+BEGIN 
+  -- member
+  INSERT INTO member (emp_id, location, name_first, name_middle, name_last, display_name, status) 
+  VALUES (in_emp_id, in_location, in_name_first, in_name_middle, in_name_last, in_display_name, in_status) 
+  RETURNING member.mid, member.created, member.modified, member.emp_id, member.location, member.name_first, member.name_middle, member.name_last, member.display_name, member.status
+  INTO out_mid, out_created, out_modified, out_emp_id, out_location, out_name_first, out_name_middle, out_name_last, out_display_name, out_status
+  ;
+  -- mauth
+  INSERT INTO mauth (mid, dob, ssn, email_personal, email_work, mobile_phone, home_phone, work_phone, fax, username, pswd) 
+  VALUES (out_mid, in_dob, in_ssn, in_email_personal, in_email_work, in_mobile_phone, in_home_phone, in_work_phone, in_fax, in_username, pass_hash(in_pswd)) 
+  RETURNING mauth.dob, mauth.ssn, mauth.email_personal, mauth.email_work, mauth.mobile_phone, mauth.home_phone, mauth.work_phone, mauth.fax, mauth.username
+  INTO out_dob, out_ssn, out_email_personal, out_email_work, out_mobile_phone, out_home_phone, out_work_phone, out_fax, out_username
+  ;
+END
+$_$;
 
 create type member_audit_type as enum (
   'LOGIN',

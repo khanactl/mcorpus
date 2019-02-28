@@ -5,8 +5,14 @@ import org.jooq.Field;
 import java.util.Map;
 
 import static com.tll.mcorpus.Util.isBlank;
+import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.not;
 
+/**
+ * General repository-level entity persistence utility methods.
+ * 
+ * @author jpk
+ */
 public class RepoUtil {
 
   /**
@@ -25,9 +31,21 @@ public class RepoUtil {
    * @param <T> the field type
    * @return the field value gotten from the field map
    */
-  @SuppressWarnings("unchecked")
   public static <T> T fval(final Field<T> f, final Map<String, Object> fmap) {
-    return (T) fmap.get(f.getName());
+    return fval(f.getName(), fmap);
+  }
+
+  /**
+   * Get the field value from a field name and value map.
+   *
+   * @param fname the field name whose value is to be fetched
+   * @param fmap the field name and value map
+   * @param <T> the field type
+   * @return the field value gotten from the field map
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T fval(final String fname, final Map<String, Object> fmap) {
+    return (T) fmap.get(fname);
   }
 
   /**
@@ -100,6 +118,17 @@ public class RepoUtil {
    */
   public static void fputWhenNotBlank(final Field<String> f, final String fval, final Map<String, Object> fmap) {
     if(not(isBlank(fval))) fmap.put(f.getName(), fval);
+  }
+
+  /**
+   * Add a field value to the given field map providing the given field value is NOT null.
+   *
+   * @param f the field ref
+   * @param fval the field value
+   * @param fmap the field map to which the field name and field value are added
+   */
+  public static <T> void fputWhenNotEmpty(final Field<T[]> f, final T[] fval, final Map<String, Object> fmap) {
+    if(not(isNullOrEmpty(fval))) fmap.put(f.getName(), fval);
   }
 
   /**

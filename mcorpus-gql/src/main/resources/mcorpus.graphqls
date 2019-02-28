@@ -41,8 +41,8 @@ type Mutation {
   # update member properties
   updateMember(member: MemberToUpdate!): Member @auth(role: "mcorpus")
 
-  # physical removal of a member from the corpus - returns the deleted member id when successful
-  deleteMember(mid: ID!): ID @auth(role: "mcorpus")
+  # physical removal of a member from the corpus - returns true when successful
+  deleteMember(mid: ID!): Boolean! @auth(role: "mcorpus")
 
   # add a member address of a given address name (type)
   addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress @auth(role: "mcorpus")
@@ -50,8 +50,8 @@ type Mutation {
   # update a member address
   updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress @auth(role: "mcorpus")
 
-  # delete a member address of the given address name (type) returning the member id when successful
-  deleteMemberAddress(mid: ID!, addressName: AddressName!): ID @auth(role: "mcorpus")
+  # delete a member address of the given address name (type) returning true when successful
+  deleteMemberAddress(mid: ID!, addressName: AddressName!): Boolean! @auth(role: "mcorpus")
 
 }
 
@@ -330,6 +330,12 @@ input MemberToAdd {
 input MemberToUpdate {
   # member id
   mid: ID!
+
+  # member employee id
+  empId: String
+  # member location
+  location: Location
+
   # first name
   nameFirst: String
   # middle name
@@ -358,6 +364,11 @@ input MemberToUpdate {
   homePhone: String
   # work phone
   workPhone: String
+
+  # member username
+  username: String
+  # member password
+  pswd: String
 }
 
 # required properties for adding a new member address

@@ -1,20 +1,16 @@
 package com.tll.mcorpus;
 
-import static com.tll.mcorpus.db.Tables.MADDRESS;
-import static com.tll.mcorpus.db.Tables.MAUTH;
-import static com.tll.mcorpus.db.Tables.MEMBER;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -24,9 +20,7 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
-import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.web.JWT;
 import com.tll.mcorpus.web.JWT.JWTStatus;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
@@ -46,12 +40,6 @@ public class TestUtil {
 
   public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
-  public static final UUID testMemberUid = UUID.fromString("001ea236-12be-410a-9586-1bc6c2b2c89c");
-
-  public static final String testMemberUsername = "zqwiHSbB";
-
-  public static final String testMemberPswd = "test123";
-
   private static final ObjectMapper mapper = new ObjectMapper();
 
   private static final TypeReference<Map<String, Object>> strObjMapTypeRef = new TypeReference<Map<String, Object>>() { };
@@ -63,7 +51,7 @@ public class TestUtil {
   private static DSLContext dslMcweb = null;
   
   private static DSLContext dslMcwebtest = null;
-  
+
   /**
    * @return A newly created {@link DataSource} to the test database intended for
    *         testing.
@@ -201,6 +189,30 @@ public class TestUtil {
     }
   }
 
+  /**
+   * Convert a string date token of format: "yyyy-MM-dd" to a {@link Timestamp}.
+   *
+   * @param s the date token
+   * @return {@link Timestamp} instance
+   * @throws RuntimeException when the date parsing fails
+   */
+  public static Timestamp toTimestamp(final String s) {
+    final Date d = toDate(s);
+    return new Timestamp(d.getTime());
+  }
+
+  /**
+   * Convert a string date token of format: "yyyy-MM-dd" to a {@link java.sql.Date}.
+   *
+   * @param s the date token
+   * @return {@link java.sql.Date} instance
+   * @throws RuntimeException when the date parsing fails
+   */
+  public static java.sql.Date toSqlDate(final String s) {
+    final Date d = toDate(s);
+    return new java.sql.Date(d.getTime());
+  }
+
   public static String randomEmpId() {
     String s = String.format("%02d-%07d",
       Integer.valueOf(rand.nextInt(100)),
@@ -211,70 +223,6 @@ public class TestUtil {
 
   public static Location randomLocation() {
     return Location.values()[rand.nextInt(Location.values().length)];
-  }
-
-  public static void addMemberTableProperties(final Map<String, Object> memberMap) {
-    memberMap.put(MEMBER.EMP_ID.getName(), randomEmpId());
-    memberMap.put(MEMBER.LOCATION.getName(), randomLocation());
-    memberMap.put(MEMBER.NAME_FIRST.getName(), "Jake");
-    memberMap.put(MEMBER.NAME_MIDDLE.getName(), "Arthur");
-    memberMap.put(MEMBER.NAME_LAST.getName(), "McGidrich");
-    memberMap.put(MEMBER.DISPLAY_NAME.getName(), "JAMFMan");
-    memberMap.put(MEMBER.STATUS.getName(), MemberStatus.ACTIVE);
-  }
-
-  public static void addMauthTableProperties(final Map<String, Object> memberMap) {
-    memberMap.put(MAUTH.DOB.getName(), toDate("1977-07-04"));
-    memberMap.put(MAUTH.SSN.getName(), "101-01-0101");
-    memberMap.put(MAUTH.EMAIL_PERSONAL.getName(), "jam@ggl.com");
-    memberMap.put(MAUTH.EMAIL_WORK.getName(), "jam-work@ggl.com");
-    memberMap.put(MAUTH.MOBILE_PHONE.getName(), "(415) 674-7832");
-    memberMap.put(MAUTH.HOME_PHONE.getName(), "415 474-1080");
-    memberMap.put(MAUTH.WORK_PHONE.getName(), "415.374.2231");
-    memberMap.put(MAUTH.USERNAME.getName(), "jmac");
-    memberMap.put(MAUTH.PSWD.getName(), "33#4%%^22");
-  }
-
-  public static void addMaddressTableProperties(final Map<String, Object> maddressMap, UUID mid, Addressname addressname) {
-    maddressMap.put(MADDRESS.MID.getName(), mid);
-    maddressMap.put(MADDRESS.ADDRESS_NAME.getName(), addressname);
-    maddressMap.put(MADDRESS.ATTN.getName(), "attn");
-    maddressMap.put(MADDRESS.STREET1.getName(), "88 bway");
-    maddressMap.put(MADDRESS.STREET2.getName(), "#3");
-    maddressMap.put(MADDRESS.CITY.getName(), "city");
-    maddressMap.put(MADDRESS.STATE.getName(), "MS");
-    maddressMap.put(MADDRESS.POSTAL_CODE.getName(), "99876");
-    maddressMap.put(MADDRESS.COUNTRY.getName(), "USA");
-  }
-
-  public static Map<String, Object> generateMemberToAddPropertyMap() {
-    Map<String, Object> memberMap = new HashMap<>();
-    addMemberTableProperties(memberMap);
-    addMauthTableProperties(memberMap);
-    return memberMap;
-  }
-
-  public static Map<String, Object> generateMemberToUpdatePropertyMap() {
-    Map<String, Object> memberMap = new HashMap<>();
-    addMemberTableProperties(memberMap);
-    memberMap.remove(MEMBER.EMP_ID.getName());
-    memberMap.remove(MEMBER.LOCATION.getName());
-    addMauthTableProperties(memberMap);
-    memberMap.remove(MAUTH.USERNAME.getName());
-    memberMap.remove(MAUTH.PSWD.getName());
-    return memberMap;
-  }
-
-  public static Map<String, Object> generateMaddressToAddPropertyMap(UUID mid, Addressname addressname) {
-    Map<String, Object> maddressMap = new HashMap<>();
-    addMaddressTableProperties(maddressMap, mid, addressname);
-    return maddressMap;
-  }
-
-  public static Map<String, Object> generateMaddressToUpdatePropertyMap(UUID mid, Addressname addressname) {
-    Map<String, Object> maddressMap = new HashMap<>();
-    addMaddressTableProperties(maddressMap, mid, addressname);
-    return maddressMap;
   }
 
   public static RequestSnapshot testRequestSnapshot() {

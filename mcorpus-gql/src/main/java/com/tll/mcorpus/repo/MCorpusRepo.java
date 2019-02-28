@@ -1,19 +1,12 @@
 package com.tll.mcorpus.repo;
 
-import static com.tll.mcorpus.Util.flatten;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
+import static com.tll.mcorpus.repo.RepoUtil.*;
 import static com.tll.mcorpus.Util.not;
+import static com.tll.mcorpus.Util.nflatten;
+import static com.tll.mcorpus.Util.isNull;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMember;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddressForAdd;
-import static com.tll.mcorpus.repo.MCorpusDataTransformer.transformMemberAddressForUpdate;
-import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberAddressToAdd;
-import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberAddressToUpdate;
-import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberToAdd;
-import static com.tll.mcorpus.repo.MCorpusDataValidator.validateMemberToUpdate;
-import static com.tll.mcorpus.repo.RepoUtil.fval;
 
 import java.io.Closeable;
 import java.sql.Timestamp;
@@ -24,18 +17,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
-import com.tll.mcorpus.db.tables.pojos.Mcuser;
+import com.tll.mcorpus.db.tables.pojos.Maddress;
+import com.tll.mcorpus.db.tables.pojos.Member;
+import com.tll.mcorpus.db.tables.pojos.Mauth;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
-import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.MemberFilter;
+import com.tll.mcorpus.dmodel.MemberAndMauth;
+import com.tll.mcorpus.dmodel.MemberSearch;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -55,13 +52,49 @@ import org.slf4j.LoggerFactory;
  * @author jpk
  */
 public class MCorpusRepo implements Closeable {
+
+  private static MemberAndMauth mapToMemberAndMauth(final Map<String, Object> mmap) {
+      // map to pojo
+      final MemberAndMauth manda = new MemberAndMauth(
+        new Member(
+          fval(MEMBER.MID, mmap),
+          fval(MEMBER.CREATED, mmap),
+          fval(MEMBER.MODIFIED, mmap),
+          fval(MEMBER.EMP_ID, mmap),
+          fval(MEMBER.LOCATION, mmap),
+          fval(MEMBER.NAME_FIRST, mmap),
+          fval(MEMBER.NAME_MIDDLE, mmap),
+          fval(MEMBER.NAME_LAST, mmap),
+          fval(MEMBER.DISPLAY_NAME, mmap),
+          fval(MEMBER.STATUS, mmap)
+        ), 
+        new Mauth(
+          fval(MEMBER.MID, mmap),
+          null,
+          fval(MAUTH.DOB, mmap),
+          fval(MAUTH.SSN, mmap),
+          fval(MAUTH.EMAIL_PERSONAL, mmap),
+          fval(MAUTH.EMAIL_WORK, mmap),
+          fval(MAUTH.MOBILE_PHONE, mmap),
+          fval(MAUTH.HOME_PHONE, mmap),
+          fval(MAUTH.WORK_PHONE, mmap),
+          fval(MAUTH.FAX, mmap),
+          fval(MAUTH.USERNAME, mmap),
+          null
+        )
+      );
+      return manda;
+  }
+
   protected final Logger log = LoggerFactory.getLogger("MCorpusRepo");
 
   protected final DSLContext dsl;
 
   /**
-   * Constructor
+   * Constructor.
+   * 
    * @param ds the data source
+   * @param vldtr optional entity validator
    */
   public MCorpusRepo(DataSource ds) {
     Settings s = new Settings();
@@ -90,9 +123,7 @@ public class MCorpusRepo implements Closeable {
    * @param pswd the member password
    * @param requestInstant the sourcing request timestamp
    * @param clientOrigin the sourcing request client origin token
-   * @return Never null {@link FetchResult} object holding the {@link Mcuser} ref
-   *         if successful<br>
-   *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
+   * @return Never null {@link FetchResult} object holding the {@link Mref} ref if successful.
    */
   public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final String clientOrigin) {
     try {
@@ -166,11 +197,11 @@ public class MCorpusRepo implements Closeable {
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
-      emsg = "A data access exception occurred.";
+      emsg = "A data access exception occurred fetching mref by mid.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
-      emsg = "A technical error occurred fetching member ref by member id.";
+      emsg = "A technical error occurred fetching mref by mid.";
     }
     // error
     return new FetchResult<>(null, emsg);
@@ -197,15 +228,15 @@ public class MCorpusRepo implements Closeable {
       }
       catch(DataAccessException dae) {
         log.error(dae.getMessage());
-        emsg = "A data access exception occurred.";
+        emsg = "A data access exception occurred fetching mref by empid and location.";
       }
       catch(Throwable t) {
         log.error(t.getMessage());
-        emsg = "A technical error occurred fetching member ref by member id.";
+        emsg = "A technical error occurred fetching mref by by empid and location.";
       }
     }
     else {
-      emsg = "Invalid emp id and/or location.";
+      emsg = "Invalid emp id and/or location for mref fetch.";
     }
     // error
     return new FetchResult<>(null, emsg);
@@ -231,33 +262,40 @@ public class MCorpusRepo implements Closeable {
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
-      emsg = "A data access exception occurred.";
+      emsg = "A data access exception occurred fetching mrefs by emp id.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
-      emsg = "A technical error occurred fetching member refs by emp id.";
+      emsg = "A technical error occurred fetching mrefs by emp id.";
     }
     // error
     return new FetchResult<>(null, emsg);
   }
 
-  public FetchResult<Map<String, Object>> fetchMember(final UUID mid) {
+  public FetchResult<MemberAndMauth> fetchMember(final UUID mid) {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
     String emsg;
     try {
       final Map<String, Object> mmap = dsl
-              .select(MEMBER.MID, MEMBER.CREATED, MEMBER.MODIFIED, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
+              .select(
+                MEMBER.MID, MEMBER.CREATED, MEMBER.MODIFIED, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS, 
+                MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.FAX, MAUTH.USERNAME
+              )
               .from(MEMBER).join(MAUTH).onKey()
               .where(MEMBER.MID.eq(mid))
               .fetchOneMap();
 
-      return mmap != null ?
-        new FetchResult<>(mmap, null)
-        : new FetchResult<>(null, String.format("No member found with mid: '%s'.", mid));
+      if(isNull(mmap)) return new FetchResult<>(null, String.format("No member found with mid: '%s'.", mid));
+      
+      // map to pojo
+      final MemberAndMauth manda = mapToMemberAndMauth(mmap);
+      
+      // success
+      return new FetchResult<>(manda, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
-      emsg = "A data access exception occurred.";
+      emsg = "A data access exception occurred fetching member.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
@@ -275,24 +313,22 @@ public class MCorpusRepo implements Closeable {
    *          wrapped in a {@link FetchResult} to enclose an
    *          error message when the fetch fails
    */
-  public FetchResult<List<Map<String, Object>>> fetchMemberAddresses(final UUID mid) {
+  public FetchResult<List<Maddress>> fetchMemberAddresses(final UUID mid) {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
     String emsg;
     try {
-      final List<Map<String, Object>> maddressList = dsl
+      final List<Maddress> maddressList = dsl
         .select()
         .from(MADDRESS)
         .where(MADDRESS.MID.eq(mid))
-        .fetchMaps();
-      if(maddressList != null && !maddressList.isEmpty()) {
-        return new FetchResult<>(maddressList, null);
-      }
-      // no member addresses exist
-      return new FetchResult<>(Collections.emptyList(), null);
+        .fetchInto(Maddress.class);
+      
+      // success
+      return new FetchResult<>(maddressList, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
-      emsg = "A data access exception occurred.";
+      emsg = "A data access exception occurred fetching member address.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
@@ -305,47 +341,58 @@ public class MCorpusRepo implements Closeable {
   /**
    * Member search function with optional filtering and paging offsets.
    *
-   * @param filter the optional filter object
-   * @param offset the sql query offset
-   * @param limit the sql query fetch size
+   * @param msearch the member search conditions object
+   * @param offset the member search db offset index
+   * @param limit the max number of members to return
    * @return FetchResult for a list of property maps representing member entities.
    */
-  public FetchResult<List<Map<String, Object>>> memberSearch(final MemberFilter filter, int offset, int limit) {
+  public FetchResult<List<MemberAndMauth>> memberSearch(final MemberSearch msearch, int offset, int limit) {
     String emsg;
     try {
       final List<Map<String, Object>> members;
-      if(filter == null || !filter.isSet()) {
+      if(msearch == null || not(msearch.hasSearchConditions())) {
         // NO filter
         members = dsl
-          .select(MEMBER.MID, MEMBER.CREATED, MEMBER.MODIFIED, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
+          .select(
+            MEMBER.MID, MEMBER.CREATED, MEMBER.MODIFIED, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS, 
+            MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME
+          )
           .from(MEMBER).join(MAUTH).onKey()
-          .orderBy(MemberFilter.getDefaultJooqSortFields())
+          .orderBy(msearch.orderBys)
           .offset(offset).limit(limit)
           .fetch().intoMaps();
-      }
-      else {
+      } else {
         // filter
         members = dsl
-          .select(MEMBER.MID, MEMBER.CREATED, MEMBER.MODIFIED, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
+          .select(
+            MEMBER.MID, MEMBER.CREATED, MEMBER.MODIFIED, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS, 
+            MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME
+          )
           .from(MEMBER).join(MAUTH).onKey()
-          .where(filter.asJooqCondition())
-          .orderBy(filter.generateJooqSortFields())
+          .where(msearch.conditions)
+          .orderBy(msearch.orderBys)
           .offset(offset).limit(limit)
           .fetch().intoMaps();
       }
+      
       if(members == null || members.isEmpty()) {
         // no matches
         return new FetchResult<>(Collections.emptyList(), null);
       }
-      return new FetchResult<>(members, null);
+
+      final List<MemberAndMauth> mlist = members.stream()
+        .map(MCorpusRepo::mapToMemberAndMauth)
+        .collect(Collectors.toList());
+
+      return new FetchResult<>(mlist, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
-      emsg = "A data access error occurred fetching members.";
+      emsg = "A data access error occurred fetching members by search.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
-      emsg = "A technical error occurred fetching members.";
+      emsg = "A technical error occurred fetching members by search.";
     }
     // error
     return new FetchResult<>(null, emsg);
@@ -354,197 +401,161 @@ public class MCorpusRepo implements Closeable {
   /**
    * Add a member.
    *
-   * @param memberMap a map of property name keys and values.<br>
-   *                  The expected member properties are:
-   * <pre>
-   * emp_id         the member emp id
-   * location       the member location
-   * name_first     first name of the member
-   * name_middle    middle name of the member
-   * name_last last name of the member
-   * display_name   member display name
-   * dob member     date of birth
-   * ssn member     SSN
-   * email_personal member personal email address
-   * email_work     member work email address
-   * mobile_phone   member mobile phone number
-   * home_phone     member home phone number
-   * workPhone      member work phone number
-   * username       member username
-   * pswd           password un-encrypted
-   * </pre>
+   * @param memberToAdd the member to insert in the backend.
    *
-   * @return newly created {@link FetchResult} of a map of the newly added member:<br>
-   *          mid: the member's unique UUID,<br>
-   *          created: the member's record created timestamp
+   * @return newly created fetch result of the added {@link MemberAndMauth} upon success 
+   *         -OR- an error message otherwise.
    */
-  public FetchResult<Map<String, Object>> addMember(final Map<String, Object> memberMap) {
-    if(isNullOrEmpty(memberMap)) return new FetchResult<>(null, "No member properties provided.");
+  public FetchResult<MemberAndMauth> addMember(final MemberAndMauth memberToAdd) {
+    if(isNull(memberToAdd)) return new FetchResult<>(null, "No member provided.");
 
     final List<String> emsgs = new ArrayList<>();
-
-    // validate the member properties
-    validateMemberToAdd(memberMap, emsgs);
-    if(not(emsgs.isEmpty())) {
-      return new FetchResult<>(null, flatten(emsgs, ","));
-    }
-
-    // transform member property map to serve as a data cleanse/prep operation before record insert
-    final List<Map<String, Object>> cmapList = transformMember(memberMap);
-    final Map<String, Object> cmapMember = cmapList.get(0);
-    final Map<String, Object> cmapMauth = cmapList.get(1);
-
-    final Map<String, Object> rmap = new HashMap<>();
+    final List<MemberAndMauth> rlist = new ArrayList<>(1);
     
     try {
       dsl.transaction(configuration -> {
-
         final DSLContext trans = DSL.using(configuration);
 
-        // add member record
-        final Map<String, Object> rmapMember =
-          trans
-            .insertInto(MEMBER, MEMBER.EMP_ID, MEMBER.LOCATION, MEMBER.NAME_FIRST, MEMBER.NAME_MIDDLE, MEMBER.NAME_LAST, MEMBER.DISPLAY_NAME, MEMBER.STATUS)
-            .values(
-              fval(MEMBER.EMP_ID, cmapMember),
-              fval(MEMBER.LOCATION, cmapMember),
-              fval(MEMBER.NAME_FIRST, cmapMember),
-              fval(MEMBER.NAME_MIDDLE, cmapMember),
-              fval(MEMBER.NAME_LAST, cmapMember),
-              fval(MEMBER.DISPLAY_NAME, cmapMember),
-              fval(MEMBER.STATUS, cmapMember)
-            )
-            .returning() // :o
-            .fetchOne().intoMap();
-
-        // acquire the inserted member record's PK and created timestamp
-        if(rmapMember == null) throw new DataAccessException("No post-insert member record returned.");
-
-        final UUID mid = fval(MEMBER.MID, rmapMember);
-        final Timestamp created = fval(MEMBER.CREATED, rmapMember);
-
-        if(mid == null || created == null) {
-          // bad insert return values (force rollback)
-          throw new DataAccessException("Bad member insert return values.");
-        }
-
-        // create mauth record
-        final Map<String, Object> rmapMauth =
-          trans
-            .insertInto(MAUTH,
-              MAUTH.MID, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME, MAUTH.PSWD)
-            .values(
-              mid,
-              fval(MAUTH.DOB, cmapMauth),
-              fval(MAUTH.SSN, cmapMauth),
-              fval(MAUTH.EMAIL_PERSONAL, cmapMauth),
-              fval(MAUTH.EMAIL_WORK, cmapMauth),
-              fval(MAUTH.MOBILE_PHONE, cmapMauth),
-              fval(MAUTH.HOME_PHONE, cmapMauth),
-              fval(MAUTH.WORK_PHONE, cmapMauth),
-              fval(MAUTH.USERNAME, cmapMauth),
-              fval(MAUTH.PSWD, cmapMauth)
-            )
-            .returning(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
-            .fetchOne().intoMap();
-
-        if(rmapMauth == null) {
-          // mauth insert failed (rollback)
-          throw new DataAccessException("No post-insert member record returned.");
-        }
+        final InsertMember im = new InsertMember();
+        im.setInEmpId(memberToAdd.dbMember.getEmpId());
+        im.setInLocation(memberToAdd.dbMember.getLocation());
+        im.setInNameFirst(memberToAdd.dbMember.getNameFirst());
+        im.setInNameMiddle(memberToAdd.dbMember.getNameMiddle());
+        im.setInNameLast(memberToAdd.dbMember.getNameLast());
+        im.setInDisplayName(memberToAdd.dbMember.getDisplayName());
+        im.setInStatus(memberToAdd.dbMember.getStatus());
+        im.setInDob(memberToAdd.dbMauth.getDob());
+        im.setInSsn(memberToAdd.dbMauth.getSsn());
+        im.setInEmailPersonal(memberToAdd.dbMauth.getEmailPersonal());
+        im.setInEmailWork(memberToAdd.dbMauth.getEmailWork());
+        im.setInMobilePhone(memberToAdd.dbMauth.getMobilePhone());
+        im.setInHomePhone(memberToAdd.dbMauth.getHomePhone());
+        im.setInWorkPhone(memberToAdd.dbMauth.getWorkPhone());
+        im.setInFax(memberToAdd.dbMauth.getFax());
+        im.setInUsername(memberToAdd.dbMauth.getUsername());
+        im.setInPswd(memberToAdd.dbMauth.getPswd());
+        
+        im.execute(trans.configuration());
+        
+        final MemberAndMauth added = new MemberAndMauth(
+          new Member(
+            im.getOutMid(),
+            im.getOutCreated(),
+            im.getOutModified(),
+            im.getOutEmpId(),
+            im.getOutLocation(),
+            im.getOutNameFirst(),
+            im.getOutNameMiddle(),
+            im.getOutNameLast(),
+            im.getOutDisplayName(),
+            im.getOutStatus()
+          ),
+          new Mauth(
+            im.getOutMid(),
+            null,
+            im.getOutDob(),
+            im.getOutSsn(),
+            im.getOutEmailPersonal(),
+            im.getOutEmailWork(),
+            im.getOutMobilePhone(),
+            im.getOutHomePhone(),
+            im.getOutWorkPhone(),
+            im.getOutFax(),
+            im.getOutUsername(),
+            null 
+          )
+        );
 
         // success
-        // NOTE: the order of adding the maps the returning map is important
-        rmap.putAll(rmapMauth);
-        rmap.putAll(rmapMember);
+        rlist.add(added);
       });
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsgs.add("A data access exception occurred.");
+      emsgs.add("A data access exception occurred adding member.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
       emsgs.add("A technical error occurred adding member.");
     }
 
-    if(not(isNullOrEmpty(emsgs))) {
-      // member add fail
-      return new FetchResult<>(null, flatten(emsgs, ","));
-    }
-
-    // success (presuming actually)
-    return new FetchResult<>(rmap, null);
+    final MemberAndMauth added = rlist.size() == 1 ? rlist.get(0) : null;
+    return new FetchResult<>(added, nflatten(emsgs, ","));
   }
 
-  public FetchResult<Map<String, Object>> updateMember(final Map<String, Object> memberMap) {
-    if(isNullOrEmpty(memberMap)) return new FetchResult<>(null, "No member properties provided.");
+  public FetchResult<MemberAndMauth> updateMember(final MemberAndMauth memberToUpdate) {
+    if(isNull(memberToUpdate)) return new FetchResult<>(null, "No member provided.");
     
     final List<String> emsgs = new ArrayList<>();
     
-    // validate the member properties
-    validateMemberToUpdate(memberMap, emsgs);
-    if(not(emsgs.isEmpty())) {
-      return new FetchResult<>(null, flatten(emsgs, ","));
-    }
+    final UUID mid = memberToUpdate.dbMember.getMid();
 
-    // transform member property map to serve as a data cleanse/prep operation before record insert
-    final List<Map<String, Object>> cmaps = transformMember(memberMap);
-    final Map<String, Object> cmapMember = cmaps.get(0);
-    final Map<String, Object> cmapMauth = cmaps.get(1);
-
-    final UUID mid = fval(MEMBER.MID, memberMap);
-
-    final Map<String, Object> rmap = new HashMap<>();
+    final List<MemberAndMauth> rlist = new ArrayList<>(1);
 
     try {
       dsl.transaction(configuration -> {
 
         final DSLContext trans = DSL.using(configuration);
 
-        final Map<String, Object> rmapMauth;
-        
         // update mauth
-        if(not(cmapMauth.isEmpty())) {
+        final Mauth dbMauth;
+        if(memberToUpdate.hasMauthTableVals()) {
+
           // update mauth record
-          rmapMauth = trans
+          final Map<String, Object> fmapMauth = new HashMap<>();
+          fputWhenNotNull(MAUTH.DOB, memberToUpdate.dbMauth.getDob(), fmapMauth);
+          fputWhenNotNull(MAUTH.SSN, memberToUpdate.dbMauth.getSsn(), fmapMauth);
+          fputWhenNotNull(MAUTH.EMAIL_PERSONAL, memberToUpdate.dbMauth.getEmailPersonal(), fmapMauth);
+          fputWhenNotNull(MAUTH.EMAIL_WORK, memberToUpdate.dbMauth.getEmailWork(), fmapMauth);
+          fputWhenNotNull(MAUTH.MOBILE_PHONE, memberToUpdate.dbMauth.getMobilePhone(), fmapMauth);
+          fputWhenNotNull(MAUTH.HOME_PHONE, memberToUpdate.dbMauth.getHomePhone(), fmapMauth);
+          fputWhenNotNull(MAUTH.WORK_PHONE, memberToUpdate.dbMauth.getWorkPhone(), fmapMauth);
+          fputWhenNotNull(MAUTH.USERNAME, memberToUpdate.dbMauth.getUsername(), fmapMauth);
+          dbMauth = trans
                     .update(MAUTH)
-                    .set(cmapMauth)
+                    .set(fmapMauth)
                     .where(MAUTH.MID.eq(mid))
                     .returning(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
-                    .fetchOne().intoMap();
-        }
-        else {
+                    .fetchOne().into(Mauth.class);
+        } else {
           // otherwise select to get current snapshot
-          rmapMauth = trans
+          dbMauth = trans
                     .select(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
                     .from(MAUTH)
                     .where(MAUTH.MID.eq(mid))
-                    .fetchOne().intoMap();
+                    .fetchOne().into(Mauth.class);
         }
         
-        if (rmapMauth == null) {
+        if (dbMauth == null) {
           // mauth insert failed (rollback)
           throw new DataAccessException("No post-update mauth record returned.");
         }
-        rmap.putAll(rmapMauth);
 
-        final Map<String, Object> rmapMember;
-
-        // update member record (we are guaranteed at least one field to update)
-        rmapMember = trans
-                  .update(MEMBER)
-                  .set(cmapMember)
-                  .where(MEMBER.MID.eq(mid))
-                  .returning()
-                  .fetchOne().intoMap();
+        // update member record (always to maintain modified integrity)
+        final Map<String, Object> fmapMember = new HashMap<>();
+        fput(MEMBER.MODIFIED, Timestamp.from(Instant.now()), fmapMember); // force
+        fputWhenNotNull(MEMBER.EMP_ID, memberToUpdate.dbMember.getEmpId(), fmapMember);
+        fputWhenNotNull(MEMBER.LOCATION, memberToUpdate.dbMember.getLocation(), fmapMember);
+        fputWhenNotNull(MEMBER.NAME_FIRST, memberToUpdate.dbMember.getNameFirst(), fmapMember);
+        fputWhenNotNull(MEMBER.NAME_MIDDLE, memberToUpdate.dbMember.getNameMiddle(), fmapMember);
+        fputWhenNotNull(MEMBER.NAME_LAST, memberToUpdate.dbMember.getNameLast(), fmapMember);
+        fputWhenNotNull(MEMBER.DISPLAY_NAME, memberToUpdate.dbMember.getDisplayName(), fmapMember);
+        fputWhenNotNull(MEMBER.STATUS, memberToUpdate.dbMember.getStatus(), fmapMember);
+        final com.tll.mcorpus.db.tables.pojos.Member dbMember;
+        dbMember = trans
+                .update(MEMBER)
+                .set(fmapMember)
+                .where(MEMBER.MID.eq(mid))
+                .returning()
+                .fetchOne().into(com.tll.mcorpus.db.tables.pojos.Member.class);
 
         // acquire the inserted member record's modified timestamp
-        if (rmapMember == null) {
+        if (dbMember == null) {
           // bad insert return values (force rollback)
           throw new DataAccessException("No post-update member record returned.");
         }
-        rmap.putAll(rmapMember);
+
+        rlist.add(new MemberAndMauth(dbMember, dbMauth));
 
         // successful member update at this point
         // implicit commit happens now
@@ -552,20 +563,16 @@ public class MCorpusRepo implements Closeable {
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsgs.add("A data access exception occurred.");
+      emsgs.add("A data access error occurred updating member.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
       emsgs.add("A technical error occurred updating member.");
     }
 
-    if(not(isNullOrEmpty(emsgs))) {
-      // error fetching updated member
-      return new FetchResult<>(null, flatten(emsgs, ","));
-    }
-
     // success
-    return new FetchResult<>(rmap, null);
+    final MemberAndMauth updated = rlist.size() == 1 ? rlist.get(0) : null;
+    return new FetchResult<>(updated, nflatten(emsgs, ","));
   }
 
   /**
@@ -575,7 +582,7 @@ public class MCorpusRepo implements Closeable {
    * @return FetchResult of the member id upon successful deletion,
    *                     otherwise an error message.
    */
-  public FetchResult<UUID> deleteMember(final UUID mid) {
+  public FetchResult<Boolean> deleteMember(final UUID mid) {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
     
     String emsg;
@@ -589,11 +596,11 @@ public class MCorpusRepo implements Closeable {
       if(numDeleted != 1) throw new DataAccessException("Invalid member delete return value.");
 
       // success
-      return new FetchResult<>(mid, null);
+      return new FetchResult<>(Boolean.TRUE, null);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsg = "A data access exception occurred.";
+      emsg = "A data access exception occurred deleting member.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());
@@ -604,23 +611,16 @@ public class MCorpusRepo implements Closeable {
     return new FetchResult<>(null, emsg);
   }
 
-  public FetchResult<Map<String, Object>> addMemberAddress(final Map<String, Object> maddressMap) {
-    if(isNullOrEmpty(maddressMap)) return new FetchResult<>(null, "No member address properties provided.");
+  public FetchResult<Maddress> addMemberAddress(final Maddress memberAddressToAdd) {
+    if(isNull(memberAddressToAdd)) return new FetchResult<>(null, "No member address provided.");
 
     final List<String> emsgs = new ArrayList<>();
     
-    // validate the member properties
-    validateMemberAddressToAdd(maddressMap, emsgs);
-    if(not(emsgs.isEmpty())) {
-      return new FetchResult<>(null, flatten(emsgs, ","));
-    }
-
-    // transform property map param to serve as a data cleanse/prep operation before record insert
-    final Map<String, Object> cmap = transformMemberAddressForAdd(maddressMap);
+    final UUID mid = memberAddressToAdd.getMid();
     
     try {
       // add record
-      final Map<String, Object> rmap =
+      final Maddress maddress =
         dsl
           .insertInto(MADDRESS,
             MADDRESS.MID,
@@ -633,28 +633,28 @@ public class MCorpusRepo implements Closeable {
             MADDRESS.POSTAL_CODE,
             MADDRESS.COUNTRY)
           .values(
-            fval(MADDRESS.MID, cmap),
-            fval(MADDRESS.ADDRESS_NAME, cmap),
-            fval(MADDRESS.ATTN, cmap),
-            fval(MADDRESS.STREET1, cmap),
-            fval(MADDRESS.STREET2, cmap),
-            fval(MADDRESS.CITY, cmap),
-            fval(MADDRESS.STATE, cmap),
-            fval(MADDRESS.POSTAL_CODE, cmap),
-            fval(MADDRESS.COUNTRY, cmap)
+            mid,
+            memberAddressToAdd.getAddressName(),
+            memberAddressToAdd.getAttn(),
+            memberAddressToAdd.getStreet1(),
+            memberAddressToAdd.getStreet2(),
+            memberAddressToAdd.getCity(),
+            memberAddressToAdd.getState(),
+            memberAddressToAdd.getPostalCode(),
+            memberAddressToAdd.getCountry()
           )
           .returning()
-          .fetchOne().intoMap();
+          .fetchOne().into(Maddress.class);
 
-      if(isNullOrEmpty(rmap)) 
+      if(isNull(maddress) || isNull(maddress.getMid())) 
         throw new DataAccessException("Invalid member address insert return value.");
 
-      // successful
-      return new FetchResult<>(rmap, null);
+      // success
+      return new FetchResult<>(maddress, null);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsgs.add("A data access exception occurred.");
+      emsgs.add("A data access exception occurred addming member address.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
@@ -662,46 +662,45 @@ public class MCorpusRepo implements Closeable {
     }
 
     // fail
-    return new FetchResult<>(null, flatten(emsgs, ","));
+    return new FetchResult<>(null, nflatten(emsgs, ","));
   }
 
-  public FetchResult<Map<String, Object>> updateMemberAddress(final Map<String, Object> maddressMap) {
-    if(isNullOrEmpty(maddressMap)) return new FetchResult<>(null, "No member address properties provided.");
+  public FetchResult<Maddress> updateMemberAddress(final Maddress maddressToUpdate) {
+    if(isNull(maddressToUpdate)) return new FetchResult<>(null, "No member address provided.");
 
     final List<String> emsgs = new ArrayList<>();
-    
-    // validate
-    validateMemberAddressToUpdate(maddressMap, emsgs);
-    if(not(emsgs.isEmpty())) {
-      return new FetchResult<>(null, flatten(emsgs, ","));
-    }
 
-    // transform member property map to serve as a data cleanse/prep operation before record insert
-    final List<Object> clist = transformMemberAddressForUpdate(maddressMap);
-    final UUID mid = (UUID) clist.get(0);
-    final Addressname addressname = (Addressname) clist.get(1);
-    @SuppressWarnings("unchecked")
-    final Map<String, Object> cmap = (Map<String, Object>) clist.get(2);
+    final UUID mid = maddressToUpdate.getMid();
+    final Addressname addressname = maddressToUpdate.getAddressName();
     
     try {
       // update
-      final Map<String, Object> rmap =
+      final Map<String, Object> fmap = new HashMap<>();
+      fputWhenNotNull(MADDRESS.ATTN, maddressToUpdate.getAttn(), fmap);
+      fputWhenNotNull(MADDRESS.STREET1, maddressToUpdate.getStreet1(), fmap);
+      fputWhenNotNull(MADDRESS.STREET2, maddressToUpdate.getStreet2(), fmap);
+      fputWhenNotNull(MADDRESS.CITY, maddressToUpdate.getCity(), fmap);
+      fputWhenNotNull(MADDRESS.STATE, maddressToUpdate.getState(), fmap);
+      fputWhenNotNull(MADDRESS.POSTAL_CODE, maddressToUpdate.getPostalCode(), fmap);
+      fputWhenNotNull(MADDRESS.COUNTRY, maddressToUpdate.getCountry(), fmap);
+
+      final Maddress maddress =
         dsl
           .update(MADDRESS)
-          .set(cmap)
+          .set(fmap)
           .where(MADDRESS.MID.eq(mid)).and(MADDRESS.ADDRESS_NAME.eq(addressname))
           .returning() // :o
-          .fetchOne().intoMap();
+          .fetchOne().into(Maddress.class);
 
-      if(isNullOrEmpty(rmap))
+      if(isNull(maddress))
         throw new DataAccessException("Bad member address update return value.");
 
-      // successful
-      return new FetchResult<>(rmap, null);
+      // success
+      return new FetchResult<>(maddress, null);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsgs.add("A data access exception occurred.");
+      emsgs.add("A data access exception occurred updating member address.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
@@ -709,7 +708,7 @@ public class MCorpusRepo implements Closeable {
     }
 
     // fail
-    return new FetchResult<>(null, flatten(emsgs, ","));
+    return new FetchResult<>(null, nflatten(emsgs, ","));
   }
 
   /**
@@ -717,14 +716,13 @@ public class MCorpusRepo implements Closeable {
    *
    * @param mid the id of the member "owning" the address to delete
    * @param addressname the address name identifying the member address to delete
-   * @return FetchResult of the member id upon successful deletion,
-   *                     otherwise an error message.
+   * @return FetchResult<TRUE> upon successful deletion, or an error message.
    */
-  public FetchResult<UUID> deleteMemberAddress(final UUID mid, Addressname addressname) {
+  public FetchResult<Boolean> deleteMemberAddress(final UUID mid, Addressname addressname) {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    if(addressname == null) return new FetchResult<>(null, "No address name provided.");
     String emsg;
     try {
-      // update member record
       final int numDeleted = dsl
                 .delete(MADDRESS)
                 .where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(addressname)))
@@ -732,12 +730,12 @@ public class MCorpusRepo implements Closeable {
 
       if(numDeleted != 1) throw new DataAccessException("Invalid member address delete return value.");
 
-      // successful member address delete
-      return new FetchResult<>(mid, null);
+      // success
+      return new FetchResult<>(Boolean.TRUE);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsg = "A data access exception occurred.";
+      emsg = "A data access exception occurred deleting member address.";
     }
     catch(Throwable t) {
       log.error(t.getMessage());

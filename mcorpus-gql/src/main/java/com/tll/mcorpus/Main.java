@@ -10,6 +10,9 @@ import com.tll.mcorpus.web.GraphQLIndexHandler;
 import com.tll.mcorpus.web.JWTStatusHandler;
 import com.tll.mcorpus.web.MCorpusWebModule;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ratpack.guice.Guice;
 import ratpack.handling.RequestLogger;
 import ratpack.hikari.HikariModule;
@@ -23,6 +26,19 @@ import ratpack.server.RatpackServer;
  */
 public class Main {
 
+  /**
+   * The app-wide global logger.
+   * <p>
+   * Use this sole static logger to issue application level logging
+   * when logging at class/global level (i.e. inside static methods).
+   */
+  private static final Logger appLog = LoggerFactory.getLogger("mcorpus-gql-server");
+  
+  /**
+   * @return the global app logger.
+   */
+  public static Logger glog() { return appLog; }
+  
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
      .serverConfig(config -> config

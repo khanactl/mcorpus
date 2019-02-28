@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.repo.FetchResult;
+import com.tll.mcorpus.repo.IJwtStatusProvider;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.IJwtStatusProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

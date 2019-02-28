@@ -5,8 +5,10 @@ package com.tll.mcorpus.db;
 
 
 import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
+import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.Armor1;
 import com.tll.mcorpus.db.routines.Armor2;
 import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
@@ -28,6 +30,7 @@ import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.Hmac1;
 import com.tll.mcorpus.db.routines.Hmac2;
 import com.tll.mcorpus.db.routines.InsertMcuser;
+import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
@@ -69,6 +72,7 @@ import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -785,6 +789,33 @@ public class Routines {
         f.setInRoles(inRoles);
 
         return f.asField();
+    }
+
+    /**
+     * Call <code>public.insert_member</code>
+     */
+    public static InsertMember insertMember(Configuration configuration, String inEmpId, Location inLocation, String inNameFirst, String inNameMiddle, String inNameLast, String inDisplayName, MemberStatus inStatus, Date inDob, String inSsn, String inEmailPersonal, String inEmailWork, String inMobilePhone, String inHomePhone, String inWorkPhone, String inFax, String inUsername, String inPswd) {
+        InsertMember p = new InsertMember();
+        p.setInEmpId(inEmpId);
+        p.setInLocation(inLocation);
+        p.setInNameFirst(inNameFirst);
+        p.setInNameMiddle(inNameMiddle);
+        p.setInNameLast(inNameLast);
+        p.setInDisplayName(inDisplayName);
+        p.setInStatus(inStatus);
+        p.setInDob(inDob);
+        p.setInSsn(inSsn);
+        p.setInEmailPersonal(inEmailPersonal);
+        p.setInEmailWork(inEmailWork);
+        p.setInMobilePhone(inMobilePhone);
+        p.setInHomePhone(inHomePhone);
+        p.setInWorkPhone(inWorkPhone);
+        p.setInFax(inFax);
+        p.setInUsername(inUsername);
+        p.setInPswd(inPswd);
+
+        p.execute(configuration);
+        return p;
     }
 
     /**

@@ -8,10 +8,7 @@ import static com.tll.mcorpus.TestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -28,9 +25,6 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
-import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.McuserToAdd;
-import com.tll.mcorpus.repo.model.McuserToUpdate;
 
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -50,9 +44,13 @@ public class MCorpusUserRepoTest {
   @AfterClass
   public static void clearBackend() {
     try {
-      // using mcwebtest db creds - remove any test generated db artifacts
-      log.info("Num mcuser audit records deleted after test: {}.",
+      // delete mcuser_audit recs if any
+      log.info("Num mcuser_audit records deleted after test: {}.",
           testDslMcwebTest().delete(MCUSER_AUDIT).where(MCUSER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
+      
+      // delete test mcuser recs if any
+      log.info("Num mcuser records deleted after test: {}.",
+          testDslMcwebTest().delete(MCUSER).where(MCUSER.USERNAME.eq(TEST_MCUSER_USERNAME)).execute());
     } catch (Exception e) {
       log.error(e.getMessage());
     } finally {
@@ -105,6 +103,7 @@ public class MCorpusUserRepoTest {
       imu.execute(testDslMcwebTest().configuration());
       final Mcuser mcuser = imu.getReturnValue().into(Mcuser.class);
       log.info("mcuser test record added: {}", mcuser);
+      assertNotNull(mcuser);
       assertNotNull(mcuser.getUid());
       return mcuser;
     }
@@ -175,25 +174,20 @@ public class MCorpusUserRepoTest {
     return e;
   }
 
-  public static McuserToAdd asMcuserToAdd(final Mcuser mar) {
-    return new McuserToAdd(
-      mar.getName(),
-      mar.getEmail(),
-      mar.getUsername(),
-      mar.getPswd(),
-      mar.getStatus(),
-      mar.getRoles()
-    );
-  }
-
-  public static McuserToUpdate asMcuserToUpdate(final Mcuser mar) {
-    return new McuserToUpdate(
-      mar.getUid(),
-      mar.getName(),
-      mar.getEmail(),
-      mar.getUsername(),
-      mar.getStatus(),
-      mar.getRoles()
+  /**
+   * @return New modified copy of mcuser to use to verify mcuser update op.
+   */
+  static Mcuser alteredCopy(final Mcuser mcuser) {
+    return new Mcuser(
+      mcuser.getUid(),
+      mcuser.getCreated(),
+      mcuser.getModified(),
+      mcuser.getUsername(),
+      null,
+      "nameUPDATED",
+      mcuser.getEmail(),
+      McuserStatus.INVALIDATED,
+      new McuserRole[0] // i.e. nix roles
     );
   }
 
@@ -288,6 +282,7 @@ public class MCorpusUserRepoTest {
       assertNotNull(loginResult.getErrorMsg());
       assertTrue(loginResult.hasErrorMsg());
       assertNull(loginResult.get());
+      assertFalse(loginResult.isSuccess());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -316,8 +311,9 @@ public class MCorpusUserRepoTest {
       log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
       
       assertNotNull(loginResult);
-      assertNotNull(loginResult.getErrorMsg());
+      assertFalse(loginResult.isSuccess());
       assertTrue(loginResult.hasErrorMsg());
+      assertNotNull(loginResult.getErrorMsg());
       assertNull(loginResult.get());
     }
     catch(Exception e) {
@@ -355,6 +351,8 @@ public class MCorpusUserRepoTest {
       log.info("mcorpus LOGOUT WITH VALID LOGIN TEST result: {}", logoutResult);
       
       assertNotNull(logoutResult);
+      assertTrue(logoutResult.isSuccess());
+      assertTrue(logoutResult.get());
       assertNull(logoutResult.getErrorMsg());
       assertFalse(logoutResult.hasErrorMsg());
     }
@@ -399,6 +397,7 @@ public class MCorpusUserRepoTest {
       assertNotNull(logoutResult);
       assertNotNull(logoutResult.getErrorMsg());
       assertTrue(logoutResult.hasErrorMsg());
+      assertFalse(logoutResult.isSuccess());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -421,7 +420,6 @@ public class MCorpusUserRepoTest {
 
       // insert test mcuser record
       Mcuser mcuser = insertTestMcuser();
-      // final Set<McuserRole> roles = rolesToSet(testMcuserAndRoles.getRoles());
       uid = mcuser.getUid();
       assertNotNull(uid);
 
@@ -452,8 +450,7 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
       
       final Mcuser testMcuser = testNewMcuserAndRoles();
-      final McuserToAdd mcuserToAdd = asMcuserToAdd(testMcuser);
-      final FetchResult<Mcuser> fr = repo.addMcuser(mcuserToAdd);
+      final FetchResult<Mcuser> fr = repo.addMcuser(testMcuser);
       try { uid = fr.get().getUid(); } catch(Exception e) {}
       
       assertNotNull(fr);
@@ -483,17 +480,23 @@ public class MCorpusUserRepoTest {
 
       // insert test mcuser record
       final Mcuser mcuser = insertTestMcuser();
-      final McuserToUpdate mcuserToUpdate = asMcuserToUpdate(mcuser);
-      uid = mcuser.getUid();
-      assertNotNull(uid);
+      try { uid = mcuser.getUid(); } catch(Exception e) {}
 
-      final FetchResult<Mcuser> fr = repo.updateMcuser(mcuserToUpdate);
+      // update
+      final Mcuser altered = alteredCopy(mcuser);
+
+      final FetchResult<Mcuser> fr = repo.updateMcuser(altered);
       assertNotNull(fr);
-      assertTrue("mcuser add test failed", fr.isSuccess());
+      assertTrue("mcuser update test failed", fr.isSuccess());
       assertNotNull("mcuser add test - no mcuser", fr.get());
       assertNotNull("mcuser add test - no mcuser.uid", fr.get().getUid());
       assertNotNull("mcuser add test - no mcuser.created", fr.get().getCreated());
       assertNotNull("mcuser add test - no mcuser.modified", fr.get().getModified());
+
+      final Mcuser updated = fr.get();
+      assertEquals(altered.getName(), updated.getName());
+      assertEquals(altered.getStatus(), updated.getStatus());
+      assertArrayEquals(altered.getRoles(), updated.getRoles());
     }
     catch(Exception e) {
       log.error(e.getMessage());
@@ -514,8 +517,7 @@ public class MCorpusUserRepoTest {
     try {
       repo = mcuserRepo();
       Mcuser testMcuser = insertTestMcuser();
-      uid = testMcuser.getUid();
-      assertNotNull(uid);
+      try { uid = testMcuser.getUid(); } catch(Exception e) {}
 
       FetchResult<Boolean> fetchResult = repo.deleteMcuser(uid);
       assertNotNull(fetchResult);
@@ -539,8 +541,10 @@ public class MCorpusUserRepoTest {
     UUID uid = null;
     try {
       repo = mcuserRepo();
+      
       Mcuser testMcuser = insertTestMcuser();
       uid = testMcuser.getUid();
+      
       Instant requestInstant = Instant.now();
       String clientOrigin = testRequestOrigin;
 

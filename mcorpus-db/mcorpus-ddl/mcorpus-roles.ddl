@@ -2,11 +2,11 @@
 ---     mcorpus db roles      ---
 ---------------------------------
 -- Author               jkirton
--- mcorpus Version:     0.7.0
+-- mcorpus Version:     0.9.0-SNAPSHOT
 -- Created:             10/15/17
--- Modified:            03/21/18
+-- Modified:            02/26/19
 -- Description:         Prototype UC member corpus db written in PostgreSQL.
--- PostgreSQL Version   10.3
+-- PostgreSQL Version   11.2
 ---------------------------------
 
 -- Role: mcweb
@@ -14,7 +14,7 @@
 --       as well as api login and logout.
 create role mcweb with 
   login 
-  encrypted password '' 
+  encrypted password 'mcweb' 
   connection limit 500 
   valid until '2020-01-01';
 grant connect on database mcorpus to mcweb;
@@ -22,8 +22,8 @@ grant connect on database mcorpus to mcweb;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcweb;
 grant select, insert on member_audit to mcweb;
 -- mcuser related
-grant select on mcuser, mcuser_audit, mcuser_roles to mcweb;
-grant insert, update, delete on mcuser, mcuser_roles to mcweb;
+grant select on mcuser, mcuser_audit to mcweb;
+grant insert, update, delete on mcuser to mcweb;
 grant insert on mcuser_audit to mcweb;
 
 -- Role: mcwebtest
@@ -31,18 +31,18 @@ grant insert on mcuser_audit to mcweb;
 --			  beyond mcweb in order to accommodate db cleanup in audit tables.
 create role mcwebtest with 
   login 
-  encrypted password '' 
+  encrypted password 'mcwebtest' 
   connection limit 100 
   valid until '2020-01-01';
 grant connect on database mcorpus to mcwebtest;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcwebtest;
-grant select, insert, update, delete on mcuser, mcuser_audit, mcuser_roles, member_audit to mcwebtest;
+grant select, insert, update, delete on mcuser, mcuser_audit, member_audit to mcwebtest;
 
 -- Role: mcadmin
 -- Desc: mcorpus db architect privileges - ddl create/drop
 create role mcadmin with 
   login 
-  encrypted password '' 
+  encrypted password 'mcadmin' 
   connection limit 1 
   valid until '2020-01-01';
 grant connect on database mcorpus to mcadmin;

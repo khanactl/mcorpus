@@ -1,47 +1,52 @@
 package com.tll.mcorpus.gql;
 
 import static com.tll.mcorpus.Util.asStringAndClean;
+import static com.tll.mcorpus.Util.clean;
 import static com.tll.mcorpus.Util.dflt;
-import static com.tll.mcorpus.Util.emptyIfNull;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.lower;
+import static com.tll.mcorpus.Util.isNotNull;
+import static com.tll.mcorpus.Util.isNull;
 import static com.tll.mcorpus.Util.uuidFromToken;
 import static com.tll.mcorpus.Util.uuidToToken;
-import static com.tll.mcorpus.db.Tables.MADDRESS;
-import static com.tll.mcorpus.db.Tables.MAUTH;
-import static com.tll.mcorpus.db.Tables.MEMBER;
-import static com.tll.mcorpus.repo.RepoUtil.fput;
-import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotBlank;
-import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotNull;
-import static com.tll.mcorpus.repo.RepoUtil.fval;
+import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
-import com.tll.mcorpus.db.enums.MemberStatus;
-import com.tll.mcorpus.db.tables.pojos.Mcuser;
-import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.db.tables.pojos.Maddress;
+import com.tll.mcorpus.dmodel.McuserHistoryDomain;
+import com.tll.mcorpus.dmodel.MemberAndMauth;
+import com.tll.mcorpus.dmodel.MemberSearch;
+import com.tll.mcorpus.gmodel.Member;
+import com.tll.mcorpus.gmodel.MemberAddress;
+import com.tll.mcorpus.gmodel.MemberFilter;
+import com.tll.mcorpus.gmodel.Mref;
+import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
+import com.tll.mcorpus.gmodel.mcuser.Mcuser;
+import com.tll.mcorpus.gmodel.mcuser.McuserHistory;
+import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LoginEvent;
+import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LogoutEvent;
+import com.tll.mcorpus.repo.FetchResult;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.repo.model.FetchResult;
-import com.tll.mcorpus.repo.model.McuserHistory;
-import com.tll.mcorpus.repo.model.McuserToAdd;
-import com.tll.mcorpus.repo.model.McuserToUpdate;
-import com.tll.mcorpus.repo.model.McuserHistory.LoginEvent;
-import com.tll.mcorpus.repo.model.McuserHistory.LogoutEvent;
-import com.tll.mcorpus.repo.model.MemberFilter;
+import com.tll.mcorpus.transform.McuserHistoryXfrm;
+import com.tll.mcorpus.transform.McuserXfrm;
+import com.tll.mcorpus.transform.MemberAddressXfrm;
+import com.tll.mcorpus.transform.MemberFilterXfrm;
+import com.tll.mcorpus.transform.MemberXfrm;
+import com.tll.mcorpus.transform.MrefXfrm;
+import com.tll.mcorpus.validate.McuserValidator;
+import com.tll.mcorpus.validate.MemberAddressValidator;
+import com.tll.mcorpus.validate.MemberValidator;
+import com.tll.mcorpus.validateapi.VldtnResult;
 import com.tll.mcorpus.web.GraphQLWebContext;
 import com.tll.mcorpus.web.RequestSnapshot;
 
@@ -49,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import graphql.language.SourceLocation;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
@@ -61,10 +67,26 @@ public class MCorpusGraphQL {
 
   private final Logger log = LoggerFactory.getLogger(MCorpusGraphQL.class);
 
-  private final MCorpusUserRepo mcuserRepo;
+  // validators
+  private final McuserValidator vldtnMcuser;
 
+  private final MemberValidator vldtnMember;
+  private final MemberAddressValidator vldtnMemberAddress;
+
+  // transformers
+  private final McuserXfrm xfrmMcuser;
+  private final McuserHistoryXfrm xfrmMcuserHistory;
+
+  private final MrefXfrm xfrmMref;
+  private final MemberXfrm xfrmMember;
+  private final MemberAddressXfrm xfrmMemberAddress;
+  private final MemberFilterXfrm xfrmMemberFilter;
+  
+  // backend repos
+  private final MCorpusUserRepo mcuserRepo;
   private final MCorpusRepo mcorpusRepo;
 
+  // GraphQL schema
   private GraphQLSchema graphQLSchema = null;
 
   /**
@@ -77,6 +99,19 @@ public class MCorpusGraphQL {
   MCorpusGraphQL(final MCorpusUserRepo mcuserRepo, final MCorpusRepo mcorpusRepo) {
     this.mcuserRepo = mcuserRepo;
     this.mcorpusRepo = mcorpusRepo;
+
+    this.vldtnMcuser = new McuserValidator();
+    this.xfrmMcuserHistory = new McuserHistoryXfrm();
+    
+    this.vldtnMember = new MemberValidator();
+    this.vldtnMemberAddress = new MemberAddressValidator();
+    
+    this.xfrmMcuser = new McuserXfrm();
+    
+    this.xfrmMref = new MrefXfrm();
+    this.xfrmMember = new MemberXfrm();
+    this.xfrmMemberAddress = new MemberAddressXfrm();
+    this.xfrmMemberFilter = new MemberFilterXfrm();
   }
 
   /**
@@ -144,46 +179,55 @@ public class MCorpusGraphQL {
         // mcuser history
         .dataFetcher("mchistory", env -> {
           final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final FetchResult<McuserHistory> fr = mcuserRepo.mcuserHistory(uid);
-          return fr.isSuccess() ? fr.get() : null;
+          final FetchResult<McuserHistoryDomain> fr = mcuserRepo.mcuserHistory(uid);
+          return processFetchResult(fr, env, b -> xfrmMcuserHistory.fromBackend(b));
         })
 
         // fetch mcuser
         .dataFetcher("fetchMcuser", env -> {
           final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final FetchResult<Mcuser> fr = mcuserRepo.fetchMcuser(uid);
-          return fr.isSuccess() ? fr.get() : null;
+          final FetchResult<com.tll.mcorpus.db.tables.pojos.Mcuser> fr = mcuserRepo.fetchMcuser(uid);
+          return processFetchResult(fr, env, b -> xfrmMcuser.fromBackend(b));
         })
 
         // mcorpus
 
         .dataFetcher("mrefByMid", env -> {
           final UUID uuid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<Mref> memberRefFetchResult = mcorpusRepo.fetchMRefByMid(uuid);
-          return memberRefFetchResult.isSuccess() ? memberRefFetchResult.get() : null;
+          final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = mcorpusRepo.fetchMRefByMid(uuid);
+          return processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
         })
         .dataFetcher("mrefByEmpIdAndLoc", env -> {
-          final String empId = env.getArgument("empId");
+          final String empId = clean(env.getArgument("empId"));
           final Location location = locationFromString(env.getArgument("location"));
-          final FetchResult<Mref> memberRefFetchResult = mcorpusRepo.fetchMRefByEmpIdAndLoc(empId, location);
-          return memberRefFetchResult.isSuccess() ? memberRefFetchResult.get() : null;
+          final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = mcorpusRepo.fetchMRefByEmpIdAndLoc(empId, location);
+          return processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
         })
         .dataFetcher("mrefsByEmpId", env -> {
-          final String empId = env.getArgument("empId");
-          final FetchResult<List<Mref>> memberRefsFetchResult = mcorpusRepo.fetchMRefsByEmpId(empId);
-          return memberRefsFetchResult.isSuccess() ? memberRefsFetchResult.get() : null;
+          final String empId = clean(env.getArgument("empId"));
+          final FetchResult<List<com.tll.mcorpus.db.udt.pojos.Mref>> fr = mcorpusRepo.fetchMRefsByEmpId(empId);
+          return processFetchResult(fr, env, blist -> 
+            blist.stream()
+              .map(b -> xfrmMref.fromBackend(b))
+              .collect(Collectors.toList())
+          );
         })
         .dataFetcher("memberByMid", env -> {
           final UUID mid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<Map<String, Object>> memberFetchResult = mcorpusRepo.fetchMember(mid);
-          return memberFetchResult.isSuccess() ? memberFetchResult.get() : null;
+          final FetchResult<MemberAndMauth> fr = mcorpusRepo.fetchMember(mid);
+          return processFetchResult(fr, env, b -> xfrmMember.fromBackend(b));
         })
         .dataFetcher("members", env -> {
-          final MemberFilter filter = MemberFilter.fromMap(env.getArgument("filter"));
+          final MemberFilter filter = xfrmMemberFilter.fromGraphQLMap(env.getArgument("filter"));
           final int offset = dflt(env.getArgument("offset"), 0);
           final int limit = dflt(env.getArgument("limit"), 10);
-          final FetchResult<List<Map<String, Object>>> membersFetchResult = mcorpusRepo.memberSearch(filter, offset, limit);
-          return membersFetchResult.isSuccess() ? membersFetchResult.get() : null;
+          final MemberSearch msearch = xfrmMemberFilter.toBackend(filter);
+          final FetchResult<List<MemberAndMauth>> fr = mcorpusRepo.memberSearch(msearch, offset, limit);
+          return processFetchResult(fr, env, blist -> 
+            blist.stream()
+              .map(b -> xfrmMember.fromBackend(b))
+              .collect(Collectors.toList())
+          );
         })
       )
 
@@ -208,33 +252,43 @@ public class MCorpusGraphQL {
 
         // add mcuser
         .dataFetcher("addMcuser", env -> {
-          final Map<String, Object> mcuserMap = env.getArgument("mcuser");
-          final McuserToAdd mta = McuserToAdd.fromMap(mcuserMap);
-          final FetchResult<Mcuser> fr = mcuserRepo.addMcuser(mta);
-          return fr.isSuccess() ? fr.get() : null;
+          return handleMutation(
+            "mcuser", env,
+            map -> xfrmMcuser.fromGraphQLMap(map),
+            g -> vldtnMcuser.validateForAdd(g), 
+            (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
+            b -> mcuserRepo.addMcuser(b),
+            bpost -> xfrmMcuser.fromBackend(bpost)
+          );
         })
 
         // update mcuser
         .dataFetcher("updateMcuser", env -> {
-          final Map<String, Object> mcuserMap = env.getArgument("mcuser");
-          final McuserToUpdate mtu = McuserToUpdate.fromMap(mcuserMap);
-          final FetchResult<Mcuser> fr = mcuserRepo.updateMcuser(mtu);
-          return fr.isSuccess() ? fr.get() : null;
+          return handleMutation(
+            "mcuser", env,
+            map -> xfrmMcuser.fromGraphQLMap(map),
+            g -> vldtnMcuser.validateForAdd(g), 
+            (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
+            b -> mcuserRepo.updateMcuser(b),
+            bpost -> xfrmMcuser.fromBackend(bpost)
+          );
         })
 
         // delete mcuser
         .dataFetcher("deleteMcuser", env -> {
-          final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final FetchResult<Boolean> fr = mcuserRepo.deleteMcuser(uid);
-          return fr.isSuccess() ? fr.get() : Boolean.FALSE;
+          return handleDeletion(
+            env, 
+            uuidFromToken(env.getArgument("uid")), 
+            b -> mcuserRepo.deleteMcuser(b) 
+          );
         })
 
         // mcpswd
         .dataFetcher("mcpswd", env -> {
           final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final String pswd = env.getArgument("pswd");
+          final String pswd = clean(env.getArgument("pswd"));
           final FetchResult<Boolean> fr = mcuserRepo.setPswd(uid, pswd);
-          return fr.isSuccess() ? fr.get() : Boolean.FALSE;
+          return processFetchResult(fr, env);
         })
         
         // invalidateJwtsFor
@@ -245,7 +299,7 @@ public class MCorpusGraphQL {
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
           final FetchResult<Boolean> fr = mcuserRepo.invalidateJwtsFor(uid, requestInstant, requestOrigin);
-          return fr.isSuccess() ? fr.get() : Boolean.FALSE;
+          return processFetchResult(fr, env);
         })
         
         // mcorpus
@@ -258,8 +312,9 @@ public class MCorpusGraphQL {
           final String pswd = asStringAndClean(env.getArgument("pswd"));
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
-          final FetchResult<Mref> mloginResult = mcorpusRepo.memberLogin(username, pswd, requestInstant, requestOrigin);
-          return mloginResult.isSuccess() ? mloginResult.get() : null;
+          final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = 
+                  mcorpusRepo.memberLogin(username, pswd, requestInstant, requestOrigin);
+          return processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
         })
         
         // member logout
@@ -269,197 +324,75 @@ public class MCorpusGraphQL {
           final UUID mid = uuidFromToken(env.getArgument("mid"));
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
-          final FetchResult<UUID> mlogoutResult = mcorpusRepo.memberLogout(mid, requestInstant, requestOrigin);
-          return mlogoutResult.isSuccess();
+          final FetchResult<UUID> fr = mcorpusRepo.memberLogout(mid, requestInstant, requestOrigin);
+          return isNotNull(processFetchResult(fr, env));
         })
         
         // add member
         .dataFetcher("addMember", env -> {
-          final Map<String, Object> memberMap = env.getArgument("member");
-
-          final String empId = (String) memberMap.get("empId");
-          final Location location = locationFromString((String) memberMap.get("location"));
-          final String nameFirst = (String) memberMap.get("nameFirst");
-          final String nameMiddle = (String) memberMap.get("nameMiddle");
-          final String nameLast = (String) memberMap.get("nameLast");
-          final String displayName = (String) memberMap.get("displayName");
-          final MemberStatus status = memberStatusFromString((String) memberMap.get("status"));
-          final Date dob = (Date) memberMap.get("dob");
-          final java.sql.Date dobSql = dob == null ? null : new java.sql.Date(dob.getTime());
-          final String ssn = (String) memberMap.get("ssn");
-          final String personalEmail = (String) memberMap.get("personalEmail");
-          final String workEmail = (String) memberMap.get("workEmail");
-          final String mobilePhone = (String) memberMap.get("mobilePhone");
-          final String homePhone = (String) memberMap.get("homePhone");
-          final String workPhone = (String) memberMap.get("workPhone");
-          final String username = (String) memberMap.get("username");
-          final String pswd = (String) memberMap.get("pswd");
-
-          final Map<String, Object> memberMapDomain = new HashMap<>(15);
-          // member
-          fput(MEMBER.EMP_ID, empId, memberMapDomain);
-          fput(MEMBER.LOCATION, location, memberMapDomain);
-          fput(MEMBER.NAME_FIRST, nameFirst, memberMapDomain);
-          fput(MEMBER.NAME_MIDDLE, nameMiddle, memberMapDomain);
-          fput(MEMBER.NAME_LAST, nameLast, memberMapDomain);
-          fput(MEMBER.DISPLAY_NAME, displayName, memberMapDomain);
-          fput(MEMBER.STATUS, status, memberMapDomain);
-          // mauth
-          fput(MAUTH.DOB, dobSql, memberMapDomain);
-          fput(MAUTH.SSN, ssn, memberMapDomain);
-          fput(MAUTH.EMAIL_PERSONAL, personalEmail, memberMapDomain);
-          fput(MAUTH.EMAIL_WORK, workEmail, memberMapDomain);
-          fput(MAUTH.MOBILE_PHONE, mobilePhone, memberMapDomain);
-          fput(MAUTH.WORK_PHONE, workPhone, memberMapDomain);
-          fput(MAUTH.HOME_PHONE, homePhone, memberMapDomain);
-          fput(MAUTH.USERNAME, username, memberMapDomain);
-          fput(MAUTH.PSWD, pswd, memberMapDomain);
-
-          final FetchResult<Map<String, Object>> fr = mcorpusRepo.addMember(memberMapDomain);
-          if(fr.isSuccess()) {
-            return fr.get();
-          } else {
-            final String emsg = fr.getErrorMsg();
-            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
-            return null;
-          }
+          return handleMutation(
+            "member", env, 
+            map -> xfrmMember.fromGraphQLMap(map), 
+            (Member g) -> vldtnMember.validateForAdd(g), 
+            gvldtd -> xfrmMember.toBackend(gvldtd), 
+            (MemberAndMauth b) -> mcorpusRepo.addMember(b), 
+            bpost -> xfrmMember.fromBackend(bpost)
+          );
         })
 
         // update member
         .dataFetcher("updateMember", env -> {
-          final Map<String, Object> memberMap = env.getArgument("member");
-
-          final UUID mid = uuidFromToken((String) memberMap.get("mid"));
-          final String nameFirst = (String) memberMap.get("nameFirst");
-          final String nameMiddle = (String) memberMap.get("nameMiddle");
-          final String nameLast = (String) memberMap.get("nameLast");
-          final String displayName = (String) memberMap.get("displayName");
-          final MemberStatus status = memberStatusFromString((String) memberMap.get("status"));
-          final Date dob = (Date) memberMap.get("dob");
-          final java.sql.Date dobSql = dob == null ? null : new java.sql.Date(dob.getTime());
-          final String ssn = (String) memberMap.get("ssn");
-          final String personalEmail = (String) memberMap.get("personalEmail");
-          final String workEmail = (String) memberMap.get("workEmail");
-          final String mobilePhone = (String) memberMap.get("mobilePhone");
-          final String homePhone = (String) memberMap.get("homePhone");
-          final String workPhone = (String) memberMap.get("workPhone");
-
-          final Map<String, Object> memberMapDomain = new HashMap<>(11);
-          // member
-          // required
-          fput(MEMBER.MID, mid, memberMapDomain);
-          // optional
-          fputWhenNotBlank(MEMBER.NAME_FIRST, nameFirst, memberMapDomain);
-          fputWhenNotBlank(MEMBER.NAME_MIDDLE, nameMiddle, memberMapDomain);
-          fputWhenNotBlank(MEMBER.NAME_LAST, nameLast, memberMapDomain);
-          fputWhenNotBlank(MEMBER.DISPLAY_NAME, displayName, memberMapDomain);
-          fputWhenNotNull(MEMBER.STATUS, status, memberMapDomain);
-          // mauth
-          fputWhenNotNull(MAUTH.DOB, dobSql, memberMapDomain);
-          fputWhenNotBlank(MAUTH.SSN, ssn, memberMapDomain);
-          fputWhenNotBlank(MAUTH.EMAIL_PERSONAL, personalEmail, memberMapDomain);
-          fputWhenNotBlank(MAUTH.EMAIL_WORK, workEmail, memberMapDomain);
-          fputWhenNotBlank(MAUTH.MOBILE_PHONE, mobilePhone, memberMapDomain);
-          fputWhenNotBlank(MAUTH.HOME_PHONE, homePhone, memberMapDomain);
-          fputWhenNotBlank(MAUTH.WORK_PHONE, workPhone, memberMapDomain);
-
-          final FetchResult<Map<String, Object>> fr = mcorpusRepo.updateMember(memberMapDomain);
-          if(fr.isSuccess()) {
-            return fr.get();
-          } else {
-            final String emsg = fr.getErrorMsg();
-            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
-            return null;
-          }
+          return handleMutation(
+            "member", env, 
+            map -> xfrmMember.fromGraphQLMap(map), 
+            (Member g) -> vldtnMember.validateForUpdate(g), 
+            gvldtd -> xfrmMember.toBackend(gvldtd), 
+            (MemberAndMauth b) -> mcorpusRepo.updateMember(b), 
+            bpost -> xfrmMember.fromBackend(bpost)
+          );
         })
 
         // delete member
         .dataFetcher("deleteMember", env -> {
-          final UUID mid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<UUID> fr = mcorpusRepo.deleteMember(mid);
-          return fr.isSuccess() ? uuidToToken(fr.get()) : null;
+          return handleDeletion(
+            env, 
+            uuidFromToken(env.getArgument("mid")), 
+            b -> mcorpusRepo.deleteMember(b) 
+          );
         })
 
         // add member address
         .dataFetcher("addMemberAddress", env -> {
-          final Map<String, Object> memberAddress = env.getArgument("memberAddress");
-
-          final UUID mid = uuidFromToken((String) memberAddress.get("mid"));
-          final Addressname addressName = addressNameFromString((String) memberAddress.get("addressName"));
-
-          final String attn = (String) memberAddress.get("attn");
-          final String street1 = (String) memberAddress.get("street1");
-          final String street2 = (String) memberAddress.get("street2");
-          final String city = (String) memberAddress.get("city");
-          final String state = (String) memberAddress.get("state");
-          final String postalCode = (String) memberAddress.get("postalCode");
-          final String country = (String) memberAddress.get("country");
-
-          final Map<String, Object> maddressMap = new HashMap<>(8);
-          fput(MADDRESS.MID, mid, maddressMap);
-          fput(MADDRESS.ADDRESS_NAME, addressName, maddressMap);
-
-          fput(MADDRESS.ATTN, attn, maddressMap);
-          fput(MADDRESS.STREET1, street1, maddressMap);
-          fput(MADDRESS.STREET2, street2, maddressMap);
-          fput(MADDRESS.CITY, city, maddressMap);
-          fput(MADDRESS.STATE, state, maddressMap);
-          fput(MADDRESS.POSTAL_CODE, postalCode, maddressMap);
-          fput(MADDRESS.COUNTRY, country, maddressMap);
-
-          final FetchResult<Map<String, Object>> fr = mcorpusRepo.addMemberAddress(maddressMap);
-          if(fr.isSuccess()) {
-            return fr.get();
-          } else {
-            final String emsg = fr.getErrorMsg();
-            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
-            return null;
-          }
+          return handleMutation(
+            "memberAddress", env, 
+            map -> xfrmMemberAddress.fromGraphQLMap(map), 
+            (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g), 
+            gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
+            (Maddress b) -> mcorpusRepo.addMemberAddress(b), 
+            bpost -> xfrmMemberAddress.fromBackend(bpost)
+          );
         })
 
         // update member address
         .dataFetcher("updateMemberAddress", env -> {
-          final Map<String, Object> memberAddress = env.getArgument("memberAddress");
-
-          final UUID mid = uuidFromToken((String) memberAddress.get("mid"));
-          final Addressname addressName = addressNameFromString((String) memberAddress.get("addressName"));
-          final String attn = (String) memberAddress.get("attn");
-          final String street1 = (String) memberAddress.get("street1");
-          final String street2 = (String) memberAddress.get("street2");
-          final String city = (String) memberAddress.get("city");
-          final String state = (String) memberAddress.get("state");
-          final String postalCode = (String) memberAddress.get("postalCode");
-          final String country = (String) memberAddress.get("country");
-
-          final Map<String, Object> maddressMap = new HashMap<>(8);
-          // required
-          fput(MADDRESS.MID, mid, maddressMap);
-          fput(MADDRESS.ADDRESS_NAME, addressName, maddressMap);
-          // optional
-          fputWhenNotBlank(MADDRESS.ATTN, attn, maddressMap);
-          fputWhenNotBlank(MADDRESS.STREET1, street1, maddressMap);
-          fputWhenNotBlank(MADDRESS.STREET2, street2, maddressMap);
-          fputWhenNotBlank(MADDRESS.CITY, city, maddressMap);
-          fputWhenNotBlank(MADDRESS.STATE, state, maddressMap);
-          fputWhenNotBlank(MADDRESS.POSTAL_CODE, postalCode, maddressMap);
-          fputWhenNotBlank(MADDRESS.COUNTRY, country, maddressMap);
-
-          final FetchResult<Map<String, Object>> fr = mcorpusRepo.updateMemberAddress(maddressMap);
-          if(fr.isSuccess()) {
-            return fr.get();
-          } else {
-            final String emsg = fr.getErrorMsg();
-            env.getExecutionContext().addError(new ValidationError(ValidationErrorType.InvalidSyntax, (SourceLocation) null, emsg));
-            return null;
-          }
+          return handleMutation(
+            "memberAddress", env, 
+            map -> xfrmMemberAddress.fromGraphQLMap(map), 
+            (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g), 
+            gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
+            (Maddress b) -> mcorpusRepo.updateMemberAddress(b), 
+            bpost -> xfrmMemberAddress.fromBackend(bpost)
+          );
         })
 
         // delete member address
         .dataFetcher("deleteMemberAddress", env -> {
-          final UUID mid = uuidFromToken(env.getArgument("mid"));
-          final Addressname addressname = addressNameFromString(env.getArgument("addressName"));
-          final FetchResult<UUID> fr = mcorpusRepo.deleteMemberAddress(mid, addressname);
-          return fr.isSuccess() ? uuidToToken(fr.get()) : null;
+          return handleDeletion(env, () -> {
+            final UUID mid = uuidFromToken(env.getArgument("mid"));
+            final Addressname addressname = MemberAddressXfrm.addressnameFromString(env.getArgument("addressName"));
+            final FetchResult<Boolean> fr = mcorpusRepo.deleteMemberAddress(mid, addressname);
+            return fr;
+          });
         })
       )
 
@@ -517,11 +450,7 @@ public class MCorpusGraphQL {
         })
         .dataFetcher("roles", env -> {
           final Mcuser mc = env.getSource();
-          return isNullOrEmpty(mc.getRoles()) ? 
-            Collections.emptyList() :
-            Arrays.stream(mc.getRoles()).map(role -> {
-              return role.getLiteral();
-            }).collect(Collectors.toList());
+          return mc.getRoles().stream().collect(Collectors.toList());
         })
       )
 
@@ -570,177 +499,339 @@ public class MCorpusGraphQL {
       // MRef
       .type("MRef", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
-          final Mref mref = env.getSource();
-          return mref == null ? null : uuidToToken(mref.getMid());
+          final com.tll.mcorpus.gmodel.Mref mref = env.getSource();
+          return mref == null ? null : uuidToToken(mref.mid);
         })
         .dataFetcher("empId", env -> {
           final Mref mref = env.getSource();
-          return mref == null ? null : mref.getEmpId();
+          return mref == null ? null : mref.empId;
         })
         .dataFetcher("location", env -> {
           final Mref mref = env.getSource();
-          return mref == null ? null : locationToString(mref.getLocation());
+          return mref == null ? null : mref.location;
         })
       )
 
       // Member
       .type("Member", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
-          final Map<String, Object> m = env.getSource();
-          final UUID mid = m == null ? null : fval(MEMBER.MID, m);
+          final Member m = env.getSource();
+          final UUID mid = m == null ? null : m.getMid();
           return mid == null ? null : uuidToToken(mid);
         })
         .dataFetcher("created", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.CREATED, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getCreated();
         })
         .dataFetcher("modified", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.MODIFIED, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getModified();
         })
         .dataFetcher("empId", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.EMP_ID, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getEmpId();
         })
         .dataFetcher("location", env -> {
-          final Map<String, Object> m = env.getSource();
-          final Location loc = m == null ? null : fval(MEMBER.LOCATION, m);
-          return locationToString(loc);
+          final Member m = env.getSource();
+          return m == null ? null : m.getLocation();
         })
         .dataFetcher("nameFirst", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.NAME_FIRST, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getNameFirst();
         })
         .dataFetcher("nameMiddle", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.NAME_MIDDLE, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getNameMiddle();
         })
         .dataFetcher("nameLast", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.NAME_LAST, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getNameLast();
         })
         .dataFetcher("displayName", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MEMBER.DISPLAY_NAME, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getDisplayName();
         })
         .dataFetcher("status", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : memberStatusToString(fval(MEMBER.STATUS, m));
+          final Member m = env.getSource();
+          return m == null ? null : m.getStatus();
         })
         .dataFetcher("dob", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.DOB, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getDob();
         })
         .dataFetcher("ssn", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.SSN, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getSsn();
         })
         .dataFetcher("personalEmail", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.EMAIL_PERSONAL, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getPersonalEmail();
         })
         .dataFetcher("workEmail", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.EMAIL_WORK, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getWorkEmail();
         })
         .dataFetcher("mobilePhone", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.MOBILE_PHONE, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getMobilePhone();
         })
         .dataFetcher("homePhone", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.HOME_PHONE, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getHomePhone();
         })
         .dataFetcher("workPhone", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.WORK_PHONE, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getWorkPhone();
         })
         .dataFetcher("username", env -> {
-          final Map<String, Object> m = env.getSource();
-          return m == null ? null : fval(MAUTH.USERNAME, m);
+          final Member m = env.getSource();
+          return m == null ? null : m.getUsername();
         })
         .dataFetcher("addresses", env -> {
-          final Map<String, Object> m = env.getSource();
-          final FetchResult<List<Map<String, Object>>> memberAddressesFetchResult = mcorpusRepo.fetchMemberAddresses(fval(MADDRESS.MID, m));
-          return memberAddressesFetchResult.isSuccess() ? memberAddressesFetchResult.get() : null;
+          final Member m = env.getSource();
+          final UUID mid = m.getMid();
+          final FetchResult<List<Maddress>> fr = mcorpusRepo.fetchMemberAddresses(mid);
+          return processFetchResult(fr, env, blist -> blist.stream().map(b -> xfrmMemberAddress.fromBackend(b)));
         })
       )
 
       // MemberAddress
       .type("MemberAddress", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
-          final Map<String, Object> ma = env.getSource();
-          final UUID mid = ma == null ? null : fval(MADDRESS.MID, ma);
-          return mid == null ? null : uuidToToken(mid);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : uuidToToken(ma.getMid());
         })
         .dataFetcher("addressName", env -> {
-          final Map<String, Object> ma = env.getSource();
-          final Addressname aname = ma == null ? null : fval(MADDRESS.ADDRESS_NAME, ma);
-          return addressNameToString(aname);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getAddressName();
         })
         .dataFetcher("modified", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.MODIFIED, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getModified();
         })
         .dataFetcher("attn", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.ATTN, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getAttn();
         })
         .dataFetcher("street1", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.STREET1, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getStreet1();
         })
         .dataFetcher("street2", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.STREET2, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getStreet2();
         })
         .dataFetcher("city", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.CITY, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getCity();
         })
         .dataFetcher("state", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.STATE, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getState();
         })
         .dataFetcher("postalCode", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.POSTAL_CODE, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getPostalCode();
         })
         .dataFetcher("country", env -> {
-          final Map<String, Object> ma = env.getSource();
-          return ma == null ? null : fval(MADDRESS.COUNTRY, ma);
+          final MemberAddress ma = env.getSource();
+          return ma == null ? null : ma.getCountry();
         })
       )
 
       .build();
   }
 
-  private static Location locationFromString(final String location) {
-    final String sloc = emptyIfNull(location).startsWith("L") ? location.substring(1) : location;
-    for(final Location enmLoc : Location.values()) {
-      if(enmLoc.getLiteral().equals(sloc)) return enmLoc;
+  /**
+   * Process a GraphQL mutation request.
+   * <p>
+   * Steps:
+   * <ul>
+   * <li>Transform GraphQL field map to fronend entity type
+   * <li>Validate
+   * <li>Transform to backend domain type
+   * <li>Do the persist operation
+   * <li>Transform to returned persisted entity to a frontend entity type
+   * </ul>
+   * 
+   * @param <G> the GraphQl schema type
+   * @param <B> the backend domain type
+   * 
+   * @param arg0 the [first] GraphQL mutation method input argument name 
+   *             as defined in the loaded GraphQL schema
+   * @param env the GraphQL data fetching env object
+   * @param tfrmFromGqlMap constitutes a frontend GraphQL type from the 
+   *                       GraphQL data fetching environment (param <code>env</code>).
+   * @param vldtn the optional validation function to use to validate the frontend object <code>e</code>
+   * @param tfrmToBack the frontend to backend transform function
+   * @param persistOp the backend repository persist operation function
+   * @param tfrmToFront the backend to frontend transform function
+   * @return the returned entity from the backend persist operation
+   *         which should be considered to be the post-mutation 
+   *         current state of the entity.
+   */
+  private static <G, B> G handleMutation(
+    final String arg0, 
+    final DataFetchingEnvironment env, 
+    final Function<Map<String, Object>, G> tfrmFromGqlMap, 
+    final Function<G, VldtnResult> vldtn, 
+    final Function<G, B> tfrmToBack, 
+    final Function<B, FetchResult<B>> persistOp, 
+    final Function<B, G> trfmToFront
+  ) {
+    final G g = tfrmFromGqlMap.apply(env.getArgument(arg0));
+    final VldtnResult vresult = isNull(vldtn) ? VldtnResult.VALID : vldtn.apply(g);
+    if(vresult.isValid()) {
+      final B b = tfrmToBack.apply(g);
+      final FetchResult<B> fr = persistOp.apply(b);
+      if(fr.isSuccess()) {
+        final G gpost = trfmToFront.apply(fr.get());
+        return gpost;
+      } 
+      if(fr.hasErrorMsg()) {
+        final String emsg = fr.getErrorMsg();
+        env.getExecutionContext().addError(
+          new ValidationError(
+              ValidationErrorType.InvalidSyntax, 
+              (SourceLocation) null, 
+              emsg));
+      }
+      // default
+      return null;
+      
+    } else {
+      vresult.getErrors().stream().forEach(cv -> {
+        env.getExecutionContext().addError(
+          new ValidationError(
+            ValidationErrorType.InvalidSyntax, 
+            (SourceLocation) null, 
+            cv.getVldtnErrMsg()));
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Generalized backend entity deletion routine.
+   * <p>
+   * Use when the backend primary key is not a single UUID.
+   * 
+   * @param env the GraphQL data fetching environment ref
+   * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
+   * @return true when the delete op was run without error, false otherwise.
+   */
+  private static <G> boolean handleDeletion(
+    final DataFetchingEnvironment env, 
+    final Supplier<FetchResult<Boolean>> deleteOp 
+  ) {
+    final FetchResult<Boolean> fr = deleteOp.get();
+    if(fr.isSuccess()) {
+      return true;
+    } 
+    if(fr.hasErrorMsg()) {
+      final String emsg = fr.getErrorMsg();
+      env.getExecutionContext().addError(
+        new ValidationError(
+            ValidationErrorType.InvalidSyntax, 
+            (SourceLocation) null, 
+            emsg));
+    }
+    // delete error
+    return false;
+  }
+
+  /**
+   * Do a backend entity deletion for the case of a single UUID (primary key) input argument.
+   * 
+   * @param env the GraphQL data fetching environment ref
+   * @param pk the entity primary key value
+   * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
+   * @return true when the delete op was run without error, false otherwise.
+   */
+  private static <G, B> boolean handleDeletion(
+    final DataFetchingEnvironment env, 
+    final UUID pk,
+    final Function<UUID, FetchResult<Boolean>> deleteOp 
+  ) {
+    final FetchResult<Boolean> fr = deleteOp.apply(pk);
+    if(fr.isSuccess()) {
+      return true;
+    } 
+    if(fr.hasErrorMsg()) {
+      final String emsg = fr.getErrorMsg();
+      env.getExecutionContext().addError(
+        new ValidationError(
+            ValidationErrorType.InvalidSyntax, 
+            (SourceLocation) null, 
+            emsg));
+    }
+    // delete error
+    return false;
+  }
+
+  /**
+   * Processes a {@link FetchResult} that wraps a simple (non-entity) type.
+   * <p>
+   * Any backend errors will be translated then added to the GraphQL 
+   * fetching environment and <code>null</code> is returned.
+   * 
+   * @param <T> the simple type in the given fetch result (usually {@link Boolean})
+   * @param fr the fetch result
+   * @param env the GraphQL data fetching environment ref
+   * @return the extracted fetch result value
+   */
+  private static <T> T processFetchResult(
+    final FetchResult<T> fr, 
+    final DataFetchingEnvironment env
+  ) {
+    if(fr.isSuccess()) {
+      return fr.get();
+    } 
+    if(fr.hasErrorMsg()) {
+      final String emsg = fr.getErrorMsg();
+      env.getExecutionContext().addError(
+        new ValidationError(
+            ValidationErrorType.InvalidSyntax, 
+            (SourceLocation) null, 
+            emsg));
     }
     // default
     return null;
   }
 
-  private static String locationToString(Location location) {
-    return location == null ? null : "L" + location.getLiteral();
+  /**
+   * Processes a {@link FetchResult} 
+   * transforming the backend result type to the frontend GraphQL type.
+   * <p>
+   * Any backend errors will be translated then added to the GraphQL 
+   * fetching environment and <code>null</code> is returned.
+   * 
+   * @param <T> the held object type in the given fetch result 
+   * @param <G> the frontend GraphQL type
+   * @param fr the fetch result
+   * @param env the GraphQL data fetching environment ref
+   * @return the transformed fetch result value when no errors are present
+   *         or null when errors are present
+   */
+  private static <T, G> G processFetchResult(
+    final FetchResult<T> fr, 
+    final DataFetchingEnvironment env, 
+    final Function<T, G> transform
+  ) {
+    if(fr.isSuccess()) {
+      final G g = transform.apply(fr.get());
+      return g;
+    } 
+    if(fr.hasErrorMsg()) {
+      final String emsg = fr.getErrorMsg();
+      env.getExecutionContext().addError(
+        new ValidationError(
+            ValidationErrorType.InvalidSyntax, 
+            (SourceLocation) null, 
+            emsg));
+    }
+    // default
+    return null;
   }
 
-  private static MemberStatus memberStatusFromString(final String memberStatus) {
-    return isNullOrEmpty(memberStatus) ? null : MemberStatus.valueOf(memberStatus);
-  }
-
-  private static String memberStatusToString(MemberStatus memberStatus) {
-    return memberStatus == null ? null : memberStatus.name();
-  }
-
-  private static Addressname addressNameFromString(final String addressName) {
-    return isNullOrEmpty(addressName) ? null : Addressname.valueOf(lower(addressName));
-  }
-
-  private static String addressNameToString(Addressname addressname) {
-    return addressname == null ? null : addressname.getLiteral().toUpperCase(Locale.US);
-  }
 }
