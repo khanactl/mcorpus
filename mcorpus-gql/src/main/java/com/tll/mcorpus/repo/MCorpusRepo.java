@@ -2,6 +2,7 @@ package com.tll.mcorpus.repo;
 
 import static com.tll.mcorpus.repo.RepoUtil.*;
 import static com.tll.mcorpus.Util.not;
+import static com.tll.mcorpus.Util.isNullOrEmpty;
 import static com.tll.mcorpus.Util.nflatten;
 import static com.tll.mcorpus.Util.isNull;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
@@ -497,8 +498,9 @@ public class MCorpusRepo implements Closeable {
 
         final DSLContext trans = DSL.using(configuration);
 
+        final Map<String, Object> mmap;
+        
         // update mauth
-        final Mauth dbMauth;
         if(memberToUpdate.hasMauthTableVals()) {
 
           // update mauth record
@@ -511,22 +513,22 @@ public class MCorpusRepo implements Closeable {
           fputWhenNotNull(MAUTH.HOME_PHONE, memberToUpdate.dbMauth.getHomePhone(), fmapMauth);
           fputWhenNotNull(MAUTH.WORK_PHONE, memberToUpdate.dbMauth.getWorkPhone(), fmapMauth);
           fputWhenNotNull(MAUTH.USERNAME, memberToUpdate.dbMauth.getUsername(), fmapMauth);
-          dbMauth = trans
+          mmap = trans
                     .update(MAUTH)
                     .set(fmapMauth)
                     .where(MAUTH.MID.eq(mid))
-                    .returning(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
-                    .fetchOne().into(Mauth.class);
+                    .returning(MAUTH.MID, MAUTH.MODIFIED, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
+                    .fetchOne().intoMap();
         } else {
           // otherwise select to get current snapshot
-          dbMauth = trans
+          mmap = trans
                     .select(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
                     .from(MAUTH)
                     .where(MAUTH.MID.eq(mid))
-                    .fetchOne().into(Mauth.class);
+                    .fetchOne().intoMap();
         }
         
-        if (dbMauth == null) {
+        if (isNullOrEmpty(mmap)) {
           // mauth insert failed (rollback)
           throw new DataAccessException("No post-update mauth record returned.");
         }
@@ -541,24 +543,18 @@ public class MCorpusRepo implements Closeable {
         fputWhenNotNull(MEMBER.NAME_LAST, memberToUpdate.dbMember.getNameLast(), fmapMember);
         fputWhenNotNull(MEMBER.DISPLAY_NAME, memberToUpdate.dbMember.getDisplayName(), fmapMember);
         fputWhenNotNull(MEMBER.STATUS, memberToUpdate.dbMember.getStatus(), fmapMember);
-        final com.tll.mcorpus.db.tables.pojos.Member dbMember;
-        dbMember = trans
+        
+        mmap.putAll(trans
                 .update(MEMBER)
                 .set(fmapMember)
                 .where(MEMBER.MID.eq(mid))
                 .returning()
-                .fetchOne().into(com.tll.mcorpus.db.tables.pojos.Member.class);
+                .fetchOne().intoMap());
 
-        // acquire the inserted member record's modified timestamp
-        if (dbMember == null) {
-          // bad insert return values (force rollback)
-          throw new DataAccessException("No post-update member record returned.");
-        }
+        // success
+        rlist.add(mapToMemberAndMauth(mmap));
 
-        rlist.add(new MemberAndMauth(dbMember, dbMauth));
-
-        // successful member update at this point
-        // implicit commit happens now
+        // commit happens upon falling out of scope
       });
     }
     catch(DataAccessException e) {

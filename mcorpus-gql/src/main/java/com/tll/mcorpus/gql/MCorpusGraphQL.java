@@ -254,7 +254,7 @@ public class MCorpusGraphQL {
         .dataFetcher("addMcuser", env -> {
           return handleMutation(
             "mcuser", env,
-            map -> xfrmMcuser.fromGraphQLMap(map),
+            map -> xfrmMcuser.fromGraphQLMapForAdd(map),
             g -> vldtnMcuser.validateForAdd(g), 
             (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
             b -> mcuserRepo.addMcuser(b),
@@ -266,8 +266,8 @@ public class MCorpusGraphQL {
         .dataFetcher("updateMcuser", env -> {
           return handleMutation(
             "mcuser", env,
-            map -> xfrmMcuser.fromGraphQLMap(map),
-            g -> vldtnMcuser.validateForAdd(g), 
+            map -> xfrmMcuser.fromGraphQLMapForUpdate(map),
+            g -> vldtnMcuser.validateForUpdate(g), 
             (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
             b -> mcuserRepo.updateMcuser(b),
             bpost -> xfrmMcuser.fromBackend(bpost)
@@ -332,7 +332,7 @@ public class MCorpusGraphQL {
         .dataFetcher("addMember", env -> {
           return handleMutation(
             "member", env, 
-            map -> xfrmMember.fromGraphQLMap(map), 
+            map -> xfrmMember.fromGraphQLMapForAdd(map), 
             (Member g) -> vldtnMember.validateForAdd(g), 
             gvldtd -> xfrmMember.toBackend(gvldtd), 
             (MemberAndMauth b) -> mcorpusRepo.addMember(b), 
@@ -344,7 +344,7 @@ public class MCorpusGraphQL {
         .dataFetcher("updateMember", env -> {
           return handleMutation(
             "member", env, 
-            map -> xfrmMember.fromGraphQLMap(map), 
+            map -> xfrmMember.fromGraphQLMapForUpdate(map), 
             (Member g) -> vldtnMember.validateForUpdate(g), 
             gvldtd -> xfrmMember.toBackend(gvldtd), 
             (MemberAndMauth b) -> mcorpusRepo.updateMember(b), 
@@ -365,7 +365,7 @@ public class MCorpusGraphQL {
         .dataFetcher("addMemberAddress", env -> {
           return handleMutation(
             "memberAddress", env, 
-            map -> xfrmMemberAddress.fromGraphQLMap(map), 
+            map -> xfrmMemberAddress.fromGraphQLMapForAdd(map), 
             (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g), 
             gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
             (Maddress b) -> mcorpusRepo.addMemberAddress(b), 
@@ -377,7 +377,7 @@ public class MCorpusGraphQL {
         .dataFetcher("updateMemberAddress", env -> {
           return handleMutation(
             "memberAddress", env, 
-            map -> xfrmMemberAddress.fromGraphQLMap(map), 
+            map -> xfrmMemberAddress.fromGraphQLMapForUpdate(map), 
             (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g), 
             gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
             (Maddress b) -> mcorpusRepo.updateMemberAddress(b), 
@@ -591,7 +591,10 @@ public class MCorpusGraphQL {
           final Member m = env.getSource();
           final UUID mid = m.getMid();
           final FetchResult<List<Maddress>> fr = mcorpusRepo.fetchMemberAddresses(mid);
-          return processFetchResult(fr, env, blist -> blist.stream().map(b -> xfrmMemberAddress.fromBackend(b)));
+          return processFetchResult(fr, env, 
+            blist -> blist.stream()
+              .map(b -> xfrmMemberAddress.fromBackend(b)).collect(Collectors.toList())
+          );
         })
       )
 
