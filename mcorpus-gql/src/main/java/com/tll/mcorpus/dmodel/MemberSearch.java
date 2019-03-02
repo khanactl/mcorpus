@@ -1,7 +1,7 @@
 package com.tll.mcorpus.dmodel;
 
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 
 import org.jooq.Condition;
 import org.jooq.SortField;

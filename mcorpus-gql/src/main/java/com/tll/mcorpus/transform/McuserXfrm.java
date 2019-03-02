@@ -1,13 +1,11 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.Util.neclean;
-import static com.tll.mcorpus.Util.clean;
-import static com.tll.mcorpus.Util.isNotNull;
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.upper;
-import static com.tll.mcorpus.Util.uuidFromToken;
-import static com.tll.mcorpus.repo.RepoUtil.fval;
+import static com.tll.core.Util.neclean;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.upper;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,9 +18,8 @@ import java.util.stream.Collectors;
 import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.gmodel.mcuser.Mcuser;
-import com.tll.mcorpus.transformapi.BaseTransformer;
 
-public class McuserXfrm extends BaseTransformer<Mcuser, com.tll.mcorpus.db.tables.pojos.Mcuser> {
+public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.db.tables.pojos.Mcuser> {
 
   public static McuserStatus mcuserStatusFromString(final String s) {
     try {

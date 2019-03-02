@@ -1,12 +1,11 @@
 package com.tll.mcorpus.gql;
 
-import static com.tll.mcorpus.Util.upper;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.upper;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.clean;
 
 import com.tll.mcorpus.web.GraphQLWebContext;
 
@@ -117,21 +116,23 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
     final Role targetRole = Role.fromString(upper(roletok));
     final GraphQLFieldDefinition f = env.getElement();
     return f.transform(builder -> builder.dataFetcher(dataFetchingEnvironment -> {
-      try {
-        final GraphQLWebContext webContext = dataFetchingEnvironment.getContext();
-        final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
-        log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
-        if(targetRole.isAuthorized(requestingRoles)) {
-          // authorized
+      final GraphQLWebContext webContext = dataFetchingEnvironment.getContext();
+      final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
+      // log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
+      if(targetRole.isAuthorized(requestingRoles)) {
+        // authorized
+        // log.debug("Role(s) {} authorized for {}", requestingRoles, f.getName());
+        try {
           return f.getDataFetcher().get(dataFetchingEnvironment);
+        } catch(Exception e) {
+          log.error("Data fetching error for {}: {}", f.getName(), e.getMessage());
         }
+      } else {
         // not authorized
-        log.warn("Role(s) {} not authorized for {}", requestingRoles, f.getName());
-        return null;
-      } catch(Exception e) {
-        log.error("Role check for {} error: {}", f.getName(), e.getMessage());
-        return null;
+        log.warn("Role(s) {} NOT authorized for {}", requestingRoles, f.getName());
       }
+      // default 
+      return null;
     }));
   }
 }

@@ -1,7 +1,7 @@
 package com.tll.mcorpus.validateapi;
 
-import static com.tll.mcorpus.Util.isNotNullOrEmpty;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotNull;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.mcorpus.validateapi.VldtnErr.verr;
 
 import java.util.HashSet;

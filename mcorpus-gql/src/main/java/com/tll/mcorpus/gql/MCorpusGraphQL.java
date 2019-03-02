@@ -1,12 +1,12 @@
 package com.tll.mcorpus.gql;
 
-import static com.tll.mcorpus.Util.asStringAndClean;
-import static com.tll.mcorpus.Util.clean;
-import static com.tll.mcorpus.Util.dflt;
-import static com.tll.mcorpus.Util.isNotNull;
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.uuidFromToken;
-import static com.tll.mcorpus.Util.uuidToToken;
+import static com.tll.core.Util.asStringAndClean;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.dflt;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNull;
+import static com.tll.mcorpus.transform.BaseMcorpusTransformer.uuidFromToken;
+import static com.tll.mcorpus.transform.BaseMcorpusTransformer.uuidToToken;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 
 import java.io.InputStreamReader;
@@ -141,7 +141,7 @@ public class MCorpusGraphQL {
             Thread.currentThread().getContextClassLoader().getResourceAsStream("mcuser.graphqls"), StandardCharsets.UTF_8);
       final InputStreamReader rdrMcorpus = new InputStreamReader(
           Thread.currentThread().getContextClassLoader().getResourceAsStream("mcorpus.graphqls"), StandardCharsets.UTF_8);
-      ) {
+    ) {
       log.debug("Loading mcorpus GraphQL schema(s)..");
 
       final TypeDefinitionRegistry typeRegistry = new TypeDefinitionRegistry();
@@ -673,7 +673,7 @@ public class MCorpusGraphQL {
    *         which should be considered to be the post-mutation 
    *         current state of the entity.
    */
-  private static <G, B> G handleMutation(
+  private <G, B> G handleMutation(
     final String arg0, 
     final DataFetchingEnvironment env, 
     final Function<Map<String, Object>, G> tfrmFromGqlMap, 
@@ -682,36 +682,39 @@ public class MCorpusGraphQL {
     final Function<B, FetchResult<B>> persistOp, 
     final Function<B, G> trfmToFront
   ) {
-    final G g = tfrmFromGqlMap.apply(env.getArgument(arg0));
-    final VldtnResult vresult = isNull(vldtn) ? VldtnResult.VALID : vldtn.apply(g);
-    if(vresult.isValid()) {
-      final B b = tfrmToBack.apply(g);
-      final FetchResult<B> fr = persistOp.apply(b);
-      if(fr.isSuccess()) {
-        final G gpost = trfmToFront.apply(fr.get());
-        return gpost;
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
+    try {
+      final G g = tfrmFromGqlMap.apply(env.getArgument(arg0));
+      final VldtnResult vresult = isNull(vldtn) ? VldtnResult.VALID : vldtn.apply(g);
+      if(vresult.isValid()) {
+        final B b = tfrmToBack.apply(g);
+        final FetchResult<B> fr = persistOp.apply(b);
+        if(fr.isSuccess()) {
+          final G gpost = trfmToFront.apply(fr.get());
+          return gpost;
+        } 
+        if(fr.hasErrorMsg()) {
+          final String emsg = fr.getErrorMsg();
+          env.getExecutionContext().addError(
+            new ValidationError(
+                ValidationErrorType.InvalidSyntax, 
+                (SourceLocation) null, 
+                emsg));
+        }
+      } else {
+        vresult.getErrors().stream().forEach(cv -> {
+          env.getExecutionContext().addError(
+            new ValidationError(
               ValidationErrorType.InvalidSyntax, 
               (SourceLocation) null, 
-              emsg));
+              cv.getVldtnErrMsg()));
+        });
       }
-      // default
-      return null;
-      
-    } else {
-      vresult.getErrors().stream().forEach(cv -> {
-        env.getExecutionContext().addError(
-          new ValidationError(
-            ValidationErrorType.InvalidSyntax, 
-            (SourceLocation) null, 
-            cv.getVldtnErrMsg()));
-      });
-      return null;
+    } catch(Exception e) {
+      // mutation processing error
+      log.error("Mutation processing error: {}", e.getMessage());
     }
+    // default
+    return null;
   }
 
   /**
@@ -723,23 +726,27 @@ public class MCorpusGraphQL {
    * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
    * @return true when the delete op was run without error, false otherwise.
    */
-  private static <G> boolean handleDeletion(
+  private <G> boolean handleDeletion(
     final DataFetchingEnvironment env, 
     final Supplier<FetchResult<Boolean>> deleteOp 
   ) {
-    final FetchResult<Boolean> fr = deleteOp.get();
-    if(fr.isSuccess()) {
-      return true;
-    } 
-    if(fr.hasErrorMsg()) {
-      final String emsg = fr.getErrorMsg();
-      env.getExecutionContext().addError(
-        new ValidationError(
-            ValidationErrorType.InvalidSyntax, 
-            (SourceLocation) null, 
-            emsg));
+    try {
+      final FetchResult<Boolean> fr = deleteOp.get();
+      if(fr.isSuccess()) {
+        return true;
+      } 
+      if(fr.hasErrorMsg()) {
+        final String emsg = fr.getErrorMsg();
+        env.getExecutionContext().addError(
+          new ValidationError(
+              ValidationErrorType.InvalidSyntax, 
+              (SourceLocation) null, 
+              emsg));
+      }
+    } catch(Exception e) {
+      log.error("Deletion by op processing error: {}", e.getMessage());
     }
-    // delete error
+    // default
     return false;
   }
 
@@ -751,22 +758,26 @@ public class MCorpusGraphQL {
    * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
    * @return true when the delete op was run without error, false otherwise.
    */
-  private static <G, B> boolean handleDeletion(
+  private <G, B> boolean handleDeletion(
     final DataFetchingEnvironment env, 
     final UUID pk,
     final Function<UUID, FetchResult<Boolean>> deleteOp 
   ) {
-    final FetchResult<Boolean> fr = deleteOp.apply(pk);
-    if(fr.isSuccess()) {
-      return true;
-    } 
-    if(fr.hasErrorMsg()) {
-      final String emsg = fr.getErrorMsg();
-      env.getExecutionContext().addError(
-        new ValidationError(
-            ValidationErrorType.InvalidSyntax, 
-            (SourceLocation) null, 
-            emsg));
+    try {
+      final FetchResult<Boolean> fr = deleteOp.apply(pk);
+      if(fr.isSuccess()) {
+        return true;
+      } 
+      if(fr.hasErrorMsg()) {
+        final String emsg = fr.getErrorMsg();
+        env.getExecutionContext().addError(
+          new ValidationError(
+              ValidationErrorType.InvalidSyntax, 
+              (SourceLocation) null, 
+              emsg));
+      }
+    } catch(Exception e) {
+      log.error("Deletion by UUID processing error: {}", e.getMessage());
     }
     // delete error
     return false;
@@ -783,20 +794,24 @@ public class MCorpusGraphQL {
    * @param env the GraphQL data fetching environment ref
    * @return the extracted fetch result value
    */
-  private static <T> T processFetchResult(
+  private <T> T processFetchResult(
     final FetchResult<T> fr, 
     final DataFetchingEnvironment env
   ) {
-    if(fr.isSuccess()) {
-      return fr.get();
-    } 
-    if(fr.hasErrorMsg()) {
-      final String emsg = fr.getErrorMsg();
-      env.getExecutionContext().addError(
-        new ValidationError(
-            ValidationErrorType.InvalidSyntax, 
-            (SourceLocation) null, 
-            emsg));
+    try {
+      if(fr.isSuccess()) {
+        return fr.get();
+      } 
+      if(fr.hasErrorMsg()) {
+        final String emsg = fr.getErrorMsg();
+        env.getExecutionContext().addError(
+          new ValidationError(
+              ValidationErrorType.InvalidSyntax, 
+              (SourceLocation) null, 
+              emsg));
+      }
+    } catch(Exception e) {
+      log.error("Fetch result processing error: {}", e.getMessage());
     }
     // default
     return null;
@@ -816,22 +831,26 @@ public class MCorpusGraphQL {
    * @return the transformed fetch result value when no errors are present
    *         or null when errors are present
    */
-  private static <T, G> G processFetchResult(
+  private <T, G> G processFetchResult(
     final FetchResult<T> fr, 
     final DataFetchingEnvironment env, 
     final Function<T, G> transform
   ) {
-    if(fr.isSuccess()) {
-      final G g = transform.apply(fr.get());
-      return g;
-    } 
-    if(fr.hasErrorMsg()) {
-      final String emsg = fr.getErrorMsg();
-      env.getExecutionContext().addError(
-        new ValidationError(
-            ValidationErrorType.InvalidSyntax, 
-            (SourceLocation) null, 
-            emsg));
+    try {
+      if(fr.isSuccess()) {
+        final G g = transform.apply(fr.get());
+        return g;
+      } 
+      if(fr.hasErrorMsg()) {
+        final String emsg = fr.getErrorMsg();
+        env.getExecutionContext().addError(
+          new ValidationError(
+              ValidationErrorType.InvalidSyntax, 
+              (SourceLocation) null, 
+              emsg));
+      }
+    } catch(Exception e) {
+      log.error("Fetch result (transforming) processing error: {}", e.getMessage());
     }
     // default
     return null;

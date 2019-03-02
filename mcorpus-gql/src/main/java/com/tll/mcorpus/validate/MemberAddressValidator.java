@@ -1,12 +1,12 @@
 package com.tll.mcorpus.validate;
 
-import static com.tll.mcorpus.validateapi.VldtnCore.clean;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotNull;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNullOrEmpty;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.lower;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
 import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
-import static com.tll.mcorpus.validateapi.VldtnCore.not;
-import static com.tll.mcorpus.validateapi.VldtnCore.lower;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.gmodel.MemberAddress;
@@ -36,13 +36,13 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
       // require pk
       .vrqd(t -> vldtn.getTarget().getPk().isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
       
-      .vopt(MemberAddressValidator::addressAttnValid, MemberAddress::getAttn, "maddress.attn.emsg", "attn")
-      .vopt(MemberAddressValidator::addressStreet1Valid, MemberAddress::getStreet1, "maddress.street1.emsg", "street1")
-      .vopt(MemberAddressValidator::addressStreet2Valid, MemberAddress::getStreet2, "maddress.street2.emsg", "street2")
-      .vopt(MemberAddressValidator::addressCityValid, MemberAddress::getCity, "maddress.city.emsg", "city")
-      .vopt(MemberAddressValidator::addressStateValid, MemberAddress::getState, "maddress.state.emsg", "state")
-      .vopt(MemberAddressValidator::addressPostalCodeValid, MemberAddress::getPostalCode, "maddress.postalCode.emsg", "postalCode")
-      .vopt(MemberAddressValidator::addressCountryValid, MemberAddress::getCountry, "maddress.country.emsg", "country")
+      .vtok(MemberAddressValidator::addressAttnValid, MemberAddress::getAttn, "maddress.attn.emsg", "attn")
+      .vtok(MemberAddressValidator::addressStreet1Valid, MemberAddress::getStreet1, "maddress.street1.emsg", "street1")
+      .vtok(MemberAddressValidator::addressStreet2Valid, MemberAddress::getStreet2, "maddress.street2.emsg", "street2")
+      .vtok(MemberAddressValidator::addressCityValid, MemberAddress::getCity, "maddress.city.emsg", "city")
+      .vtok(MemberAddressValidator::addressStateValid, MemberAddress::getState, "maddress.state.emsg", "state")
+      .vtok(MemberAddressValidator::addressPostalCodeValid, MemberAddress::getPostalCode, "maddress.postalCode.emsg", "postalCode")
+      .vtok(MemberAddressValidator::addressCountryValid, MemberAddress::getCountry, "maddress.country.emsg", "country")
     ;
   }
 

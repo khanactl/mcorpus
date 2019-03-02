@@ -8,8 +8,10 @@ import com.google.inject.Singleton;
 
 /**
  * MCorpusRepoModule module.
- *
- * Created by jpk on 11/22/17.
+ * <p>
+ * Created on 11/22/17.
+ * 
+ * @author jpk
  */
 public class MCorpusRepoModule extends AbstractModule {
 

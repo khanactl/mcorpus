@@ -1,10 +1,10 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.clean;
-import static com.tll.mcorpus.Util.isBlank;
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.expireAllCookies;
 

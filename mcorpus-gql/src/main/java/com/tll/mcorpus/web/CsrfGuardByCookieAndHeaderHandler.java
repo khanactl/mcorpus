@@ -1,7 +1,7 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.addRstCookieToResponse;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 

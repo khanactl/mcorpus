@@ -1,7 +1,7 @@
 package com.tll.mcorpus.repo;
 
-import static com.tll.mcorpus.Util.nflatten;
-import static com.tll.mcorpus.Util.isNull;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.nflatten;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotNull;

@@ -4,8 +4,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
-import com.tll.mcorpus.gmodel.BaseEntity;
-import com.tll.mcorpus.gmodel.IKey;
+import com.tll.mcorpus.gmodelapi.BaseEntity;
+import com.tll.mcorpus.gmodelapi.IKey;
 
 public class Mcuser extends BaseEntity<Mcuser, IKey> {
 

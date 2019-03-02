@@ -1,6 +1,6 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import static ratpack.jackson.Jackson.fromJson;
 import static ratpack.jackson.Jackson.json;

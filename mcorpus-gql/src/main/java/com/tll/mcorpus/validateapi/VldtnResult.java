@@ -1,8 +1,8 @@
 package com.tll.mcorpus.validateapi;
 
 import static com.tll.mcorpus.validateapi.VldtnErr.verr;
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
 
 import java.util.Collections;
 import java.util.Set;

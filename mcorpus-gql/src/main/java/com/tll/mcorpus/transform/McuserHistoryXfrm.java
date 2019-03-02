@@ -1,6 +1,6 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.Util.isNull;
+import static com.tll.core.Util.isNull;
 
 import java.util.List;
 import java.util.Map;

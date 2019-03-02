@@ -1,21 +1,18 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.Util.neclean;
-import static com.tll.mcorpus.Util.clean;
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.lower;
-import static com.tll.mcorpus.Util.upper;
-import static com.tll.mcorpus.Util.uuidFromToken;
-import static com.tll.mcorpus.repo.RepoUtil.fval;
+import static com.tll.core.Util.neclean;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.lower;
+import static com.tll.core.Util.upper;
 
 import java.util.Map;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.gmodel.MemberAddress;
-import com.tll.mcorpus.transformapi.BaseTransformer;
 
-public class MemberAddressXfrm extends BaseTransformer<MemberAddress, Maddress> {
+public class MemberAddressXfrm extends BaseMcorpusTransformer<MemberAddress, Maddress> {
 
   public static Addressname addressnameFromString(final String s) {
     try {

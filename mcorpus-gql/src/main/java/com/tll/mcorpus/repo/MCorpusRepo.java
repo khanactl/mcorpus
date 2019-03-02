@@ -1,13 +1,15 @@
 package com.tll.mcorpus.repo;
 
-import static com.tll.mcorpus.repo.RepoUtil.*;
-import static com.tll.mcorpus.Util.not;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.nflatten;
-import static com.tll.mcorpus.Util.isNull;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.nflatten;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
+import static com.tll.mcorpus.repo.RepoUtil.fput;
+import static com.tll.mcorpus.repo.RepoUtil.fputWhenNotNull;
+import static com.tll.mcorpus.repo.RepoUtil.fval;
 
 import java.io.Closeable;
 import java.sql.Timestamp;
@@ -22,14 +24,14 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
-import com.tll.mcorpus.db.tables.pojos.Member;
 import com.tll.mcorpus.db.tables.pojos.Mauth;
+import com.tll.mcorpus.db.tables.pojos.Member;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 import com.tll.mcorpus.dmodel.MemberAndMauth;

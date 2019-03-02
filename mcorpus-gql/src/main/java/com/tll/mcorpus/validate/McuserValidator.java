@@ -1,11 +1,11 @@
 package com.tll.mcorpus.validate;
 
-import static com.tll.mcorpus.validateapi.VldtnCore.clean;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotBlank;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotNull;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNotBlank;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.upper;
 import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
 import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
-import static com.tll.mcorpus.validateapi.VldtnCore.upper;
 
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.gmodel.mcuser.Mcuser;

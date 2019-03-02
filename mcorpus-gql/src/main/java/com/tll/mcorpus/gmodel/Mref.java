@@ -1,8 +1,9 @@
 package com.tll.mcorpus.gmodel;
 
-import static com.tll.mcorpus.Util.uuidToToken;
-
 import java.util.UUID;
+
+import com.tll.mcorpus.gmodelapi.BaseEntity;
+import com.tll.mcorpus.gmodelapi.IKey;
 
 public class Mref extends BaseEntity<Mref, IKey> {
 
@@ -23,6 +24,6 @@ public class Mref extends BaseEntity<Mref, IKey> {
 
   @Override
   public String toString() {
-    return String.format("Mref[mid: %s, empId: %s, location: %s]", uuidToToken(mid), empId, location);
+    return String.format("Mref[mid: %s, empId: %s, location: %s]", mid, empId, location);
   }
 }

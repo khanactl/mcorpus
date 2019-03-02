@@ -3,6 +3,9 @@ package com.tll.mcorpus.gmodel;
 import java.util.Date;
 import java.util.UUID;
 
+import com.tll.mcorpus.gmodelapi.BaseEntity;
+import com.tll.mcorpus.gmodelapi.IKey;
+
 /**
  * Member gql entity.
  * 

@@ -1,10 +1,10 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.asString;
-import static com.tll.mcorpus.Util.dflt;
-import static com.tll.mcorpus.Util.isNotNull;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.asString;
+import static com.tll.core.Util.dflt;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;

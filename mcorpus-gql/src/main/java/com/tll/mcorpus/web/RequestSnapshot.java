@@ -1,9 +1,9 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.clean;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.lower;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.lower;
+import static com.tll.core.Util.not;
 
 import java.time.Instant;
 import java.util.regex.Matcher;

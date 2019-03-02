@@ -1,101 +1,19 @@
 package com.tll.mcorpus.validateapi;
 
-import java.util.Collection;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNullOrEmpty;
+
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Non-mutating validation primitives for use in entity validation.
+ * Non-mutating validation primitives for use in validation implementations.
  * 
  * @author jpk
  */
 public class VldtnCore {
-
-    /**
-   * Is the given object ref null?
-   *
-   * @param o the object ref
-   * @return true when null
-   */
-  public static boolean isNull(final Object o) { return o == null; }
-
-  /**
-   * Is the given object ref NOT null?
-   *
-   * @param o the object ref
-   * @return true when NOT null
-   */
-  public static boolean isNotNull(final Object o) { return o != null; }
-
-  /**
-   * Is the given string null or 0-length ("")?
-   *
-   * @param s the string to check
-   * @return true if the given string is empty, false otherwise.
-   */
-  public static boolean isNullOrEmpty(final String s) { return s == null || s.isEmpty(); }
-  
-  /**
-   * Is the given string non-null and not-empty (greater than zero-length)?
-   *
-   * @param s the string to check
-   * @return true if the given string is no-null and not empty, false otherwise.
-   */
-  public static boolean isNotNullOrEmpty(final String s) { return s != null && !s.isEmpty(); }
-  
-  /**
-   * Is the given array null or 0-length?
-   *
-   * @param a the array to check
-   * @return true if the given array null 0-length, false otherwise.
-   */
-  public static boolean isNullOrEmpty(final Object[] a) { return a == null || a.length == 0; }
-  
-  /**
-   * Is the given collection null or empty?
-   * 
-   * @param clc the collection to check
-   * @return true if the given collection is null or empty, false otherwise
-   */
-  public static boolean isNullOrEmpty(final Collection<?> clc) { return clc == null || clc.isEmpty(); }
-
-  /**
-   * Is the given map null or empty?
-   * 
-   * @param clc the map to check
-   * @return true if the given map is null or empty, false otherwise
-   */
-  public static boolean isNullOrEmpty(final Map<?, ?> map) { return map == null || map.isEmpty(); }
-
-  /**
-   * Is the given string blank? (I.e. null or 0-length or contains only whitespace)
-   *
-   * @param s the string to check
-   * @return true if blank, false otherwise.
-   */
-  public static boolean isBlank(final String s) {
-    return isNullOrEmpty(s) || s.trim().length() == 0;
-  }
-
-  /**
-   * Is the given string not blank?
-   *
-   * @param s the string to check
-   * @return true if not blank, false otherwise.
-   */
-  public static boolean isNotBlank(final String s) {
-    return isNotNullOrEmpty(s) && s.trim().length() > 0;
-  }
-
-  /**
-   * Alternative to the <code>!</code> java lang operator.
-   *
-   * @param b boolean arg
-   * @return not <code>b</code>
-   */
-  public static boolean not(boolean b) { return !b; }
 
   /**
    * Verfiy the given string's length does not exceed the given max length.
@@ -125,57 +43,6 @@ public class VldtnCore {
     return len >= minLen && len <= maxLen;
   }
 
-  /**
-   * Convert a possibly absent (null) object to a string where null begets an empty string.
-   *
-   * @param o the object to express as a string
-   * @return the string-wise object -OR- an empty string ("") when the given object is null.
-   */
-  public static String asString(final Object o) { return o == null ? "" : o.toString(); }
-
-  /**
-   * Get the length of a possibly null string.
-   *
-   * @param s the string
-   * @return the string's length which is 0 for both null and empty length strings.
-   */
-  public static int strlen(final String s) { return s == null ? 0 : s.length(); }
-
-  /**
-   * Clean a string: if it is blank (null or whitespace-only), an empty string ("") is returned.
-   * Otherwise, the string is trimmed on both sides and returned.
-   *
-   * @param s the string to clean
-   * @return Never-null, trimmed string
-   */
-  public static String clean(final String s) { return s == null ? "" : s.trim(); }
-
-  /**
-   * Clean a string when NOT NULL.
-   * If it is null, null is returned.
-   * Otherwise, the string is trimmed on both sides and returned.
-   *
-   * @param s the string to nclean
-   * @return Null when the input is null or the trimmed string
-   */
-  public static String nclean(final String s) { return s == null ? null : s.trim(); }
-
-  /**
-   * Convert an arbitrary object to a string, then trim it on both sides.
-   *
-   * @param o the object to clean and trim
-   * @return never-null string
-   */
-  public static String asStringAndClean(final Object o) { return o == null ? "" : o.toString().trim(); }
-
-  public static String upper(final String s) { return s == null ? "" : s.toUpperCase(Locale.getDefault()); }
-
-  public static String lower(final String s) { return s == null ? "" : s.toLowerCase(Locale.getDefault()); }
-
-  public static String upper(final Object o) { return upper(asStringAndClean(o)); }
-
-  public static String lower(final Object o) { return lower(asStringAndClean(o)); }
-  
   /**
    * namePattern: RegEx to apply to a 'name'.<br>
    *              Allowed chars: A-Z, a-z, comma(,), dash(-), period(.), space( ), apostrophe(')

@@ -1,6 +1,6 @@
 package com.tll.mcorpus.dmodel;
 
-import static com.tll.mcorpus.Util.isNotNull;
+import static com.tll.core.Util.isNotNull;
 
 import com.tll.mcorpus.db.tables.pojos.Mauth;
 import com.tll.mcorpus.db.tables.pojos.Member;

@@ -1,13 +1,9 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.Util.digits;
-import static com.tll.mcorpus.Util.upper;
-import static com.tll.mcorpus.Util.neclean;
-import static com.tll.mcorpus.Util.isNotNullOrEmpty;
-import static com.tll.mcorpus.Util.asSqlDate;
-import static com.tll.mcorpus.Util.clean;
-import static com.tll.mcorpus.Util.uuidFromToken;
-import static com.tll.mcorpus.repo.RepoUtil.fval;
+import static com.tll.core.Util.upper;
+import static com.tll.core.Util.neclean;
+import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.clean;
 
 import java.util.Map;
 
@@ -15,9 +11,8 @@ import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.Member;
-import com.tll.mcorpus.transformapi.BaseTransformer;
 
-public class MemberXfrm extends BaseTransformer<Member, MemberAndMauth> {
+public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
 
   public static String locationToString(Location location) {
     return location == null ? null : "L" + location.getLiteral();

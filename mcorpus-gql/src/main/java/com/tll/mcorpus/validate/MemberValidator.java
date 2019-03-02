@@ -1,12 +1,12 @@
 package com.tll.mcorpus.validate;
 
-import static com.tll.mcorpus.validateapi.VldtnCore.clean;
-import static com.tll.mcorpus.validateapi.VldtnCore.isBlank;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotNull;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNullOrEmpty;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
 import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
-import static com.tll.mcorpus.validateapi.VldtnCore.not;
 
 import java.util.regex.Pattern;
 
@@ -47,12 +47,12 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
       .vrqd(t -> vldtn.getTarget().getPk().isSet(), Member::getPk, "member.nopk.emsg", "pk")
       
       // member
-      .vopt(MemberValidator::empIdValid, Member::getEmpId, "member.empId.emsg", "empId")
-      .vopt(MemberValidator::locationValid, Member::getLocation, "member.location.emsg", "location")
-      .vopt(MemberValidator::nameFirstValid, Member::getNameFirst, "member.nameFirst.emsg", "nameFirst")
-      .vopt(MemberValidator::nameMiddleValid, Member::getNameMiddle, "member.nameMiddle.emsg", "nameMiddle")
-      .vopt(MemberValidator::nameLastValid, Member::getNameLast, "member.nameLast.emsg", "nameLast")
-      .vopt(MemberValidator::displayNameValid, Member::getDisplayName, "member.displayName.emsg", "displayName")
+      .vtok(MemberValidator::empIdValid, Member::getEmpId, "member.empId.emsg", "empId")
+      .vtok(MemberValidator::locationValid, Member::getLocation, "member.location.emsg", "location")
+      .vtok(MemberValidator::nameFirstValid, Member::getNameFirst, "member.nameFirst.emsg", "nameFirst")
+      .vtok(MemberValidator::nameMiddleValid, Member::getNameMiddle, "member.nameMiddle.emsg", "nameMiddle")
+      .vtok(MemberValidator::nameLastValid, Member::getNameLast, "member.nameLast.emsg", "nameLast")
+      .vtok(MemberValidator::displayNameValid, Member::getDisplayName, "member.displayName.emsg", "displayName")
       // mauth
       .vopt(VldtnCore::dobValid, Member::getDob, "member.dob.emsg", "dob")
       .vtok(VldtnCore::ssnValid, Member::getSsn, "member.ssn.emsg", "ssn")

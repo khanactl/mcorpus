@@ -5,4 +5,4 @@
  * 
  * @author jpk
  */
-package com.tll.mcorpus.gmodel.mcuser;
+package com.tll.mcorpus.gmodelapi;

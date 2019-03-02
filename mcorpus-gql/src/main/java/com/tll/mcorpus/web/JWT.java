@@ -1,8 +1,8 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.Util.isNull;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 
 import java.security.SecureRandom;
 import java.time.Instant;

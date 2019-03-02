@@ -1,6 +1,6 @@
 package com.tll.mcorpus.validateapi;
 
-import static com.tll.mcorpus.Util.asString;
+import static com.tll.core.Util.asString;
 
 /**
  * A single validation error.

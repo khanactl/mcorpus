@@ -1,21 +1,22 @@
 package com.tll.mcorpus.validateapi;
 
-import static com.tll.mcorpus.validateapi.VldtnTestHelper.*;
-import static org.junit.Assert.*;
-import static com.tll.mcorpus.validateapi.VldtnCore.clean;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotBlank;
-import static com.tll.mcorpus.validateapi.VldtnCore.isNotNull;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNotBlank;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.upper;
 import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
 import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
-import static com.tll.mcorpus.validateapi.VldtnCore.upper;
+import static com.tll.mcorpus.validateapi.VldtnTestHelper.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
 import com.tll.mcorpus.UnitTest;
-import com.tll.mcorpus.gmodel.BaseEntity;
-import com.tll.mcorpus.gmodel.IKey;
+import com.tll.mcorpus.gmodelapi.BaseEntity;
+import com.tll.mcorpus.gmodelapi.IKey;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -4,9 +4,9 @@ import org.jooq.Field;
 
 import java.util.Map;
 
-import static com.tll.mcorpus.Util.isBlank;
-import static com.tll.mcorpus.Util.isNullOrEmpty;
-import static com.tll.mcorpus.Util.not;
+import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 
 /**
  * General repository-level entity persistence utility methods.

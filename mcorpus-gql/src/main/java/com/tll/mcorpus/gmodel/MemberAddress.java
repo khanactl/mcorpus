@@ -1,9 +1,12 @@
 package com.tll.mcorpus.gmodel;
 
-import static com.tll.mcorpus.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNotNullOrEmpty;
 
 import java.util.Date;
 import java.util.UUID;
+
+import com.tll.mcorpus.gmodelapi.BaseEntity;
+import com.tll.mcorpus.gmodelapi.IKey;
 
 public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAndAddressName> {
 

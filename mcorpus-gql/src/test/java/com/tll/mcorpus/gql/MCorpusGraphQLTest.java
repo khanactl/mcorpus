@@ -84,6 +84,15 @@ public class MCorpusGraphQLTest {
   }
   
   @Test
+  public void testJsonStringToMap() throws Exception {
+    final String json = cpr("introspect.gql");
+    Map<String, Object> rmap = jsonStringToMap(json);
+    assertNotNull(rmap);
+    assertTrue(rmap.size() == 1);
+    assertTrue(rmap.containsKey("query"));
+  }
+  
+  @Test
   public void testLoadSchema() {
     final MCorpusGraphQL g = mcgql();
     g.loadSchema();

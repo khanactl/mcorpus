@@ -1,8 +1,8 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.Util.asString;
-import static com.tll.mcorpus.Util.isBlank;
-import static com.tll.mcorpus.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.asString;
+import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 import static java.util.Collections.singletonList;

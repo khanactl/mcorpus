@@ -1,10 +1,10 @@
-package com.tll.mcorpus.gmodel;
+package com.tll.mcorpus.gmodelapi;
 
 /**
  * GraphQL entity definition.
  * <p>
  * All declared entity fields are expected to be of the same type 
- * of declared in the GraphQL schema this entity backs.
+ * as what is declared in the GraphQL schema this entity backs.
  * 
  * @param <E> the concrete entity type
  * @param <PK> the primary key type

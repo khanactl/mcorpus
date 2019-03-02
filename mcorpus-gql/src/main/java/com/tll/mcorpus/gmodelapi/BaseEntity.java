@@ -1,4 +1,4 @@
-package com.tll.mcorpus.gmodel;
+package com.tll.mcorpus.gmodelapi;
 
 /**
  * Base class for all {@link IGEntity} implementations.

@@ -1,5 +1,5 @@
 /**
- * Houses core, project-agnostic utility type methods that have no dependencies.
+ * Houses core, project-agnostic utility methods that have no dependencies.
  * 
  * @author jpk
  */
