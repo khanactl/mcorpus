@@ -25,6 +25,7 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
+import com.tll.mcorpus.repoapi.FetchResult;
 
 import org.junit.AfterClass;
 import org.junit.Test;

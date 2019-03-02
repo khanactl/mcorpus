@@ -1,4 +1,4 @@
-package com.tll.mcorpus.repo;
+package com.tll.mcorpus.repoapi;
 
 import org.jooq.Field;
 

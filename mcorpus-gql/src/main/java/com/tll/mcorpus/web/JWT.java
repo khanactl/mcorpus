@@ -27,7 +27,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.repo.FetchResult;
+import com.tll.mcorpus.repoapi.FetchResult;
 import com.tll.mcorpus.repo.IJwtStatusProvider;
 
 import org.slf4j.Logger;

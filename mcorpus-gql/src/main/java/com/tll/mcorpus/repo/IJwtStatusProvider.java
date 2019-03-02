@@ -3,6 +3,7 @@ package com.tll.mcorpus.repo;
 import java.util.UUID;
 
 import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.repoapi.FetchResult;
 
 /**
  * Contract for obtaining the status of a JWT from a known-about 

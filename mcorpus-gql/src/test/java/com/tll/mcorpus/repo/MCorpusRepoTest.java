@@ -36,6 +36,7 @@ import com.tll.mcorpus.db.tables.pojos.Member;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
+import com.tll.mcorpus.repoapi.FetchResult;
 
 import org.junit.AfterClass;
 import org.junit.Test;

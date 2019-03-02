@@ -22,7 +22,7 @@ import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.repo.FetchResult;
+import com.tll.mcorpus.repoapi.FetchResult;
 import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
 import org.slf4j.Logger;

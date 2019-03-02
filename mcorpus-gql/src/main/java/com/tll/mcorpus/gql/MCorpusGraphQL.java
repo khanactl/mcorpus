@@ -34,7 +34,7 @@ import com.tll.mcorpus.gmodel.mcuser.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LoginEvent;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LogoutEvent;
-import com.tll.mcorpus.repo.FetchResult;
+import com.tll.mcorpus.repoapi.FetchResult;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.transform.McuserHistoryXfrm;
