@@ -16,15 +16,6 @@ public class MCorpusServerConfig {
   public String dbUrl;
   
   /**
-   * The maximum number of web sessions allowed to exist at any instant of time.
-   */
-  public int maxWebSessions;
-  /**
-   * The duration of a web session in minutes.
-   */
-  public int webSessionDurationInMinutes;
-  
-  /**
    * The JWT salt value.
    */
   public String jwtSalt;
