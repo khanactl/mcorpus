@@ -15,9 +15,9 @@ import com.tll.mcorpus.UnitTest;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.GraphQLWebContext;
-import com.tll.mcorpus.web.JWT.JWTStatus;
-import com.tll.mcorpus.web.JWT.JWTStatusInstance;
-import com.tll.mcorpus.web.RequestSnapshot;
+import com.tll.mcorpus.jwt.JWTStatus;
+import com.tll.mcorpus.jwt.JWTStatusInstance;
+import com.tll.mcorpus.webapi.RequestSnapshot;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

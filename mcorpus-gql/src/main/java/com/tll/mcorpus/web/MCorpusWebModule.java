@@ -4,6 +4,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.tll.mcorpus.MCorpusServerConfig;
+import com.tll.mcorpus.jwt.CachingBackendJwtStatusProvider;
+import com.tll.mcorpus.jwt.JWT;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 
 import ratpack.error.ClientErrorHandler;
@@ -30,11 +32,15 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
+    final MCorpusJwtBackendStatusProvider mcorpusJwtBSP = new MCorpusJwtBackendStatusProvider(mcuserRepo);
     return new JWT(
       config.jwtTtlInMillis, 
       JWT.deserialize(config.jwtSalt), 
-      config.jwtStatusCacheTimeoutInMinutes <= 0 ? mcuserRepo : 
-        new CachingJwtStatusProvider(mcuserRepo, config.jwtStatusCacheTimeoutInMinutes), 
+      config.jwtStatusCacheTimeoutInMinutes <= 0 ? mcorpusJwtBSP : 
+        new CachingBackendJwtStatusProvider(
+          mcorpusJwtBSP, 
+          config.jwtStatusCacheTimeoutInMinutes, 
+          config.jwtStatusCacheMaxSize), 
       serverConfig.getPublicAddress().toString()
     );
   }

@@ -6,6 +6,8 @@ import static java.util.Collections.singletonMap;
 
 import java.util.UUID;
 
+import com.tll.mcorpus.jwt.JWT;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

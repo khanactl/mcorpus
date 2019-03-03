@@ -3,6 +3,7 @@ package com.tll.mcorpus.web;
 import static com.tll.mcorpus.Main.glog;
 
 import com.tll.mcorpus.MCorpusServerConfig;
+import com.tll.mcorpus.webapi.RequestSnapshot;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import ratpack.handling.Context;

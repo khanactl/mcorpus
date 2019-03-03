@@ -21,9 +21,11 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
+import com.tll.mcorpus.jwt.JWT;
+import com.tll.mcorpus.jwt.JWTStatusInstance;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.repoapi.FetchResult;
-import com.tll.mcorpus.web.JWT.JWTStatusInstance;
+import com.tll.mcorpus.webapi.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,7 +183,7 @@ public class GraphQLWebContext {
     final JWTStatusInstance jwtStatusInst = getJwtStatus();
     final UUID jwtId = jwtStatusInst.jwtId();
     if(jwtStatusInst.status().isValid()) {
-      final UUID mcuserId = jwtStatusInst.mcuserId();
+      final UUID mcuserId = jwtStatusInst.userId();
       FetchResult<Integer> fetchResult = ctx.get(MCorpusUserRepo.class).getNumActiveLogins(mcuserId);
       if(fetchResult.isSuccess()) {
         // success
@@ -222,18 +224,17 @@ public class GraphQLWebContext {
       return false;
     }
     
-    final RequestSnapshot requestSnapshot = ctx.getRequest().get(RequestSnapshot.class);
     final JWT jwtbiz = ctx.get(JWT.class);
     
     final UUID pendingJwtID = UUID.randomUUID();
     final long requestInstantMillis = requestSnapshot.getRequestInstant().toEpochMilli();
-    final long jwtExpiresMillis = requestInstantMillis + jwtbiz.jwtCookieTtlInMillis();    
+    final long loginExpiration = requestInstantMillis + jwtbiz.jwtCookieTtlInMillis();    
 
     final McuserLogin mcuserLogin = new McuserLogin();
     mcuserLogin.setMcuserUsername(username);
     mcuserLogin.setMcuserPassword(pswd);
     mcuserLogin.setInJwtId(pendingJwtID);
-    mcuserLogin.setInLoginExpiration(new Timestamp(jwtExpiresMillis));
+    mcuserLogin.setInLoginExpiration(new Timestamp(loginExpiration));
     mcuserLogin.setInRequestOrigin(requestSnapshot.getClientOrigin());
     mcuserLogin.setInRequestTimestamp(new Timestamp(requestInstantMillis));
 
@@ -252,25 +253,20 @@ public class GraphQLWebContext {
     try {
       // create the JWT - and set as a cookie to go back to user
       // the user is now expected to provide this JWT for subsequent mcorpus api requests
-      final String issuer = ctx.getServerConfig().getPublicAddress().toString();
-      final String audience = requestSnapshot.getClientOrigin();
       final String jwt = jwtbiz.generate(
-          requestSnapshot.getRequestInstant(), 
-          mcuser.getUid(), 
           pendingJwtID,
-          issuer,
-          audience,
+          mcuser.getUid(), 
           isNullOrEmpty(mcuser.getRoles()) ? "" : 
             Arrays.stream(mcuser.getRoles())
             .map(role -> { return role.getLiteral(); })
-            .collect(Collectors.joining(","))
+            .collect(Collectors.joining(",")),
+          requestSnapshot
       );
       
       // jwt cookie
       addJwtCookieToResponse(ctx, jwt, jwtbiz.jwtCookieTtlInSeconds());
       
-      log.info("Mcuser {} logged in.  JWT {} generated from server (issuer): '{}' to client origin (audience:) '{}'.", 
-          mcuser.getUid(), pendingJwtID, issuer, audience);
+      log.info("Mcuser {} logged in.  JWT {} generated.", mcuser.getUid(), pendingJwtID);
       return true;
     }
     catch(Exception e) {
@@ -290,13 +286,8 @@ public class GraphQLWebContext {
    *         is successfully logged out, false otherwise.
    */
   public boolean mcuserLogout() {
-    // call db-level logout routine to invalidate the jwt id 
-    // and capture the logout event as an mcuser audit record
-    final JWTStatusInstance jwtStatus = ctx.getRequest().get(JWTStatusInstance.class);
-    final RequestSnapshot requestSnapshot = ctx.getRequest().get(RequestSnapshot.class);
-    
     final McuserLogout mcuserLogout = new McuserLogout();
-    mcuserLogout.setMcuserUid(jwtStatus.mcuserId());
+    mcuserLogout.setMcuserUid(jwtStatus.userId());
     mcuserLogout.setJwtId(jwtStatus.jwtId());
     mcuserLogout.setRequestTimestamp(new Timestamp(requestSnapshot.getRequestInstant().toEpochMilli()));
     mcuserLogout.setRequestOrigin(requestSnapshot.getClientOrigin());
@@ -304,12 +295,12 @@ public class GraphQLWebContext {
     if(fetchResult.isSuccess()) {
       // logout success - nix all mcorpus cookies clientside
       expireAllCookies(ctx);
-      log.info("mcuser '{}' logged out.", jwtStatus.mcuserId());
+      log.info("mcuser '{}' logged out.", jwtStatus.userId());
       return true;
     }
 
     // default - logout failed
-    log.error("mcuser '{}' logout failed.", jwtStatus.mcuserId());
+    log.error("mcuser '{}' logout failed.", jwtStatus.userId());
     return false;
   }
 

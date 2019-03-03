@@ -1,6 +1,5 @@
 package com.tll.mcorpus.gql;
 
-import static com.tll.core.Util.asStringAndClean;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.dflt;
 import static com.tll.core.Util.isNotNull;
@@ -48,7 +47,7 @@ import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
 import com.tll.mcorpus.validateapi.VldtnResult;
 import com.tll.mcorpus.web.GraphQLWebContext;
-import com.tll.mcorpus.web.RequestSnapshot;
+import com.tll.mcorpus.webapi.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,8 +238,8 @@ public class MCorpusGraphQL {
         // mcuser login
         .dataFetcher("mclogin", env -> {
           final GraphQLWebContext webContext = env.getContext();
-          final String username = asStringAndClean(env.getArgument("username"));
-          final String pswd = asStringAndClean(env.getArgument("pswd"));
+          final String username = clean(env.getArgument("username"));
+          final String pswd = clean(env.getArgument("pswd"));
           return webContext.mcuserLogin(username, pswd);
         })
 
@@ -308,8 +307,8 @@ public class MCorpusGraphQL {
         .dataFetcher("mlogin", env -> {
           final GraphQLWebContext webContext = env.getContext();
           final RequestSnapshot rs = webContext.getRequestSnapshot();
-          final String username = asStringAndClean(env.getArgument("username"));
-          final String pswd = asStringAndClean(env.getArgument("pswd"));
+          final String username = clean(env.getArgument("username"));
+          final String pswd = clean(env.getArgument("pswd"));
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
           final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = 

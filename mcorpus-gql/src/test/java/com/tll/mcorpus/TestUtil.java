@@ -21,10 +21,10 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tll.mcorpus.db.enums.Location;
-import com.tll.mcorpus.web.JWT;
-import com.tll.mcorpus.web.JWT.JWTStatus;
-import com.tll.mcorpus.web.JWT.JWTStatusInstance;
-import com.tll.mcorpus.web.RequestSnapshot;
+import com.tll.mcorpus.jwt.JWT;
+import com.tll.mcorpus.jwt.JWTStatus;
+import com.tll.mcorpus.jwt.JWTStatusInstance;
+import com.tll.mcorpus.webapi.RequestSnapshot;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -230,7 +230,7 @@ public class TestUtil {
         Instant.now(),
         "127.0.0.1",
         "localhost",
-        "127.0.0.1|",
+        "origin",
         "https://mcorpus.d2d",
         "forwarded",
         "X-Forwarded-For",
@@ -247,9 +247,9 @@ public class TestUtil {
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),
+      roles, 
       new Date(Instant.now().toEpochMilli()),
-      new Date(Instant.now().toEpochMilli()),
-      roles
+      new Date(Instant.now().toEpochMilli())
     );
   }
 

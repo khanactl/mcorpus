@@ -1,6 +1,7 @@
-package com.tll.mcorpus.web;
+package com.tll.mcorpus.webapi;
 
 import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 import static com.tll.core.Util.not;
@@ -9,13 +10,15 @@ import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.tll.mcorpus.jwt.IJwtHttpRequestProvider;
+
 /**
  * Immutable snapshot of the key 'auditable' attributes of an incoming http
- * request attempting to access the mcorpus api.
+ * request.
  * 
  * @author jkirton
  */
-public class RequestSnapshot {
+public class RequestSnapshot implements IJwtHttpRequestProvider {
   
   /**
    * Parse a given client origin token into its constituent parts.
@@ -28,7 +31,7 @@ public class RequestSnapshot {
    *         </ul>
    * @see #getClientOrigin() for the expected client origin format
    */
-  public static String[] parseClientOriginToken(final String clientOrigin) {
+  private static String[] parseClientOriginToken(final String clientOrigin) {
     if(not(isNullOrEmpty(clientOrigin)) && clientOrigin.indexOf('|') >= 0) {
       final Matcher matcher = clientOriginExtractor.matcher(clientOrigin);
       if(matcher.matches()) {
@@ -84,10 +87,20 @@ public class RequestSnapshot {
    * @param rstCookie the mcorpus request sync token cookie value
    * @param rstHeader the mcorpus request sync token http header value
    */
-  public RequestSnapshot(Instant requestInstant, String remoteAddressHost, String httpHost, String httpOrigin,
-      String httpReferer, String httpForwarded, 
-      String xForwardedFor, String xForwardedProto, String xForwardedPort,
-      String jwtCookie, String rstCookie, String rstHeader) {
+  public RequestSnapshot(
+      Instant requestInstant, 
+      String remoteAddressHost, 
+      String httpHost, 
+      String httpOrigin,
+      String httpReferer, 
+      String httpForwarded, 
+      String xForwardedFor, 
+      String xForwardedProto, 
+      String xForwardedPort,
+      String jwtCookie, 
+      String rstCookie, 
+      String rstHeader
+  ) {
     super();
     this.requestInstant = requestInstant;
     this.remoteAddressHost = remoteAddressHost;
@@ -117,9 +130,10 @@ public class RequestSnapshot {
    * </code>
    * 
    * @return Never-null resolved client origin token containing both the remote
-   *         address host of the received request and the X-Forwarded-For header
-   *         value.
+   *         address host of the received request and the X-Forwarded-For 
+   *         http header values.
    */
+  @Override
   public String getClientOrigin() {
     return clientOrigin;
   }
@@ -127,6 +141,7 @@ public class RequestSnapshot {
   /**
    * @return the instant the associated http request reached the server.
    */
+  @Override
   public Instant getRequestInstant() {
     return requestInstant;
   }
@@ -195,6 +210,7 @@ public class RequestSnapshot {
   /**
    * @return the mcorpus JWT cookie value.
    */
+  @Override
   public String getJwtCookie() {
     return jwtCookie;
   }
@@ -223,6 +239,31 @@ public class RequestSnapshot {
     return rstHeader;
   }
 
+  @Override
+  public boolean verifyClientOrigin(final String clientOrigin) {
+    if(isNull(clientOrigin)) return false;
+    
+    final String[] thisParsed = parseClientOriginToken(getClientOrigin());
+    final String[] toverifyParsed = parseClientOriginToken(clientOrigin);
+    
+    String thisRemoteAddrHost = thisParsed[0];
+    String thisXForwardedFor = thisParsed[1];
+    
+    String toverifyRemoteAddrHost = toverifyParsed[0];
+    String toverifyXForwardedFor = toverifyParsed[1];
+    
+    // if the original remote address host matches either the current remote address host 
+    // -OR- the x-forwarded-for then we approve this message
+    if(thisRemoteAddrHost.equals(toverifyRemoteAddrHost) || thisRemoteAddrHost.equals(toverifyXForwardedFor)) 
+      return true;
+    
+    if(thisXForwardedFor.equals(toverifyRemoteAddrHost) || thisXForwardedFor.equals(toverifyXForwardedFor)) 
+      return true;
+    
+    // denied
+    return false;
+  }
+  
   @Override
   public String toString() {
     return String.format(

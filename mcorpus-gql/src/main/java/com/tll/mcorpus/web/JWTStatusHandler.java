@@ -2,10 +2,12 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 
+import com.tll.mcorpus.jwt.JWT;
+import com.tll.mcorpus.jwt.JWTStatusInstance;
+import com.tll.mcorpus.webapi.RequestSnapshot;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.tll.mcorpus.web.JWT.JWTStatusInstance;
 
 import ratpack.exec.Blocking;
 import ratpack.exec.Promise;
@@ -32,7 +34,7 @@ public class JWTStatusHandler implements Handler {
   @Override
   public void handle(Context ctx) throws Exception {
     Blocking.get(() -> { 
-      return ctx.get(JWT.class).jwtRequestStatus(getOrCreateRequestSnapshot(ctx)); 
+      return ctx.get(JWT.class).jwtStatus(getOrCreateRequestSnapshot(ctx)); 
     }).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);
       log.info("JWT status cached in incoming request: {}", jwtStatus);

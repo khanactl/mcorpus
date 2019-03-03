@@ -2,6 +2,8 @@ package com.tll.mcorpus.web;
 
 import java.util.Arrays;
 
+import com.tll.mcorpus.jwt.JWT;
+
 /**
  * Generates a random hex-wise string to serve as a JWT shared secret (salt).
  * <p>

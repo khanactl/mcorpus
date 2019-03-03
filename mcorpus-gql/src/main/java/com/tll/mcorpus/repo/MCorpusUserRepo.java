@@ -52,7 +52,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author jpk
  */
-public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
+public class MCorpusUserRepo implements Closeable {
+  
   protected final Logger log = LoggerFactory.getLogger("MCorpusUserRepo");
 
   protected final DSLContext dsl;
@@ -109,14 +110,14 @@ public class MCorpusUserRepo implements Closeable, IJwtStatusProvider {
    * @param jwtId the JWT id to check
    * @return fetch result for the JWT status and mcuser role
    */
-  public FetchResult<JwtStatus> getJwtStatus(final UUID jwtId) {
+  public FetchResult<JwtStatus> getBackendJwtStatus(final UUID jwtId) {
     if(jwtId == null) return new FetchResult<>(null, "JWT status check failed: bad input.");
     try {
       final GetJwtStatus backend = new GetJwtStatus();
       backend.setJwtId(jwtId);
       backend.execute(dsl.configuration());
-      JwtStatus rval = backend.getReturnValue();
-      return new FetchResult<>(rval, null);
+      final JwtStatus rval = backend.getReturnValue();
+      return new FetchResult<>(rval);
     }
     catch(Throwable e) {
       log.info("JWT id validation check error: {}", e.getMessage());
