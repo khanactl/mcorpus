@@ -13,7 +13,7 @@ import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.db.Tables.MEMBER_AUDIT;
-import static com.tll.mcorpus.transformapi.BaseTransformer.asSqlDate;
+import static com.tll.transform.BaseTransformer.asSqlDate;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,7 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import com.tll.mcorpus.UnitTest;
+import com.tll.UnitTest;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
@@ -36,7 +36,7 @@ import com.tll.mcorpus.db.tables.pojos.Member;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
-import com.tll.mcorpus.repoapi.FetchResult;
+import com.tll.repo.FetchResult;
 
 import org.junit.AfterClass;
 import org.junit.Test;

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import com.tll.mcorpus.dmodel.McuserHistoryDomain;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory;
-import com.tll.mcorpus.transformapi.BaseTransformer;
+import com.tll.transform.BaseTransformer;
 
 public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHistoryDomain> {
 

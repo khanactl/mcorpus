@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.tll.mcorpus.UnitTest;
+import com.tll.UnitTest;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

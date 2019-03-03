@@ -3,9 +3,9 @@ package com.tll.mcorpus.web;
 import java.util.UUID;
 
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.jwt.IJwtBackendStatusProvider;
+import com.tll.jwt.IJwtBackendStatusProvider;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.repoapi.FetchResult;
+import com.tll.repo.FetchResult;
 
 /**
  * Dedicated mcorpus JWT backend status provider.

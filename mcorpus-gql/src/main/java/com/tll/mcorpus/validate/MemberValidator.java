@@ -5,15 +5,15 @@ import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
-import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
-import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
+import static com.tll.validate.VldtnCore.lenchk;
+import static com.tll.validate.VldtnCore.namePattern;
 
 import java.util.regex.Pattern;
 
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.gmodel.Member;
-import com.tll.mcorpus.validateapi.VldtnBuilder;
-import com.tll.mcorpus.validateapi.VldtnCore;
+import com.tll.validate.VldtnBuilder;
+import com.tll.validate.VldtnCore;
 
 public class MemberValidator extends BaseMcorpusValidator<Member> {
 

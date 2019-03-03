@@ -20,11 +20,11 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tll.jwt.JWT;
+import com.tll.jwt.JWTStatus;
+import com.tll.jwt.JWTStatusInstance;
 import com.tll.mcorpus.db.enums.Location;
-import com.tll.mcorpus.jwt.JWT;
-import com.tll.mcorpus.jwt.JWTStatus;
-import com.tll.mcorpus.jwt.JWTStatusInstance;
-import com.tll.mcorpus.webapi.RequestSnapshot;
+import com.tll.web.RequestSnapshot;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;

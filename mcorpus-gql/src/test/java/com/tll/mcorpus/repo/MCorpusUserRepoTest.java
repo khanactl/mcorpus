@@ -8,14 +8,19 @@ import static com.tll.mcorpus.TestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.tll.mcorpus.UnitTest;
+import com.tll.UnitTest;
 import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserRole;
@@ -25,7 +30,7 @@ import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
-import com.tll.mcorpus.repoapi.FetchResult;
+import com.tll.repo.FetchResult;
 
 import org.junit.AfterClass;
 import org.junit.Test;

@@ -11,13 +11,13 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 
-import com.tll.mcorpus.UnitTest;
+import com.tll.UnitTest;
+import com.tll.jwt.JWTStatus;
+import com.tll.jwt.JWTStatusInstance;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.GraphQLWebContext;
-import com.tll.mcorpus.jwt.JWTStatus;
-import com.tll.mcorpus.jwt.JWTStatusInstance;
-import com.tll.mcorpus.webapi.RequestSnapshot;
+import com.tll.web.RequestSnapshot;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

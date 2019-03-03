@@ -2,9 +2,9 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 
-import com.tll.mcorpus.jwt.JWT;
-import com.tll.mcorpus.jwt.JWTStatusInstance;
-import com.tll.mcorpus.webapi.RequestSnapshot;
+import com.tll.jwt.JWT;
+import com.tll.jwt.JWTStatusInstance;
+import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

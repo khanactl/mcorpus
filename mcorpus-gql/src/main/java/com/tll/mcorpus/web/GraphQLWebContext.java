@@ -17,15 +17,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.tll.jwt.JWT;
+import com.tll.jwt.JWTStatusInstance;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
-import com.tll.mcorpus.jwt.JWT;
-import com.tll.mcorpus.jwt.JWTStatusInstance;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.repoapi.FetchResult;
-import com.tll.mcorpus.webapi.RequestSnapshot;
+import com.tll.repo.FetchResult;
+import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

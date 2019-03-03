@@ -4,7 +4,7 @@ import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.nflatten;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
-import static com.tll.mcorpus.repoapi.RepoUtil.fputWhenNotNull;
+import static com.tll.repo.RepoUtil.fputWhenNotNull;
 
 import java.io.Closeable;
 import java.sql.Timestamp;
@@ -31,7 +31,7 @@ import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain.LoginEventDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain.LogoutEventDomain;
-import com.tll.mcorpus.repoapi.FetchResult;
+import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
 import org.jooq.Record3;

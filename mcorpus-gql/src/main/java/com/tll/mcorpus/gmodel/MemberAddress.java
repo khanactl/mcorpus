@@ -5,8 +5,8 @@ import static com.tll.core.Util.isNotNullOrEmpty;
 import java.util.Date;
 import java.util.UUID;
 
-import com.tll.mcorpus.gmodelapi.BaseEntity;
-import com.tll.mcorpus.gmodelapi.IKey;
+import com.tll.gmodel.BaseEntity;
+import com.tll.gmodel.IKey;
 
 public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAndAddressName> {
 

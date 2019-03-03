@@ -4,13 +4,13 @@ import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.upper;
-import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
-import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
+import static com.tll.validate.VldtnCore.lenchk;
+import static com.tll.validate.VldtnCore.namePattern;
 
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.gmodel.mcuser.Mcuser;
-import com.tll.mcorpus.validateapi.VldtnBuilder;
-import com.tll.mcorpus.validateapi.VldtnCore;
+import com.tll.validate.VldtnBuilder;
+import com.tll.validate.VldtnCore;
 
 public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
 

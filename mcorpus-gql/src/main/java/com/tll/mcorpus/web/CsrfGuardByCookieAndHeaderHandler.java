@@ -8,8 +8,8 @@ import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.tll.mcorpus.jwt.JWT;
-import com.tll.mcorpus.webapi.RequestSnapshot;
+import com.tll.jwt.JWT;
+import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

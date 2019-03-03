@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.reflect.TypeToken;
 import com.tll.mcorpus.gql.MCorpusGraphQL;
-import com.tll.mcorpus.jwt.JWTStatusInstance;
+import com.tll.jwt.JWTStatusInstance;
 
 import graphql.ExecutionInput;
 import graphql.GraphQL;

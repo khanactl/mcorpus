@@ -5,12 +5,12 @@ import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 import static com.tll.core.Util.not;
-import static com.tll.mcorpus.validateapi.VldtnCore.lenchk;
-import static com.tll.mcorpus.validateapi.VldtnCore.namePattern;
+import static com.tll.validate.VldtnCore.lenchk;
+import static com.tll.validate.VldtnCore.namePattern;
 
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.gmodel.MemberAddress;
-import com.tll.mcorpus.validateapi.VldtnBuilder;
+import com.tll.validate.VldtnBuilder;
 
 public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> {
 

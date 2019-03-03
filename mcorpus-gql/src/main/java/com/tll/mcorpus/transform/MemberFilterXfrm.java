@@ -26,7 +26,7 @@ import com.tll.mcorpus.gmodel.MemberFilter.OrderBy;
 import com.tll.mcorpus.gmodel.MemberFilter.OrderBy.OrderByClause;
 import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate.Operation;
-import com.tll.mcorpus.transformapi.BaseTransformer;
+import com.tll.transform.BaseTransformer;
 
 import org.jooq.Condition;
 import org.jooq.Field;

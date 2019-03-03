@@ -1,12 +1,12 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.transform.MemberXfrm.locationToString;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
+import static com.tll.mcorpus.transform.MemberXfrm.locationToString;
 
 import java.util.Map;
 
 import com.tll.mcorpus.gmodel.Mref;
-import com.tll.mcorpus.transformapi.BaseTransformer;
+import com.tll.transform.BaseTransformer;
 
 public class MrefXfrm extends BaseTransformer<Mref, com.tll.mcorpus.db.udt.pojos.Mref> {
 

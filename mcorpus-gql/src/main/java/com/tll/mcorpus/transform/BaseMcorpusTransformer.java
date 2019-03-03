@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.UUID;
 
-import com.tll.mcorpus.gmodelapi.IGEntity;
-import com.tll.mcorpus.transformapi.BaseTransformer;
+import com.tll.gmodel.IGEntity;
+import com.tll.transform.BaseTransformer;
 
 public abstract class BaseMcorpusTransformer<G extends IGEntity<G, ?>, D> extends BaseTransformer<G, D> {
 

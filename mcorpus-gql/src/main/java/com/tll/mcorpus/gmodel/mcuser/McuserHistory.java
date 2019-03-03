@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.tll.mcorpus.gmodelapi.BaseEntity;
-import com.tll.mcorpus.gmodelapi.IKey;
+import com.tll.gmodel.BaseEntity;
+import com.tll.gmodel.IKey;
 
 public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
 

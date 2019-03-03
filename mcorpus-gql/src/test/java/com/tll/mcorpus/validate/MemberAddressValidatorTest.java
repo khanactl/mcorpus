@@ -12,7 +12,7 @@ import static com.tll.mcorpus.validate.MemberAddressValidator.addressStreet2Vali
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.tll.mcorpus.UnitTest;
+import com.tll.UnitTest;
 import com.tll.mcorpus.db.enums.Addressname;
 
 import org.junit.Test;

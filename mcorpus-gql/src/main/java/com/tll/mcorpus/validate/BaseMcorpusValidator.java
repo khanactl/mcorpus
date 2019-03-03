@@ -1,6 +1,6 @@
 package com.tll.mcorpus.validate;
 
-import com.tll.mcorpus.validateapi.BaseValidator;
+import com.tll.validate.BaseValidator;
 
 public abstract class BaseMcorpusValidator<E> extends BaseValidator<E> {
 
