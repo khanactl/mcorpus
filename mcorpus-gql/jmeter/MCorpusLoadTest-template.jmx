@@ -740,7 +740,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  updateMemberAddress(memberAddress: {\n  mid: \&quot;${mid}\&quot;\n  addressName: HOME\n  country: &quot;US&quot;\n}) {\n  mid\n  modified\n  addressName\n  country\n  attn\n}&quot;,&quot;variables&quot;:null}</stringProp>
+                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  updateMemberAddress(memberAddress: {\n  mid: \&quot;${mid}\&quot;\n  addressName: HOME\n  country: \&quot;US\&quot;\n}) {\n  mid\n  modified\n  addressName\n  country\n  attn\n}\n}&quot;,&quot;variables&quot;:null}</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
                 </collectionProp>
