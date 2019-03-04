@@ -13,15 +13,15 @@ import org.junit.experimental.categories.Category;
  * Unit test methods for verifying the public methods in {@link GraphQLWebContext}.
  */
 @Category(UnitTest.class)
-public class GraphQLWebContextTest {
+public class MCorpusGraphQLWebContextTest {
 
-  static GraphQLWebContext create(String query) {
-    return new GraphQLWebContext(query, null, null, null, null);
+  static MCorpusGraphQLWebContext create(String query) {
+    return new MCorpusGraphQLWebContext(query, null, null, null, null);
   }
 
   @Test
   public void testOperationName() throws Exception {
-    GraphQLWebContext ctx;
+    MCorpusGraphQLWebContext ctx;
 
     ctx = create("query { mrefByMid");
     assertEquals("", ctx.getOperationName());
@@ -41,7 +41,7 @@ public class GraphQLWebContextTest {
 
   @Test
   public void testQueryMethodName() throws Exception {
-    GraphQLWebContext ctx;
+    MCorpusGraphQLWebContext ctx;
     
     ctx = create("{ mrefByMid");
     assertEquals("mrefByMid", ctx.getQueryMethodName());
@@ -64,7 +64,7 @@ public class GraphQLWebContextTest {
 
   @Test
   public void testIsIntrospectionQuery() {
-    GraphQLWebContext ctx;
+    MCorpusGraphQLWebContext ctx;
 
     ctx = create("{ mrefByMid");
     assertFalse(ctx.isIntrospectionQuery());
@@ -93,7 +93,7 @@ public class GraphQLWebContextTest {
 
   @Test
   public void testIsMcuserLoginQuery() throws Exception {
-    GraphQLWebContext ctx;
+    MCorpusGraphQLWebContext ctx;
 
     ctx = create("{ mrefByMid");
     assertFalse(ctx.isMcuserLoginQuery());

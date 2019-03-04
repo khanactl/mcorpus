@@ -19,7 +19,7 @@ import com.tll.jwt.JWTStatus;
 import com.tll.jwt.JWTStatusInstance;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.web.GraphQLWebContext;
+import com.tll.web.GraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
 import org.junit.Test;
@@ -120,7 +120,7 @@ public class MCorpusGraphQLTest {
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
     final RequestSnapshot requestSnapshot = testRequestSnapshot();
     final JWTStatusInstance jsi = testJwtStatus(jwtStatus, roles);
-    final GraphQLWebContext context = new GraphQLWebContext(query, null, requestSnapshot, jsi, null);
+    final GraphQLWebContext context = new GraphQLWebContext(query, null, requestSnapshot, jsi);
     final ExecutionInput executionInput = 
       ExecutionInput.newExecutionInput()
         .query(query)

@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.tll.gql.GraphQLDate;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
@@ -46,7 +47,7 @@ import com.tll.mcorpus.validate.McuserValidator;
 import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
 import com.tll.validate.VldtnResult;
-import com.tll.mcorpus.web.GraphQLWebContext;
+import com.tll.mcorpus.web.MCorpusGraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
@@ -62,6 +63,11 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.validation.ValidationError;
 import graphql.validation.ValidationErrorType;
 
+/**
+ * The MCorpus GraphQL schema loader and data fetchers all in one class.
+ * 
+ * @author jpk
+ */
 public class MCorpusGraphQL {
 
   private final Logger log = LoggerFactory.getLogger(MCorpusGraphQL.class);
@@ -95,7 +101,7 @@ public class MCorpusGraphQL {
    * @param mcuserRepo required mcuser repo
    * @param mcorpusRepo required mcorpus repo
    */
-  MCorpusGraphQL(final MCorpusUserRepo mcuserRepo, final MCorpusRepo mcorpusRepo) {
+  public MCorpusGraphQL(final MCorpusUserRepo mcuserRepo, final MCorpusRepo mcorpusRepo) {
     this.mcuserRepo = mcuserRepo;
     this.mcorpusRepo = mcorpusRepo;
 
@@ -171,7 +177,7 @@ public class MCorpusGraphQL {
 
         // mcuser status
         .dataFetcher("mcstatus", env -> {
-          final GraphQLWebContext webContext = env.getContext();
+          final MCorpusGraphQLWebContext webContext = env.getContext();
           return webContext.mcstatus();
         })
 
@@ -237,7 +243,7 @@ public class MCorpusGraphQL {
 
         // mcuser login
         .dataFetcher("mclogin", env -> {
-          final GraphQLWebContext webContext = env.getContext();
+          final MCorpusGraphQLWebContext webContext = env.getContext();
           final String username = clean(env.getArgument("username"));
           final String pswd = clean(env.getArgument("pswd"));
           return webContext.mcuserLogin(username, pswd);
@@ -245,7 +251,7 @@ public class MCorpusGraphQL {
 
         // mcuser logout
         .dataFetcher("mclogout", env -> {
-          final GraphQLWebContext webContext = env.getContext();
+          final MCorpusGraphQLWebContext webContext = env.getContext();
           return webContext.mcuserLogout();
         })
 
@@ -293,7 +299,7 @@ public class MCorpusGraphQL {
         // invalidateJwtsFor
         .dataFetcher("invalidateJwtsFor", env -> {
           final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final GraphQLWebContext webContext = env.getContext();
+          final MCorpusGraphQLWebContext webContext = env.getContext();
           final RequestSnapshot rs = webContext.getRequestSnapshot();
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
@@ -305,7 +311,7 @@ public class MCorpusGraphQL {
 
         // member login
         .dataFetcher("mlogin", env -> {
-          final GraphQLWebContext webContext = env.getContext();
+          final MCorpusGraphQLWebContext webContext = env.getContext();
           final RequestSnapshot rs = webContext.getRequestSnapshot();
           final String username = clean(env.getArgument("username"));
           final String pswd = clean(env.getArgument("pswd"));
@@ -318,7 +324,7 @@ public class MCorpusGraphQL {
         
         // member logout
         .dataFetcher("mlogout", env -> {
-          final GraphQLWebContext webContext = env.getContext();
+          final MCorpusGraphQLWebContext webContext = env.getContext();
           final RequestSnapshot rs = webContext.getRequestSnapshot();
           final UUID mid = uuidFromToken(env.getArgument("mid"));
           final Instant requestInstant = rs.getRequestInstant();
@@ -498,7 +504,7 @@ public class MCorpusGraphQL {
       // MRef
       .type("MRef", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
-          final com.tll.mcorpus.gmodel.Mref mref = env.getSource();
+          final Mref mref = env.getSource();
           return mref == null ? null : uuidToToken(mref.mid);
         })
         .dataFetcher("empId", env -> {

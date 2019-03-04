@@ -7,16 +7,14 @@ import static ratpack.jackson.Jackson.json;
 
 import java.util.Map;
 
+import com.google.common.reflect.TypeToken;
+import com.tll.jwt.JWTStatusInstance;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.reflect.TypeToken;
-import com.tll.mcorpus.gql.MCorpusGraphQL;
-import com.tll.jwt.JWTStatusInstance;
-
 import graphql.ExecutionInput;
 import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
@@ -28,7 +26,18 @@ import ratpack.handling.Handler;
 public class GraphQLHandler implements Handler {
 
   private final Logger log = LoggerFactory.getLogger(GraphQLHandler.class);
-  
+
+  private final GraphQL graphQL;
+
+  /**
+   * Constructor.
+   * 
+   * @param graphQL the app scoped {@link GraphQL} instance.
+   */
+  public GraphQLHandler( final GraphQL graphQL) {
+    this.graphQL = graphQL;
+  }
+
   @SuppressWarnings("serial")
   private static final TypeToken<Map<String, Object>> strObjMapTypeRef = new TypeToken<Map<String, Object>>() { };
   
@@ -43,7 +52,7 @@ public class GraphQLHandler implements Handler {
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
       
-      final GraphQLWebContext gqlWebCtx = new GraphQLWebContext(query, vmap, getOrCreateRequestSnapshot(ctx), jwtStatusInst, ctx);
+      final MCorpusGraphQLWebContext gqlWebCtx = new MCorpusGraphQLWebContext(query, vmap, getOrCreateRequestSnapshot(ctx), jwtStatusInst, ctx);
       log.info("{}", gqlWebCtx);
       
       // validate graphql query request
@@ -57,11 +66,12 @@ public class GraphQLHandler implements Handler {
       case NOT_PRESENT_IN_REQUEST:
       case EXPIRED:
         // only mclogin and introspection queries are allowed when no valid JWT present
-        if(not(gqlWebCtx.isMcuserLoginOrIntrospectionQuery())) {
-          ctx.clientError(401); // unauthorized
-          return;
+        if(gqlWebCtx.isMcuserLoginOrIntrospectionQuery()) {
+          // allowed - you may proceed
+          break;
         }
-        break;
+        ctx.clientError(401); // unauthorized
+        return;
 
       case VALID:
         // mcuser logged in by jwt - you may proceed
@@ -88,8 +98,6 @@ public class GraphQLHandler implements Handler {
                         .operationName(gqlWebCtx.getOperationName())
                         .context(gqlWebCtx)
                         .build();
-      final GraphQLSchema schema = ctx.get(MCorpusGraphQL.class).getGraphQLSchema();
-      final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {
           ctx.render(json(executionResult.toSpecification()));

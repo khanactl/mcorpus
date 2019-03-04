@@ -2,7 +2,6 @@ package com.tll.mcorpus;
 
 import static ratpack.handling.Handlers.redirect;
 
-import com.tll.mcorpus.gql.MCorpusGraphQLModule;
 import com.tll.mcorpus.repo.MCorpusRepoModule;
 import com.tll.mcorpus.web.CsrfGuardByCookieAndHeaderHandler;
 import com.tll.mcorpus.web.GraphQLHandler;
@@ -57,7 +56,6 @@ public class Main {
          hikariConfig.addDataSourceProperty("URL", config.dbUrl);
        })
        .module(MCorpusRepoModule.class)
-       .module(MCorpusGraphQLModule.class)
        .module(MCorpusWebModule.class)
      ))
      .handlers(chain -> chain

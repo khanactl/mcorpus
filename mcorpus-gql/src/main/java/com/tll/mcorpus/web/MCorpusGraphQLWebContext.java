@@ -1,8 +1,7 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isBlank;
-import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse;
@@ -13,8 +12,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.tll.jwt.JWT;
@@ -25,10 +22,8 @@ import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.repo.FetchResult;
+import com.tll.web.GraphQLWebContext;
 import com.tll.web.RequestSnapshot;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ratpack.handling.Context;
 
@@ -40,27 +35,11 @@ import ratpack.handling.Context;
  * 
  * @author jkirton
  */
-public class GraphQLWebContext {
+public class MCorpusGraphQLWebContext extends GraphQLWebContext {
 
-  private static final Pattern gqlOperationName = 
-    Pattern.compile("^[\\s|\"]*(mutation|query)\\s+(\\w+)\\s*\\{.*", 
-      Pattern.CASE_INSENSITIVE);
-
-  private static final Pattern gqlMethodName = 
-    Pattern.compile("^.*?\\{.*?(\\w+).*", 
-      Pattern.CASE_INSENSITIVE);
-
-  private static final Pattern gqlIntrospectQuery = 
-    Pattern.compile("^\\s*(query)?\\s*(IntrospectionQuery)\\s*\\{.*", 
-        Pattern.CASE_INSENSITIVE);
-
-  private final Logger log = LoggerFactory.getLogger(GraphQLWebContext.class);
-
-  private final String query;
-  private final String queryCleaned;
-  private final Map<String, Object> vmap;
-  private final RequestSnapshot requestSnapshot;
-  private final JWTStatusInstance jwtStatus;
+  /**
+   * The Ratpack http/web context object.
+   */
   private final Context ctx;
 
   /**
@@ -72,13 +51,8 @@ public class GraphQLWebContext {
    * @param jwtStatus       the status of the JWT of the sourcing http request
    * @param ctx             the Ratpack request handling context
    */
-  public GraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot, JWTStatusInstance jwtStatus, Context ctx) {
-    super();
-    this.query = query;
-    this.queryCleaned = clean(query).replaceAll("\\n", "").replaceAll("\n", "");
-    this.vmap = vmap;
-    this.requestSnapshot = requestSnapshot;
-    this.jwtStatus = jwtStatus;
+  public MCorpusGraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot, JWTStatusInstance jwtStatus, Context ctx) {
+    super(query, vmap, requestSnapshot, jwtStatus);
     this.ctx = ctx;
   }
   
@@ -87,64 +61,9 @@ public class GraphQLWebContext {
    * 
    * @return true/false
    */
-  public boolean isValid() { 
-    return 
-        not(isNullOrEmpty(query))
-        && not(isNull(requestSnapshot))
-        && not(isNull(jwtStatus))
-        && not(isNull(ctx))
-        ;
-  }
+  @Override
+  public boolean isValid() { return super.isValid() && isNotNull(ctx); }
   
-  /**
-   * @return true when this GraphQL query has variables, false otherwise.
-   */
-  public boolean hasQueryVariables() { return vmap != null && !vmap.isEmpty(); }
-  
-  /**
-   * @return the GraphQL query string.
-   */
-  public String getQuery() { return query; }
-  
-  /**
-   * @return map of name/value pairs representing 
-   *          the GraphQL variables associated with this query instance.
-   */
-  public Map<String, Object> getVariables() { return vmap; }
-
-  /**
-   * @return the never-null GraphQL query/mutation <em>operation</em> name.
-   *         <p>
-   *         The operation name is not required and when not present, 
-   *         a zero-length string is returned.
-   */
-  public String getOperationName() {
-    final Matcher matcher = gqlOperationName.matcher(queryCleaned);
-    final String s = matcher.matches() ? matcher.group(2) : "";
-    return s;
-  }
-
-  /**
-   * @return the never-null GraphQL query/mutation <em>method</em> name.
-   *         <p>
-   *         The method name is expected to always be present 
-   *         in a <em>valid</em> qraphql query string.
-   */
-  public String getQueryMethodName() {
-    final Matcher matcher = gqlMethodName.matcher(queryCleaned);
-    final String s = matcher.matches() ? matcher.group(1) : "";
-    return s;
-  }
-
-  /**
-   * @return true when the graphql query is an Introspection query.
-   */
-  public boolean isIntrospectionQuery() {
-    final Matcher matcher = gqlIntrospectQuery.matcher(queryCleaned);
-    boolean b = matcher.matches();
-    return b;
-  }
-
   /**
    * @return true when the GraphQL query is for mcuser login, false otherwise.
    */
@@ -159,16 +78,6 @@ public class GraphQLWebContext {
   public boolean isMcuserLoginOrIntrospectionQuery() { 
     return isMcuserLoginQuery() || isIntrospectionQuery();
   }
-
-  /**
-   * @return the snapshot of the sourcing http request.
-   */
-  public RequestSnapshot getRequestSnapshot() { return requestSnapshot; }
-  
-  /**
-   * @return the JWT status instance of the sourcing http request.
-   */
-  public JWTStatusInstance getJwtStatus() { return jwtStatus; }
 
   /**
    * Get the mcuser login status.
@@ -302,10 +211,5 @@ public class GraphQLWebContext {
     // default - logout failed
     log.error("mcuser '{}' logout failed.", jwtStatus.userId());
     return false;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("op: %s qry: %s - %n%s%n", getOperationName(), getQueryMethodName(), query);
   }
 }

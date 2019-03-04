@@ -7,7 +7,7 @@ import static com.tll.core.Util.upper;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tll.mcorpus.web.GraphQLWebContext;
+import com.tll.web.GraphQLWebContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,10 @@ import graphql.schema.idl.SchemaDirectiveWiring;
 import graphql.schema.idl.SchemaDirectiveWiringEnvironment;
 
 /**
- * AuthorizationDirective.
+ * MCorpus-specific authorization directive GraphQL extension.
  * <p>
- * Defines and enforces a simple role-based 
- * access control mechanism at the graphql query exectution level
- * for mcorpus.
+ * Enforces a role-based access control schema at the graphql query exectution level
+ * based on declared authorization constraints in the mcorpus GraphQL schema.
  * 
  * @author jpk
  */
