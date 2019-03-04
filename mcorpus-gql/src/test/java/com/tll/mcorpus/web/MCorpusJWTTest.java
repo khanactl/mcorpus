@@ -1,7 +1,7 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.TestUtil.ds_mcweb;
-import static com.tll.mcorpus.TestUtil.testServerPublicAddress;
+import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
+import static com.tll.mcorpus.McorpusTestUtil.testServerPublicAddress;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

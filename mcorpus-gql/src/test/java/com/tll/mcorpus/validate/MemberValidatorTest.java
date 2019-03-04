@@ -1,6 +1,6 @@
 package com.tll.mcorpus.validate;
 
-import static com.tll.mcorpus.TestUtil.strN;
+import static com.tll.TestUtil.strN;
 import static com.tll.mcorpus.validate.MemberValidator.displayNameValid;
 import static com.tll.mcorpus.validate.MemberValidator.empIdValid;
 import static com.tll.mcorpus.validate.MemberValidator.locationValid;

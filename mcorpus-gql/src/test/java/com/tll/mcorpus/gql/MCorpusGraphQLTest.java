@@ -1,17 +1,20 @@
 package com.tll.mcorpus.gql;
 
-import static com.tll.mcorpus.TestUtil.cpr;
-import static com.tll.mcorpus.TestUtil.ds_mcweb;
-import static com.tll.mcorpus.TestUtil.jsonStringToMap;
-import static com.tll.mcorpus.TestUtil.testJwtStatus;
-import static com.tll.mcorpus.TestUtil.testRequestSnapshot;
+import static com.tll.TestUtil.cpr;
+import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tll.UnitTest;
+import com.tll.jwt.JWT;
 import com.tll.jwt.JWTStatus;
 import com.tll.jwt.JWTStatusInstance;
 import com.tll.mcorpus.repo.MCorpusRepo;
@@ -51,6 +54,64 @@ public class MCorpusGraphQLTest {
 	  return query(query, JWTStatus.VALID, role);
   }
 	  
+  static final ObjectMapper mapper = new ObjectMapper();
+
+  static final TypeReference<Map<String, Object>> strObjMapTypeRef = new TypeReference<Map<String, Object>>() { };
+
+  /**
+   * Converts a JSON string to a map.
+   *
+   * <p>Requirement: the given json string is assumed to have a
+   * root object ref with enclosing name and object key/value pairs.</p>
+   *
+   * <p>Example:
+   * <pre>
+   *   "{ \"query\": \"...\", \"variables\":\"...\", ... }"
+   * </pre>
+   * </p>
+   *
+   * @param json the JSON string
+   * @return newly created {@link Map} with parsed name/values from the JSON string
+   * @throws Exception when the json to map conversion fails for some reason.
+   */
+  static Map<String, Object> jsonStringToMap(final String json) throws Exception {
+    try {
+      // convert JSON string to Map
+      return mapper.readValue(json, strObjMapTypeRef);
+    }
+    catch(Throwable t) {
+      throw new Exception("JSON to map failed: " + t.getMessage());
+    }
+  }
+
+  static RequestSnapshot testRequestSnapshot() {
+    return new RequestSnapshot(
+        Instant.now(),
+        "127.0.0.1",
+        "localhost",
+        "origin",
+        "https://mcorpus.d2d",
+        "forwarded",
+        "X-Forwarded-For",
+        "X-Forwarded-Proto",
+        "X-Forwarded-Port",
+        null, // jwt cookie
+        null, // rst cookie
+        null // rst header
+    );
+  }
+
+  static JWTStatusInstance testJwtStatus(JWTStatus jwtStatus, String roles) {
+    return JWT.jsi(
+      jwtStatus,
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      roles, 
+      new Date(Instant.now().toEpochMilli()),
+      new Date(Instant.now().toEpochMilli())
+    );
+  }
+
   /**
    * Issue a GraphQL query with with a context of the given jwt status and role.
    */

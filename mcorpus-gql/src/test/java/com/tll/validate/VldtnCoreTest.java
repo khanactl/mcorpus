@@ -1,7 +1,7 @@
 package com.tll.validate;
 
-import static com.tll.mcorpus.TestUtil.strN;
-import static com.tll.mcorpus.TestUtil.toDate;
+import static com.tll.TestUtil.strN;
+import static com.tll.TestUtil.toDate;
 import static com.tll.validate.VldtnCore.dobValid;
 import static com.tll.validate.VldtnCore.emailValid;
 import static com.tll.validate.VldtnCore.phoneValid;

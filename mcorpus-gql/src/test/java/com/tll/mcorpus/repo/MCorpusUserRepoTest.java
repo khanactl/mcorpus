@@ -1,10 +1,10 @@
 package com.tll.mcorpus.repo;
 
-import static com.tll.mcorpus.TestUtil.ds_mcweb;
-import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
-import static com.tll.mcorpus.TestUtil.testDslMcweb;
-import static com.tll.mcorpus.TestUtil.testDslMcwebTest;
-import static com.tll.mcorpus.TestUtil.testRequestOrigin;
+import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
+import static com.tll.mcorpus.McorpusTestUtil.isTestDslMcwebTestLoaded;
+import static com.tll.mcorpus.McorpusTestUtil.testDslMcweb;
+import static com.tll.mcorpus.McorpusTestUtil.testDslMcwebTest;
+import static com.tll.mcorpus.McorpusTestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static junit.framework.TestCase.assertNull;

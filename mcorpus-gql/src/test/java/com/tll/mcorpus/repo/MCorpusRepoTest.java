@@ -1,14 +1,12 @@
 package com.tll.mcorpus.repo;
 
 
-import static com.tll.mcorpus.TestUtil.ds_mcweb;
-import static com.tll.mcorpus.TestUtil.isTestDslMcwebTestLoaded;
-import static com.tll.mcorpus.TestUtil.randomEmpId;
-import static com.tll.mcorpus.TestUtil.randomLocation;
-import static com.tll.mcorpus.TestUtil.testDslMcweb;
-import static com.tll.mcorpus.TestUtil.testDslMcwebTest;
-import static com.tll.mcorpus.TestUtil.testRequestOrigin;
-import static com.tll.mcorpus.TestUtil.toSqlDate;
+import static com.tll.TestUtil.toSqlDate;
+import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
+import static com.tll.mcorpus.McorpusTestUtil.isTestDslMcwebTestLoaded;
+import static com.tll.mcorpus.McorpusTestUtil.testDslMcweb;
+import static com.tll.mcorpus.McorpusTestUtil.testDslMcwebTest;
+import static com.tll.mcorpus.McorpusTestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
@@ -23,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import com.tll.UnitTest;
@@ -51,6 +50,20 @@ import org.slf4j.LoggerFactory;
 public class MCorpusRepoTest {
 
   private static final Logger log = LoggerFactory.getLogger(MCorpusRepoTest.class);
+
+  private static final Random rand = new Random();
+  
+  public static String randomEmpId() {
+    String s = String.format("%02d-%07d",
+      Integer.valueOf(rand.nextInt(100)),
+      Integer.valueOf(rand.nextInt(10000000))
+    );
+    return s;
+  }
+
+  public static Location randomLocation() {
+    return Location.values()[rand.nextInt(Location.values().length)];
+  }
 
   static final String           TEST_MEMBER_EMP_ID = randomEmpId();
   static final Location         TEST_MEMBER_LOCATION = randomLocation();
