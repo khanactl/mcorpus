@@ -341,19 +341,6 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-        <!--
-        <plugin> findbugs (do `mvn findbugs:gui` to run manually) 
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>findbugs-maven-plugin</artifactId>
-          <version>3.0.1</version>
-          <configuration>
-            <effort>Max</effort>
-            <threshold>Low</threshold>
-            <failOnError>false</failOnError>
-            <xmlOutput>true</xmlOutput>
-          </configuration>
-        </plugin>
-        -->
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
