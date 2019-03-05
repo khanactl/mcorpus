@@ -186,6 +186,14 @@ type MemberAddress {
   country: String! @auth(role: "mpii")
 }
 
+# string value criterion
+input StringPredicate {
+  # the string value which may contain one or more wildcard characters (*).  E.g.: "*sh" or "sh*" or "sheb*ng"
+  value: String!
+  # ignore case?  Defaults to false
+  ignoreCase: Boolean
+}
+
 # date op
 enum DateOp {
   # equal to
@@ -216,30 +224,12 @@ input DatePredicate {
   b: Date
 }
 
-# location criterion
+# member location criterion
 input LocationPredicate {
-  # list of subject locations
-  locations: [Location]
-  # include (false) or exclude (true)
+  # list of one or more subject locations
+  locations: [Location]!
+  # include (false) or exclude (true)?  Defaults to false.
   negate: Boolean
-}
-
-# value comparison mode
-enum Operation {
-  # equals
-  EQUALS
-  # SQL like (* or % wildcards supported)
-  LIKE
-}
-
-# value (string) criterion
-input StringPredicate {
-  # the string value
-  value: String!
-  # ignore case?
-  ignoreCase: Boolean
-  # value operation
-  operation: Operation
 }
 
 # the member filter type
@@ -260,8 +250,18 @@ input MemberFilter {
   nameMiddle: StringPredicate
   # member last name value predicate
   nameLast: StringPredicate
+  
   # member display name value predicate
   displayName: StringPredicate
+
+  # member status predicate
+  status: MemberStatus
+
+  # member dob predicate
+  dob: DatePredicate
+
+  # member username predicate
+  username: StringPredicate
 
   # comma-delimited list of field names with optional sort direction ("asc" or "desc").  E.g.: "modified desc, location asc, ..."
   orderBy: String

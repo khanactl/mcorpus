@@ -1,12 +1,14 @@
 package com.tll.mcorpus.transform;
 
+import static com.tll.mcorpus.transform.MemberXfrm.memberStatusFromString;
 import static com.tll.core.Util.asString;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isBlank;
-import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.upper;
 import static com.tll.mcorpus.db.Tables.MEMBER;
+import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 import static java.util.Collections.singletonList;
 import static org.jooq.impl.DSL.not;
@@ -22,14 +24,15 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.dmodel.MemberSearch;
 import com.tll.mcorpus.gmodel.MemberFilter;
 import com.tll.mcorpus.gmodel.MemberFilter.DatePredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.DatePredicate.DateOp;
+import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate.Operation;
 import com.tll.mcorpus.gmodel.MemberFilter.LocationPredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.OrderBy;
 import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate;
-import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate.Operation;
 import com.tll.transform.BaseTransformer;
 
 import org.jooq.Condition;
@@ -39,69 +42,72 @@ import org.jooq.SortField;
 public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch> {
 
   private static DatePredicate datePredicateFromGraphQLMap(final Map<String, Object> gqlMap) {
-    DatePredicate dp = null;
+    DateOp dop = null;
+    Date a = null;
+    Date b = null;
     if(gqlMap != null && !gqlMap.isEmpty()) {
-      dp = new DatePredicate();
       for(final Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         switch(key) {
           case "dateOp":
-            dp.setDateOp(DateOp.valueOf((String) entry.getValue()));
+            dop = DateOp.valueOf(upper(clean((String) entry.getValue())));
             break;
           case "a":
-            dp.setA((Date) entry.getValue());
+            a = (Date) entry.getValue();
             break;
           case "b":
-            dp.setB((Date) entry.getValue());
+            b = (Date) entry.getValue();
             break;
         }
       }
     }
-    return dp;
+    return isNotNull(dop) && isNotNull(a) ? new DatePredicate(dop, a, b) : null;
   }
 
   private static StringPredicate stringPredicatefromGraphQLMap(final Map<String, Object> gqlMap) {
-    StringPredicate tp = null;
+    String value = null;
+    boolean ignoreCase = false;
+    Operation op = Operation.EQUALS;
     if(gqlMap != null && !gqlMap.isEmpty()) {
-      tp = new StringPredicate();
       for(final Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         switch(key) {
           case "value":
-            tp.setValue((String) entry.getValue());
+            final String sval = clean((String) entry.getValue());
+            value = sval.replaceAll("[^a-zA-Z|\\d| |\\*|%]", "");
+            op = sval.matches("^.*?[*|%].*?$") ? Operation.LIKE : Operation.EQUALS;
             break;
           case "ignoreCase":
-            tp.setIgnoreCase((Boolean) entry.getValue());
-            break;
-          case "operation":
-            tp.setOperation(Operation.valueOf(asString(entry.getValue())));
+            Boolean b = (Boolean) entry.getValue();
+            ignoreCase = isNotNull(b) ? b.booleanValue() : false;
             break;
         }
       }
     }
-    return tp;
+    return isNotNullOrEmpty(value) ? new StringPredicate(value, ignoreCase, op) : null;
   }
 
   private static LocationPredicate locationPredicatefromGraphQLMap(final Map<String, Object> gqlMap) {
-    LocationPredicate lp = null;
+    List<String> locations = null;
+    boolean negate = false;
     if(gqlMap !=  null && !gqlMap.isEmpty()) {
-      lp = new LocationPredicate();
       for(final Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         switch (key) {
           case "locations":
-            @SuppressWarnings("unchecked") List<String> sloclist = (List<String>) entry.getValue();
-            if(sloclist != null && !sloclist.isEmpty()) {
-             for(final String sloc : sloclist) lp.addLocation(sloc);
-            }
+            @SuppressWarnings("unchecked") 
+            final List<String> sloclist = (List<String>) entry.getValue();
+            locations = isNotNullOrEmpty(sloclist) ? 
+              sloclist.stream().filter(e -> isNotNull(e)).map(e -> clean(e)).collect(Collectors.toList())
+              : Collections.emptyList();
             break;
           case "negate":
-            lp.setNegate(Boolean.valueOf(asString(entry.getValue())).booleanValue());
+            negate = Boolean.valueOf(asString(entry.getValue())).booleanValue();
             break;
         }
       }
     }
-    return lp;
+    return isNotNullOrEmpty(locations) ? new LocationPredicate(locations, negate) : null;
   }
 
   private static OrderBy.Dir orderByDirFromToken(final String dirtok) {
@@ -136,14 +142,18 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   private static Condition[] asJooqCondition(final MemberFilter mf) {
     if(!mf.isSet()) return new Condition[0];
     final List<Condition> conditions = new ArrayList<>(8);
-    if(mf.hasCreated()) conditions.add(datePredicateAsJooqCondition(mf.getCreated(), MEMBER.CREATED));
-    if(mf.hasModified()) conditions.add(datePredicateAsJooqCondition(mf.getCreated(), MEMBER.MODIFIED));
+    if(mf.hasCreated()) conditions.add(timestampPredicateAsJooqCondition(mf.getCreated(), MEMBER.CREATED));
+    if(mf.hasModified()) conditions.add(timestampPredicateAsJooqCondition(mf.getCreated(), MEMBER.MODIFIED));
     if(mf.hasEmpId()) conditions.add(stringPredicateAsJooqCondition(mf.getEmpId(), MEMBER.EMP_ID));
     if(mf.hasLocation()) conditions.add(locationPredicateAsJooqCondition(mf.getLocation(), MEMBER.LOCATION));
     if(mf.hasNameFirst()) conditions.add(stringPredicateAsJooqCondition(mf.getNameFirst(), MEMBER.NAME_FIRST));
     if(mf.hasNameMiddle()) conditions.add(stringPredicateAsJooqCondition(mf.getNameMiddle(), MEMBER.NAME_MIDDLE));
     if(mf.hasNameLast()) conditions.add(stringPredicateAsJooqCondition(mf.getNameLast(), MEMBER.NAME_LAST));
     if(mf.hasDisplayName()) conditions.add(stringPredicateAsJooqCondition(mf.getDisplayName(), MEMBER.DISPLAY_NAME));
+    if(mf.hasStatus()) conditions.add(memberStatusAsJooqCondition(mf.getStatus(), MEMBER.STATUS));
+    if(mf.hasDob()) conditions.add(datePredicateAsJooqCondition(mf.getDob(), MAUTH.DOB));
+    if(mf.hasUsername()) conditions.add(stringPredicateAsJooqCondition(mf.getUsername(), MAUTH.USERNAME));
+    
     return conditions.toArray(new Condition[conditions.size()]);
   }
 
@@ -152,7 +162,51 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     return isNotNullOrEmpty(orderBys) ? generateJooqSortFields(orderBys) : defaultJooqSorting;
   }
 
-  private static Condition datePredicateAsJooqCondition(final DatePredicate dp, final Field<Timestamp> f) {
+  private static Condition datePredicateAsJooqCondition(final DatePredicate dp, final Field<java.sql.Date> f) {
+    final Condition c;
+    switch(dp.getDateOp()) {
+      default:
+      case EQUAL_TO:
+        c = f.eq(new java.sql.Date(dp.getA().getTime()));
+        break;
+      case NOT_EQUAL_TO:
+        c = f.notEqual(new java.sql.Date(dp.getA().getTime()));
+        break;
+      case LESS_THAN:
+        c = f.lessThan(new java.sql.Date(dp.getA().getTime()));
+        break;
+      case NOT_LESS_THAN:
+        c = not(f.lessThan(new java.sql.Date(dp.getA().getTime())));
+        break;
+      case LESS_THAN_OR_EQUAL_TO:
+        c = f.lessOrEqual(new java.sql.Date(dp.getA().getTime()));
+        break;
+      case NOT_LESS_THAN_OR_EQUAL_TO:
+        c = not(f.lessOrEqual(new java.sql.Date(dp.getA().getTime())));
+        break;
+      case GREATER_THAN:
+        c = f.greaterThan(new java.sql.Date(dp.getA().getTime()));
+        break;
+      case NOT_GREATER_THAN:
+        c = not(f.greaterThan(new java.sql.Date(dp.getA().getTime())));
+        break;
+      case GREATER_THAN_OR_EQUAL_TO:
+        c = f.greaterOrEqual(new java.sql.Date(dp.getA().getTime()));
+        break;
+      case NOT_GREATER_THAN_OR_EQUAL_TO:
+        c = not(f.greaterOrEqual(new java.sql.Date(dp.getA().getTime())));
+        break;
+      case BETWEEN:
+        c = f.between(new java.sql.Date(dp.getA().getTime()), new java.sql.Date(dp.getB().getTime()));
+        break;
+      case NOT_BETWEEN:
+        c = not(f.between(new java.sql.Date(dp.getA().getTime()), new java.sql.Date(dp.getB().getTime())));
+        break;
+    }
+    return c;
+  }
+
+  private static Condition timestampPredicateAsJooqCondition(final DatePredicate dp, final Field<Timestamp> f) {
     final Condition c;
     switch(dp.getDateOp()) {
       default:
@@ -223,6 +277,10 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     return lp.isNegate() ? not(f.in(dlocations)) : f.in(dlocations);
   }
 
+  private static Condition memberStatusAsJooqCondition(final MemberStatus status, final Field<MemberStatus> f) {
+    return f.eq(status);
+  }
+
   /**
    * Given a list of 'native' {@link OrderBy} elements,
    * generate the complimenting JooQ {@link SortField} array.
@@ -258,6 +316,15 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
         case "displayName":
           jlist.add(orderBy.asc() ? MEMBER.DISPLAY_NAME.asc() : MEMBER.DISPLAY_NAME.desc());
           break;
+        case "status":
+          jlist.add(orderBy.asc() ? MEMBER.STATUS.asc() : MEMBER.STATUS.desc());
+          break;
+        case "dob":
+          jlist.add(orderBy.asc() ? MAUTH.DOB.asc() : MAUTH.DOB.desc());
+          break;
+        case "username":
+          jlist.add(orderBy.asc() ? MAUTH.USERNAME.asc() : MAUTH.USERNAME.desc());
+          break;
       }
     }
     return jlist.toArray(new SortField[jlist.size()]);
@@ -285,47 +352,73 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     MemberFilter mf = null;
     if(isNotNullOrEmpty(gqlMap)) {
       mf = new MemberFilter();
+      StringPredicate sp = null;
+      LocationPredicate lp = null;
+      DatePredicate dp = null;
+      MemberStatus status = null;
+      List<OrderBy> obl = null;
       for(Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         if(!isBlank(key)) {
           Map<String, Object> submap;
-          String orderBy;
           switch(key) {
             case "created":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setCreated(datePredicateFromGraphQLMap(submap));
+              dp = datePredicateFromGraphQLMap(submap);
+              if(isNotNull(dp)) mf.setCreated(dp);
               break;
             case "modified":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setModified(datePredicateFromGraphQLMap(submap));
+              dp = datePredicateFromGraphQLMap(submap);
+              if(isNotNull(dp)) mf.setModified(dp);
               break;
             case "empId":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setEmpId(stringPredicatefromGraphQLMap(submap));
+              sp = stringPredicatefromGraphQLMap(submap);
+              if(isNotNull(sp)) mf.setEmpId(sp);
               break;
             case "location":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setLocation(locationPredicatefromGraphQLMap(submap));
+              lp = locationPredicatefromGraphQLMap(submap);
+              if(isNotNull(lp)) mf.setLocation(lp);
               break;
             case "nameFirst":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setNameFirst(stringPredicatefromGraphQLMap(submap));
+              sp = stringPredicatefromGraphQLMap(submap);
+              if(isNotNull(sp)) mf.setNameFirst(sp);
               break;
             case "nameMiddle":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setNameMiddle(stringPredicatefromGraphQLMap(submap));
+              sp = stringPredicatefromGraphQLMap(submap);
+              if(isNotNull(sp)) mf.setNameMiddle(sp);
               break;
             case "nameLast":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setNameLast(stringPredicatefromGraphQLMap(submap));
+              sp = stringPredicatefromGraphQLMap(submap);
+              if(isNotNull(sp)) mf.setNameLast(sp);
               break;
             case "displayName":
               submap = (Map<String, Object>) entry.getValue();
-              mf.setDisplayName(stringPredicatefromGraphQLMap(submap));
+              sp = stringPredicatefromGraphQLMap(submap);
+              if(isNotNull(sp)) mf.setDisplayName(sp);
+              break;
+            case "status":
+              status = memberStatusFromString((String) gqlMap.get(key));
+              if(isNotNull(status)) mf.setStatus(status);
+              break;
+            case "dob":
+              submap = (Map<String, Object>) entry.getValue();
+              dp = datePredicateFromGraphQLMap(submap);
+              if(isNotNull(dp)) mf.setDob(dp);
+              break;
+            case "username":
+              submap = (Map<String, Object>) entry.getValue();
+              sp = stringPredicatefromGraphQLMap(submap);
+              if(isNotNull(sp)) mf.setUsername(sp);
               break;
             case "orderBy":
-              orderBy = (String) gqlMap.get(key);
-              mf.setOrderByList(orderByListFromToken(orderBy));
+              obl = orderByListFromToken((String) gqlMap.get(key));
+              if(isNotNullOrEmpty(obl)) mf.setOrderByList(obl);
               break;
             default:
               break;

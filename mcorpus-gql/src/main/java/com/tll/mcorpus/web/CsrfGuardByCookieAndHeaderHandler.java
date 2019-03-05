@@ -52,7 +52,7 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
       return;
     }
     
-    // send a no content response if *both* the cookie or header rst are not present
+    // send a no content response if *both* the cookie and header rst are not present
     // this serves as a way for the clients to sync up and issue a valid subsequent request
     if(isNull(cookieRst) && isNull(headerRst)) {
       final String nextRst = UUID.randomUUID().toString();

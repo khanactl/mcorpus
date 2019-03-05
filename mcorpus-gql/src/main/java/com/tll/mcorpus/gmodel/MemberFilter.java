@@ -1,15 +1,21 @@
 package com.tll.mcorpus.gmodel;
 
+import static com.tll.core.Util.isNotBlank;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import com.tll.mcorpus.db.enums.MemberStatus;
 
 /**
  * Member search filter GraphQL entity type.
@@ -21,63 +27,33 @@ import java.util.Set;
  */
 public class MemberFilter {
 
-  public static class StringPredicate {
+  @FunctionalInterface
+  static interface IFieldPredicate { boolean isSet(); }
+
+  public static class StringPredicate implements IFieldPredicate {
 
     public static enum Operation {
       EQUALS,
       LIKE
     }
   
-    private String value;
-    private boolean ignoreCase;
-    private Operation operation;
+    private final String value;
+    private final boolean ignoreCase;
+    private final Operation operation;
   
-    /**
-     * Constructor.
-     */
-    public StringPredicate() {
-      this("", false, Operation.EQUALS);
-    }
-  
-    /**
-     * Constructor.
-     *
-     * @param value the string value for which to filter against.
-     *              Allowed characters (<code>a-z, A-Z, 0-9, *, %, -space-</code>)
-     *              are enforced with a regex replacement before field assignment.
-     *
-     * @param ignoreCase ignore case when comparing?
-     * @param operation compare value by equals or like
-     */
     public StringPredicate(String value, boolean ignoreCase, Operation operation) {
-      setValue(value);
-      setIgnoreCase(ignoreCase);
-      setOperation(operation);
-    }
-  
-    public String getValue() {
-      return value;
-    }
-  
-    public void setValue(String value) {
-      this.value = value == null ? "" : value.replaceAll("[^a-zA-Z|\\d| |\\*|%]", "");
-    }
-  
-    public boolean isIgnoreCase() {
-      return ignoreCase;
-    }
-  
-    public void setIgnoreCase(boolean b) {
-      this.ignoreCase = b;
-    }
-  
-    public Operation getOperation() {
-      return operation;
-    }
-  
-    public void setOperation(Operation operation) {
+      this.value = value;
+      this.ignoreCase = ignoreCase;
       this.operation = operation;
     }
+
+    public boolean isSet() { return isNotNull(value); }
+  
+    public String getValue() { return value; }
+  
+    public boolean isIgnoreCase() { return ignoreCase; }
+  
+    public Operation getOperation() { return operation; }
   
     @Override
     public boolean equals(Object o) {
@@ -98,7 +74,7 @@ public class MemberFilter {
     public String toString() { return String.format("StringPredicate [value: '%s', ignoreCase? %s, operation: %s]", value, ignoreCase, operation); }
   }
 
-  public static class DatePredicate {
+  public static class DatePredicate implements IFieldPredicate {
 
     public static enum DateOp {
       EQUAL_TO,
@@ -115,16 +91,9 @@ public class MemberFilter {
       NOT_BETWEEN;
     }
   
-    private DateOp dateOp;
-    private Date a;
-    private Date b;
-  
-    /**
-     * Constructor.
-     */
-    public DatePredicate() {
-  
-    }
+    private final DateOp dateOp;
+    private final Date a;
+    private final Date b;
   
     /**
      * Constructor.
@@ -135,32 +104,33 @@ public class MemberFilter {
      */
     public DatePredicate(DateOp dateOp, Date a, Date b) {
       this.dateOp = dateOp;
-      setA(a);
-      setB(b);
+      this.a = a;
+      this.b = b;
+    }
+
+    public boolean isSet() { 
+      if(isNotNull(dateOp)) {
+        switch(dateOp) {
+        case BETWEEN:
+        case NOT_BETWEEN:
+          return a != null && b != null;
+        default:
+          return a != null;
+        }
+      }
+      return false;
     }
   
     public DateOp getDateOp() {
       return dateOp;
     }
   
-    public void setDateOp(DateOp dateOp) {
-      this.dateOp = dateOp;
-    }
-  
     public Date getA() {
       return a == null ? null : new Date(a.getTime());
     }
   
-    public void setA(Date d) {
-      this.a = d == null ? null : new Date(d.getTime());
-    }
-  
     public Date getB() {
       return b == null ? null : new Date(b.getTime());
-    }
-  
-    public void setB(Date d) {
-      this.b = d == null ? null : new Date(d.getTime());
     }
   
     @Override
@@ -182,30 +152,25 @@ public class MemberFilter {
     public String toString() { return String.format("DatePredicate [Op: %s, argA: %s, argB: %s]", dateOp, a, b); }
   }
 
-  public static class LocationPredicate {
+  public static class LocationPredicate implements IFieldPredicate {
 
-    private final Set<String> locations = new HashSet<>(5);
-  
-    private boolean negate;
+    private final Set<String> locations;
+    private final boolean negate;
+
+    public LocationPredicate(final Collection<String> locations, boolean negate) {
+      this.locations = isNullOrEmpty(locations) ? Collections.emptySet() : new HashSet<>(locations);
+      this.negate = negate;
+    }
+
+    public boolean isSet() { return isNotNullOrEmpty(locations); }
   
     public Set<String> getLocations() { return locations; }
-  
-    /**
-     * Add a location to the set of locations in this predicate.
-     *
-     * <p>NOTE: if the location is already present, nothing happens. </p>
-     *
-     * @param loc the [unique] location to add
-     */
-    public void addLocation(String loc) { locations.add(loc); }
   
     /**
      * @return true when the held set of Locations is to be considered as "not in",
      *         false -> "in"
      */
     public boolean isNegate() { return negate; }
-  
-    public void setNegate(boolean b) { this.negate = b; }
   
     @Override
     public boolean equals(Object o) {
@@ -225,12 +190,12 @@ public class MemberFilter {
     public String toString() { return String.format("LocationPredicate[locations: %s, negate?: %s]", locations, negate); }
   }
   
-  public static class OrderBy {
+  public static class OrderBy implements IFieldPredicate {
 
     public static enum Dir { ASC, DESC; }
   
-    public String token;
-    public Dir dir;
+    private final String token;
+    private final Dir dir;
   
     /**
      * Constructor - token only with default dir asc.
@@ -249,15 +214,13 @@ public class MemberFilter {
       this.token = token;
       this.dir = isNull(dir) ? Dir.ASC : dir;
     }
+
+    public boolean isSet() { return isNotBlank(token); }
   
     public String getToken() { return token; }
   
     public Dir getDir() { return dir; }
   
-    /**
-     * @return true when ascending,
-     *         false when descending.
-     */
     public boolean asc() { return dir == Dir.ASC; }
   
     @Override
@@ -286,6 +249,9 @@ public class MemberFilter {
   private StringPredicate nameMiddle;
   private StringPredicate nameLast;
   private StringPredicate displayName;
+  private MemberStatus status;
+  private DatePredicate dob;
+  private StringPredicate username;
 
   private List<OrderBy> orderByList;
 
@@ -294,7 +260,7 @@ public class MemberFilter {
    */
   public MemberFilter() { }
 
-  public boolean hasCreated() { return created != null; }
+  public boolean hasCreated() { return isNotNull(created) && created.isSet(); }
 
   public DatePredicate getCreated() {
     return created;
@@ -304,7 +270,7 @@ public class MemberFilter {
     this.created = created;
   }
 
-  public boolean hasModified() { return modified != null; }
+  public boolean hasModified() { return isNotNull(modified) && modified.isSet(); }
 
   public DatePredicate getModified() {
     return modified;
@@ -314,7 +280,7 @@ public class MemberFilter {
     this.modified = modified;
   }
 
-  public boolean hasEmpId() { return empId != null; }
+  public boolean hasEmpId() { return isNotNull(empId) && empId.isSet(); }
 
   public StringPredicate getEmpId() {
     return empId;
@@ -324,7 +290,7 @@ public class MemberFilter {
     this.empId = empId;
   }
 
-  public boolean hasLocation() { return location != null; }
+  public boolean hasLocation() { return isNotNull(location) && location.isSet(); }
 
   public LocationPredicate getLocation() {
     return location;
@@ -334,7 +300,7 @@ public class MemberFilter {
     this.location = location;
   }
 
-  public boolean hasNameFirst() { return nameFirst != null; }
+  public boolean hasNameFirst() { return isNotNull(nameFirst ) && nameFirst.isSet(); }
 
   public StringPredicate getNameFirst() {
     return nameFirst;
@@ -344,7 +310,7 @@ public class MemberFilter {
     this.nameFirst = nameFirst;
   }
 
-  public boolean hasNameMiddle() { return nameMiddle != null; }
+  public boolean hasNameMiddle() { return isNotNull(nameMiddle) && nameMiddle.isSet(); }
 
   public StringPredicate getNameMiddle() {
     return nameMiddle;
@@ -354,7 +320,7 @@ public class MemberFilter {
     this.nameMiddle = nameMiddle;
   }
 
-  public boolean hasNameLast() { return nameLast != null; }
+  public boolean hasNameLast() { return isNotNull(nameLast) && nameLast.isSet(); }
 
   public StringPredicate getNameLast() {
     return nameLast;
@@ -364,7 +330,7 @@ public class MemberFilter {
     this.nameLast = nameLast;
   }
 
-  public boolean hasDisplayName() { return displayName != null; }
+  public boolean hasDisplayName() { return isNotNull(displayName) && displayName.isSet(); }
 
   public StringPredicate getDisplayName() {
     return displayName;
@@ -374,6 +340,36 @@ public class MemberFilter {
     this.displayName = displayName;
   }
 
+  public boolean hasStatus() { return isNotNull(status); }
+
+  public MemberStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(MemberStatus status) {
+    this.status = status;
+  }
+
+  public boolean hasDob() { return isNotNull(dob) && dob.isSet(); }
+
+  public DatePredicate getDob() {
+    return dob;
+  }
+
+  public void setDob(DatePredicate dob) {
+    this.dob = dob;
+  }
+
+  public boolean hasUsername() { return isNotNull(username) && username.isSet(); }
+
+  public StringPredicate getUsername() {
+    return username;
+  }
+
+  public void setUsername(StringPredicate username) {
+    this.username = username;
+  }
+
   public List<OrderBy> getOrderByList() { return orderByList; }
 
   public void setOrderByList(final List<OrderBy> orderBys) {
@@ -381,8 +377,7 @@ public class MemberFilter {
   }
 
   /**
-   * @return true if at least one member filter constraint is set,
-   *         false otherwise.
+   * @return true if at least one member filter constraint is set, false otherwise.
    */
   public boolean isSet() {
     return hasCreated()
@@ -392,7 +387,11 @@ public class MemberFilter {
       || hasNameFirst()
       || hasNameMiddle()
       || hasNameLast()
-      || hasDisplayName();
+      || hasDisplayName()
+      || hasStatus()
+      || hasDob()
+      || hasUsername()
+      ;
   }
 
   @Override
@@ -407,12 +406,16 @@ public class MemberFilter {
       Objects.equals(nameMiddle, that.nameMiddle) &&
       Objects.equals(nameLast, that.nameLast) &&
       Objects.equals(displayName, that.displayName) &&
-      Objects.equals(orderByList, that.orderByList);
+      Objects.equals(status, that.status) &&
+      Objects.equals(dob, that.dob) &&
+      Objects.equals(username, that.username) &&      
+      Objects.equals(orderByList, that.orderByList)
+      ;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(created, modified, location, nameFirst, nameMiddle, nameLast, displayName, orderByList);
+    return Objects.hash(created, modified, location, nameFirst, nameMiddle, nameLast, displayName, status, dob, username, orderByList);
   }
 
   /*
