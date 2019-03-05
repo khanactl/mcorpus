@@ -242,22 +242,6 @@ input StringPredicate {
   operation: Operation
 }
 
-# order by clause (direction)
-enum OrderByClause {
-  # ascending
-  ASCENDING
-  # descending
-  DESCENDING
-}
-
-# order by directive
-input OrderBy {
-  # order by field name
-  value: String!
-  # order by direction
-  direction: OrderByClause!
-}
-
 # the member filter type
 input MemberFilter {
   # member created date predicate
@@ -279,8 +263,8 @@ input MemberFilter {
   # member display name value predicate
   displayName: StringPredicate
 
-  # member results order by list
-  orderByList: [OrderBy]
+  # comma-delimited list of field names with optional sort direction ("asc" or "desc").  E.g.: "modified desc, location asc, ..."
+  orderBy: String
 }
 
 # required properties for adding a new member to the system

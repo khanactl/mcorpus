@@ -1,8 +1,11 @@
 package com.tll.mcorpus.transform;
 
 import static com.tll.core.Util.asString;
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.upper;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 import static java.util.Collections.singletonList;
@@ -10,6 +13,8 @@ import static org.jooq.impl.DSL.not;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +28,6 @@ import com.tll.mcorpus.gmodel.MemberFilter.DatePredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.DatePredicate.DateOp;
 import com.tll.mcorpus.gmodel.MemberFilter.LocationPredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.OrderBy;
-import com.tll.mcorpus.gmodel.MemberFilter.OrderBy.OrderByClause;
 import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate.Operation;
 import com.tll.transform.BaseTransformer;
@@ -100,23 +104,33 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     return lp;
   }
 
-  private static OrderBy orderByFromGraphQLMap(final Map<String, Object> gqlMap) {
-    OrderBy ob = null;
-    if(gqlMap != null && !gqlMap.isEmpty()) {
-      ob = new OrderBy();
-      for(final Entry<String, Object> entry : gqlMap.entrySet()) {
-        String key = entry.getKey();
-        switch(key) {
-          case "value":
-            ob.token = (String) entry.getValue();
-            break;
-          case "direction":
-            ob.direction = OrderByClause.valueOf((String) entry.getValue());
-            break;
-        }
+  private static OrderBy.Dir orderByDirFromToken(final String dirtok) {
+    return OrderBy.Dir.valueOf(upper(clean(dirtok)));
+  }
+
+  private static OrderBy orderByFromToken(final String token) {
+    final String[] parts = clean(token).split(" ");
+    if(isNotNullOrEmpty(parts)) {
+      switch(parts.length) {
+        case 1:  // field only
+          return new OrderBy(clean(parts[0]));
+        case 2:  // field and dir
+          return new OrderBy(clean(parts[0]), orderByDirFromToken(parts[1]));
+        default: // unhandled
+          break;
       }
     }
-    return ob;
+    // default
+    return null;
+  }
+
+  private static List<OrderBy> orderByListFromToken(final String orderByToken) {
+    return isNotNullOrEmpty(orderByToken) ? 
+      Arrays.stream(orderByToken.split(",")) 
+        .map(elm -> orderByFromToken(elm))
+        .filter(ob -> isNotNull(ob))
+        .collect(Collectors.toList())
+      : Collections.emptyList();
   }
 
   private static Condition[] asJooqCondition(final MemberFilter mf) {
@@ -135,7 +149,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
 
   private static SortField<?>[] generateJooqSortFields(final MemberFilter mf) {
     final List<OrderBy> orderBys = mf.getOrderByList();
-    return orderBys == null || orderBys.isEmpty() ? defaultJooqSorting : generateJooqSortFields(orderBys);
+    return isNotNullOrEmpty(orderBys) ? generateJooqSortFields(orderBys) : defaultJooqSorting;
   }
 
   private static Condition datePredicateAsJooqCondition(final DatePredicate dp, final Field<Timestamp> f) {
@@ -263,7 +277,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   private static final SortField<?>[] defaultJooqSorting;
 
   static {
-    defaultJooqSorting = generateJooqSortFields(singletonList(new OrderBy("created", OrderBy.OrderByClause.DESCENDING)));
+    defaultJooqSorting = generateJooqSortFields(singletonList(new OrderBy("created", OrderBy.Dir.DESC)));
   }
 
   @Override @SuppressWarnings("unchecked")
@@ -275,7 +289,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
         String key = entry.getKey();
         if(!isBlank(key)) {
           Map<String, Object> submap;
-          List<Map<String, Object>> sublist;
+          String orderBy;
           switch(key) {
             case "created":
               submap = (Map<String, Object>) entry.getValue();
@@ -309,14 +323,12 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
               submap = (Map<String, Object>) entry.getValue();
               mf.setDisplayName(stringPredicatefromGraphQLMap(submap));
               break;
-            case "orderByList":
-              sublist = (List<Map<String, Object>>) gqlMap.get(key);
-              if(sublist != null && !sublist.isEmpty()) {
-                for(final Map<String, Object> sublistmap : sublist) {
-                  OrderBy ob = orderByFromGraphQLMap(sublistmap);
-                  if(ob != null) mf.addOrderBy(ob);
-                }
-              }
+            case "orderBy":
+              orderBy = (String) gqlMap.get(key);
+              mf.setOrderByList(orderByListFromToken(orderBy));
+              break;
+            default:
+              break;
           }
         }
       }

@@ -1,6 +1,10 @@
 package com.tll.mcorpus.gmodel;
 
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -223,41 +227,38 @@ public class MemberFilter {
   
   public static class OrderBy {
 
-    public static enum OrderByClause {
-      ASCENDING,
-      DESCENDING;
-    }
+    public static enum Dir { ASC, DESC; }
   
     public String token;
-    public OrderByClause direction;
+    public Dir dir;
   
     /**
-     * Constructor.
+     * Constructor - token only with default dir asc.
      */
-    public OrderBy() {
-  
+    public OrderBy(String token) { 
+      this(token, Dir.ASC);
     }
   
     /**
      * Constructor.
      *
      * @param token the order by token
-     * @param direction asc or desc?
+     * @param dir asc or desc?
      */
-    public OrderBy(String token, OrderByClause direction) {
+    public OrderBy(String token, Dir dir) {
       this.token = token;
-      this.direction = direction;
+      this.dir = isNull(dir) ? Dir.ASC : dir;
     }
   
     public String getToken() { return token; }
   
-    public OrderByClause getDirection() { return direction; }
+    public Dir getDir() { return dir; }
   
     /**
      * @return true when ascending,
      *         false when descending.
      */
-    public boolean asc() { return direction == OrderByClause.ASCENDING; }
+    public boolean asc() { return dir == Dir.ASC; }
   
     @Override
     public boolean equals(Object o) {
@@ -265,12 +266,12 @@ public class MemberFilter {
       if (o == null || getClass() != o.getClass()) return false;
       OrderBy orderBy = (OrderBy) o;
       return Objects.equals(token, orderBy.token) &&
-        direction == orderBy.direction;
+        dir == orderBy.dir;
     }
   
     @Override
     public int hashCode() {
-      return Objects.hash(token, direction);
+      return Objects.hash(token, dir);
     }
   
     @Override
@@ -375,16 +376,8 @@ public class MemberFilter {
 
   public List<OrderBy> getOrderByList() { return orderByList; }
 
-  /**
-   * Add an order by directive to the internal list.
-   *
-   * @param orderBy the order by directive to add
-   */
-  public void addOrderBy(final OrderBy orderBy) {
-    if(orderBy != null) {
-      if (orderByList == null) orderByList = new ArrayList<>(5);
-      orderByList.add(orderBy);
-    }
+  public void setOrderByList(final List<OrderBy> orderBys) {
+    this.orderByList = isNullOrEmpty(orderBys) ? Collections.emptyList() : new ArrayList<>(orderBys);
   }
 
   /**
