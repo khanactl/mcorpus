@@ -390,12 +390,11 @@
 
   <reporting>
     <plugins>
-      <plugin><!--  findbugs (do `mvn findbugs:gui` to run manually) -->
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
         <configuration>
-          <skip>false</skip>
-          <effort>high</effort>
+          <xmlOutput>true</xmlOutput>
         </configuration>
       </plugin>
     </plugins>
