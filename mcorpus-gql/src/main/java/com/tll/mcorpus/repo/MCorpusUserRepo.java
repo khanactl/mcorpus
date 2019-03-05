@@ -211,7 +211,7 @@ public class MCorpusUserRepo implements Closeable {
     if(mcuserLogout != null) {
       try {
         mcuserLogout.execute(dsl.configuration());
-        if(mcuserLogout.getReturnValue() == Boolean.TRUE) {
+        if(Boolean.TRUE.equals(mcuserLogout.getReturnValue())) {
           // logout success
           return new FetchResult<>(Boolean.TRUE, null);
         }

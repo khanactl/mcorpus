@@ -282,8 +282,10 @@ public class JWT {
     // 2) the associated user has a valid status
     
     final JwtBackendStatus jwtbsi = jbsp.getBackendJwtStatus(jwtId);
-    if(jwtbsi == null || jwtbsi.getStatus() == null) {
-      log.error("JWT (jwtId: {}) fetch backend status error: {}", jwtId.toString(), jwtbsi.getErrorMsg());
+    if(isNull(jwtbsi) || isNull(jwtbsi.getStatus())) {
+      log.error("JWT (jwtId: {}) fetch backend status error: {}", 
+        jwtId, 
+        isNull(jwtbsi) ? "UNKNOWN" : jwtbsi.getErrorMsg());
       return jsi(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
     }
 

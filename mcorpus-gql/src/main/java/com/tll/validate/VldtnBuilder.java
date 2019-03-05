@@ -115,7 +115,7 @@ public class VldtnBuilder<E> {
    * @param fname the entity field name used when the validation fails
    */
   public <T> VldtnBuilder<E> vwhn(Supplier<Boolean> c, Predicate<T> p, Function<E, T> fval, String vmk, String fname) {
-    if(c.get() == Boolean.TRUE) {
+    if(Boolean.TRUE.equals(c.get())) {
       final T fv = fval.apply(entity);
       if(isNotNull(fv) && !p.test(fv)) {
         vaddErr(vmk, fname, fv);
