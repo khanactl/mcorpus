@@ -132,7 +132,7 @@ public class JWT {
    * @return newly created, never null encrypted and signed JWT.
    * @throws Exception upon any unexpected error generating the JWT
    */
-  public String generate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq) 
+  public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq) 
       throws Exception {
     final long requestTimestamp = httpreq.getRequestInstant().toEpochMilli();
     final long loginExpirationTimestamp = requestTimestamp + jwtCookieTtlInMillis;

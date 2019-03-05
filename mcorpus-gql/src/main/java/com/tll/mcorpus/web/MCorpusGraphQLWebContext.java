@@ -162,7 +162,7 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
     try {
       // create the JWT - and set as a cookie to go back to user
       // the user is now expected to provide this JWT for subsequent mcorpus api requests
-      final String jwt = jwtbiz.generate(
+      final String jwt = jwtbiz.jwtGenerate(
           pendingJwtID,
           mcuser.getUid(), 
           isNullOrEmpty(mcuser.getRoles()) ? "" : 

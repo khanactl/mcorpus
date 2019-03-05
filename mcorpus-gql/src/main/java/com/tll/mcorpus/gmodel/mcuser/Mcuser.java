@@ -1,5 +1,7 @@
 package com.tll.mcorpus.gmodel.mcuser;
 
+import static com.tll.core.Util.copy;
+
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -33,8 +35,8 @@ public class Mcuser extends BaseEntity<Mcuser, IKey> {
   ) {
       this.pk = IKey.uuid("Mcuser", uid);
       this.uid = uid;
-      this.created = created;
-      this.modified = modified;
+      this.created = copy(created);
+      this.modified = copy(modified);
       this.name = name;
       this.email = email;
       this.username = username;
@@ -51,11 +53,11 @@ public class Mcuser extends BaseEntity<Mcuser, IKey> {
   }
 
   public Date getCreated() {
-    return created;
+    return copy(created);
   }
 
   public Date getModified() {
-    return modified;
+    return copy(modified);
   }
 
   public String getName() {

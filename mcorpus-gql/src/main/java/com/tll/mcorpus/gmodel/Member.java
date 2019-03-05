@@ -1,5 +1,7 @@
 package com.tll.mcorpus.gmodel;
 
+import static com.tll.core.Util.copy;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -46,8 +48,8 @@ public class Member extends BaseEntity<Member, IKey> {
   public Member(UUID mid, Date created, Date modified, String empId, String location, String nameFirst, String nameMiddle, String nameLast, String displayName, String status, Date dob, String ssn, String personalEmail, String workEmail, String mobilePhone, String homePhone, String workPhone, String username, String pswd) {
     this.pk = IKey.uuid("Member", mid);
     this.mid = mid;
-    this.created = created;
-    this.modified = modified;
+    this.created = copy(created);
+    this.modified = copy(modified);
     this.empId = empId;
     this.location = location;
     this.nameFirst = nameFirst;
@@ -74,11 +76,11 @@ public class Member extends BaseEntity<Member, IKey> {
   }
 
   public Date getCreated() {
-    return created;
+    return copy(created);
   }
 
   public Date getModified() {
-    return modified;
+    return copy(modified);
   }
 
   public String getEmpId() {

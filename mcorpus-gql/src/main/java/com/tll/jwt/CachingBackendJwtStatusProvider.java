@@ -26,7 +26,7 @@ public class CachingBackendJwtStatusProvider implements IJwtBackendStatusProvide
    * Constructor.
    * 
    * @param jwtStatusProvider the underlying JWT status provider
-   * @param minutesTolive the number of minutes a jwt status object shall live in-memory
+   * @param minutesTolive the number of minutes a JWT status object shall live in-memory
    * @param maxCacheSize the max number of JWT status instances to hold in cache at any one time
    */
   public CachingBackendJwtStatusProvider(final IJwtBackendStatusProvider jwtStatusProvider, int minutesTolive, int maxCacheSize) {

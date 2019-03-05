@@ -1,5 +1,6 @@
 package com.tll.mcorpus.gmodel;
 
+import static com.tll.core.Util.copy;
 import static com.tll.core.Util.isNotNullOrEmpty;
 
 import java.util.Date;
@@ -47,7 +48,7 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
     this.pk = new MidAndAddressName(mid, addressName);
     this.mid = mid;
     this.addressName = addressName;
-    this.modified = modified;
+    this.modified = copy(modified);
     this.attn = attn;
     this.street1 = street1;
     this.street2 = street2;
@@ -69,7 +70,7 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
   }
 
   public Date getModified() {
-    return modified;
+    return copy(modified);
   }
 
   public String getAttn() {

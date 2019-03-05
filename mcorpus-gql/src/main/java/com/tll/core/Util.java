@@ -1,6 +1,7 @@
 package com.tll.core;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -193,6 +194,14 @@ public class Util {
    * @return <code>inst</code> when it is not null and <code>dflt</code> when <code>inst</code> is null.
    */
   public static <T> T dflt(T inst, T dflt) { return inst == null ? dflt : inst; }
+
+  /**
+   * Physical copy for <code>java.util.Date</code> objects.
+   * 
+   * @return Newly created {@link Date} with the same time as <code>d</code> 
+   *         or null if <code>d</code> is null.
+   */
+  public static Date copy(final Date d) { return d == null ? null : new Date(d.getTime()); }
   
   /**
    * Takes a list as input and adds each list element to a string

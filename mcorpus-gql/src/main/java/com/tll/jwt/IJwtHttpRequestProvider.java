@@ -16,9 +16,9 @@ public interface IJwtHttpRequestProvider {
   
   /**
    * @return the client origin token which is a constructed token 
-   *         from http hader values.
+   *         from http header values of an incoming http request.
    *         <p>
-   *         The reccommended client origin format:<br>
+   *         Recommended client origin token:<br>
    *         <code>{remoteAddressHost}|{X-Forwarded-For}</code>.
    */
   String getClientOrigin();

@@ -74,7 +74,7 @@ public class MCorpusJWTTest {
       "rsth");
     
       // generate jwt
-    String jwt = jwti.generate(jwtId, mcuserId, roles, rsPre);
+    String jwt = jwti.jwtGenerate(jwtId, mcuserId, roles, rsPre);
     assertNotNull(jwt);
     log.info("JWT generated: {}", jwt);
     

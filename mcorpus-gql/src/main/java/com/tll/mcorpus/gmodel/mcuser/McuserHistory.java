@@ -1,5 +1,7 @@
 package com.tll.mcorpus.gmodel.mcuser;
 
+import static com.tll.core.Util.copy;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +18,7 @@ public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
 
     public LoginEvent(UUID jwtId, Date timestamp) {
       this.jwtId = jwtId;
-      this.timestamp = timestamp;
+      this.timestamp = copy(timestamp);
     }
   }
 
@@ -26,7 +28,7 @@ public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
 
     public LogoutEvent(UUID jwtId, Date timestamp) {
       this.jwtId = jwtId;
-      this.timestamp = timestamp;
+      this.timestamp = copy(timestamp);
     }
   }
 
