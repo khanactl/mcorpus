@@ -1,4 +1,4 @@
-package com.tll.mcorpus.gql;
+package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.dflt;
@@ -34,7 +34,6 @@ import com.tll.mcorpus.gmodel.mcuser.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LoginEvent;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LogoutEvent;
-import com.tll.repo.FetchResult;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.transform.McuserHistoryXfrm;
@@ -46,8 +45,8 @@ import com.tll.mcorpus.transform.MrefXfrm;
 import com.tll.mcorpus.validate.McuserValidator;
 import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
+import com.tll.repo.FetchResult;
 import com.tll.validate.VldtnResult;
-import com.tll.mcorpus.web.MCorpusGraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;

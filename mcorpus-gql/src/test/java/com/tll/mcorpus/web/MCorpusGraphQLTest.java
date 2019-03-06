@@ -1,4 +1,4 @@
-package com.tll.mcorpus.gql;
+package com.tll.mcorpus.web;
 
 import static com.tll.TestUtil.cpr;
 import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;

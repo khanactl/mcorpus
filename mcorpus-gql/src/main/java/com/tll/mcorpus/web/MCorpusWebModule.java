@@ -3,10 +3,9 @@ package com.tll.mcorpus.web;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.tll.mcorpus.MCorpusServerConfig;
-import com.tll.mcorpus.gql.MCorpusGraphQL;
 import com.tll.jwt.CachingBackendJwtStatusProvider;
 import com.tll.jwt.JWT;
+import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 

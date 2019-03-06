@@ -1,4 +1,4 @@
-package com.tll.mcorpus.gql;
+package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNullOrEmpty;
