@@ -4,7 +4,7 @@ import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.nflatten;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
-import static com.tll.repo.RepoUtil.fputWhenNotNull;
+import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 
 import java.io.Closeable;
 import java.sql.Timestamp;

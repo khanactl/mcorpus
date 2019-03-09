@@ -7,9 +7,9 @@ import static com.tll.core.Util.not;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
-import static com.tll.repo.RepoUtil.fput;
-import static com.tll.repo.RepoUtil.fputWhenNotNull;
-import static com.tll.repo.RepoUtil.fval;
+import static com.tll.mcorpus.repo.MCorpusRepoUtil.fput;
+import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
+import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 
 import java.io.Closeable;
 import java.sql.Timestamp;

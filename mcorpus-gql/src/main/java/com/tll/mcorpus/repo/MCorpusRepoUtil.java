@@ -1,4 +1,4 @@
-package com.tll.repo;
+package com.tll.mcorpus.repo;
 
 import org.jooq.Field;
 
@@ -9,11 +9,11 @@ import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
 
 /**
- * General repository-level entity persistence utility methods.
+ * Mcorpus-specific repo (entity persistence) utility methods.
  * 
  * @author jpk
  */
-public class RepoUtil {
+public class MCorpusRepoUtil {
 
   /**
    * Given a {@link Field} ref, return the field name.
@@ -74,7 +74,7 @@ public class RepoUtil {
   }
 
   /**
-   * Is the given field either not in the field map or null in the field map?
+   * Is the given field either is not in the field map or null in the field map?
    *
    * @param f the field ref
    * @param fmap the field map
@@ -134,5 +134,5 @@ public class RepoUtil {
   /**
    * Static access only please.
    */
-  private RepoUtil() {}
+  private MCorpusRepoUtil() {}
 }
