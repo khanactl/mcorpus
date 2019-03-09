@@ -13,7 +13,7 @@ bin
 .DS_Store
 mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
 
-aws-env.txt
+aws-env*
 aws-mcorpus-db-psql.sh
 aws-mcorpus-dev.sh
 
