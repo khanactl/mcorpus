@@ -11,7 +11,7 @@ import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.db.Tables.MEMBER_AUDIT;
-import static com.tll.transform.BaseTransformer.asSqlDate;
+import static com.tll.transform.TransformUtil.asSqlDate;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

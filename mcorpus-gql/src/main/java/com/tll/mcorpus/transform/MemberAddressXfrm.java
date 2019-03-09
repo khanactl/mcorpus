@@ -1,10 +1,12 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.lower;
+import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
+import static com.tll.transform.TransformUtil.dateToTimestamp;
+import static com.tll.transform.TransformUtil.fval;
 
 import java.util.Map;
 

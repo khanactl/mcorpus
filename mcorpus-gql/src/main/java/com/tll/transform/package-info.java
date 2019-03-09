@@ -1,5 +1,5 @@
 /**
- * Generalized Transformation API intended for transforming frontend types 
+ * Generalized Transformation API intended for transforming frontend GraphQL types 
  * to backend domain types and vice versa.
  * <p>
  * Transform implementations (packages) have awareness of both frontend types and backend types.
