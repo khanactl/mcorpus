@@ -13,8 +13,8 @@ import java.util.UUID;
 
 import com.tll.UnitTest;
 import com.tll.jwt.JWT;
-import com.tll.jwt.JWTStatus;
 import com.tll.jwt.JWTStatusInstance;
+import com.tll.jwt.JWTStatusInstance.JWTStatus;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.web.RequestSnapshot;
 

@@ -26,6 +26,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tll.jwt.IJwtBackendStatusProvider.JwtBackendStatus;
+import com.tll.jwt.JWTStatusInstance.JWTStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,9 @@ import org.slf4j.LoggerFactory;
 public class JWT {
 
   /**
+   * Generate a new JWT shared secret for use server-side to both encrypt 
+   * newly created JWTs and decrypt incoming JWTs.
+   * 
    * @return Cryptographically strong random 32-byte (256 bits) array to serve as
    *         a JWT salt (shared secret).
    */
@@ -76,20 +80,12 @@ public class JWT {
     return DatatypeConverter.parseHexBinary(hexToken);
   }
   
-  public static JWTStatusInstance jsi(JWTStatus status) { 
-    return new JWTStatusInstance(status, null, null, null, null, null); 
-  }
-  
-  public static JWTStatusInstance jsi(JWTStatus status, UUID jwtId, UUID userId, String roles, Date issued, Date expires) { 
-    return new JWTStatusInstance(status, jwtId, userId, roles, issued, expires); 
-  }
-  
   private final Logger log = LoggerFactory.getLogger(JWT.class);
   
   private final long jwtCookieTtlInMillis; 
   private final long jwtCookieTtlInSeconds;
   private final IJwtBackendStatusProvider jbsp;
-  private final SecretKey secretKey;
+  private final SecretKey jkey;
   private final String serverIssuer; 
 
   /**
@@ -107,7 +103,7 @@ public class JWT {
     this.jwtCookieTtlInMillis = jwtCookieTtlInMillis;
     this.jwtCookieTtlInSeconds = Math.floorDiv(jwtCookieTtlInMillis, 1000);
     this.jbsp = jbsp;
-    this.secretKey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
+    this.jkey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = serverIssuer;
     log.info("JWT configured with cookie time-to-live: {} seconds, serverIssuer: {}.", jwtCookieTtlInSeconds, serverIssuer);
   }
@@ -153,14 +149,14 @@ public class JWT {
     
     try {
       // sign
-      signedJWT.sign(new MACSigner(secretKey.getEncoded()));
+      signedJWT.sign(new MACSigner(jkey.getEncoded()));
       // encrypt
       JWEObject jweObject = new JWEObject(
           new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A256GCM)
               .contentType("JWT") // required to signal nested JWT
               .build(),
           new Payload(signedJWT));
-      jweObject.encrypt(new DirectEncrypter(secretKey.getEncoded()));
+      jweObject.encrypt(new DirectEncrypter(jkey.getEncoded()));
       return jweObject.serialize();
     } catch (Exception e) {
       throw new Exception("JWT signing/encryption error: " + e.getMessage());
@@ -187,16 +183,16 @@ public class JWT {
   public JWTStatusInstance jwtStatus(final IJwtHttpRequestProvider httpreq) {
     // present?
     if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwtCookie())) 
-      return jsi(JWTStatus.NOT_PRESENT_IN_REQUEST);
+      return JWTStatusInstance.create(JWTStatus.NOT_PRESENT_IN_REQUEST);
     
     // decrypt JWT cookie
     final JWEObject jweObject;
     try {
       jweObject = JWEObject.parse(httpreq.getJwtCookie());
-      jweObject.decrypt(new DirectDecrypter(secretKey.getEncoded()));
+      jweObject.decrypt(new DirectDecrypter(jkey.getEncoded()));
     } catch (Exception e) {
       log.error("JWT decrypt error: {}", e.getMessage());
-      return jsi(JWTStatus.BAD_TOKEN);
+      return JWTStatusInstance.create(JWTStatus.BAD_TOKEN);
     }
     
     // parse to object
@@ -206,16 +202,16 @@ public class JWT {
       if(sjwt == null) throw new Exception();
     } catch (Exception e) {
       log.error("JWT un-signing error: {}", e.getMessage());
-      return jsi(JWTStatus.BAD_TOKEN);
+      return JWTStatusInstance.create(JWTStatus.BAD_TOKEN);
     }
     
     // verify signature
     try {
-      if(not(sjwt.verify(new MACVerifier(secretKey.getEncoded())))) 
+      if(not(sjwt.verify(new MACVerifier(jkey.getEncoded())))) 
         throw new Exception();
     } catch (Exception e) {
       log.error("JWT verify signature error: {}", e.getMessage());
-      return jsi(JWTStatus.BAD_SIGNATURE);
+      return JWTStatusInstance.create(JWTStatus.BAD_SIGNATURE);
     }
     
     // extract and verify the held JWT claims
@@ -224,8 +220,8 @@ public class JWT {
     //       will keep this secret and unaltered.
     final UUID jwtId;
     final UUID userId;
-    final Date issued;
-    final Date expires;
+    final long issued;
+    final long expires;
     final String issuer;
     final String jwtAudience;
     final String roles; // bound to the user
@@ -234,10 +230,10 @@ public class JWT {
       
       jwtId = UUID.fromString(claims.getJWTID());
       userId = UUID.fromString(claims.getSubject());
-      issued = claims.getIssueTime();
-      expires = claims.getExpirationTime();
+      issued = isNull(claims.getIssueTime()) ? -1 : claims.getIssueTime().getTime();
+      expires = isNull(claims.getExpirationTime()) ? -1 : claims.getExpirationTime().getTime();
       issuer = claims.getIssuer();
-      jwtAudience = claims.getAudience().isEmpty() ? "" : claims.getAudience().get(0);
+      jwtAudience = isNullOrEmpty(claims.getAudience()) ? "" : claims.getAudience().get(0);
       roles = (String) claims.getClaim("roles");
 
       if(
@@ -256,25 +252,25 @@ public class JWT {
     }
     catch (Exception e) {
       log.error("JWT bad claims: {}", e.getMessage());
-      return jsi(JWTStatus.BAD_CLAIMS);
+      return JWTStatusInstance.create(JWTStatus.BAD_CLAIMS);
     }
     
     // verify issuer (this server's public host name)
     if(not(issuer.equals(serverIssuer))) {
       log.error("JWT bad issuer: {} (expected: {})", issuer, serverIssuer);
-      return jsi(JWTStatus.BAD_CLAIMS);
+      return JWTStatusInstance.create(JWTStatus.BAD_CLAIMS);
     }
     
     // verify audience (client origin)
     if(not(httpreq.verifyClientOrigin(jwtAudience))) {
       log.error("JWT client origin mis-match (JWT: {} (current request: {})", jwtAudience, httpreq.getClientOrigin());
-      return jsi(JWTStatus.BAD_CLAIMS);
+      return JWTStatusInstance.create(JWTStatus.BAD_CLAIMS);
     }
     
     // expired? (check for exp. time in the past)
-    if(new Date().after(expires)) {
+    if(new Date().after(new Date(expires))) {
       log.info("JWT expired for JWT ID: {}", jwtId);
-      return jsi(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
+      return JWTStatusInstance.create(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
     }
     
     // Backend verification:
@@ -286,7 +282,7 @@ public class JWT {
       log.error("JWT (jwtId: {}) fetch backend status error: {}", 
         jwtId, 
         isNull(jwtbsi) ? "UNKNOWN" : jwtbsi.getErrorMsg());
-      return jsi(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
+      return JWTStatusInstance.create(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
     }
 
     final JwtBackendStatus.Status jwtBackendStatus = jwtbsi.getStatus();
@@ -296,35 +292,35 @@ public class JWT {
     case NOT_PRESENT:
       // jwt id not found in db - treat as blocked then
       log.warn("JWT not present on backend.  jwtId: {}", jwtId.toString());
-      jsi = jsi(JWTStatus.NOT_PRESENT_BACKEND, jwtId, userId, null, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.NOT_PRESENT_BACKEND, jwtId, userId, null, issued, expires);
       break;
     case PRESENT_BAD_STATE:
       // jwt id found in db but the status could not be determined
       log.warn("JWT present but status is unknown.  jwtId: {}", jwtId.toString());
-      jsi = jsi(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
       break;
     case BLACKLISTED:
       log.warn("JWT blacklisted.  jwtId: {}", jwtId.toString());
-      jsi = jsi(JWTStatus.BLOCKED, jwtId, userId, null, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.BLOCKED, jwtId, userId, null, issued, expires);
       break;
     case BAD_USER:
       log.warn("JWT bad user.  jwtId: {}", jwtId.toString());
-      jsi = jsi(JWTStatus.BLOCKED, jwtId, userId, null, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.BLOCKED, jwtId, userId, null, issued, expires);
       break;
     case EXPIRED:
       // jwt (login) expired
       log.warn("JWT expired.  jwtId: {}", jwtId.toString());
-      jsi = jsi(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
       break;
     case VALID:
       // valid - provide roles
-      jsi = jsi(JWTStatus.VALID, jwtId, userId, roles, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.VALID, jwtId, userId, roles, issued, expires);
       break;
     case ERROR:
     default:
       // unhandled jwt status so convey status as backend error
       log.error("JWT backend status error: {}!  jwtId: {}", jwtBackendStatus);
-      jsi = jsi(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
+      jsi = JWTStatusInstance.create(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
       break;
     }
 

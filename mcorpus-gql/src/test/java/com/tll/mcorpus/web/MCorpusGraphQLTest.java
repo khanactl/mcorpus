@@ -7,16 +7,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tll.UnitTest;
-import com.tll.jwt.JWT;
-import com.tll.jwt.JWTStatus;
 import com.tll.jwt.JWTStatusInstance;
+import com.tll.jwt.JWTStatusInstance.JWTStatus;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.web.GraphQLWebContext;
@@ -102,13 +100,14 @@ public class MCorpusGraphQLTest {
   }
 
   static JWTStatusInstance testJwtStatus(JWTStatus jwtStatus, String roles) {
-    return JWT.jsi(
+    final long lnow = System.currentTimeMillis();
+    return JWTStatusInstance.create(
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),
       roles, 
-      new Date(Instant.now().toEpochMilli()),
-      new Date(Instant.now().toEpochMilli())
+      lnow,
+      lnow
     );
   }
 
