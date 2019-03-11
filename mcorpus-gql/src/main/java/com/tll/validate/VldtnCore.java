@@ -61,7 +61,6 @@ public class VldtnCore {
    *
    * - min 2 chars long
    * - max 128 chars long
-   *
    */
   public static final Pattern emailPattern = Pattern.compile("(?i)^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,128}$");
 

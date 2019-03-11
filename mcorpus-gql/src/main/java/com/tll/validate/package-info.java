@@ -1,11 +1,6 @@
 /**
- * Validation API.
- * <p>
- * This package defines the code types and methods to realize a validation scheme 
- * for entity objects.
- * <p>
- * This api supports validating incoming entity instances for backend persistence 
- * where the backend is some sort or database or repository.
+ * Generalized validation API for verifying incoming entity object types 
+ * destined for backend persistence.
  * 
  * @author jpk
  */
