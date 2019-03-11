@@ -23,7 +23,7 @@ type Query {
   memberByMid(mid: ID!): Member @auth(role: "mcorpus") 
 
   # member search - dynamic, filter-able, paginate-able query
-  members(filter: MemberFilter, offset: Int, limit: Int): [Member] @auth(role: "mcorpus") 
+  members(filter: MemberFilter): [Member] @auth(role: "mcorpus") 
 }
 
 # the mcorpus mutation methods
@@ -234,6 +234,11 @@ input LocationPredicate {
 
 # the member filter type
 input MemberFilter {
+  # backend repo cursor offset (default is 0 if not specified)
+  offset: Int
+  # max number of members to fetch (default is 10 if not specified)
+  limit: Int
+
   # member created date predicate
   created: DatePredicate
   # member modified date predicate

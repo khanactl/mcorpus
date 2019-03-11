@@ -346,11 +346,9 @@ public class MCorpusRepo implements Closeable {
    * Member search function with optional filtering and paging offsets.
    *
    * @param msearch the member search conditions object
-   * @param offset the member search db offset index
-   * @param limit the max number of members to return
    * @return FetchResult for a list of property maps representing member entities.
    */
-  public FetchResult<List<MemberAndMauth>> memberSearch(final MemberSearch msearch, int offset, int limit) {
+  public FetchResult<List<MemberAndMauth>> memberSearch(final MemberSearch msearch) {
     String emsg;
     try {
       final List<Map<String, Object>> members;
@@ -363,7 +361,7 @@ public class MCorpusRepo implements Closeable {
           )
           .from(MEMBER).join(MAUTH).onKey()
           .orderBy(msearch.orderBys)
-          .offset(offset).limit(limit)
+          .offset(msearch.offset).limit(msearch.limit)
           .fetch().intoMaps();
       } else {
         // filter
@@ -375,7 +373,7 @@ public class MCorpusRepo implements Closeable {
           .from(MEMBER).join(MAUTH).onKey()
           .where(msearch.conditions)
           .orderBy(msearch.orderBys)
-          .offset(offset).limit(limit)
+          .offset(msearch.offset).limit(msearch.limit)
           .fetch().intoMaps();
       }
       

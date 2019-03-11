@@ -4,6 +4,7 @@ import static com.tll.mcorpus.transform.MemberXfrm.memberStatusFromString;
 import static com.tll.core.Util.asString;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.upper;
@@ -352,16 +353,26 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     MemberFilter mf = null;
     if(isNotNullOrEmpty(gqlMap)) {
       mf = new MemberFilter();
+      int offset = 0;
+      int limit = 10;
       StringPredicate sp = null;
       LocationPredicate lp = null;
       DatePredicate dp = null;
       MemberStatus status = null;
       List<OrderBy> obl = null;
-      for(Entry<String, Object> entry : gqlMap.entrySet()) {
+      for(final Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         if(!isBlank(key)) {
           Map<String, Object> submap;
           switch(key) {
+            case "offset":
+              offset = isNull(entry.getValue()) ? 0 : ((Integer)entry.getValue()).intValue();
+              mf.setOffset(offset);
+              break;
+            case "limit":
+              limit = isNull(entry.getValue()) ? 0 : ((Integer)entry.getValue()).intValue();
+              mf.setLimit(limit);
+              break;
             case "created":
               submap = (Map<String, Object>) entry.getValue();
               dp = datePredicateFromGraphQLMap(submap);
@@ -417,7 +428,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
               if(isNotNull(sp)) mf.setUsername(sp);
               break;
             case "orderBy":
-              obl = orderByListFromToken((String) gqlMap.get(key));
+              obl = orderByListFromToken((String) entry.getValue());
               if(isNotNullOrEmpty(obl)) mf.setOrderByList(obl);
               break;
             default:
@@ -433,7 +444,9 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   protected MemberSearch toBackendFromNonNull(MemberFilter e) {
     return new MemberSearch(
       asJooqCondition(e), 
-      generateJooqSortFields(e) 
+      generateJooqSortFields(e), 
+      e.getOffset(), 
+      e.getLimit()
     );
   }
 

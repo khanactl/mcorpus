@@ -241,6 +241,8 @@ public class MemberFilter {
     public String toString() { return String.format("OrderBy['%s' %s]", token, asc() ? "asc" : "desc"); }
   }
   
+  private int offset;
+  private int limit;
   private DatePredicate created;
   private DatePredicate modified;
   private StringPredicate empId;
@@ -260,6 +262,14 @@ public class MemberFilter {
    */
   public MemberFilter() { }
 
+  public int getOffset() { return offset; }
+
+  public void setOffset(int offset) { this.offset = offset; }
+
+  public int getLimit() { return limit; }
+  
+  public void setLimit(int limit) { this.limit = limit; }
+  
   public boolean hasCreated() { return isNotNull(created) && created.isSet(); }
 
   public DatePredicate getCreated() {

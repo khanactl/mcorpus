@@ -1,9 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
-import static com.tll.core.Util.dflt;
 import static com.tll.core.Util.isNotNull;
-import static com.tll.core.Util.isNull;
 import static com.tll.mcorpus.transform.BaseMcorpusTransformer.uuidFromToken;
 import static com.tll.mcorpus.transform.BaseMcorpusTransformer.uuidToToken;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
@@ -12,22 +10,18 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.tll.gql.GraphQLDate;
+import com.tll.gql.GraphQLRequestProcessor;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
-import com.tll.mcorpus.dmodel.McuserHistoryDomain;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
-import com.tll.mcorpus.dmodel.MemberSearch;
+import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.mcorpus.gmodel.MemberAddress;
-import com.tll.mcorpus.gmodel.MemberFilter;
 import com.tll.mcorpus.gmodel.Mref;
 import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
 import com.tll.mcorpus.gmodel.mcuser.Mcuser;
@@ -46,21 +40,16 @@ import com.tll.mcorpus.validate.McuserValidator;
 import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
 import com.tll.repo.FetchResult;
-import com.tll.validate.VldtnResult;
 import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import graphql.language.SourceLocation;
-import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.validation.ValidationError;
-import graphql.validation.ValidationErrorType;
 
 /**
  * The MCorpus GraphQL schema loader and data fetchers all in one class.
@@ -70,6 +59,8 @@ import graphql.validation.ValidationErrorType;
 public class MCorpusGraphQL {
 
   private final Logger log = LoggerFactory.getLogger(MCorpusGraphQL.class);
+
+  private final GraphQLRequestProcessor processor;
 
   // validators
   private final McuserValidator vldtnMcuser;
@@ -103,6 +94,8 @@ public class MCorpusGraphQL {
   public MCorpusGraphQL(final MCorpusUserRepo mcuserRepo, final MCorpusRepo mcorpusRepo) {
     this.mcuserRepo = mcuserRepo;
     this.mcorpusRepo = mcorpusRepo;
+
+    this.processor = new GraphQLRequestProcessor();
 
     this.vldtnMcuser = new McuserValidator();
     this.xfrmMcuserHistory = new McuserHistoryXfrm();
@@ -181,36 +174,39 @@ public class MCorpusGraphQL {
         })
 
         // mcuser history
-        .dataFetcher("mchistory", env -> {
-          final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final FetchResult<McuserHistoryDomain> fr = mcuserRepo.mcuserHistory(uid);
-          return processFetchResult(fr, env, b -> xfrmMcuserHistory.fromBackend(b));
-        })
+        .dataFetcher("mchistory", env -> processor.fetch(
+            env, 
+            env2 -> uuidFromToken(env2.getArgument("uid")), 
+            uid -> mcuserRepo.mcuserHistory(uid), 
+            b -> xfrmMcuserHistory.fromBackend(b))
+        )
 
         // fetch mcuser
-        .dataFetcher("fetchMcuser", env -> {
-          final UUID uid = uuidFromToken(env.getArgument("uid"));
-          final FetchResult<com.tll.mcorpus.db.tables.pojos.Mcuser> fr = mcuserRepo.fetchMcuser(uid);
-          return processFetchResult(fr, env, b -> xfrmMcuser.fromBackend(b));
-        })
+        .dataFetcher("fetchMcuser", env -> processor.fetch(
+            env, 
+            env2 -> uuidFromToken(env2.getArgument("uid")), 
+            uid -> mcuserRepo.fetchMcuser(uid), 
+            b -> xfrmMcuser.fromBackend(b))
+        )
 
         // mcorpus
 
-        .dataFetcher("mrefByMid", env -> {
-          final UUID uuid = uuidFromToken(env.getArgument("mid"));
-          final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = mcorpusRepo.fetchMRefByMid(uuid);
-          return processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
-        })
+        .dataFetcher("mrefByMid", env -> processor.fetch(
+            env, 
+            env2 -> uuidFromToken(env2.getArgument("mid")), 
+            mid -> mcorpusRepo.fetchMRefByMid(mid), 
+            b -> xfrmMref.fromBackend(b))
+        )
         .dataFetcher("mrefByEmpIdAndLoc", env -> {
           final String empId = clean(env.getArgument("empId"));
           final Location location = locationFromString(env.getArgument("location"));
           final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = mcorpusRepo.fetchMRefByEmpIdAndLoc(empId, location);
-          return processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
+          return processor.processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
         })
         .dataFetcher("mrefsByEmpId", env -> {
           final String empId = clean(env.getArgument("empId"));
           final FetchResult<List<com.tll.mcorpus.db.udt.pojos.Mref>> fr = mcorpusRepo.fetchMRefsByEmpId(empId);
-          return processFetchResult(fr, env, blist -> 
+          return processor.processFetchResult(fr, env, blist -> 
             blist.stream()
               .map(b -> xfrmMref.fromBackend(b))
               .collect(Collectors.toList())
@@ -219,20 +215,15 @@ public class MCorpusGraphQL {
         .dataFetcher("memberByMid", env -> {
           final UUID mid = uuidFromToken(env.getArgument("mid"));
           final FetchResult<MemberAndMauth> fr = mcorpusRepo.fetchMember(mid);
-          return processFetchResult(fr, env, b -> xfrmMember.fromBackend(b));
+          return processor.processFetchResult(fr, env, b -> xfrmMember.fromBackend(b));
         })
-        .dataFetcher("members", env -> {
-          final MemberFilter filter = xfrmMemberFilter.fromGraphQLMap(env.getArgument("filter"));
-          final int offset = dflt(env.getArgument("offset"), 0);
-          final int limit = dflt(env.getArgument("limit"), 10);
-          final MemberSearch msearch = xfrmMemberFilter.toBackend(filter);
-          final FetchResult<List<MemberAndMauth>> fr = mcorpusRepo.memberSearch(msearch, offset, limit);
-          return processFetchResult(fr, env, blist -> 
-            blist.stream()
-              .map(b -> xfrmMember.fromBackend(b))
-              .collect(Collectors.toList())
-          );
-        })
+        .dataFetcher("members", env -> processor.fetch(
+            env, 
+            env2 -> xfrmMemberFilter.fromGraphQLMap(env2.getArgument("filter")), 
+            mfilter -> xfrmMemberFilter.toBackend(mfilter), 
+            msearch -> mcorpusRepo.memberSearch(msearch), 
+            blist -> blist.stream().map(b -> xfrmMember.fromBackend(b)).collect(Collectors.toList()))
+        )
       )
 
       // Mutation
@@ -255,44 +246,38 @@ public class MCorpusGraphQL {
         })
 
         // add mcuser
-        .dataFetcher("addMcuser", env -> {
-          return handleMutation(
+        .dataFetcher("addMcuser", env -> processor.handleMutation(
             "mcuser", env,
             map -> xfrmMcuser.fromGraphQLMapForAdd(map),
             g -> vldtnMcuser.validateForAdd(g), 
             (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
             b -> mcuserRepo.addMcuser(b),
-            bpost -> xfrmMcuser.fromBackend(bpost)
-          );
-        })
+            bpost -> xfrmMcuser.fromBackend(bpost))
+        )
 
         // update mcuser
-        .dataFetcher("updateMcuser", env -> {
-          return handleMutation(
+        .dataFetcher("updateMcuser", env -> processor.handleMutation(
             "mcuser", env,
             map -> xfrmMcuser.fromGraphQLMapForUpdate(map),
             g -> vldtnMcuser.validateForUpdate(g), 
             (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
             b -> mcuserRepo.updateMcuser(b),
-            bpost -> xfrmMcuser.fromBackend(bpost)
-          );
-        })
+            bpost -> xfrmMcuser.fromBackend(bpost))
+        )
 
         // delete mcuser
-        .dataFetcher("deleteMcuser", env -> {
-          return handleDeletion(
+        .dataFetcher("deleteMcuser", env -> processor.handleDeletion(
             env, 
             uuidFromToken(env.getArgument("uid")), 
-            b -> mcuserRepo.deleteMcuser(b) 
-          );
-        })
+            b -> mcuserRepo.deleteMcuser(b))
+        )
 
         // mcpswd
         .dataFetcher("mcpswd", env -> {
           final UUID uid = uuidFromToken(env.getArgument("uid"));
           final String pswd = clean(env.getArgument("pswd"));
           final FetchResult<Boolean> fr = mcuserRepo.setPswd(uid, pswd);
-          return processFetchResult(fr, env);
+          return processor.processFetchResult(fr, env);
         })
         
         // invalidateJwtsFor
@@ -303,7 +288,7 @@ public class MCorpusGraphQL {
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
           final FetchResult<Boolean> fr = mcuserRepo.invalidateJwtsFor(uid, requestInstant, requestOrigin);
-          return processFetchResult(fr, env);
+          return processor.processFetchResult(fr, env);
         })
         
         // mcorpus
@@ -318,7 +303,7 @@ public class MCorpusGraphQL {
           final String requestOrigin = rs.getClientOrigin();
           final FetchResult<com.tll.mcorpus.db.udt.pojos.Mref> fr = 
                   mcorpusRepo.memberLogin(username, pswd, requestInstant, requestOrigin);
-          return processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
+          return processor.processFetchResult(fr, env, b -> xfrmMref.fromBackend(b));
         })
         
         // member logout
@@ -329,75 +314,64 @@ public class MCorpusGraphQL {
           final Instant requestInstant = rs.getRequestInstant();
           final String requestOrigin = rs.getClientOrigin();
           final FetchResult<UUID> fr = mcorpusRepo.memberLogout(mid, requestInstant, requestOrigin);
-          return isNotNull(processFetchResult(fr, env));
+          return isNotNull(processor.processFetchResult(fr, env));
         })
         
         // add member
-        .dataFetcher("addMember", env -> {
-          return handleMutation(
+        .dataFetcher("addMember", env -> processor.handleMutation(
             "member", env, 
             map -> xfrmMember.fromGraphQLMapForAdd(map), 
             (Member g) -> vldtnMember.validateForAdd(g), 
             gvldtd -> xfrmMember.toBackend(gvldtd), 
             (MemberAndMauth b) -> mcorpusRepo.addMember(b), 
-            bpost -> xfrmMember.fromBackend(bpost)
-          );
-        })
+            bpost -> xfrmMember.fromBackend(bpost))
+        )
 
         // update member
-        .dataFetcher("updateMember", env -> {
-          return handleMutation(
+        .dataFetcher("updateMember", env -> processor.handleMutation(
             "member", env, 
             map -> xfrmMember.fromGraphQLMapForUpdate(map), 
             (Member g) -> vldtnMember.validateForUpdate(g), 
             gvldtd -> xfrmMember.toBackend(gvldtd), 
             (MemberAndMauth b) -> mcorpusRepo.updateMember(b), 
-            bpost -> xfrmMember.fromBackend(bpost)
-          );
-        })
+            bpost -> xfrmMember.fromBackend(bpost))
+        )
 
         // delete member
-        .dataFetcher("deleteMember", env -> {
-          return handleDeletion(
+        .dataFetcher("deleteMember", env -> processor.handleDeletion(
             env, 
             uuidFromToken(env.getArgument("mid")), 
-            b -> mcorpusRepo.deleteMember(b) 
-          );
-        })
+            b -> mcorpusRepo.deleteMember(b))
+        )
 
         // add member address
-        .dataFetcher("addMemberAddress", env -> {
-          return handleMutation(
+        .dataFetcher("addMemberAddress", env -> processor.handleMutation(
             "memberAddress", env, 
             map -> xfrmMemberAddress.fromGraphQLMapForAdd(map), 
             (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g), 
             gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
             (Maddress b) -> mcorpusRepo.addMemberAddress(b), 
-            bpost -> xfrmMemberAddress.fromBackend(bpost)
-          );
-        })
+            bpost -> xfrmMemberAddress.fromBackend(bpost))
+        )
 
         // update member address
-        .dataFetcher("updateMemberAddress", env -> {
-          return handleMutation(
+        .dataFetcher("updateMemberAddress", env -> processor.handleMutation(
             "memberAddress", env, 
             map -> xfrmMemberAddress.fromGraphQLMapForUpdate(map), 
             (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g), 
             gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
             (Maddress b) -> mcorpusRepo.updateMemberAddress(b), 
-            bpost -> xfrmMemberAddress.fromBackend(bpost)
-          );
-        })
+            bpost -> xfrmMemberAddress.fromBackend(bpost))
+        )
 
         // delete member address
-        .dataFetcher("deleteMemberAddress", env -> {
-          return handleDeletion(env, () -> {
+        .dataFetcher("deleteMemberAddress", env -> processor.handleDeletion(env, () -> {
             final UUID mid = uuidFromToken(env.getArgument("mid"));
             final Addressname addressname = MemberAddressXfrm.addressnameFromString(env.getArgument("addressName"));
             final FetchResult<Boolean> fr = mcorpusRepo.deleteMemberAddress(mid, addressname);
             return fr;
-          });
-        })
+          })
+        )
       )
 
       // mcuser types
@@ -595,7 +569,7 @@ public class MCorpusGraphQL {
           final Member m = env.getSource();
           final UUID mid = m.getMid();
           final FetchResult<List<Maddress>> fr = mcorpusRepo.fetchMemberAddresses(mid);
-          return processFetchResult(fr, env, 
+          return processor.processFetchResult(fr, env, 
             blist -> blist.stream()
               .map(b -> xfrmMemberAddress.fromBackend(b)).collect(Collectors.toList())
           );
@@ -647,217 +621,6 @@ public class MCorpusGraphQL {
       )
 
       .build();
-  }
-
-  /**
-   * Process a GraphQL mutation request.
-   * <p>
-   * Steps:
-   * <ul>
-   * <li>Transform GraphQL field map to fronend entity type
-   * <li>Validate
-   * <li>Transform to backend domain type
-   * <li>Do the persist operation
-   * <li>Transform to returned persisted entity to a frontend entity type
-   * </ul>
-   * 
-   * @param <G> the GraphQl schema type
-   * @param <B> the backend domain type
-   * 
-   * @param arg0 the [first] GraphQL mutation method input argument name 
-   *             as defined in the loaded GraphQL schema
-   * @param env the GraphQL data fetching env object
-   * @param tfrmFromGqlMap constitutes a frontend GraphQL type from the 
-   *                       GraphQL data fetching environment (param <code>env</code>).
-   * @param vldtn the optional validation function to use to validate the frontend object <code>e</code>
-   * @param tfrmToBack the frontend to backend transform function
-   * @param persistOp the backend repository persist operation function
-   * @param tfrmToFront the backend to frontend transform function
-   * @return the returned entity from the backend persist operation
-   *         which should be considered to be the post-mutation 
-   *         current state of the entity.
-   */
-  private <G, B> G handleMutation(
-    final String arg0, 
-    final DataFetchingEnvironment env, 
-    final Function<Map<String, Object>, G> tfrmFromGqlMap, 
-    final Function<G, VldtnResult> vldtn, 
-    final Function<G, B> tfrmToBack, 
-    final Function<B, FetchResult<B>> persistOp, 
-    final Function<B, G> trfmToFront
-  ) {
-    try {
-      final G g = tfrmFromGqlMap.apply(env.getArgument(arg0));
-      final VldtnResult vresult = isNull(vldtn) ? VldtnResult.VALID : vldtn.apply(g);
-      if(vresult.isValid()) {
-        final B b = tfrmToBack.apply(g);
-        final FetchResult<B> fr = persistOp.apply(b);
-        if(fr.isSuccess()) {
-          final G gpost = trfmToFront.apply(fr.get());
-          return gpost;
-        } 
-        if(fr.hasErrorMsg()) {
-          final String emsg = fr.getErrorMsg();
-          env.getExecutionContext().addError(
-            new ValidationError(
-                ValidationErrorType.InvalidSyntax, 
-                (SourceLocation) null, 
-                emsg));
-        }
-      } else {
-        vresult.getErrors().stream().forEach(cv -> {
-          env.getExecutionContext().addError(
-            new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              cv.getVldtnErrMsg()));
-        });
-      }
-    } catch(Exception e) {
-      // mutation processing error
-      log.error("Mutation processing error: {}", e.getMessage());
-    }
-    // default
-    return null;
-  }
-
-  /**
-   * Generalized backend entity deletion routine.
-   * <p>
-   * Use when the backend primary key is not a single UUID.
-   * 
-   * @param env the GraphQL data fetching environment ref
-   * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
-   * @return true when the delete op was run without error, false otherwise.
-   */
-  private <G> boolean handleDeletion(
-    final DataFetchingEnvironment env, 
-    final Supplier<FetchResult<Boolean>> deleteOp 
-  ) {
-    try {
-      final FetchResult<Boolean> fr = deleteOp.get();
-      if(fr.isSuccess()) {
-        return true;
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
-      }
-    } catch(Exception e) {
-      log.error("Deletion by op processing error: {}", e.getMessage());
-    }
-    // default
-    return false;
-  }
-
-  /**
-   * Do a backend entity deletion for the case of a single UUID (primary key) input argument.
-   * 
-   * @param env the GraphQL data fetching environment ref
-   * @param pk the entity primary key value
-   * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
-   * @return true when the delete op was run without error, false otherwise.
-   */
-  private <G, B> boolean handleDeletion(
-    final DataFetchingEnvironment env, 
-    final UUID pk,
-    final Function<UUID, FetchResult<Boolean>> deleteOp 
-  ) {
-    try {
-      final FetchResult<Boolean> fr = deleteOp.apply(pk);
-      if(fr.isSuccess()) {
-        return true;
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
-      }
-    } catch(Exception e) {
-      log.error("Deletion by UUID processing error: {}", e.getMessage());
-    }
-    // delete error
-    return false;
-  }
-
-  /**
-   * Processes a {@link FetchResult} that wraps a simple (non-entity) type.
-   * <p>
-   * Any backend errors will be translated then added to the GraphQL 
-   * fetching environment and <code>null</code> is returned.
-   * 
-   * @param <T> the simple type in the given fetch result (usually {@link Boolean})
-   * @param fr the fetch result
-   * @param env the GraphQL data fetching environment ref
-   * @return the extracted fetch result value
-   */
-  private <T> T processFetchResult(
-    final FetchResult<T> fr, 
-    final DataFetchingEnvironment env
-  ) {
-    try {
-      if(fr.isSuccess()) {
-        return fr.get();
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
-      }
-    } catch(Exception e) {
-      log.error("Fetch result processing error: {}", e.getMessage());
-    }
-    // default
-    return null;
-  }
-
-  /**
-   * Processes a {@link FetchResult} 
-   * transforming the backend result type to the frontend GraphQL type.
-   * <p>
-   * Any backend errors will be translated then added to the GraphQL 
-   * fetching environment and <code>null</code> is returned.
-   * 
-   * @param <T> the held object type in the given fetch result 
-   * @param <G> the frontend GraphQL type
-   * @param fr the fetch result
-   * @param env the GraphQL data fetching environment ref
-   * @return the transformed fetch result value when no errors are present
-   *         or null when errors are present
-   */
-  private <T, G> G processFetchResult(
-    final FetchResult<T> fr, 
-    final DataFetchingEnvironment env, 
-    final Function<T, G> transform
-  ) {
-    try {
-      if(fr.isSuccess()) {
-        final G g = transform.apply(fr.get());
-        return g;
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
-      }
-    } catch(Exception e) {
-      log.error("Fetch result (transforming) processing error: {}", e.getMessage());
-    }
-    // default
-    return null;
   }
 
 }
