@@ -3,7 +3,6 @@ package com.tll.gql;
 import static com.tll.core.Util.isNull;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -105,7 +104,7 @@ public class GraphQLRequestProcessor {
   /**
    * Generalized backend entity deletion routine.
    * <p>
-   * Use when the backend primary key is not a single UUID.
+   * Use when the backend primary key is not a simple type.
    * 
    * @param <G> the GraphQl entity type
    * 
@@ -138,8 +137,9 @@ public class GraphQLRequestProcessor {
   }
 
   /**
-   * Do a backend entity deletion for the case of a single UUID (primary key) input argument.
+   * Do a backend entity deletion for the case of a simple primary key input argument.
    * 
+   * @param <PK> the primary key type
    * @param <G> the GraphQl entity type
    * @param <D> the backend domain entity type
    * 
@@ -148,10 +148,10 @@ public class GraphQLRequestProcessor {
    * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
    * @return true when the delete op was run without error, false otherwise.
    */
-  public <G, B> boolean handleDeletion(
+  public <PK, G, B> boolean handleDeletion(
     final DataFetchingEnvironment env, 
-    final UUID pk,
-    final Function<UUID, FetchResult<Boolean>> deleteOp 
+    final PK pk,
+    final Function<PK, FetchResult<Boolean>> deleteOp 
   ) {
     try {
       final FetchResult<Boolean> fr = deleteOp.apply(pk);
@@ -167,7 +167,7 @@ public class GraphQLRequestProcessor {
               emsg));
       }
     } catch(Exception e) {
-      log.error("Deletion by UUID processing error: {}", e.getMessage());
+      log.error("Deletion by simple PK processing error: {}", e.getMessage());
     }
     // delete error
     return false;
