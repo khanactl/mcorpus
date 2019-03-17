@@ -2,7 +2,6 @@ package com.tll.gql;
 
 import static com.tll.core.Util.isNull;
 
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -20,6 +19,16 @@ import graphql.validation.ValidationErrorType;
 /**
  * Processes GraphQL requests by CRUD operation type.
  * <p>
+ * All public methods herein are expted to handle any exceptions that may occur.
+ * The calling context shall NOT have to handle exceptions!
+ * <p>
+ * By routing all GraphQL requests through this processor, 
+ * we now have the ability to consolidate the way these requests are handled
+ * including consistent error handling in a project-agnostic manner.
+ * <p>
+ * Also, this processing construct affords us a way to separate mutating 
+ * operations from fetch-only operations in a straight-forward way.
+ * <p>
  * This class depends on the graphql-java library:
  * https://github.com/graphql-java/graphql-java.
  * 
@@ -30,26 +39,40 @@ public class GraphQLRequestProcessor {
   private final Logger log = LoggerFactory.getLogger(GraphQLRequestProcessor.class);
 
   /**
+   * Maps validation errors back to the calling GraphQL context.
+   * 
+   * @param  env the calling GraphQL context
+   * @param vresult the validation result to map back to the GraphQL context
+   */
+  static void processInvalid(final DataFetchingEnvironment env, final VldtnResult vresult) {
+    vresult.getErrors().stream().forEach(cv -> {
+      env.getExecutionContext().addError(
+        new ValidationError(
+          ValidationErrorType.InvalidSyntax, 
+          (SourceLocation) null, 
+          cv.getVldtnErrMsg()));
+    });
+  }
+
+  /**
+   * Maps backend repo fetch errors back to the calling GraphQL context .
+   * 
+   * @param env the calling GraphQL context
+   * @param emsg the fetch error message
+   */
+  static void processFetchError(final DataFetchingEnvironment env, final String emsg) {
+    env.getExecutionContext().addError(new GraphQLDataFetchError(emsg));
+  }
+
+  /**
    * Process a GraphQL mutation request.
-   * <p>
-   * Steps:
-   * <ul>
-   * <li>Transform GraphQL field map to fronend entity type
-   * <li>Validate
-   * <li>Transform to backend domain type
-   * <li>Do the persist operation
-   * <li>Transform the returned persisted entity to a frontend entity type
-   * </ul>
    * 
    * @param <G> the GraphQl entity type
    * @param <D> the backend domain entity type
    * 
-   * @param arg0 the [first] GraphQL mutation method input argument name 
-   *             as defined in the loaded GraphQL schema
    * @param env the GraphQL data fetching env object
-   * @param tfrmFromGqlMap constitutes a frontend GraphQL type from the 
-   *                       GraphQL data fetching environment (param <code>env</code>).
-   * @param vldtn the optional validation function to use to validate the frontend object <code>e</code>
+   * @param gextractor obtains the <G> entity from the GraphQL env
+   * @param vldtn the optional validation function to use to validate the frontend g entity
    * @param tfrmToBack the frontend to backend transform function
    * @param persistOp the backend repository persist operation function
    * @param tfrmToFront the backend to frontend transform function
@@ -58,40 +81,26 @@ public class GraphQLRequestProcessor {
    *         current state of the entity.
    */
   public <G, D> G handleMutation(
-    final String arg0, 
     final DataFetchingEnvironment env, 
-    final Function<Map<String, Object>, G> tfrmFromGqlMap, 
+    final Supplier<G> gextractor, 
     final Function<G, VldtnResult> vldtn, 
     final Function<G, D> tfrmToBack, 
     final Function<D, FetchResult<D>> persistOp, 
     final Function<D, G> trfmToFront
   ) {
     try {
-      final G g = tfrmFromGqlMap.apply(env.getArgument(arg0));
+      final G g = gextractor.get();
       final VldtnResult vresult = isNull(vldtn) ? VldtnResult.VALID : vldtn.apply(g);
       if(vresult.isValid()) {
         final D d = tfrmToBack.apply(g);
         final FetchResult<D> fr = persistOp.apply(d);
-        if(fr.isSuccess()) {
-          final G gpost = trfmToFront.apply(fr.get());
-          return gpost;
-        } 
+        final G gpost = isNull(fr.get()) ? null : trfmToFront.apply(fr.get());
         if(fr.hasErrorMsg()) {
-          final String emsg = fr.getErrorMsg();
-          env.getExecutionContext().addError(
-            new ValidationError(
-                ValidationErrorType.InvalidSyntax, 
-                (SourceLocation) null, 
-                emsg));
+          processFetchError(env, fr.getErrorMsg());
         }
+        return gpost;
       } else {
-        vresult.getErrors().stream().forEach(cv -> {
-          env.getExecutionContext().addError(
-            new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              cv.getVldtnErrMsg()));
-        });
+        processInvalid(env, vresult);
       }
     } catch(Exception e) {
       // mutation processing error
@@ -102,69 +111,124 @@ public class GraphQLRequestProcessor {
   }
 
   /**
-   * Generalized backend entity deletion routine.
-   * <p>
-   * Use when the backend primary key is not a simple type.
+   * Process a GraphQL mutation request.
    * 
    * @param <G> the GraphQl entity type
+   * @param <D> the backend domain entity type
+   * @param <GR> the frontend gql entity type to return
    * 
-   * @param env the GraphQL data fetching environment ref
-   * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
-   * @return true when the delete op was run without error, false otherwise.
+   * @param env the GraphQL data fetching env object
+   * @param gextractor obtains the <G> entity from the GraphQL env
+   * @param persistOp the backend repository persist operation function
+   * @param tfrmToFront the backend to frontend transform function
+   * @return the returned entity from the backend persist operation
+   *         which should be considered to be the post-mutation 
+   *         current state of the entity.
    */
-  public <G> boolean handleDeletion(
+  public <G, D, GR> GR handleMutation(
     final DataFetchingEnvironment env, 
-    final Supplier<FetchResult<Boolean>> deleteOp 
+    final Supplier<G> gextractor, 
+    final Function<G, FetchResult<D>> persistOp, 
+    final Function<D, GR> trfmToFront
   ) {
     try {
-      final FetchResult<Boolean> fr = deleteOp.get();
-      if(fr.isSuccess()) {
-        return true;
-      } 
+      final G g = gextractor.get();
+      final FetchResult<D> fr = persistOp.apply(g);
+      final GR gpost = isNull(fr.get()) ? null : trfmToFront.apply(fr.get());
       if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
+        processFetchError(env, fr.getErrorMsg());
       }
+      return gpost;
     } catch(Exception e) {
-      log.error("Deletion by op processing error: {}", e.getMessage());
+      // mutation processing error
+      log.error("Mutation processing error: {}", e.getMessage());
+      return null;
     }
-    // default
-    return false;
   }
 
   /**
-   * Do a backend entity deletion for the case of a simple primary key input argument.
+   * Process a GraphQL mutation request where the persist operation return 
+   * type is not a {@link FetchResult}.
    * 
-   * @param <PK> the primary key type
    * @param <G> the GraphQl entity type
    * @param <D> the backend domain entity type
+   * @param <GR> the frontend gql entity type to return
+   * 
+   * @param env the GraphQL data fetching env object
+   * @param gextractor obtains the <G> entity from the GraphQL env
+   * @param persistOp the backend repository persist operation function
+   * @param tfrmToFront the backend to frontend transform function
+   * @return the returned entity from the backend persist operation
+   *         which should be considered to be the post-mutation 
+   *         current state of the entity.
+   */
+  public <G, D, GR> GR handleSimpleMutation(
+    final DataFetchingEnvironment env, 
+    final Supplier<G> gextractor, 
+    final Function<G, D> persistOp, 
+    final Function<D, GR> trfmToFront
+  ) {
+    try {
+      final G g = gextractor.get();
+      final D d = persistOp.apply(g);
+      final GR gpost = isNull(d) ? null : trfmToFront.apply(d);
+      return gpost;
+    } catch(Exception e) {
+      // mutation processing error
+      log.error("Mutation [simple] processing error: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Process a GraphQL mutation request whose persist operation returns a simple boolean.
+   * 
+   * @param env
+   * @param persisOp the persist op that returns {@link Boolean}.
+   * @return true upon success, false otherwise.
+   */
+  public boolean handleSimpleMutation(
+    final DataFetchingEnvironment env, 
+    final Supplier<Boolean> persistOp 
+  ) {
+    try {
+      final Boolean rval = persistOp.get();
+      return isNull(rval) ? false : rval.booleanValue();
+    } catch(Exception e) {
+      // mutation processing error
+      log.error("Mutation by supplier processing error: {}", e.getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Do a backend entity deletion for the case of a signle key 
+   * input argument and a boolean return value.
+   * 
+   * @param <KG> the frontend key type
+   * @param <KD> the backend domain key type
    * 
    * @param env the GraphQL data fetching environment ref
-   * @param pk the entity primary key value
+   * @param extractor function to extract the frontend key type
+   * @param xfrmToBack transforms frontend key type to backend key type
    * @param deleteOp the {@link FetchResult} provider that performs the backend deletion
    * @return true when the delete op was run without error, false otherwise.
    */
-  public <PK, G, B> boolean handleDeletion(
+  public <KG, KD> boolean handleDeletion(
     final DataFetchingEnvironment env, 
-    final PK pk,
-    final Function<PK, FetchResult<Boolean>> deleteOp 
+    final Supplier<KG> extractor, 
+    final Function<KG, KD> xfrmToBack, 
+    final Function<KD, FetchResult<Boolean>> deleteOp 
   ) {
     try {
-      final FetchResult<Boolean> fr = deleteOp.apply(pk);
+      final KG key = extractor.get();
+      final KD keyb = xfrmToBack.apply(key);
+      final FetchResult<Boolean> fr = deleteOp.apply(keyb);
       if(fr.isSuccess()) {
-        return true;
+        return fr.get().booleanValue();
       } 
       if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
+        processFetchError(env, fr.getErrorMsg());
       }
     } catch(Exception e) {
       log.error("Deletion by simple PK processing error: {}", e.getMessage());
@@ -178,116 +242,96 @@ public class GraphQLRequestProcessor {
    * 
    * @param env the GraphQL data fetching environment ref
    * @param argExtractor function that extracts the sole input argument 
-   *        from the GraphQL <code>env</code>
+   *                     from the GraphQL <code>env</code>
    * @param fetchOp the fetch operation function
    * @param toFrontXfrm the backend to frontend transform function
+   * @return the transformed backend result type
    */
   public <A, G, D> G fetch(
     final DataFetchingEnvironment env, 
-    final Function<DataFetchingEnvironment, A> argExtractor, 
+    final Supplier<A> argExtractor, 
     final Function<A, FetchResult<D>> fetchOp, 
     final Function<D, G> toFrontXfrm 
   ) {
-    final A key = argExtractor.apply(env);
-    final FetchResult<D> fr = fetchOp.apply(key);
-    return processFetchResult(fr, env, toFrontXfrm);
+    try {
+      final A key = argExtractor.get();
+      final FetchResult<D> fr = fetchOp.apply(key);
+      if(fr.hasErrorMsg()) {
+        processFetchError(env, fr.getErrorMsg());
+      }
+      if(fr.isSuccess()) {
+        final G g = toFrontXfrm.apply(fr.get());
+        return g;
+      } 
+    } catch(Exception e) {
+      log.error("Fetch processing error: {}", e.getMessage());
+    }
+    // default
+    return null;
   }
 
   /**
-   * Do a fetch op with a single object/entity input argument.
+   * Do a fetch op for a single object/entity input argument 
+   * that validates the input before persisting.
    * 
    * @param env the GraphQL data fetching environment ref
    * @param argExtractor function that extracts the sole input argument 
-   *        from the GraphQL <code>env</code>
+   *                     from the GraphQL <code>env</code>
+   * @param argVldtn optional input arg validator
    * @param argToBackXfrm transform input argument from frontend type to backend type
    * @param fetchOp the fetch operation function
    * @param toFrontXfrm the backend to frontend transform function
+   * @return the transformed backend result type
    */
   public <AG, AD, G, D> G fetch(
     final DataFetchingEnvironment env, 
-    final Function<DataFetchingEnvironment, AG> argExtractor, 
+    final Supplier<AG> argExtractor, 
+    final Function<AG, VldtnResult> argVldtn, 
     final Function<AG, AD> argToBackXfrm, 
     final Function<AD, FetchResult<D>> fetchOp, 
     final Function<D, G> toFrontXfrm 
   ) {
-    final AG gin = argExtractor.apply(env);
-    final AD din = argToBackXfrm.apply(gin);
-    final FetchResult<D> fr = fetchOp.apply(din);
-    return processFetchResult(fr, env, toFrontXfrm);
-  }
-
-  /**
-   * Processes a {@link FetchResult} that wraps a simple (non-entity) type.
-   * <p>
-   * Any backend errors will be translated then added to the GraphQL 
-   * fetching environment and <code>null</code> is returned.
-   * 
-   * @param <T> the simple type in the given fetch result (usually {@link Boolean})
-   * @param fr the fetch result
-   * @param env the GraphQL data fetching environment ref
-   * @return the extracted fetch result value
-   */
-  public <T> T processFetchResult(
-    final FetchResult<T> fr, 
-    final DataFetchingEnvironment env
-  ) {
     try {
-      if(fr.isSuccess()) {
-        return fr.get();
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
+      final AG gin = argExtractor.get();
+      final VldtnResult vresult = isNull(argVldtn) ? VldtnResult.VALID : argVldtn.apply(gin);
+      if(vresult.isValid()) {
+        final AD din = argToBackXfrm.apply(gin);
+        final FetchResult<D> fr = fetchOp.apply(din);
+        if(fr.hasErrorMsg()) {
+          processFetchError(env, fr.getErrorMsg());
+        }
+        if(fr.isSuccess()) {
+          final G g = toFrontXfrm.apply(fr.get());
+          return g;
+        } 
+      } else {
+        processInvalid(env, vresult);
       }
     } catch(Exception e) {
-      log.error("Fetch result processing error: {}", e.getMessage());
+      log.error("Fetch processing error: {}", e.getMessage());
     }
     // default
     return null;
   }
 
   /**
-   * Processes a {@link FetchResult} 
-   * transforming the backend result type to the frontend GraphQL type.
-   * <p>
-   * Any backend errors will be translated then added to the GraphQL 
-   * fetching environment and <code>null</code> is returned.
+   * Process a simple GraphQL op.
    * 
-   * @param <G> the GraphQl entity type
-   * @param <D> the backend domain type
+   * @param <G> the GraphQL type
    * 
-   * @param fr the fetch result
-   * @param env the GraphQL data fetching environment ref
-   * @return the transformed fetch result value when no errors are present
-   *         or null when errors are present
+   * @param env the GraphQL context
+   * @param op provides the G type return value
+   * @return the target frontend GraphQL type
    */
-  public <G, D> G processFetchResult(
-    final FetchResult<D> fr, 
+  public <G> G process(
     final DataFetchingEnvironment env, 
-    final Function<D, G> transform
+    final Supplier<G> op 
   ) {
     try {
-      if(fr.isSuccess()) {
-        final G g = transform.apply(fr.get());
-        return g;
-      } 
-      if(fr.hasErrorMsg()) {
-        final String emsg = fr.getErrorMsg();
-        env.getExecutionContext().addError(
-          new ValidationError(
-              ValidationErrorType.InvalidSyntax, 
-              (SourceLocation) null, 
-              emsg));
-      }
+      return op.get();
     } catch(Exception e) {
-      log.error("Fetch result (transforming) processing error: {}", e.getMessage());
+      log.error("Process error: {}", e.getMessage());
+      return null;
     }
-    // default
-    return null;
   }
-
 }

@@ -6,14 +6,14 @@ import static com.tll.core.Util.isNullOrEmpty;
 import java.util.Map;
 
 /**
- * Base class for all {@link IEntityTransformer} implmentations.
+ * Base class for all {@link IGTransformer} implmentations.
  * <p>
  * Nullness and emptiness of input arguments are generally handled 
  * in this base class to make implementations easier.
  * 
  * @author jpk
  */
-public abstract class BaseTransformer<G, D> implements IEntityTransformer<G, D> {
+public abstract class BaseTransformer<G, D> implements IGTransformer<G, D> {
 
   public final G fromGraphQLMap(final Map<String, Object> gqlMap) {
     return isNullOrEmpty(gqlMap) ? null : fromNotEmptyGraphQLMap(gqlMap);

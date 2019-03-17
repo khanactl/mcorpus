@@ -78,9 +78,10 @@ public class RequestUtil {
    * @param maxAge the cookie max age in seconds
    */
   public static void addJwtCookieToResponse(final Context ctx, final String jwt, final long maxAge) {
+    final String cookieServerName = getServerDomainName(ctx);
     final boolean secure = ctx.get(MCorpusServerConfig.class).cookieSecure;
     final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);
-    jwtCookieRef.setDomain(getServerDomainName(ctx));
+    jwtCookieRef.setDomain(cookieServerName);
     jwtCookieRef.setMaxAge(maxAge);
     jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
     jwtCookieRef.setSecure(secure);

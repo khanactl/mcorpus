@@ -200,6 +200,7 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
     mcuserLogout.setJwtId(jwtStatus.jwtId());
     mcuserLogout.setRequestTimestamp(new Timestamp(requestSnapshot.getRequestInstant().toEpochMilli()));
     mcuserLogout.setRequestOrigin(requestSnapshot.getClientOrigin());
+
     FetchResult<Boolean> fetchResult = ctx.get(MCorpusUserRepo.class).logout(mcuserLogout);
     if(fetchResult.isSuccess()) {
       // logout success - nix all mcorpus cookies clientside

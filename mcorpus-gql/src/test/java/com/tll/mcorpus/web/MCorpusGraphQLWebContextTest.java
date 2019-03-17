@@ -1,6 +1,5 @@
 package com.tll.mcorpus.web;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -17,78 +16,6 @@ public class MCorpusGraphQLWebContextTest {
 
   static MCorpusGraphQLWebContext create(String query) {
     return new MCorpusGraphQLWebContext(query, null, null, null, null);
-  }
-
-  @Test
-  public void testOperationName() throws Exception {
-    MCorpusGraphQLWebContext ctx;
-
-    ctx = create("query { mrefByMid");
-    assertEquals("", ctx.getOperationName());
-  
-    ctx = create("query opname { mrefByMid");
-    assertEquals("opname", ctx.getOperationName());
-
-    ctx = create("  query opname { mrefByMid");
-    assertEquals("opname", ctx.getOperationName());
-    
-    ctx = create("opname { mrefByMid");
-    assertEquals("", ctx.getOperationName());
-    
-    ctx = create("  opname { mrefByMid");
-    assertEquals("", ctx.getOperationName());
-  }
-
-  @Test
-  public void testQueryMethodName() throws Exception {
-    MCorpusGraphQLWebContext ctx;
-    
-    ctx = create("{ mrefByMid");
-    assertEquals("mrefByMid", ctx.getQueryMethodName());
-  
-    ctx = create("query { mrefByMid");
-    assertEquals("mrefByMid", ctx.getQueryMethodName());
-  
-    ctx = create("  query  { mrefByMid");
-    assertEquals("mrefByMid", ctx.getQueryMethodName());
-  
-    ctx = create("  query  { mrefByMid(mid: ) {}");
-    assertEquals("mrefByMid", ctx.getQueryMethodName());
-  
-    ctx = create("  query  { ");
-    assertEquals("", ctx.getQueryMethodName());
-  
-    ctx = create(" ");
-    assertEquals("", ctx.getQueryMethodName());
-  }
-
-  @Test
-  public void testIsIntrospectionQuery() {
-    MCorpusGraphQLWebContext ctx;
-
-    ctx = create("{ mrefByMid");
-    assertFalse(ctx.isIntrospectionQuery());
-  
-    ctx = create("{ mclogin");
-    assertFalse(ctx.isIntrospectionQuery());
-    
-    ctx = create("login { mclogin");
-    assertFalse(ctx.isIntrospectionQuery());
-    
-    ctx = create("mutation login { mclogin");
-    assertFalse(ctx.isIntrospectionQuery());
-
-    ctx = create("query IntrospectionQuery {");
-    assertTrue(ctx.isIntrospectionQuery());
-
-    ctx = create("IntrospectionQuery {");
-    assertTrue(ctx.isIntrospectionQuery());
-    
-    ctx = create(" IntrospectionQuery {");
-    assertTrue(ctx.isIntrospectionQuery());
-
-    ctx = create("query IntrospectionQuery {    __schema { ");
-    assertTrue(ctx.isIntrospectionQuery());
   }
 
   @Test

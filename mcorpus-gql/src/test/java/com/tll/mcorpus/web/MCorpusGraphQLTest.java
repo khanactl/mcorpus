@@ -38,20 +38,6 @@ public class MCorpusGraphQLTest {
     return new MCorpusGraphQL(new MCorpusUserRepo(ds_mcweb()), new MCorpusRepo(ds_mcweb()));
   }
 
-  /**
-   * Issue a GraphQL query with a context of VALID jwt status under role MCORPUS.
-   */
-  static ExecutionResult query(final String query) {
-    return query(query, JWTStatus.VALID, "MCORPUS");
-  }
-  
-  /**
-   * Issue a GraphQL query with with a context of VALID jwt status under a given role.
-   */
-  static ExecutionResult query(final String query, String role) {
-	  return query(query, JWTStatus.VALID, role);
-  }
-	  
   static final ObjectMapper mapper = new ObjectMapper();
 
   static final TypeReference<Map<String, Object>> strObjMapTypeRef = new TypeReference<Map<String, Object>>() { };
@@ -111,6 +97,20 @@ public class MCorpusGraphQLTest {
     );
   }
 
+  /**
+   * Issue a GraphQL query with a context of VALID jwt status under role MCORPUS.
+   */
+  static ExecutionResult query(final String query) {
+    return query(query, JWTStatus.VALID, "MCORPUS");
+  }
+  
+  /**
+   * Issue a GraphQL query with with a context of VALID jwt status under a given role.
+   */
+  static ExecutionResult query(final String query, String role) {
+	  return query(query, JWTStatus.VALID, role);
+  }
+	  
   /**
    * Issue a GraphQL query with with a context of the given jwt status and role.
    */

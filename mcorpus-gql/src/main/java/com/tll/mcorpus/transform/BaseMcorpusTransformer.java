@@ -4,10 +4,9 @@ import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.UUID;
 
-import com.tll.gmodel.IGEntity;
 import com.tll.transform.BaseTransformer;
 
-public abstract class BaseMcorpusTransformer<G extends IGEntity<G, ?>, D> extends BaseTransformer<G, D> {
+public abstract class BaseMcorpusTransformer<G, D> extends BaseTransformer<G, D> {
 
   /**
    * Converts a {@link UUID} to a URL-safe base64-encoded string 24 characters long.
