@@ -240,6 +240,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <groups>com.tll.UnitTest</groups>
+        </configuration>
       </plugin>
 
       <plugin>
