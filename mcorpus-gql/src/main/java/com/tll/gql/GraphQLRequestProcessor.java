@@ -55,13 +55,23 @@ public class GraphQLRequestProcessor {
   }
 
   /**
-   * Maps backend repo fetch errors back to the calling GraphQL context .
+   * Maps backend repo fetch errors back to the calling GraphQL context.
    * 
    * @param env the calling GraphQL context
    * @param emsg the fetch error message
    */
   static void processFetchError(final DataFetchingEnvironment env, final String emsg) {
     env.getExecutionContext().addError(new GraphQLDataFetchError(emsg));
+  }
+
+  /**
+   * Maps an exception that occurred during processing to the calling GraphQL context.
+   * 
+   * @param env the calling GraphQL context
+   * @param exception the processing exception
+   */
+  static void processException(final DataFetchingEnvironment env, final Throwable exception) {
+    env.getExecutionContext().addError(new GraphQLDataFetchError(exception));
   }
 
   /**
@@ -104,7 +114,8 @@ public class GraphQLRequestProcessor {
       }
     } catch(Exception e) {
       // mutation processing error
-      log.error("Mutation processing error: {}", e.getMessage());
+      log.error("Mutation (extract, validate, transform persist, transform) processing error: {}", e.getMessage());
+      processException(env, e);
     }
     // default
     return null;
@@ -141,7 +152,8 @@ public class GraphQLRequestProcessor {
       return gpost;
     } catch(Exception e) {
       // mutation processing error
-      log.error("Mutation processing error: {}", e.getMessage());
+      log.error("Mutation (extract, persist, transform) processing error: {}", e.getMessage());
+      processException(env, e);
       return null;
     }
   }
@@ -175,7 +187,8 @@ public class GraphQLRequestProcessor {
       return gpost;
     } catch(Exception e) {
       // mutation processing error
-      log.error("Mutation [simple] processing error: {}", e.getMessage());
+      log.error("Mutation (extract, persist, transform) processing error: {}", e.getMessage());
+      processException(env, e);
       return null;
     }
   }
@@ -196,7 +209,8 @@ public class GraphQLRequestProcessor {
       return isNull(rval) ? false : rval.booleanValue();
     } catch(Exception e) {
       // mutation processing error
-      log.error("Mutation by supplier processing error: {}", e.getMessage());
+      log.error("Mutation (persist op only) processing error: {}", e.getMessage());
+      processException(env, e);
       return false;
     }
   }
@@ -231,9 +245,10 @@ public class GraphQLRequestProcessor {
         processFetchError(env, fr.getErrorMsg());
       }
     } catch(Exception e) {
-      log.error("Deletion by simple PK processing error: {}", e.getMessage());
+      log.error("Deletion by key (extract, transform, delete) processing error: {}", e.getMessage());
+      processException(env, e);
     }
-    // delete error
+    // default
     return false;
   }
 
@@ -264,7 +279,8 @@ public class GraphQLRequestProcessor {
         return g;
       } 
     } catch(Exception e) {
-      log.error("Fetch processing error: {}", e.getMessage());
+      log.error("Fetch (extract, fetch, transform) processing error: {}", e.getMessage());
+      processException(env, e);
     }
     // default
     return null;
@@ -308,7 +324,8 @@ public class GraphQLRequestProcessor {
         processInvalid(env, vresult);
       }
     } catch(Exception e) {
-      log.error("Fetch processing error: {}", e.getMessage());
+      log.error("Fetch (extract, validate, transform, fetch, transform) processing error: {}", e.getMessage());
+      processException(env, e);
     }
     // default
     return null;
@@ -330,7 +347,8 @@ public class GraphQLRequestProcessor {
     try {
       return op.get();
     } catch(Exception e) {
-      log.error("Process error: {}", e.getMessage());
+      log.error("Process by supplier error: {}", e.getMessage());
+      processException(env, e);
       return null;
     }
   }
