@@ -19,8 +19,8 @@ import graphql.validation.ValidationErrorType;
 /**
  * Processes GraphQL requests by CRUD operation type.
  * <p>
- * All public methods herein are expted to handle any exceptions that may occur.
- * The calling context shall NOT have to handle exceptions!
+ * All public methods herein are expected to handle any exceptions that may occur.
+ * The calling context shall NOT have to handle exceptions.
  * <p>
  * By routing all GraphQL requests through this processor, 
  * we now have the ability to consolidate the way these requests are handled
@@ -238,12 +238,12 @@ public class GraphQLRequestProcessor {
       final KG key = extractor.get();
       final KD keyb = xfrmToBack.apply(key);
       final FetchResult<Boolean> fr = deleteOp.apply(keyb);
-      if(fr.isSuccess()) {
-        return fr.get().booleanValue();
-      } 
       if(fr.hasErrorMsg()) {
         processFetchError(env, fr.getErrorMsg());
       }
+      if(fr.isSuccess()) {
+        return fr.get().booleanValue();
+      } 
     } catch(Exception e) {
       log.error("Deletion by key (extract, transform, delete) processing error: {}", e.getMessage());
       processException(env, e);
