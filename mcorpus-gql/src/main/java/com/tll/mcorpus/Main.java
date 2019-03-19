@@ -40,49 +40,49 @@ public class Main {
   
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
-     .serverConfig(config -> config
-       .baseDir(BaseDir.find())
-       .args(args)
-       .sysProps()
-       .env()
-       .env("MCORPUS_")
-       .require("", MCorpusServerConfig.class)
-       // .require("/metrics", DropwizardMetricsConfig.class)
-     )
-     .registry(Guice.registry(bindings -> bindings
-       .module(HikariModule.class, hikariConfig -> {
-         final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
-         hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
-         hikariConfig.addDataSourceProperty("URL", config.dbUrl);
-       })
-       .module(MCorpusRepoModule.class)
-       .module(MCorpusWebModule.class)
-     ))
-     .handlers(chain -> chain
-       .all(RequestLogger.ncsa()) // log all incoming requests
+      .serverConfig(config -> config
+        .baseDir(BaseDir.find())
+        .args(args)
+        .sysProps()
+        .env()
+        .env("MCORPUS_")
+        .require("", MCorpusServerConfig.class)
+        // .require("/metrics", DropwizardMetricsConfig.class)
+      )
+      .registry(Guice.registry(bindings -> bindings
+        .module(HikariModule.class, hikariConfig -> {
+          final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
+          hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
+          hikariConfig.addDataSourceProperty("URL", config.dbUrl);
+        })
+        .module(MCorpusRepoModule.class)
+        .module(MCorpusWebModule.class)
+      ))
+      .handlers(chain -> chain
+        .all(RequestLogger.ncsa()) // log all incoming requests
 
-       // redirect to /index if coming in under /
-       .path(redirect(301, "index"))
+        // redirect to /index if coming in under /
+        .path(redirect(301, "index"))
 
-       // graphql/
-       .prefix("graphql", chainsub -> chainsub
+        // graphql/
+        .prefix("graphql", chainsub -> chainsub
          
-         // the mcorpus GraphQL api (post only)
-         .post(JWTStatusHandler.class)
-         .post(CsrfGuardByCookieAndHeaderHandler.class)
-         .post(GraphQLHandler.class)
+          // the mcorpus GraphQL api (post only)
+          .post(JWTStatusHandler.class)
+          .post(CsrfGuardByCookieAndHeaderHandler.class)
+          .post(GraphQLHandler.class)
          
-         // the GraphiQL developer interface (get only)
-         .get("index", GraphQLIndexHandler.class)
+          // the GraphiQL developer interface (get only)
+          .get("index", GraphQLIndexHandler.class)
          
-         .files(f -> f.dir("templates/graphql"))
-       )
+          .files(f -> f.dir("templates/graphql"))
+        )
 
-       // mcorpus graphql api html landing page
-       .get("index", ctx -> { ctx.render(ctx.file("templates/index.html")); })
+        // mcorpus graphql api html landing page
+        .get("index", ctx -> { ctx.render(ctx.file("templates/index.html")); })
 
-       .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")))
-     )
+        .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")))
+      )
     );
   }
 }
