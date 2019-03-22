@@ -2,8 +2,9 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 
+import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
-import com.tll.jwt.JWTStatusInstance;
+import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ import ratpack.handling.Handler;
 
 /**
  * Determine the JWT status for incoming http requests and cache a
- * {@link JWTStatusInstance} for downstrem handlers to access.
+ * {@link JWTHttpRequestStatus} for downstrem handlers to access.
  * <p>
  * <b>IMPT</b>: This handler will query the backend db to verify the held claims
  * of a JWT if one is present thus the reason for the asynchronous
@@ -33,9 +34,12 @@ public class JWTStatusHandler implements Handler {
   
   @Override
   public void handle(Context ctx) throws Exception {
-    Blocking.get(() -> { 
-      return ctx.get(JWT.class).jwtStatus(getOrCreateRequestSnapshot(ctx)); 
-    }).then(jwtStatus -> {
+    Blocking.get(() -> 
+      ctx.get(JWT.class).jwtHttpRequestStatus(
+        getOrCreateRequestSnapshot(ctx), 
+        ctx.get(IJwtBackendHandler.class)
+      )
+    ).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);
       log.info("JWT status cached in incoming request: {}", jwtStatus);
       ctx.next();

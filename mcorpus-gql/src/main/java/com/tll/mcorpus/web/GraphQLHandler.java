@@ -8,7 +8,9 @@ import static ratpack.jackson.Jackson.json;
 import java.util.Map;
 
 import com.google.common.reflect.TypeToken;
-import com.tll.jwt.JWTStatusInstance;
+import com.tll.jwt.IJwtBackendHandler;
+import com.tll.jwt.JWT;
+import com.tll.jwt.JWTHttpRequestStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +47,22 @@ public class GraphQLHandler implements Handler {
   public void handle(Context ctx) throws Exception {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
       
-      final JWTStatusInstance jwtStatusInst = ctx.getRequest().get(JWTStatusInstance.class);
+      final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
       
       // grab the http request info
       final String query = ((String) qmap.get("query"));
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
       
-      final MCorpusGraphQLWebContext gqlWebCtx = new MCorpusGraphQLWebContext(query, vmap, getOrCreateRequestSnapshot(ctx), jwtStatusInst, ctx);
+      final MCorpusGraphQLWebContext gqlWebCtx = new MCorpusGraphQLWebContext(
+        query, 
+        vmap, 
+        getOrCreateRequestSnapshot(ctx), 
+        jwtRequestStatus, 
+        ctx.get(JWT.class), 
+        ctx.get(IJwtBackendHandler.class), 
+        new MCorpusJwtHttpResponseProvider(ctx)
+      );
       log.info("{}", gqlWebCtx);
       
       // validate graphql query request
@@ -62,7 +72,7 @@ public class GraphQLHandler implements Handler {
         return;
       }
       
-      switch(jwtStatusInst.status()) {
+      switch(jwtRequestStatus.status()) {
       case NOT_PRESENT_IN_REQUEST:
       case EXPIRED:
         // only mclogin and introspection queries are allowed when no valid JWT present

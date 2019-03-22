@@ -15,7 +15,7 @@ import org.junit.experimental.categories.Category;
 public class MCorpusGraphQLWebContextTest {
 
   static MCorpusGraphQLWebContext create(String query) {
-    return new MCorpusGraphQLWebContext(query, null, null, null, null);
+    return new MCorpusGraphQLWebContext(query, null, null, null, null, null, null);
   }
 
   @Test

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.tll.jwt.JWTStatusInstance;
+import com.tll.jwt.JWTHttpRequestStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class GraphQLWebContext {
   protected final String queryCleaned;
   protected final Map<String, Object> vmap;
   protected final RequestSnapshot requestSnapshot;
-  protected final JWTStatusInstance jwtStatus;
+  protected final JWTHttpRequestStatus jwtStatus;
 
   /**
    * Constructor.
@@ -55,7 +55,7 @@ public class GraphQLWebContext {
    * @param requestSnapshot snapshot of the sourcing http request
    * @param jwtStatus       the status of the JWT of the sourcing http request
    */
-  public GraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot, JWTStatusInstance jwtStatus) {
+  public GraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtStatus) {
     super();
     this.query = query;
     this.queryCleaned = clean(query).replaceAll("\\n", "").replaceAll("\n", "");
@@ -134,7 +134,7 @@ public class GraphQLWebContext {
   /**
    * @return the JWT status instance of the sourcing http request.
    */
-  public JWTStatusInstance getJwtStatus() { return jwtStatus; }
+  public JWTHttpRequestStatus getJwtStatus() { return jwtStatus; }
 
   @Override
   public String toString() {

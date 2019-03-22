@@ -6,29 +6,29 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Immutable struct to house the JWT status and the associated id 
- * of the bound user for use in the web layer.
+ * Immutable struct to house the JWT status and the associated id of the 
+ * bound user extracted from JWT possibly held in the incoming http reqeest.
  * 
  * @author jpk
  */
-public class JWTStatusInstance {
+public class JWTHttpRequestStatus {
   
   /**
-   * Factory method to generate a {@link JWTStatusInstance} from only a {@link JWTStatus}.
+   * Factory method to generate a {@link JWTHttpRequestStatus} from only a {@link JWTStatus}.
    * 
-   * @return Newly created {@link JWTStatusInstance}
+   * @return Newly created {@link JWTHttpRequestStatus}
    */
-  public static JWTStatusInstance create(JWTStatus status) { 
-    return new JWTStatusInstance(status, null, null, null, -1, -1); 
+  public static JWTHttpRequestStatus create(JWTStatus status) { 
+    return new JWTHttpRequestStatus(status, null, null, null, -1, -1); 
   }
   
   /**
-   * Factory method to generate a fully populated {@link JWTStatusInstance}.
+   * Factory method to generate a fully populated {@link JWTHttpRequestStatus}.
    * 
-   * @return Newly created {@link JWTStatusInstance}
+   * @return Newly created {@link JWTHttpRequestStatus}
    */
-  public static JWTStatusInstance create(JWTStatus status, UUID jwtId, UUID userId, String roles, long issued, long expires) { 
-    return new JWTStatusInstance(status, jwtId, userId, roles, issued, expires); 
+  public static JWTHttpRequestStatus create(JWTStatus status, UUID jwtId, UUID userId, String roles, long issued, long expires) { 
+    return new JWTHttpRequestStatus(status, jwtId, userId, roles, issued, expires); 
   }
   
   /**
@@ -56,23 +56,27 @@ public class JWTStatusInstance {
      */
     BAD_CLAIMS,
     /**
-     * The JWT ID was not found in the backend system.
+     * The JWT signature and claims are valid but the JWT ID was not found in the 
+     * backend system.
      */
     NOT_PRESENT_BACKEND,
     /**
-     * JWT has valid signature but has expired.
+     * JWT has valid signature but is expired.
      */
     EXPIRED,
     /**
-     * Either the jwt id or associated user are logically blocked by way of backend check.
+     * The JWT signature and claims are valid but either the jwt id or 
+     * associated user are logically blocked by way of backend check.
      */
     BLOCKED,
     /**
-     * An error occurred checking for JWT validity on the backend.
+     * The JWT signature and claims are valid but an error occurred checking 
+     * for JWT validity on the backend.
      */
     ERROR,
     /**
-     * JWT is valid.  You may proceed forward.
+     * The JWT signature and claims are valid and valid by way of backend check.
+     * You may proceed forward.
      */
     VALID;
     
@@ -115,7 +119,7 @@ public class JWTStatusInstance {
    * @param issued the issue date as a long of the associated JWT in the received request
    * @param expires the expiration date as a long of the JWT in the received request
    */
-  JWTStatusInstance(JWTStatus status, UUID jwtId, UUID userId, String roles, long issued, long expires) {
+  JWTHttpRequestStatus(JWTStatus status, UUID jwtId, UUID userId, String roles, long issued, long expires) {
     super();
     this.status = status;
     this.userId = userId;
@@ -166,4 +170,4 @@ public class JWTStatusInstance {
   @Override
   public String toString() { return String.format("status: %s", status); }
 
-} // JWTStatusInstance class
+}

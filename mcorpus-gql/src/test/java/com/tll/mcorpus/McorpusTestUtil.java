@@ -1,6 +1,14 @@
 package com.tll.mcorpus;
 
+import java.time.Duration;
+
 import javax.sql.DataSource;
+
+import com.tll.jwt.IJwtBackendHandler;
+import com.tll.jwt.IJwtHttpResponseProvider;
+import com.tll.jwt.JWT;
+import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.mcorpus.web.MCorpusJwtBackendHandler;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -84,5 +92,40 @@ public class McorpusTestUtil {
     return dslMcwebtest;
   }
 
+  /**
+   * @return Newly created {@link JWT} instance suitable for testing.
+   */
+  public static JWT jwt() {
+    byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
+    long jwtTtlInMillis = Duration.ofDays(2).toMillis();
+    return new JWT(jwtTtlInMillis, jwtSharedSecret, testServerPublicAddress);
+  }
+
+  /**
+   * @return Newly created {@link IJwtBackendHandler} instance suitable for testing.
+   */
+  public static IJwtBackendHandler testJwtBackendHandler() {
+    return new MCorpusJwtBackendHandler(new MCorpusUserRepo(ds_mcweb()));
+  }
+
+  /**
+   * @return Newly created {@link IJwtHttpResponseProvider} instance 
+   *         whose implementation methods are no-ops (they do nothing).
+   */
+  public static IJwtHttpResponseProvider testJwtResponseProvider() {
+    return new IJwtHttpResponseProvider(){
+    
+      @Override
+      public void setJwtCookie(String jwt, long jwtCookieTtlInSeconds) {
+        // testing no-op
+      }
+    
+      @Override
+      public void expireAllCookies() {
+        // testing no-op
+      }
+    };
+  }
+  
   private McorpusTestUtil() {}
 }

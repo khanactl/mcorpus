@@ -6,11 +6,11 @@ import java.util.Map;
  * Contract for instantiating and transforming frontend GraphQL objects 
  * to and from backend domain objects.
  * <p>
- * The <G> type may either be an entity type but may also be an input argument 
+ * The <G> type may either be an entity type or an input argument 
  * (non-entity) type.
  * <p>
- * IMPT: <code>null</code> input shoulld produce <code>null</code> output 
- * for these transform methods generally speaking.
+ * Generally speaking, <code>null</code> input should produce <code>null</code> 
+ * output for these transform methods.
  * 
  * @param <G> the frontend GraphQL type
  * @param <D> the backend domain type

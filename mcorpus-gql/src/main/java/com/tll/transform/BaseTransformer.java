@@ -6,7 +6,7 @@ import static com.tll.core.Util.isNullOrEmpty;
 import java.util.Map;
 
 /**
- * Base class for all {@link IGTransformer} implmentations.
+ * Base class for all {@link IGTransformer} implementations.
  * <p>
  * Nullness and emptiness of input arguments are generally handled 
  * in this base class to make implementations easier.

@@ -1,21 +1,18 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
-import static com.tll.mcorpus.McorpusTestUtil.testServerPublicAddress;
+import static com.tll.mcorpus.McorpusTestUtil.jwt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
 
 import com.tll.UnitTest;
 import com.tll.jwt.JWT;
-import com.tll.jwt.JWTStatusInstance;
-import com.tll.jwt.JWTStatusInstance.JWTStatus;
-import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.jwt.JWTHttpRequestStatus;
+import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 import com.tll.web.RequestSnapshot;
 
 import org.junit.Test;
@@ -32,14 +29,6 @@ import org.slf4j.LoggerFactory;
 public class MCorpusJWTTest {
   
   private static final Logger log = LoggerFactory.getLogger(MCorpusJWTTest.class);
-  
-  private static JWT jwt() {
-    MCorpusUserRepo repo = new MCorpusUserRepo(ds_mcweb());
-    MCorpusJwtBackendStatusProvider provider = new MCorpusJwtBackendStatusProvider(repo);
-    byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
-    long jwtTtlInMillis = Duration.ofDays(2).toMillis();
-    return new JWT(jwtTtlInMillis, jwtSharedSecret, provider, testServerPublicAddress);
-  }
   
   @Test
   public void testJwtSalt() throws Exception {
@@ -93,7 +82,7 @@ public class MCorpusJWTTest {
       "rsth");
     
     // get jwt status
-    JWTStatusInstance jwtStatus = jwti.jwtStatus(rsPost);
+    JWTHttpRequestStatus jwtStatus = jwti.jwtHttpRequestStatus(rsPost, null);
     assertNotNull(jwtStatus);
     assertEquals(JWTStatus.NOT_PRESENT_BACKEND, jwtStatus.status());
   }

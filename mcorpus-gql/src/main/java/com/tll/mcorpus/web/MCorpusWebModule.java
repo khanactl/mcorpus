@@ -3,7 +3,8 @@ package com.tll.mcorpus.web;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.tll.jwt.CachingBackendJwtStatusProvider;
+import com.tll.jwt.CachingJwtBackendHandler;
+import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
 import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.repo.MCorpusRepo;
@@ -43,16 +44,23 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Provides
   @Singleton
-  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
-    final MCorpusJwtBackendStatusProvider mcorpusJwtBSP = new MCorpusJwtBackendStatusProvider(mcuserRepo);
+  IJwtBackendHandler jwtBackendHandler(MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
+    // the mcorpus server config determines whether we use a caching jwt handler or not
+    return config.jwtStatusCacheTimeoutInMinutes <= 0 ? 
+      new MCorpusJwtBackendHandler(mcuserRepo) : 
+      new CachingJwtBackendHandler(
+        new MCorpusJwtBackendHandler(mcuserRepo), 
+        config.jwtStatusCacheTimeoutInMinutes, 
+        config.jwtStatusCacheMaxSize)
+    ;
+  }
+
+  @Provides
+  @Singleton
+  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config) {
     return new JWT(
       config.jwtTtlInMillis, 
       JWT.deserialize(config.jwtSalt), 
-      config.jwtStatusCacheTimeoutInMinutes <= 0 ? mcorpusJwtBSP : 
-        new CachingBackendJwtStatusProvider(
-          mcorpusJwtBSP, 
-          config.jwtStatusCacheTimeoutInMinutes, 
-          config.jwtStatusCacheMaxSize), 
       serverConfig.getPublicAddress().toString()
     );
   }

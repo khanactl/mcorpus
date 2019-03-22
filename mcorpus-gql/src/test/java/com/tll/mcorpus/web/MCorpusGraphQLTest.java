@@ -2,9 +2,13 @@ package com.tll.mcorpus.web;
 
 import static com.tll.TestUtil.cpr;
 import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
+import static com.tll.mcorpus.McorpusTestUtil.jwt;
+import static com.tll.mcorpus.McorpusTestUtil.testJwtBackendHandler;
+import static com.tll.mcorpus.McorpusTestUtil.testJwtResponseProvider;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
 
 import java.time.Instant;
 import java.util.Map;
@@ -13,11 +17,10 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tll.UnitTest;
-import com.tll.jwt.JWTStatusInstance;
-import com.tll.jwt.JWTStatusInstance.JWTStatus;
+import com.tll.jwt.JWTHttpRequestStatus;
+import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.web.GraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
 import org.junit.Test;
@@ -85,9 +88,9 @@ public class MCorpusGraphQLTest {
     );
   }
 
-  static JWTStatusInstance testJwtStatus(JWTStatus jwtStatus, String roles) {
+  static JWTHttpRequestStatus testJwtStatus(JWTStatus jwtStatus, String roles) {
     final long lnow = System.currentTimeMillis();
-    return JWTStatusInstance.create(
+    return JWTHttpRequestStatus.create(
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),
@@ -97,33 +100,35 @@ public class MCorpusGraphQLTest {
     );
   }
 
-  /**
-   * Issue a GraphQL query with a context of VALID jwt status under role MCORPUS.
-   */
-  static ExecutionResult query(final String query) {
-    return query(query, JWTStatus.VALID, "MCORPUS");
+  static MCorpusGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
+    return new MCorpusGraphQLWebContext(
+      query, 
+      null, 
+      requestSnapshot, 
+      jwtRequestStatus, 
+      jwt(), 
+      testJwtBackendHandler(), 
+      testJwtResponseProvider()
+    );
   }
-  
+	  
   /**
    * Issue a GraphQL query with with a context of VALID jwt status under a given role.
    */
   static ExecutionResult query(final String query, String role) {
 	  return query(query, JWTStatus.VALID, role);
   }
-	  
+
   /**
    * Issue a GraphQL query with with a context of the given jwt status and role.
    */
   static ExecutionResult query(final String query, JWTStatus jwtStatus, String roles) {
     final GraphQLSchema schema = mcgql().getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final RequestSnapshot requestSnapshot = testRequestSnapshot();
-    final JWTStatusInstance jsi = testJwtStatus(jwtStatus, roles);
-    final GraphQLWebContext context = new GraphQLWebContext(query, null, requestSnapshot, jsi);
     final ExecutionInput executionInput = 
       ExecutionInput.newExecutionInput()
         .query(query)
-        .context(context)
+        .context(gqlWebContext(query, testRequestSnapshot(), testJwtStatus(jwtStatus, roles)))
         .build();
     final ExecutionResult result = graphQL.execute(executionInput);
     return result;
@@ -204,7 +209,7 @@ public class MCorpusGraphQLTest {
     final String query = (String) qmap.get("query");
     assertNotNull(query);
 
-    final ExecutionResult result = query(query);
+    final ExecutionResult result = query(query, "MCORPUS");
     assertNotNull(result);
     assertTrue(result.getErrors().isEmpty());
 
@@ -214,8 +219,8 @@ public class MCorpusGraphQLTest {
   }
 
   @Test
-  public void testAuthorization_success() throws Exception {
-    final String gql = "{\"query\":\"{\\n  mrefByMid(mid: \\\"001ea236-12be-410a-9586-1bc6c2b2c89c\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}";
+  public void testAuthorizationDirective() throws Exception {
+    final String gql = "{\"query\":\"mutation {\\n  mlogin(username: \\\"testo\\\", pswd: \\\"failo\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}";
 
     final Map<String, Object> qmap = jsonStringToMap(gql);
     log.info("qmap: {}", qmap);
@@ -223,39 +228,19 @@ public class MCorpusGraphQLTest {
     final String query = (String) qmap.get("query");
     assertNotNull(query);
 
-    final ExecutionResult result = query(query, "PUBLIC");
-    assertNotNull(result);
-    assertTrue(result.getErrors().isEmpty());
+    // authorization success case
+    final ExecutionResult resultExpectAuthorized = query(query, "MEMBER");
+    assertNotNull(resultExpectAuthorized);
+    assertEquals(1, resultExpectAuthorized.getErrors().size());
+    assertTrue(resultExpectAuthorized.getErrors().get(0).getMessage().contains("Member login failed."));
 
-    final Map<?, ?> rmap = result.getData();
-    log.info("result map:\n{}", rmap);
-    assertNotNull(rmap);
-    
-    // verify we have data returned (authorized)
-    final Object output = rmap.get("mrefByMid");
-    assertNotNull(output);
-  }
-
-  @Test
-  public void testAuthorization_fail() throws Exception {
-    final String initialQuery = "{\"query\":\"{\\n  memberByMid(mid: \\\"bLYU_FNrT6O3T917UPSAbw==\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}";
-
-    final Map<String, Object> qmap = jsonStringToMap(initialQuery);
-    log.info("qmap: {}", qmap);
-
-    final String query = (String) qmap.get("query");
-    assertNotNull(query);
-
-    final ExecutionResult result = query(query, "PUBLIC");
-    assertNotNull(result);
-    assertTrue(result.getErrors().isEmpty());
-
-    final Map<?, ?> rmap = result.getData();
-    log.info("result map:\n{}", rmap);
-    assertNotNull(rmap);
-
-    // verify we have no data returned (un-authorized)
-    final Object output = rmap.get("memberByMid");
-    assertNull(output);
+    // authorization fail case
+    final ExecutionResult resultExpectUnauthorized = query(query, null);
+    assertNotNull(resultExpectUnauthorized);
+    assertTrue(resultExpectUnauthorized.getErrors().isEmpty());
+    Map<String, Object> rmap = resultExpectUnauthorized.getData();
+    assertEquals(1, rmap.size());
+    assertTrue(rmap.containsKey("mlogin"));
+    assertNull(rmap.get("mlogin")); // i.e. auth fail
   }
 }
