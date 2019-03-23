@@ -79,7 +79,7 @@ public class Main {
         )
 
         // mcorpus graphql api html landing page
-        .get("index", ctx -> { ctx.render(ctx.file("templates/index.html")); })
+        .get("index", ctx -> ctx.render(ctx.file("templates/index.html")))
 
         .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")))
       )
