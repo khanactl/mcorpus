@@ -348,7 +348,7 @@ public class MCorpusGraphQL {
             mclogout.getRequestInstant(), 
             mclogout.getRequestOrigin() 
           ), 
-          mid -> mid)
+          mid -> mid != null)
         )
         
         // add member
