@@ -618,7 +618,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    nameLast: {\n      value: \&quot;*${stoken}*\&quot;\n      operation: LIKE\n    }\n  }, offset: 0, limit: 30) {\n    mid\n    dob\n    status\n    personalEmail\n    addresses {\n      modified\n      addressName\n      street1\n      attn\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
+                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    offset: 0\n limit: 30\n nameLast: {\n      value: \&quot;*${stoken}*\&quot;\n    }\n  }) {\n    mid\n    dob\n    status\n    personalEmail\n    addresses {\n      modified\n      addressName\n      street1\n      attn\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
                 </collectionProp>
@@ -655,7 +655,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    displayName: {\n      value: \&quot;*${stoken}*\&quot;\n      operation: LIKE\n     ignoreCase: true\n    }\n    orderByList: {\n      value: \&quot;displayName\&quot;\n      direction: DESCENDING\n    }\n  }, offset: 0, limit:20) {\n    mid\n    created\n    modified\n    displayName\n    addresses {\n      addressName\n      modified\n      attn\n      street1\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}&#xd;
+                    <stringProp name="Argument.value">{&quot;query&quot;:&quot;{\n  members(filter: {\n    offset: 0\n limit: 20\n displayName: {\n      value: \&quot;*${stoken}*\&quot;\n     ignoreCase: true\n    }\n    orderBy: \&quot;displayName desc\&quot;\n  }) {\n    mid\n    created\n    modified\n    displayName\n    addresses {\n      addressName\n      modified\n      attn\n      street1\n      city\n      state\n      postalCode\n      country\n    }\n  }\n}&quot;,&quot;variables&quot;:null,&quot;operationName&quot;:null}&#xd;
 </stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
