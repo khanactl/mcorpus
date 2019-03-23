@@ -651,7 +651,7 @@ public class MCorpusRepo implements Closeable {
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsgs.add("A data access exception occurred addming member address.");
+      emsgs.add("A data access exception occurred adding member address.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
