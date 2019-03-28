@@ -16,6 +16,7 @@ mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
 aws-env*
 aws-mcorpus-db-psql.sh
 aws-mcorpus-dev.sh
+aws-ec2-run.sh
 
 # cert files
 *.pem
