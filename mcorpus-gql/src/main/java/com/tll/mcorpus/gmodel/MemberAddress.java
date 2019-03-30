@@ -9,14 +9,14 @@ import java.util.UUID;
 import com.tll.gmodel.BaseEntity;
 import com.tll.gmodel.IKey;
 
-public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAndAddressName> {
+public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAndAddressNameKey> {
 
-  public static class MidAndAddressName implements IKey {
+  public static class MidAndAddressNameKey implements IKey {
 
     private final UUID mid;
     private final String addressName;
 
-    public MidAndAddressName(final UUID mid, final String addressName) {
+    public MidAndAddressNameKey(final UUID mid, final String addressName) {
       this.mid = mid;
       this.addressName = addressName;
     }
@@ -32,7 +32,7 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
     public String refToken() { return String.format("Maddress[mid: %s, AddressName: %s]", mid, addressName); }
   }
 
-  private final MidAndAddressName pk;
+  private final MidAndAddressNameKey pk;
   private final UUID        mid;
   private final String      addressName;
   private final Date        modified;
@@ -45,7 +45,7 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
   private final String      country;
 
   public MemberAddress(UUID mid, String addressName, Date modified, String attn, String street1, String street2, String city, String state, String postalCode, String country) {
-    this.pk = new MidAndAddressName(mid, addressName);
+    this.pk = new MidAndAddressNameKey(mid, addressName);
     this.mid = mid;
     this.addressName = addressName;
     this.modified = copy(modified);
@@ -59,7 +59,7 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
   }
 
   @Override
-  public MemberAddress.MidAndAddressName getPk() { return pk; }
+  public MemberAddress.MidAndAddressNameKey getPk() { return pk; }
   
   public UUID getMid() {
     return mid;

@@ -99,7 +99,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
     public static Role[] fromCommaDelimitedString(final String s) {
       if(isNullOrEmpty(s)) return new Role[0];
       String[] sarr = s.split(",");
-      if(sarr == null || sarr.length < 1) return new Role[0];
+      if(sarr.length < 1) return new Role[0];
       List<Role> rlist = new ArrayList<Role>(sarr.length);
       for(int i = 0; i < sarr.length; i++) {
         Role role = fromString(clean(sarr[i]));

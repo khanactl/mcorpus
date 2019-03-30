@@ -57,7 +57,7 @@ public class Member extends BaseEntity<Member, IKey> {
     this.nameLast = nameLast;
     this.displayName = displayName;
     this.status = status;
-    this.dob = dob;
+    this.dob = copy(dob);
     this.ssn = ssn;
     this.personalEmail = personalEmail;
     this.workEmail = workEmail;
@@ -112,7 +112,7 @@ public class Member extends BaseEntity<Member, IKey> {
   }
 
   public Date getDob() {
-    return this.dob;
+    return copy(this.dob);
   }
 
   public String getSsn() {

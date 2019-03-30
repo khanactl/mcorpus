@@ -3,7 +3,7 @@ package com.tll.jwt;
 import java.util.UUID;
 
 /**
- * Defines the attributes for a JWT user for use in the web layer.
+ * Defines the attributes of a JWT user for use in the web layer.
  * 
  * @author jpk
  */

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 /**
  * Immutable struct to house the JWT status and the associated id of the 
- * bound user extracted from JWT possibly held in the incoming http reqeest.
+ * bound user extracted from a JWT possibly held in a target http reqeest object.
  * 
  * @author jpk
  */
