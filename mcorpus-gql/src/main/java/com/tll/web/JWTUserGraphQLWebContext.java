@@ -1,8 +1,9 @@
-package com.tll.mcorpus.web;
+package com.tll.web;
 
 import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.not;
 
 import java.util.Arrays;
@@ -12,26 +13,28 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.tll.jwt.IJwtBackendHandler;
-import com.tll.jwt.IJwtHttpResponseProvider;
+import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.IJwtUser;
+import com.tll.jwt.IJwtUserStatus;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
-import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
 import com.tll.repo.FetchResult;
 import com.tll.web.GraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
 /**
- * MCorpus specific extension of {@link GraphQLWebContext} to facilitate 
+ * JWT specific extension of {@link GraphQLWebContext} to facilitate 
  * JWT user login, logout and status methods.
  * 
  * @author jpk
  */
-public class MCorpusGraphQLWebContext extends GraphQLWebContext {
+public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
+  private final JWTHttpRequestStatus jwtStatus;
   private final JWT jwtbiz;
   private final IJwtBackendHandler jwtBackend;
-  private final IJwtHttpResponseProvider jwtResponse;
+  private final IJwtHttpResponseAction jwtResponse;
+  private final String jwtUserLoginQueryMethodName;
 
   /**
    * Constructor.
@@ -43,76 +46,97 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
    * @param jwtbiz          the JWT manager
    * @param jwtBackend      the JWT backend handler
    * @param jwtResponse     the JWT http response access object
+   * @param jwtUserLoginQueryMethodName the GraphQL schema method name purposed for JWT user logins
    */
-  public MCorpusGraphQLWebContext(
+  public JWTUserGraphQLWebContext(
     String query, 
     Map<String, Object> vmap, 
     RequestSnapshot requestSnapshot, 
     JWTHttpRequestStatus jwtStatus, 
     JWT jwtbiz, 
     IJwtBackendHandler jwtBackend, 
-    IJwtHttpResponseProvider jwtResponse) {
-    super(query, vmap, requestSnapshot, jwtStatus);
+    IJwtHttpResponseAction jwtResponse, 
+    String jwtUserLoginQueryMethodName
+  ) {
+    super(query, vmap, requestSnapshot);
+    this.jwtStatus = jwtStatus;
     this.jwtbiz = jwtbiz;
     this.jwtBackend = jwtBackend;
     this.jwtResponse = jwtResponse;
+    this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
   }
   
-  /**
-   * Is this a valid GraphQL query ready to be handed off to further processing?
-   * 
-   * @return true/false
-   */
   @Override
   public boolean isValid() { 
     return super.isValid() && 
-    isNotNull(jwtbiz) && 
-    isNotNull(jwtResponse)
+      isNotNull(jwtStatus) && 
+      isNotNull(jwtbiz) && 
+      isNotNull(jwtBackend) && 
+      isNotNull(jwtResponse) && 
+      isNotNullOrEmpty(jwtUserLoginQueryMethodName)
     ;
   }
   
   /**
-   * @return true when the GraphQL query is for mcuser login, false otherwise.
+   * @return the JWT status instance of the sourcing http request.
    */
-  public boolean isMcuserLoginQuery() {
-    return "mclogin".equals(getQueryMethodName());
+  public JWTHttpRequestStatus getJwtStatus() { return jwtStatus; }
+
+  /**
+   * @return true when the GraphQL query is for JWT user login, false otherwise.
+   */
+  public boolean isJwtUserLoginQuery() {
+    return jwtUserLoginQueryMethodName.equals(getQueryMethodName());
   }
 
   /**
-   * @return true when this GraphQL query is either an mcuser login mutation query
+   * @return true when this GraphQL query is either a JWT user login mutation query
    *         or an introspection query, false otherwise.
    */
-  public boolean isMcuserLoginOrIntrospectionQuery() { 
-    return isMcuserLoginQuery() || isIntrospectionQuery();
+  public boolean isJwtUserLoginOrIntrospectionQuery() { 
+    return isJwtUserLoginQuery() || isIntrospectionQuery();
   }
 
   /**
-   * Get the mcuser login status.
+   * Get the JWT user login status.
    * <p>
    * Blocking - Db call is issued.
    * 
-   * @return Newly created {@link Mcstatus} when an mcuser presents a valid and
+   * @return Newly created {@link IJwtUserStatus} when the http client presents a valid and
    *         non-expired JWT -OR-<br>
    *         null when no JWT is present or is not valid.
    */
-  public Mcstatus mcstatus() {
+  public IJwtUserStatus jwtUserStatus() {
     final JWTHttpRequestStatus jwtRequestStatus = getJwtStatus();
     final UUID jwtId = jwtRequestStatus.jwtId();
     if(jwtRequestStatus.status().isValid()) {
-      final UUID mcuserId = jwtRequestStatus.userId();
-      FetchResult<Integer> fetchResult = jwtBackend.getNumActiveJwtLogins(mcuserId);
+      final UUID jwtUserId = jwtRequestStatus.userId();
+      FetchResult<Integer> fetchResult = jwtBackend.getNumActiveJwtLogins(jwtUserId);
       if(fetchResult.isSuccess()) {
         // success
         final Date since = jwtRequestStatus.issued();
         final Date expires = jwtRequestStatus.expires();
         final int numActiveJWTs = fetchResult.get().intValue();
-        return new Mcstatus(mcuserId, since, expires, numActiveJWTs);
+        return new IJwtUserStatus(){
+        
+          @Override
+          public UUID getJwtUserId() { return jwtUserId; }
+        
+          @Override
+          public Date getExpires() { return expires; }
+          
+          @Override
+          public Date getSince() { return since; }
+        
+          @Override
+          public int getNumActiveJWTs() { return numActiveJWTs; }
+        };
       } else {
         final String emsg = fetchResult.getErrorMsg();
-        log.error("Invalid mcuser login status fetch result for JWT of id: {}: {}", jwtId, emsg);
+        log.error("Invalid JWT user login status fetch result for JWT of id: {}: {}", jwtId, emsg);
       }
     } else {
-      log.warn("Invalid JWT ({}) presented for mcuser status.", jwtId);
+      log.warn("Invalid JWT ({}) presented for JWT user login status.", jwtId);
     }
 
     // default
@@ -120,15 +144,15 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
   }
 
   /**
-   * Log an mcuser in and issue a JWT back to client when the login was successful.
+   * Log a JWT user in and issue a JWT back to client when the login op is successful.
    * <p>
    * Blocking - Db call is issued.
    * 
-   * @param username the posted mcuser username
-   * @param pswd the posted mcuser passwrod
-   * @return true when the mcuser was successfully logged in, false otherwise
+   * @param username the posted JWT user username
+   * @param pswd the posted JWT user passwrod
+   * @return true when the JWT user was successfully logged in, false otherwise
    */
-  public boolean mcuserLogin(final String username, final String pswd) {
+  public boolean jwtUserLogin(final String username, final String pswd) {
     
     // verify the JWT status is either not present or expired
     if(not(jwtStatus.isJWTStatusExpiredOrNotPresent())) {
@@ -146,7 +170,7 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
     final long loginExpiration = requestInstantMillis + jwtbiz.jwtCookieTtlInMillis();
 
     // call db login
-    log.debug("Authenticating mcuser '{}'..", username);
+    log.debug("Authenticating JWT user '{}'..", username);
     final FetchResult<IJwtUser> loginResult = jwtBackend.jwtBackendLogin(
       username, 
       pswd, 
@@ -156,22 +180,22 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
       loginExpiration
     );
     if(not(loginResult.isSuccess())) {
-      log.error("Mcuser login failed: {}", loginResult.getErrorMsg());
+      log.error("JWT user login failed: {}", loginResult.getErrorMsg());
       return false;
     }
-    log.info("Mcuser '{}' authenticated.", username);
+    log.info("JWT user '{}' authenticated.", username);
     // at this point, we're authenticated
     
-    log.debug("Generating JWT for mcuser '{}'..", username);
-    final IJwtUser mcuser = loginResult.get();
+    log.debug("Generating JWT for user '{}'..", username);
+    final IJwtUser jwtUser = loginResult.get();
     try {
       // create the JWT - and set as a cookie to go back to user
-      // the user is now expected to provide this JWT for subsequent mcorpus api requests
+      // the user is now expected to provide this JWT for subsequent GraphQL api requests
       final String jwt = jwtbiz.jwtGenerate(
           pendingJwtID,
-          mcuser.getJwtUserId(), 
-          isNullOrEmpty(mcuser.getJwtUserRoles()) ? "" : 
-            Arrays.stream(mcuser.getJwtUserRoles())
+          jwtUser.getJwtUserId(), 
+          isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" : 
+            Arrays.stream(jwtUser.getJwtUserRoles())
             .collect(Collectors.joining(",")),
           requestSnapshot
       );
@@ -179,11 +203,11 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
       // jwt cookie
       jwtResponse.setJwtCookie(jwt, jwtbiz.jwtCookieTtlInSeconds());
       
-      log.info("Mcuser {} logged in.  JWT {} generated.", mcuser.getJwtUserId(), pendingJwtID);
+      log.info("JWT user '{}' logged in.  JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
       return true;
     }
     catch(Exception e) {
-      log.error("Mcuser {} login error: {}", mcuser.getJwtUserId(), e.getMessage());
+      log.error("JWT user '{}' login error: {}", jwtUser.getJwtUserId(), e.getMessage());
     }
     
     // default
@@ -191,14 +215,14 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
   }
 
   /**
-   * Log an mcuser out.
+   * Log a JWT user out.
    * <p>
    * Blocking - Db call is issued.
    * 
-   * @return true when the mcuser bound to the presenting JWT in incoming request
+   * @return true when the user bound to the presenting JWT in incoming request
    *         is successfully logged out, false otherwise.
    */
-  public boolean mcuserLogout() {
+  public boolean jwtUserLogout() {
     final FetchResult<Boolean> fetchResult = jwtBackend.jwtBackendLogout(
       jwtStatus.userId(), 
       jwtStatus.jwtId(), 
@@ -206,14 +230,14 @@ public class MCorpusGraphQLWebContext extends GraphQLWebContext {
       requestSnapshot.getRequestInstant().toEpochMilli()
     );
     if(fetchResult.isSuccess()) {
-      // logout success - nix all mcorpus cookies clientside
+      // logout success - nix all cookies clientside
       jwtResponse.expireAllCookies();
-      log.info("mcuser '{}' logged out.", jwtStatus.userId());
+      log.info("JWT user '{}' logged out.", jwtStatus.userId());
       return true;
     }
 
     // default - logout failed
-    log.error("mcuser '{}' logout failed.", jwtStatus.userId());
+    log.error("JWT user '{}' logout failed.", jwtStatus.userId());
     return false;
   }
 }

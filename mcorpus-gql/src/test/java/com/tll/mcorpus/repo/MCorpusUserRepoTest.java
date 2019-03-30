@@ -26,8 +26,6 @@ import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.routines.InsertMcuser;
-import com.tll.mcorpus.db.routines.McuserLogin;
-import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
 import com.tll.repo.FetchResult;
@@ -71,8 +69,12 @@ public class MCorpusUserRepoTest {
 
   static final String TEST_MCUSER_USERNAME = "testermcuser";
 
+  static final String TEST_MCUSER_USERNAME_UNKNOWN = "unknown";
+
   static final String TEST_MCUSER_PSWD = "pswd33*7yuI";
 
+  static final String TEST_MCUSER_BAD_PSWD = "bunko";
+  
   static final McuserStatus TEST_MCUSER_STATUS = McuserStatus.ACTIVE;
   
   static final McuserRole[] TEST_MCUSER_ROLES = new McuserRole[] { McuserRole.MCORPUS, McuserRole.MPII };
@@ -197,33 +199,29 @@ public class MCorpusUserRepoTest {
     );
   }
 
-  /**
-   * @return newly created {@link McuserLogin} instance for an mcuser for testing purposes.
-   */
-  public static McuserLogin testMcuserLoginInput() {
+  static FetchResult<Mcuser> mcuserLogin(MCorpusUserRepo repo, String username, String pswd) {
     final long lnow = System.currentTimeMillis();
     final long expiry = lnow + Duration.ofMinutes(30).toMillis();
-    McuserLogin mcuserLogin = new McuserLogin();
-    mcuserLogin.setMcuserUsername(TEST_MCUSER_USERNAME);
-    mcuserLogin.setMcuserPassword(TEST_MCUSER_PSWD);
-    mcuserLogin.setInJwtId(UUID.randomUUID());
-    mcuserLogin.setInRequestTimestamp(new Timestamp(lnow));
-    mcuserLogin.setInRequestOrigin(testRequestOrigin);
-    mcuserLogin.setInLoginExpiration(new Timestamp(expiry));
-    return mcuserLogin;
+    FetchResult<Mcuser> fr = repo.login(
+      username, 
+      pswd, 
+      UUID.randomUUID(), 
+      expiry, 
+      lnow, 
+      testRequestOrigin
+    );
+    return fr;
   }
 
-  /**
-   * @return newly created {@link McuserLogout} instance for an mcuser for testing purposes.
-   */
-  public static McuserLogout testMcuserLogoutInput() {
+  static FetchResult<Boolean> mcuserLogout(MCorpusUserRepo repo, UUID mcuserId, UUID jwtId) {
     final long lnow = System.currentTimeMillis();
-    McuserLogout mcuserLogout = new McuserLogout();
-    mcuserLogout.setJwtId((UUID)null);
-    mcuserLogout.setMcuserUid((UUID)null);
-    mcuserLogout.setRequestTimestamp(new Timestamp(lnow));
-    mcuserLogout.setRequestOrigin(testRequestOrigin);
-    return mcuserLogout;
+    FetchResult<Boolean> fr = repo.logout(
+      mcuserId, 
+      jwtId, 
+      lnow, 
+      testRequestOrigin
+    );
+    return fr;
   }
 
   /**
@@ -236,11 +234,9 @@ public class MCorpusUserRepoTest {
     try {
       final Mcuser mar = insertTestMcuser();
       uid = mar.getUid();
-      
       repo = mcuserRepo();
-
-      McuserLogin loginInput = testMcuserLoginInput();
-      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      
+      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_PSWD);
       log.info("mcorpus LOGIN WITH AUTH SUCCESS TEST result: {}", loginResult);
       
       Mcuser mcuser = loginResult.get();
@@ -279,9 +275,7 @@ public class MCorpusUserRepoTest {
     MCorpusUserRepo repo = null;
     try {
       repo = mcuserRepo();
-      McuserLogin loginInput = testMcuserLoginInput();
-      loginInput.setMcuserPassword("bunko");
-      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_BAD_PSWD);
       log.info("mcorpus LOGIN WITH BAD PASSWORD TEST result: {}", loginResult);
       
       assertNotNull(loginResult);
@@ -311,9 +305,7 @@ public class MCorpusUserRepoTest {
     MCorpusUserRepo repo = null;
     try {
       repo = mcuserRepo();
-      McuserLogin loginInput = testMcuserLoginInput();
-      loginInput.setMcuserUsername("unknown");
-      FetchResult<Mcuser> loginResult = repo.login(loginInput);
+      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME_UNKNOWN, TEST_MCUSER_BAD_PSWD);
       log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
       
       assertNotNull(loginResult);
@@ -347,13 +339,7 @@ public class MCorpusUserRepoTest {
       McuserAudit mcuserAudit = addTestMcuserAuditRecord(uid);
       
       repo = mcuserRepo();
-
-      McuserLogout logoutInput = testMcuserLogoutInput();
-      logoutInput.setJwtId(mcuserAudit.getJwtId());
-      logoutInput.setMcuserUid(uid);
-      logoutInput.setRequestOrigin(testRequestOrigin);
-      logoutInput.setRequestTimestamp(new Timestamp(Instant.now().toEpochMilli()));
-      FetchResult<Boolean> logoutResult = repo.logout(logoutInput);
+      FetchResult<Boolean> logoutResult = mcuserLogout(repo, uid, mcuserAudit.getJwtId());
       log.info("mcorpus LOGOUT WITH VALID LOGIN TEST result: {}", logoutResult);
       
       assertNotNull(logoutResult);
@@ -389,15 +375,9 @@ public class MCorpusUserRepoTest {
       uid = mar.getUid();
       
       repo = mcuserRepo();
-
       // create a logout input instance where the jwt id is not in the backend system
       // this is expected to fail the logout on the backend
-      McuserLogout logoutInput = testMcuserLogoutInput();
-      logoutInput.setJwtId(UUID.randomUUID());
-      logoutInput.setMcuserUid(uid);
-      logoutInput.setRequestOrigin(testRequestOrigin);
-      logoutInput.setRequestTimestamp(new Timestamp(Instant.now().toEpochMilli()));
-      FetchResult<Boolean> logoutResult = repo.logout(logoutInput);
+      FetchResult<Boolean> logoutResult = mcuserLogout(repo, uid, UUID.randomUUID());
       log.info("mcorpus LOGOUT WITH INVALID LOGIN TEST result: {}", logoutResult);
       
       assertNotNull(logoutResult);

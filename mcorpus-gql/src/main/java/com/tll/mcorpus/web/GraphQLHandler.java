@@ -11,6 +11,7 @@ import com.google.common.reflect.TypeToken;
 import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
+import com.tll.web.JWTUserGraphQLWebContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,14 +55,15 @@ public class GraphQLHandler implements Handler {
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
       
-      final MCorpusGraphQLWebContext gqlWebCtx = new MCorpusGraphQLWebContext(
+      final JWTUserGraphQLWebContext gqlWebCtx = new JWTUserGraphQLWebContext(
         query, 
         vmap, 
         getOrCreateRequestSnapshot(ctx), 
         jwtRequestStatus, 
         ctx.get(JWT.class), 
         ctx.get(IJwtBackendHandler.class), 
-        new MCorpusJwtHttpResponseProvider(ctx)
+        new MCorpusJwtHttpResponseAction(ctx), 
+        "mclogin"
       );
       log.info("{}", gqlWebCtx);
       
@@ -76,7 +78,7 @@ public class GraphQLHandler implements Handler {
       case NOT_PRESENT_IN_REQUEST:
       case EXPIRED:
         // only mclogin and introspection queries are allowed when no valid JWT present
-        if(gqlWebCtx.isMcuserLoginOrIntrospectionQuery()) {
+        if(gqlWebCtx.isJwtUserLoginOrIntrospectionQuery()) {
           // allowed - you may proceed
           break;
         }

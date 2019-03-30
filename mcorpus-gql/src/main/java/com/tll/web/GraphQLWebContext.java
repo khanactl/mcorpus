@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.tll.jwt.JWTHttpRequestStatus;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +43,6 @@ public class GraphQLWebContext {
   protected final String queryCleaned;
   protected final Map<String, Object> vmap;
   protected final RequestSnapshot requestSnapshot;
-  protected final JWTHttpRequestStatus jwtStatus;
 
   /**
    * Constructor.
@@ -53,15 +50,13 @@ public class GraphQLWebContext {
    * @param query           the GraphQL query string
    * @param vmap            optional query variables expressed as a name/value map
    * @param requestSnapshot snapshot of the sourcing http request
-   * @param jwtStatus       the status of the JWT of the sourcing http request
    */
-  public GraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtStatus) {
+  public GraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot) {
     super();
     this.query = query;
     this.queryCleaned = clean(query).replaceAll("\\n", "").replaceAll("\n", "");
     this.vmap = vmap;
     this.requestSnapshot = requestSnapshot;
-    this.jwtStatus = jwtStatus;
   }
   
   /**
@@ -71,10 +66,9 @@ public class GraphQLWebContext {
    */
   public boolean isValid() { 
     return 
-        not(isNullOrEmpty(query))
-        && not(isNull(requestSnapshot))
-        && not(isNull(jwtStatus))
-        ;
+      not(isNullOrEmpty(query)) && 
+      not(isNull(requestSnapshot))
+    ;
   }
   
   /**
@@ -131,11 +125,6 @@ public class GraphQLWebContext {
    */
   public RequestSnapshot getRequestSnapshot() { return requestSnapshot; }
   
-  /**
-   * @return the JWT status instance of the sourcing http request.
-   */
-  public JWTHttpRequestStatus getJwtStatus() { return jwtStatus; }
-
   @Override
   public String toString() {
     return String.format("op: %s qry: %s - %n%s%n", getOperationName(), getQueryMethodName(), query);

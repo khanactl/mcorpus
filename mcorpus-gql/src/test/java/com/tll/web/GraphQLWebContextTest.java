@@ -16,7 +16,7 @@ import org.junit.experimental.categories.Category;
 public class GraphQLWebContextTest {
 
   static GraphQLWebContext create(String query) {
-    return new GraphQLWebContext(query, null, null, null);
+    return new GraphQLWebContext(query, null, null);
   }
 
   @Test
