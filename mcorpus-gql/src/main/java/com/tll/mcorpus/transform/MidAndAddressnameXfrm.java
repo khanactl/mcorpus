@@ -5,23 +5,23 @@ import static com.tll.mcorpus.transform.MemberAddressXfrm.addressnameFromString;
 import static com.tll.mcorpus.transform.MemberAddressXfrm.addressnameToString;
 
 import com.tll.mcorpus.dmodel.MidAndAddressname;
-import com.tll.mcorpus.gmodel.MidAndAddressnameKey;
+import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
 
-public class MidAndAddressnameXfrm extends BaseMcorpusTransformer<MidAndAddressnameKey, MidAndAddressname> {
+public class MidAndAddressNameXfrm extends BaseMcorpusTransformer<MidAndAddressNameKey, MidAndAddressname> {
 
   @Override
-  protected MidAndAddressnameKey fromNonNullBackend(final MidAndAddressname d) {
-    return new MidAndAddressnameKey(
+  protected MidAndAddressNameKey fromNonNullBackend(final MidAndAddressname d) {
+    return new MidAndAddressNameKey(
       d.getMid(),
       upper(addressnameToString(d.getAddressname()))
     );
   }
 
   @Override
-  protected MidAndAddressname toBackendFromNonNull(final MidAndAddressnameKey g) {
+  protected MidAndAddressname toBackendFromNonNull(final MidAndAddressNameKey g) {
     return new MidAndAddressname(
       g.getMid(),
-      addressnameFromString(g.getAddressname()) 
+      addressnameFromString(g.getAddressName()) 
     );
   }
 

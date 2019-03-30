@@ -352,7 +352,7 @@ public class MCorpusRepo implements Closeable {
     String emsg;
     try {
       final List<Map<String, Object>> members;
-      if(msearch == null || not(msearch.hasSearchConditions())) {
+      if(not(msearch.hasSearchConditions())) {
         // NO filter
         members = dsl
           .select(

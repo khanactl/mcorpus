@@ -15,7 +15,7 @@ import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.mcorpus.gmodel.MemberAddress;
-import com.tll.mcorpus.gmodel.MidAndAddressnameKey;
+import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
 import com.tll.mcorpus.gmodel.Mlogin;
 import com.tll.mcorpus.gmodel.Mlogout;
 import com.tll.mcorpus.gmodel.Mref;
@@ -35,7 +35,7 @@ import com.tll.mcorpus.transform.McuserXfrm;
 import com.tll.mcorpus.transform.MemberAddressXfrm;
 import com.tll.mcorpus.transform.MemberFilterXfrm;
 import com.tll.mcorpus.transform.MemberXfrm;
-import com.tll.mcorpus.transform.MidAndAddressnameXfrm;
+import com.tll.mcorpus.transform.MidAndAddressNameXfrm;
 import com.tll.mcorpus.transform.MrefXfrm;
 import com.tll.mcorpus.validate.EmpIdAndLocationValidator;
 import com.tll.mcorpus.validate.McuserValidator;
@@ -76,7 +76,7 @@ public class MCorpusGraphQL {
   private final EmpIdAndLocationXfrm xfrmEmpIdAndLocation;
   private final MrefXfrm xfrmMref;
   private final MemberXfrm xfrmMember;
-  private final MidAndAddressnameXfrm xfrmMidAndAddressname;
+  private final MidAndAddressNameXfrm xfrmMidAndAddressName;
   private final MemberAddressXfrm xfrmMemberAddress;
   private final MemberFilterXfrm xfrmMemberFilter;
   
@@ -112,7 +112,7 @@ public class MCorpusGraphQL {
     this.xfrmEmpIdAndLocation = new EmpIdAndLocationXfrm();
     this.xfrmMref = new MrefXfrm();
     this.xfrmMember = new MemberXfrm();
-    this.xfrmMidAndAddressname = new MidAndAddressnameXfrm();
+    this.xfrmMidAndAddressName = new MidAndAddressNameXfrm();
     this.xfrmMemberAddress = new MemberAddressXfrm();
     this.xfrmMemberFilter = new MemberFilterXfrm();
   }
@@ -402,11 +402,11 @@ public class MCorpusGraphQL {
         // delete member address
         .dataFetcher("deleteMemberAddress", env -> processor.handleDeletion(
           env, 
-          () -> new MidAndAddressnameKey(
+          () -> new MidAndAddressNameKey(
             uuidFromToken(env.getArgument("mid")), 
             clean(env.getArgument("addressName"))
           ),
-          keyg -> xfrmMidAndAddressname.toBackend(keyg), 
+          keyg -> xfrmMidAndAddressName.toBackend(keyg), 
           key -> mcorpusRepo.deleteMemberAddress(key.getMid(), key.getAddressname())
         ))
       )

@@ -1,5 +1,6 @@
 package com.tll.mcorpus.gmodel;
 
+import static com.tll.core.Util.copy;
 import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNotNullOrEmpty;
@@ -104,8 +105,8 @@ public class MemberFilter {
      */
     public DatePredicate(DateOp dateOp, Date a, Date b) {
       this.dateOp = dateOp;
-      this.a = a;
-      this.b = b;
+      this.a = copy(a);
+      this.b = copy(b);
     }
 
     public boolean isSet() { 
@@ -125,13 +126,9 @@ public class MemberFilter {
       return dateOp;
     }
   
-    public Date getA() {
-      return a == null ? null : new Date(a.getTime());
-    }
+    public Date getA() { return copy(a); }
   
-    public Date getB() {
-      return b == null ? null : new Date(b.getTime());
-    }
+    public Date getB() { return copy(b); }
   
     @Override
     public boolean equals(Object o) {

@@ -154,6 +154,8 @@ public class MCorpusUserRepo implements Closeable {
             case LOGOUT:
               logouts.add(new LogoutEventDomain(jwtId, created));
               break;
+            default:
+              throw new Exception("Unhandled mcuser audit type.");
           }
         }
         return new FetchResult<>(new McuserHistoryDomain(uid, logins, logouts), null);
