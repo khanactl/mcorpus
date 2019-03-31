@@ -30,6 +30,34 @@ import com.tll.web.RequestSnapshot;
  */
 public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
+  private static class JWTUserStatus implements IJwtUserStatus {
+
+    private final UUID jwtUserId;
+    private final Date since;
+    private final Date expires;
+    private final int numActiveJWTs;
+
+    public JWTUserStatus(UUID jwtUserId, Date since, Date expires, int numActiveJWTs) {
+      this.jwtUserId = jwtUserId;
+      this.since = since;
+      this.expires = expires;
+      this.numActiveJWTs = numActiveJWTs;
+    }
+
+    @Override
+    public UUID getJwtUserId() { return jwtUserId; }
+
+    @Override
+    public Date getSince() { return since; }
+
+    @Override
+    public Date getExpires() { return expires; }
+
+    @Override
+    public int getNumActiveJWTs() { return numActiveJWTs; }
+
+  }
+
   private final JWTHttpRequestStatus jwtStatus;
   private final JWT jwtbiz;
   private final IJwtBackendHandler jwtBackend;
@@ -111,28 +139,18 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final UUID jwtId = jwtRequestStatus.jwtId();
     if(jwtRequestStatus.status().isValid()) {
       final UUID jwtUserId = jwtRequestStatus.userId();
-      FetchResult<Integer> fetchResult = jwtBackend.getNumActiveJwtLogins(jwtUserId);
-      if(fetchResult.isSuccess()) {
+      FetchResult<Integer> fr = jwtBackend.getNumActiveJwtLogins(jwtUserId);
+      if(fr.isSuccess()) {
         // success
-        final Date since = jwtRequestStatus.issued();
-        final Date expires = jwtRequestStatus.expires();
-        final int numActiveJWTs = fetchResult.get().intValue();
-        return new IJwtUserStatus(){
-        
-          @Override
-          public UUID getJwtUserId() { return jwtUserId; }
-        
-          @Override
-          public Date getExpires() { return expires; }
-          
-          @Override
-          public Date getSince() { return since; }
-        
-          @Override
-          public int getNumActiveJWTs() { return numActiveJWTs; }
-        };
+        final JWTUserStatus jus = new JWTUserStatus(
+          jwtUserId, 
+          jwtRequestStatus.issued(), 
+          jwtRequestStatus.expires(), 
+          fr.get().intValue()
+        );
+        return jus;
       } else {
-        final String emsg = fetchResult.getErrorMsg();
+        final String emsg = fr.getErrorMsg();
         log.error("Invalid JWT user login status fetch result for JWT of id: {}: {}", jwtId, emsg);
       }
     } else {
@@ -149,7 +167,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * Blocking - Db call is issued.
    * 
    * @param username the posted JWT user username
-   * @param pswd the posted JWT user passwrod
+   * @param pswd the posted JWT user password
    * @return true when the JWT user was successfully logged in, false otherwise
    */
   public boolean jwtUserLogin(final String username, final String pswd) {

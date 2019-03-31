@@ -20,10 +20,10 @@ public class JWTUserGraphQLWebContextTest {
   }
 
   @Test
-  public void testIsMcuserLoginQuery() throws Exception {
+  public void testIsJwtUserLoginQuery() throws Exception {
     JWTUserGraphQLWebContext ctx;
 
-    ctx = create("{ mrefByMid");
+    ctx = create("{ fetchOp");
     assertFalse(ctx.isJwtUserLoginQuery());
   
     ctx = create("{ jwtLogin");

@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Immutable struct to house the JWT status and the associated id of the 
- * bound user extracted from a JWT possibly held in a target http reqeest object.
+ * Immutable struct housing the status of a possibly held JWT 
+ * in a received http request.
  * 
  * @author jpk
  */
@@ -61,7 +61,7 @@ public class JWTHttpRequestStatus {
      */
     NOT_PRESENT_BACKEND,
     /**
-     * JWT has valid signature but is expired.
+     * JWT has valid signature and claims but is expired.
      */
     EXPIRED,
     /**

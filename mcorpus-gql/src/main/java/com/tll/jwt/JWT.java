@@ -33,15 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * JWT (Json Web Token) business rules and public methods for supporting them in
- * app web layer.
+ * JWT (Json Web Token) implementation.
+ * <p>
+ * This class assesses the JWT status for incoming http requests and
+ * generates them for outbound http responses.
  * <p>
  * JWTs are used as a means to authenticate users over http before granting
  * access to server-based service(s).
- * <p>
- * Specifically, this class assesses the JWT status for incoming http requests and
- * also generates them.
- * 
+  * 
  * @author jkirton
  */
 public class JWT {

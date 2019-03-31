@@ -393,7 +393,7 @@
 
   <reporting>
     <plugins>
-      <plugin>
+      <plugin><!-- mvn spotbugs:gui -->
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
         <configuration>

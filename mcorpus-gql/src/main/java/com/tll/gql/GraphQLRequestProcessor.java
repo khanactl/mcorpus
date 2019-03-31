@@ -288,7 +288,7 @@ public class GraphQLRequestProcessor {
 
   /**
    * Do a fetch op for a single object/entity input argument 
-   * that validates the input before persisting.
+   * that validates the input before fetching.
    * 
    * @param env the GraphQL data fetching environment ref
    * @param argExtractor function that extracts the sole input argument 

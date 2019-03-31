@@ -6,8 +6,6 @@ import com.tll.repo.FetchResult;
 
 /**
  * Contract for obtaining the status of a JWT from a backend repository or datastore.
- * <p>
- * Since: 1/10/2019
  * 
  * @author jkirton
  */
