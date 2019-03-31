@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.3</version>
+  <version>0.9.4</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -393,7 +393,7 @@
 
   <reporting>
     <plugins>
-      <plugin>
+      <plugin><!-- mvn spotbugs:gui -->
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
         <configuration>

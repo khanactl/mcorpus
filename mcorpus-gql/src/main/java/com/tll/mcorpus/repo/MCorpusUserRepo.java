@@ -176,27 +176,39 @@ public class MCorpusUserRepo implements Closeable {
    * The mcorpus mcuser login routine which fetches the mcuser record ref 
    * whose username and password matches the ones given.
    *
-   * @param mcuserLogin the mcuser login input credentials
+   * @param username the mcuser username
+   * @param pswd the mcuser password
+   * @param pendingJwtId the pending JWT id (the login must succeed first)
+   * @param jwtExpirationMillis the JWT expiration date in milli-seconds
+   * @param requestInstantMillis the instant the sourcing http request reached the server in milli-seconds
+   * @param clientOriginToken the client origin token gnerated from the sourcing http request
+   * 
    * @return Never null {@link FetchResult} object<br> 
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final McuserLogin mcuserLogin) {
-    if(mcuserLogin != null) {
-      try {
-        mcuserLogin.execute(dsl.configuration());
-        final Mcuser rval = mcuserLogin.getReturnValue().into(Mcuser.class);
-        if(rval != null && rval.getUid() != null) {
-          // login success
-          return new FetchResult<>(rval, null);
-        } else {
-          // login fail - no record returned
-          return new FetchResult<>(null, "Mcuser login unsuccessful.");
-        }
+  public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, long jwtExpirationMillis, long requestInstantMillis, final String clientOriginToken) {
+    try {
+      final McuserLogin mcuserLogin = new McuserLogin();
+      mcuserLogin.setMcuserUsername(username);
+      mcuserLogin.setMcuserPassword(pswd);
+      mcuserLogin.setInJwtId(pendingJwtId);
+      mcuserLogin.setInLoginExpiration(new Timestamp(jwtExpirationMillis));
+      mcuserLogin.setInRequestOrigin(clientOriginToken);
+      mcuserLogin.setInRequestTimestamp(new Timestamp(requestInstantMillis));
+      
+      mcuserLogin.execute(dsl.configuration());
+      final Mcuser rval = mcuserLogin.getReturnValue().into(Mcuser.class);
+      if(rval != null && rval.getUid() != null) {
+        // login success
+        return new FetchResult<>(rval, null);
+      } else {
+        // login fail - no record returned
+        return new FetchResult<>(null, "Mcuser login unsuccessful.");
       }
-      catch(Throwable t) {
-        log.error("mcuser login error: {}.", t.getMessage());
-      }
+    }
+    catch(Throwable t) {
+      log.error("mcuser login error: {}.", t.getMessage());
     }
     // default - login fail
     return new FetchResult<>(null, "Mcuser login failed.");
@@ -204,23 +216,31 @@ public class MCorpusUserRepo implements Closeable {
 
   /**
    * Log an mcuser out.
+   * 
+   * @param mcuserId the mcuser id (jwt user id)
+   * @param jwtId the JWT id
+   * @param requestInstantMillis the instant the sourcing http request reached the server in milli-seconds
+   * @param clientOriginToken the client origin token gnerated from the sourcing http request
    *
-   * @param mcuserLogoutInput the mcuser logout input data object along with request snapshot
    * @return Never null {@link FetchResult} object 
    *         holding an error message if unsuccessful.
    */
-  public FetchResult<Boolean> logout(final McuserLogout mcuserLogout) {
-    if(mcuserLogout != null) {
-      try {
-        mcuserLogout.execute(dsl.configuration());
-        if(Boolean.TRUE.equals(mcuserLogout.getReturnValue())) {
-          // logout success
-          return new FetchResult<>(Boolean.TRUE, null);
-        }
+  public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, long requestInstantMillis, final String clientOriginToken) {
+    try {
+      final McuserLogout mcuserLogout = new McuserLogout();
+      mcuserLogout.setMcuserUid(mcuserId);
+      mcuserLogout.setJwtId(jwtId);
+      mcuserLogout.setRequestTimestamp(new Timestamp(requestInstantMillis));
+      mcuserLogout.setRequestOrigin(clientOriginToken);
+      
+      mcuserLogout.execute(dsl.configuration());
+      if(Boolean.TRUE.equals(mcuserLogout.getReturnValue())) {
+        // logout success
+        return new FetchResult<>(Boolean.TRUE, null);
       }
-      catch(Throwable t) {
-        log.error("Logout error: {}.", t.getMessage());
-      }
+    }
+    catch(Throwable t) {
+      log.error("Logout error: {}.", t.getMessage());
     }
     // default - logout failed
     return new FetchResult<>(Boolean.FALSE, "Logout failed.");

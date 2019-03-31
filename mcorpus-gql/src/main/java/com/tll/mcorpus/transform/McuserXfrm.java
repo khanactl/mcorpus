@@ -72,7 +72,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
     return new Mcuser(
       null,
       null,
-      null,
+      fval("name", gqlMap),
       fval("email", gqlMap),
       fval("username", gqlMap),
       fval("pswd", gqlMap),

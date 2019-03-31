@@ -2,14 +2,11 @@ package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.isNull;
 
-import java.sql.Timestamp;
 import java.util.UUID;
 
 import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.IJwtUser;
 import com.tll.mcorpus.db.enums.JwtStatus;
-import com.tll.mcorpus.db.routines.McuserLogin;
-import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.transform.McuserXfrm;
@@ -61,17 +58,15 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
  
   @Override
   public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId, String clientOriginToken, long requestInstantMillis, long jwtExpirationMillis) {
-    final McuserLogin mcuserLogin = new McuserLogin();
-    mcuserLogin.setMcuserUsername(username);
-    mcuserLogin.setMcuserPassword(pswd);
-    mcuserLogin.setInJwtId(pendingJwtId);
-    mcuserLogin.setInLoginExpiration(new Timestamp(jwtExpirationMillis));
-    mcuserLogin.setInRequestOrigin(clientOriginToken);
-    mcuserLogin.setInRequestTimestamp(new Timestamp(requestInstantMillis));
-
-    // call db login
     log.debug("Authenticating mcuser '{}'..", username);
-    final FetchResult<Mcuser> loginResult = mcuserRepo.login(mcuserLogin);
+    final FetchResult<Mcuser> loginResult = mcuserRepo.login(
+      username, 
+      pswd, 
+      pendingJwtId, 
+      jwtExpirationMillis, 
+      requestInstantMillis, 
+      clientOriginToken
+    );
     if(loginResult.isSuccess()) {
       final McuserXfrm xfrm = new McuserXfrm();
       return new FetchResult<>(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
@@ -82,13 +77,7 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
 
   @Override
   public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken, long requestInstantMillis) {
-    final McuserLogout mcuserLogout = new McuserLogout();
-    mcuserLogout.setMcuserUid(jwtUserId);
-    mcuserLogout.setJwtId(jwtId);
-    mcuserLogout.setRequestTimestamp(new Timestamp(requestInstantMillis));
-    mcuserLogout.setRequestOrigin(clientOriginToken);
-
-    FetchResult<Boolean> fr = mcuserRepo.logout(mcuserLogout);
+    FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstantMillis, clientOriginToken);
     return fr;
   }
 

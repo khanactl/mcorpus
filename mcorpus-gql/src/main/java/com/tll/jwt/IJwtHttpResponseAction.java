@@ -1,11 +1,12 @@
 package com.tll.jwt;
 
 /**
- * Contract for setting http response state for JWT handling.
+ * Contract for setting http response state for JWT handling
+ * in the web layer.
  * 
  * @author jpk
  */
-public interface IJwtHttpResponseProvider {
+public interface IJwtHttpResponseAction {
 
   /**
    * Call on JWT user logout.

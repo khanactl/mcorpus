@@ -1,15 +1,15 @@
 package com.tll.mcorpus.web;
 
-import com.tll.jwt.IJwtHttpResponseProvider;
+import com.tll.jwt.IJwtHttpResponseAction;
 
 import ratpack.handling.Context;
 
 /**
- * MCorpus specific jwt http response provider.
+ * MCorpus specific jwt http response action.
  * 
  * @author jpk
  */
-public class MCorpusJwtHttpResponseProvider implements IJwtHttpResponseProvider {
+public class MCorpusJwtHttpResponseAction implements IJwtHttpResponseAction {
 
   private final Context ctx;
 
@@ -18,7 +18,7 @@ public class MCorpusJwtHttpResponseProvider implements IJwtHttpResponseProvider 
    * 
    * @param ctx the Ratpack http request context
    */
-  public MCorpusJwtHttpResponseProvider(final Context ctx) {
+  public MCorpusJwtHttpResponseAction(final Context ctx) {
     this.ctx = ctx;
   }
 

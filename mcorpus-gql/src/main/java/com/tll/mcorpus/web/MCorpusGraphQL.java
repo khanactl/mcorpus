@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.tll.gql.GraphQLDate;
 import com.tll.gql.GraphQLRequestProcessor;
+import com.tll.jwt.IJwtUserStatus;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
@@ -20,7 +21,6 @@ import com.tll.mcorpus.gmodel.Mlogin;
 import com.tll.mcorpus.gmodel.Mlogout;
 import com.tll.mcorpus.gmodel.Mref;
 import com.tll.mcorpus.gmodel.mcuser.JwtInvalidateFor;
-import com.tll.mcorpus.gmodel.mcuser.Mcstatus;
 import com.tll.mcorpus.gmodel.mcuser.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LoginEvent;
@@ -41,6 +41,7 @@ import com.tll.mcorpus.validate.EmpIdAndLocationValidator;
 import com.tll.mcorpus.validate.McuserValidator;
 import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
+import com.tll.web.JWTUserGraphQLWebContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +176,7 @@ public class MCorpusGraphQL {
 
         // mcuser status
         .dataFetcher("mcstatus", env -> processor.process(
-          env, () -> ((MCorpusGraphQLWebContext) env.getContext()).mcstatus())
+          env, () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserStatus())
         )
 
         // mcuser history
@@ -249,14 +250,14 @@ public class MCorpusGraphQL {
             clean(env.getArgument("username")), 
             clean(env.getArgument("pswd"))
           ), 
-          key -> ((MCorpusGraphQLWebContext) env.getContext()).mcuserLogin(key.getUsername(), key.getPswd()), 
+          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd()), 
           b -> b)
         )
 
         // mcuser logout
         .dataFetcher("mclogout", env -> processor.handleSimpleMutation(
           env, 
-          () -> ((MCorpusGraphQLWebContext) env.getContext()).mcuserLogout())
+          () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogout())
         )
 
         // add mcuser
@@ -304,8 +305,8 @@ public class MCorpusGraphQL {
           env, 
           () -> new JwtInvalidateFor(
             uuidFromToken(env.getArgument("uid")), 
-            ((MCorpusGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
-            ((MCorpusGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
+            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
+            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
           ), 
           jif -> mcuserRepo.invalidateJwtsFor(
             jif.getUid(), 
@@ -323,8 +324,8 @@ public class MCorpusGraphQL {
           () -> new Mlogin(
             clean(env.getArgument("username")), 
             clean(env.getArgument("pswd")), 
-            ((MCorpusGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
-            ((MCorpusGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
+            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
+            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
           ), 
           mclogin -> mcorpusRepo.memberLogin(
             mclogin.getUsername(), 
@@ -340,8 +341,8 @@ public class MCorpusGraphQL {
           env, 
           () -> new Mlogout(
             uuidFromToken(env.getArgument("mid")), 
-            ((MCorpusGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
-            ((MCorpusGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
+            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
+            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
           ), 
           mclogout -> mcorpusRepo.memberLogout(
             mclogout.getMid(), 
@@ -413,23 +414,23 @@ public class MCorpusGraphQL {
 
       // mcuser types
 
-      // Mcstatus
+      // IJwtUserStatus
       .type("Mcstatus", typeWiring -> typeWiring
         .dataFetcher("uid", env -> {
-          final Mcstatus mcstatus = env.getSource();
-          return uuidToToken(mcstatus.mcuserId);
+          final IJwtUserStatus jwtus = env.getSource();
+          return uuidToToken(jwtus.getJwtUserId());
         })
         .dataFetcher("since", env -> {
-          final Mcstatus mcstatus = env.getSource();
-          return mcstatus.since;
+          final IJwtUserStatus jwtus = env.getSource();
+          return jwtus.getSince();
         })
         .dataFetcher("expires", env -> {
-          final Mcstatus mcstatus = env.getSource();
-          return mcstatus.expires;
+          final IJwtUserStatus jwtus = env.getSource();
+          return jwtus.getExpires();
         })
         .dataFetcher("numActiveJWTs", env -> {
-          final Mcstatus mcstatus = env.getSource();
-          return mcstatus.numActiveJWTs;
+          final IJwtUserStatus jwtus = env.getSource();
+          return jwtus.getNumActiveJWTs();
         })
       )
 

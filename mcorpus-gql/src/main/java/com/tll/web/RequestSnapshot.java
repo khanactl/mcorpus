@@ -83,9 +83,9 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
    * @param xForwardedFor the X-Forwarded-For http header value
    * @param xForwardedProto the X-Forwarded-Proto http header value
    * @param xForwardedPort the X-Forwarded-Port http header value
-   * @param jwtCookie the mcorpus JWT token cookie value
-   * @param rstCookie the mcorpus request sync token cookie value
-   * @param rstHeader the mcorpus request sync token http header value
+   * @param jwtCookie the http JWT token cookie value
+   * @param rstCookie the http request sync token cookie value
+   * @param rstHeader the http request sync token http header value
    */
   public RequestSnapshot(
       Instant requestInstant, 
@@ -203,12 +203,12 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
   }
 
   /**
-   * @return true if an mcorpus JWT cookie value is present, false otherwise
+   * @return true if a JWT cookie value is present, false otherwise
    */
   public boolean hasJwtCookie() { return not(isNullwiseOrEmpty(jwtCookie)); }
   
   /**
-   * @return the mcorpus JWT cookie value.
+   * @return the JWT cookie value.
    */
   @Override
   public String getJwtCookie() {
@@ -216,24 +216,24 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
   }
 
   /**
-   * @return true if a request sync token is present, false otherwise.
+   * @return true if a Request Sync Token is present, false otherwise.
    */
   public boolean hasRstCookie() { return not(isNullwiseOrEmpty(rstCookie)); }
 
   /**
-   * @return the mcorpus request sync token cookie value.
+   * @return the http Request Sync Token cookie value.
    */
   public String getRstCookie() {
     return rstCookie;
   }
 
   /**
-   * @return true if an mcorpus rst header value is present, false otherwise
+   * @return true if an http rst header value is present, false otherwise
    */
   public boolean hasRstHeader() { return not(isNullwiseOrEmpty(rstHeader)); }
   
   /**
-   * @return the mcorpus rst header value.
+   * @return the http Request Sync Token header value.
    */
   public String getRstHeader() {
     return rstHeader;

@@ -6,9 +6,9 @@ import static com.tll.mcorpus.McorpusTestUtil.jwt;
 import static com.tll.mcorpus.McorpusTestUtil.testJwtBackendHandler;
 import static com.tll.mcorpus.McorpusTestUtil.testJwtResponseProvider;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
 
 import java.time.Instant;
 import java.util.Map;
@@ -21,6 +21,7 @@ import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.web.JWTUserGraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
 import org.junit.Test;
@@ -100,15 +101,16 @@ public class MCorpusGraphQLTest {
     );
   }
 
-  static MCorpusGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
-    return new MCorpusGraphQLWebContext(
+  static JWTUserGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
+    return new JWTUserGraphQLWebContext(
       query, 
       null, 
       requestSnapshot, 
       jwtRequestStatus, 
       jwt(), 
       testJwtBackendHandler(), 
-      testJwtResponseProvider()
+      testJwtResponseProvider(), 
+      "mclogin"
     );
   }
 	  

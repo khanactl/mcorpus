@@ -7,7 +7,7 @@ import static com.tll.core.Util.upper;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tll.web.GraphQLWebContext;
+import com.tll.web.JWTUserGraphQLWebContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
      */
     public boolean isAuthorized(final Role[] requestingRoles) {
       if(requestingRoles == null || requestingRoles.length < 1) return false;
-      for(Role requestingRole : requestingRoles) {
+      for(final Role requestingRole : requestingRoles) {
         switch(this) {
           case MCORPUS:
             switch(requestingRole) {
@@ -92,7 +92,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
 
     public static Role fromString(final String s) {
       if(isNullOrEmpty(s)) return null;
-      for(Role r : Role.values()) if(r.name().equals(s)) return r;
+      for(final Role r : Role.values()) if(r.name().equals(s)) return r;
       return null;
     }
 
@@ -115,7 +115,7 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
     final Role targetRole = Role.fromString(upper(roletok));
     final GraphQLFieldDefinition f = env.getElement();
     return f.transform(builder -> builder.dataFetcher(dataFetchingEnvironment -> {
-      final GraphQLWebContext webContext = dataFetchingEnvironment.getContext();
+      final JWTUserGraphQLWebContext webContext = dataFetchingEnvironment.getContext();
       final Role[] requestingRoles = Role.fromCommaDelimitedString(webContext.getJwtStatus().roles());
       // log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
       if(targetRole.isAuthorized(requestingRoles)) {

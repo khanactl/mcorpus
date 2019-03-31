@@ -5,7 +5,7 @@ import java.time.Duration;
 import javax.sql.DataSource;
 
 import com.tll.jwt.IJwtBackendHandler;
-import com.tll.jwt.IJwtHttpResponseProvider;
+import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.JWT;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.MCorpusJwtBackendHandler;
@@ -109,11 +109,11 @@ public class McorpusTestUtil {
   }
 
   /**
-   * @return Newly created {@link IJwtHttpResponseProvider} instance 
+   * @return Newly created {@link IJwtHttpResponseAction} instance 
    *         whose implementation methods are no-ops (they do nothing).
    */
-  public static IJwtHttpResponseProvider testJwtResponseProvider() {
-    return new IJwtHttpResponseProvider(){
+  public static IJwtHttpResponseAction testJwtResponseProvider() {
+    return new IJwtHttpResponseAction(){
     
       @Override
       public void setJwtCookie(String jwt, long jwtCookieTtlInSeconds) {
