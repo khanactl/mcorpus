@@ -12,7 +12,7 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - mvn package shade:shade
+      - mvn package -DskipTests
       
       # - aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template template-export.yml
   post_build:
