@@ -1,5 +1,10 @@
 version: 0.2
 
+env:
+  parameter-store:
+    MCORPUS_DB_URL: mcorpusDbUrl
+    MCORPUS_TEST_DB_URL: mcorpusTestDbUrl
+
 phases:
   install:
     commands:
@@ -15,6 +20,9 @@ phases:
       - mvn package -DskipTests
   post_build:
     commands:
+      - echo Build completed on `date`
+
 artifacts:
   files:
     - mcorpus-gql/target/aws-deploy.zip
+  discard-paths: yes

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # stop current app instance (revision)
- jps -l | grep mcorpus-gql-server.jar | awk '{print $1}' | xargs kill -15
+jps -l | grep mcorpus-gql-server.jar | awk '{print $1}' | xargs kill -15
 
 # wait for webapp to shutdown
 sleep 5s
