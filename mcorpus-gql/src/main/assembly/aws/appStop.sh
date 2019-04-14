@@ -7,4 +7,4 @@ jps -l | grep mcorpus-gql-server.jar | awk '{print $1}' | xargs kill -15
 sleep 5s
 
 # delete existing deploy files
-rm -rf /home/ec2-user/webapp
+rm -f /home/ec2-user/webapp/*
