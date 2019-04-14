@@ -13,6 +13,9 @@ bin
 .DS_Store
 mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
 
+# *** AWS ***
+aws-iam-*
+aws-secure-*
 aws-env*
 aws-mcorpus-db-psql.sh
 aws-mcorpus-dev.sh
@@ -22,11 +25,6 @@ aws-ec2-run.sh
 *.pem
 *.crt
 
-
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
 
 MCorpusLoadTest-localdev.jmx
 MCorpusLoadTest-aws.jmx

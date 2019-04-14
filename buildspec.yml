@@ -13,13 +13,8 @@ phases:
     commands:
       - echo Build started on `date`
       - mvn package -DskipTests
-      
-      # - aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template template-export.yml
   post_build:
     commands:
-      # Do not remove this statement. This command is required for AWS CodeStar projects.
-      # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
-      # - sed -i.bak 's/\$PARTITION\$/'${PARTITION}'/g;s/\$AWS_REGION\$/'${AWS_REGION}'/g;s/\$ACCOUNT_ID\$/'${ACCOUNT_ID}'/g;s/\$PROJECT_ID\$/'${PROJECT_ID}'/g' template-configuration.json
 artifacts:
   files:
-    - target/mcorpus-gql-server.jar
+    - mcorpus-gql/target/aws-deploy.zip

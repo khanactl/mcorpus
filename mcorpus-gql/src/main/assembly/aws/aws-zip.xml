@@ -16,12 +16,19 @@
         <include>log4j2-aws.xml</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/assembly/aws</directory>
+      <outputDirectory></outputDirectory><!-- i.e. root -->
+      <includes>
+        <include>app*.sh</include>
+      </includes>
+    </fileSet>
   </fileSets>
   <files>
     <file>
-      <source>${project.basedir}/src/main/assembly/aws-Procfile</source>
+      <source>${project.basedir}/../appspec.yml</source>
       <outputDirectory></outputDirectory><!-- i.e. root -->
-      <destName>Procfile</destName>
+      <destName>appspec.yml</destName>
     </file>
   </files>
 </assembly>

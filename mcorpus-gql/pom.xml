@@ -179,7 +179,7 @@
               <appendAssemblyId>true</appendAssemblyId>
               <attach>false</attach>
               <descriptors>
-                <descriptor>src/main/assembly/aws-zip.xml</descriptor>
+                <descriptor>src/main/assembly/aws/aws-zip.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

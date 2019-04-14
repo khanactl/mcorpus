@@ -1,0 +1,42 @@
+# ref: https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-server
+version: 0.0
+os: linux 
+files:
+  - source: disruptor-3.4.2.jar
+    destination: /home/ec2-user/webapp
+  - source: log4j-api-2.11.1.jar
+    destination: /home/ec2-user/webapp
+  - source: log4j-core-2.11.1.jar
+    destination: /home/ec2-user/webapp
+  - source: log4j-slf4j-impl-2.11.1.jar
+    destination: /home/ec2-user/webapp
+  - source: log4j2-aws.xml
+    destination: /home/ec2-user/webapp
+  - source: mcorpus-gql-server.jar
+    destination: /home/ec2-user/webapp
+permissions:
+  - object: /home/ec2-user
+    pattern: "*.jar"
+    owner: ec2-user
+    group: ec2-user
+    mode: 400
+    type:
+      - file
+  - object: /home/ec2-user
+    pattern: "*.xml"
+    owner: ec2-user
+    group: ec2-user
+    mode: 400
+    type:
+      - file
+hooks:
+  ApplicationStop:
+    - location: appStop.sh
+      timeout: 15
+      runas: ec2-user
+  ApplicationStart:
+    - location: appStart.sh
+      timeout: 15
+      runas: ec2-user
+  ValidateService:
+    - location: appValidate.sh
