@@ -19,4 +19,4 @@ export RATPACK_SERVER__DEVELOPMENT=false
 export RATPACK_SERVER__PORT=5150
 export RATPACK_SERVER__PUBLIC_ADDRESS=https://www.mcorpus-aws.net
 
-run.sh >/dev/null 2>&1 &
+./run.sh >/dev/null 2>&1 &
