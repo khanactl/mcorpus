@@ -21,6 +21,7 @@
       <outputDirectory></outputDirectory><!-- i.e. root -->
       <includes>
         <include>app*.sh</include>
+        <include>run.sh</include>
       </includes>
     </fileSet>
   </fileSets>

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-mkdir /home/ec2-user/webapp
 cd /home/ec2-user/webapp
 
 dbUrl=$(aws ssm get-parameters --region us-west-2 --names mcorpusDbUrl --with-decryption --query Parameters[0].Value)
@@ -20,4 +19,4 @@ export RATPACK_SERVER__DEVELOPMENT=false
 export RATPACK_SERVER__PORT=5150
 export RATPACK_SERVER__PUBLIC_ADDRESS=https://www.mcorpus-aws.net
 
-java -Dlog4j.configurationFile=log4j2-aws.xml -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -cp log4j-api-2.11.1.jar:log4j-core-2.11.1.jar:log4j-slf4j-impl-2.11.1.jar:disruptor-3.4.2.jar -jar mcorpus-gql-server.jar &
+run.sh >/dev/null 2>&1 &
