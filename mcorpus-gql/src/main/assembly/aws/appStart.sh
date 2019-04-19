@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd /home/ec2-user/webapp
-
 dbUrl=$(aws ssm get-parameters --region us-west-2 --names mcorpusDbUrl --with-decryption --query Parameters[0].Value)
 dbUrl=`echo $dbUrl | sed -e 's/^"//' -e 's/"$//'`
 
@@ -19,4 +17,6 @@ export RATPACK_SERVER__DEVELOPMENT=false
 export RATPACK_SERVER__PORT=5150
 export RATPACK_SERVER__PUBLIC_ADDRESS=https://www.mcorpus-aws.net
 
-./run.sh >/dev/null 2>&1 &
+cwd=$(pwd)
+cd /home/ec2-user/webapp
+$cwd/run.sh >/dev/null 2>&1 &
