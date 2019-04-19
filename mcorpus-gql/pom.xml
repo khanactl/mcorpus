@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.4</version>
+  <version>0.9.5</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -179,7 +179,7 @@
               <appendAssemblyId>true</appendAssemblyId>
               <attach>false</attach>
               <descriptors>
-                <descriptor>src/main/assembly/aws-zip.xml</descriptor>
+                <descriptor>src/main/assembly/aws/aws-zip.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

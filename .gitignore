@@ -1,32 +1,36 @@
-target
+# os
+.DS_Store
+
+# ide
 .project
 .classpath
 .settings
 .factorypath
 .apt_generated
 .externalToolBuilders
-*.log
-bin
 .idea
 *.iml
 .vscode
-.DS_Store
-mcorpus-db/mcorpus-ddl/mcorpus-creds.txt
+bin
 
-aws-env*
-aws-mcorpus-db-psql.sh
-aws-mcorpus-dev.sh
-aws-ec2-run.sh
+# maven
+target
 
 # cert files
 *.pem
 *.crt
 
+# aws
+aws-iam-*
+aws-secure-*
+aws-env*
+aws-mcorpus-db-psql.sh
+aws-mcorpus-dev.sh
+aws-ec2-run.sh
+codedeploy*.json
 
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
-
+# app
+mcorpus-creds.txt
+*.log
 MCorpusLoadTest-localdev.jmx
 MCorpusLoadTest-aws.jmx
