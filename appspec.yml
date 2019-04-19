@@ -14,6 +14,8 @@ files:
     destination: /home/ec2-user/webapp
   - source: mcorpus-gql-server.jar
     destination: /home/ec2-user/webapp
+  - source: run.sh
+    destination: /home/ec2-user/webapp
 permissions:
   - object: /home/ec2-user/webapp
     pattern: "*.jar"
@@ -29,6 +31,13 @@ permissions:
     mode: 400
     type:
       - file
+  - object: /home/ec2-user/webapp
+    pattern: "*.sh"
+    owner: ec2-user
+    group: ec2-user
+    mode: 551
+    type:
+      - file
 hooks:
   ApplicationStop:
     - location: appStop.sh
@@ -40,3 +49,4 @@ hooks:
       runas: ec2-user
   ValidateService:
     - location: appValidate.sh
+      runas: ec2-user
