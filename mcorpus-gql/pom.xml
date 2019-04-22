@@ -166,6 +166,7 @@
       </plugin>
 			
       <!-- aws zip assembly -->
+      <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -185,7 +186,8 @@
           </execution>
         </executions>
       </plugin>
-      
+      -->
+
       <plugin>
         <groupId>com.coderplus.maven.plugins</groupId>
         <artifactId>copy-rename-maven-plugin</artifactId>
@@ -200,6 +202,22 @@
             </goals>
             <configuration>
               <fileSets>
+                <fileSet>
+                  <sourceFile>src/main/assembly/aws/appStart.sh</sourceFile>
+                  <destinationFile>${project.build.directory}/aws/appStart.sh</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>src/main/assembly/aws/appStop.sh</sourceFile>
+                  <destinationFile>${project.build.directory}/aws/appStop.sh</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>src/main/assembly/aws/appValidate.sh</sourceFile>
+                  <destinationFile>${project.build.directory}/aws/appValidate.sh</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>src/main/assembly/aws/run.sh</sourceFile>
+                  <destinationFile>${project.build.directory}/aws/run.sh</destinationFile>
+                </fileSet>
                 <fileSet>
                   <sourceFile>log4j2-localdev.xml</sourceFile>
                   <destinationFile>${project.build.directory}/log4j2-localdev.xml</destinationFile>
@@ -219,6 +237,7 @@
               </fileSets>
             </configuration>
           </execution>
+          <!--
           <execution>
             <id>rename-aws-zip</id>
             <phase>package</phase>
@@ -234,6 +253,7 @@
               </fileSets>
             </configuration>
           </execution>
+          -->
         </executions>
       </plugin>
 
