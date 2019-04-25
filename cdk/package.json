@@ -4,7 +4,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/khanactl/mcorpus.git"
+    "url": "git+https://github.com/khanactl/mcorpus.git"
   },
   "bin": {
     "cdk": "bin/cdk.js"
@@ -21,8 +21,19 @@
   },
   "dependencies": {
     "@aws-cdk/aws-ec2": "^0.29.0",
+    "@aws-cdk/aws-ecr": "^0.29.0",
     "@aws-cdk/aws-ecs": "^0.29.0",
     "@aws-cdk/cdk": "^0.29.0",
     "source-map-support": "^0.5.9"
-  }
+  },
+  "description": "* `npm run build`   compile typescript to js  * `npm run watch`   watch for changes and compile  * `cdk deploy`      deploy this stack to your default AWS account/region  * `cdk diff`        compare deployed stack with current state  * `cdk synth`       emits the synthesized CloudFormation template",
+  "bugs": {
+    "url": "https://github.com/khanactl/mcorpus/issues"
+  },
+  "homepage": "https://github.com/khanactl/mcorpus#readme",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "author": "jkirton"
 }
