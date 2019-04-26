@@ -17,5 +17,5 @@ export RATPACK_SERVER__DEVELOPMENT=false
 export RATPACK_SERVER__PORT=5150
 export RATPACK_SERVER__PUBLIC_ADDRESS=https://www.mcorpus-aws.net
 
-cd /home/ec2-user/webapp
+cd /webapp
 ./run.sh >/dev/null 2>&1 &
