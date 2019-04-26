@@ -1,4 +1,3 @@
-# jre
 FROM openjdk:8-jre-alpine
 
 # env
@@ -25,4 +24,4 @@ COPY mcorpus-gql/target/log4j-slf4j-impl-2.11.1.jar /webapp/log4j-slf4j-impl-2.1
 EXPOSE 5150/tcp
 
 # run
-CMD ["/usr/bin/java", "-Dlog4j.configurationFile=log4j2-aws.xml", "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector", "-cp", "/webapp/log4j-api-2.11.1.jar:/webapp/log4j-core-2.11.1.jar:/webapp/log4j-slf4j-impl-2.11.1.jar:/webapp/disruptor-3.4.2.jar", "-jar", "/webapp/mcorpus-gql-server.jar"]
+CMD ["/usr/bin/java", "-Dlog4j.configurationFile=/webapp/log4j2-aws.xml", "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector", "-cp", "/webapp/log4j-api-2.11.1.jar:/webapp/log4j-core-2.11.1.jar:/webapp/log4j-slf4j-impl-2.11.1.jar:/webapp/disruptor-3.4.2.jar", "-jar", "/webapp/mcorpus-gql-server.jar"]
