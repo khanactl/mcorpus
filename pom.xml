@@ -353,6 +353,11 @@
           <configuration>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>com.spotify</groupId>
+          <artifactId>dockerfile-maven</artifactId>
+          <version>1.4.10</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>

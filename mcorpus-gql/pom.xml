@@ -258,6 +258,25 @@
       </plugin>
 
       <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default</id>
+						<phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <contextDirectory>.</contextDirectory>
+          <repository>jopaki/mcorpus</repository><!-- https://cloud.docker.com/repository/docker/ -->
+          <tag>${project.version}</tag>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
