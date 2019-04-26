@@ -21,8 +21,18 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
+    <mcorpus-build.mode>DEV</mcorpus-build.mode>
     <mcorpus-db.version>1.4.5</mcorpus-db.version>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>prod</id>
+      <properties>
+        <mcorpus-build.mode>PROD</mcorpus-build.mode>
+      </properties>
+    </profile>
+  </profiles>
 
   <build>
     <!--
@@ -189,91 +199,71 @@
       -->
 
       <plugin>
-        <groupId>com.coderplus.maven.plugins</groupId>
-        <artifactId>copy-rename-maven-plugin</artifactId>
-        <version>1.0</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
         <executions>
-          <!-- copy (snapshot) log4j2 config files to build dir -->
           <execution>
-            <id>copy-log4j2-config-files</id>
+            <id>snapshot-to-target</id>
             <phase>prepare-package</phase>
             <goals>
-              <goal>copy</goal>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <fileSets>
-                <fileSet>
-                  <sourceFile>src/main/assembly/aws/appStart.sh</sourceFile>
-                  <destinationFile>${project.build.directory}/aws/appStart.sh</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>src/main/assembly/aws/appStop.sh</sourceFile>
-                  <destinationFile>${project.build.directory}/aws/appStop.sh</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>src/main/assembly/aws/appValidate.sh</sourceFile>
-                  <destinationFile>${project.build.directory}/aws/appValidate.sh</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>src/main/assembly/aws/run.sh</sourceFile>
-                  <destinationFile>${project.build.directory}/aws/run.sh</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>log4j2-localdev.xml</sourceFile>
-                  <destinationFile>${project.build.directory}/log4j2-localdev.xml</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>log4j2-prod.xml</sourceFile>
-                  <destinationFile>${project.build.directory}/log4j2-prod.xml</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>log4j2-heroku.xml</sourceFile>
-                  <destinationFile>${project.build.directory}/log4j2-heroku.xml</destinationFile>
-                </fileSet>
-                <fileSet>
-                  <sourceFile>log4j2-aws.xml</sourceFile>
-                  <destinationFile>${project.build.directory}/log4j2-aws.xml</destinationFile>
-                </fileSet>
-              </fileSets>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>.</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>log4j2-*.xml</include>
+                    <include>Dockerfile</include>
+                  </includes>
+                </resource>
+              </resources>
             </configuration>
           </execution>
-          <!--
           <execution>
-            <id>rename-aws-zip</id>
-            <phase>package</phase>
+            <id>snapshot-aws-to-target</id>
+            <phase>prepare-package</phase>
             <goals>
-              <goal>rename</goal>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <fileSets>
-                <fileSet>
-                  <sourceFile>${project.build.directory}/${project.artifactId}-${project.version}-aws-deploy.zip</sourceFile>
-                  <destinationFile>${project.build.directory}/aws-deploy.zip</destinationFile>
-                </fileSet>
-              </fileSets>
+              <outputDirectory>${project.build.directory}/aws</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/assembly/aws</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>*.sh</include>
+                  </includes>
+                </resource>
+              </resources>
             </configuration>
           </execution>
-          -->
         </executions>
       </plugin>
 
+      <!-- docker -->
+      <!-- https://cloud.docker.com/repository/docker/ -->
       <plugin>
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>
+        <configuration>
+          <contextDirectory>${project.build.directory}</contextDirectory>
+          <!--<repository>jopaki/mcorpus</repository>-->
+          <repository>${project.groupId}/${project.artifactId}</repository>
+          <tag>${project.version}-${timestamp}</tag>
+        </configuration>
         <executions>
           <execution>
             <id>default</id>
-						<phase>package</phase>
             <goals>
               <goal>build</goal>
+              <goal>push</goal>
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <contextDirectory>.</contextDirectory>
-          <repository>jopaki/mcorpus</repository><!-- https://cloud.docker.com/repository/docker/ -->
-          <tag>${project.version}</tag>
-        </configuration>
       </plugin>
 
       <plugin>
