@@ -16,7 +16,8 @@
     <java.version>8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <timestamp>${maven.build.timestamp}</timestamp>
-    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+    <!-- TODO: maven.build.timestamp.format tweaked to avoid dockerfile-maven-plugin error (BAD) -->
+    <maven.build.timestamp.format>yyyy-MM-dd'_'HHmmss</maven.build.timestamp.format>
 
     <log4j2.version>2.11.1</log4j2.version>
     <slf4j-api.version>1.7.25</slf4j-api.version>
@@ -355,7 +356,7 @@
         </plugin>
         <plugin>
           <groupId>com.spotify</groupId>
-          <artifactId>dockerfile-maven</artifactId>
+          <artifactId>dockerfile-maven-plugin</artifactId>
           <version>1.4.10</version>
         </plugin>
       </plugins>
