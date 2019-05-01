@@ -23,9 +23,16 @@
   <properties>
     <mcorpus-build.mode>DEV</mcorpus-build.mode>
     <mcorpus-db.version>1.4.5</mcorpus-db.version>
+    <awscli.version>1.16.140</awscli.version>
   </properties>
 
   <profiles>
+    <profile>
+      <id>dev</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
     <profile>
       <id>prod</id>
       <properties>
@@ -213,24 +220,12 @@
               <resources>
                 <resource>
                   <directory>.</directory>
-                  <filtering>false</filtering>
+                  <filtering>true</filtering>
                   <includes>
                     <include>log4j2-*.xml</include>
                     <include>Dockerfile</include>
                   </includes>
                 </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>snapshot-aws-to-target</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/aws</outputDirectory>
-              <resources>
                 <resource>
                   <directory>src/main/assembly/aws</directory>
                   <filtering>false</filtering>
