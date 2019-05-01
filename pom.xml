@@ -16,15 +16,14 @@
     <java.version>8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <timestamp>${maven.build.timestamp}</timestamp>
-    <!-- TODO: maven.build.timestamp.format tweaked to avoid dockerfile-maven-plugin error (BAD) -->
-    <maven.build.timestamp.format>yyyy-MM-dd'_'HHmmss</maven.build.timestamp.format>
+    <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 
     <log4j2.version>2.11.1</log4j2.version>
     <slf4j-api.version>1.7.25</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
     <postgres-jdbc.version>42.2.5</postgres-jdbc.version>
-    
+
     <jooq.version>3.11.8</jooq.version>
     <hikari-cp.version>3.2.0</hikari-cp.version>
 
