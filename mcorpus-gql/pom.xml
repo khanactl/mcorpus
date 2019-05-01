@@ -23,7 +23,7 @@
   <properties>
     <mcorpus-build.mode>DEV</mcorpus-build.mode>
     <mcorpus-db.version>1.4.5</mcorpus-db.version>
-    <awscli.version>1.16.140</awscli.version>
+    <awscli.version>1.16.147</awscli.version>
   </properties>
 
   <profiles>
@@ -234,6 +234,28 @@
                   </includes>
                 </resource>
               </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <id>chmod-dockstart</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>chmod</executable>
+              <arguments>
+                <argument>+x</argument>
+                <argument>${project.build.directory}/dockstart.sh</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>

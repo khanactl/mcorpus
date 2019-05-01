@@ -1,35 +1,28 @@
 FROM openjdk:8-jre-alpine
 
-LABEL key=maintainer="khanactl@gmail.com"
+ENV AWSCLI_VERSION "${awscli.version}"
 
-# aws cli
-RUN apt-get update -y && \
-    apt-get install -y python python-pip python-virtualenv dos2unix && \
-    mkdir aws && \
-    virtualenv aws/env && \
-    ./aws/env/bin/pip install awscli && \
-    apt-get autoremove --purge -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --update \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+    && pip install awscli==$AWSCLI_VERSION --upgrade --user \
+    && apk --purge -v del py-pip \
+    && rm -rf /var/cache/apk/*
+
+EXPOSE 5150/tcp 5432/tcp
 
 WORKDIR /webapp
 
-# artifacts
-COPY mcorpus-gql-server.jar mcorpus-gql-server.jar
-COPY log4j2-aws.xml log4j2-aws.xml
-COPY disruptor-3.4.2.jar disruptor-3.4.2.jar
-COPY log4j-api-2.11.1.jar log4j-api-2.11.1.jar
-COPY log4j-core-2.11.1.jar log4j-core-2.11.1.jar
-COPY log4j-slf4j-impl-2.11.1.jar log4j-slf4j-impl-2.11.1.jar
-COPY aws/appStart.sh appStart.sh
-COPY aws/run.sh run.sh
+COPY mcorpus-gql-server.jar /webapp/
+COPY log4j2-aws.xml /webapp/
+COPY disruptor-3.4.2.jar /webapp/
+COPY log4j-api-2.11.1.jar /webapp/
+COPY log4j-core-2.11.1.jar /webapp/
+COPY log4j-slf4j-impl-2.11.1.jar /webapp/
+COPY dockstart.sh /webapp/
 
-# port
-EXPOSE 5150/tcp
-# EXPOSE 5432/tcp  wont work.  instead: docker run -p 5432:5432 your-sql-container
+RUN chmod +x /webapp/dockstart.sh
 
-# run
-#CMD ["/usr/bin/java", "-Dlog4j.configurationFile=log4j2-aws.xml", "-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector", "-cp", "log4j-api-2.11.1.jar:log4j-core-2.11.1.jar:log4j-slf4j-impl-2.11.1.jar:disruptor-3.4.2.jar", "-jar", "mcorpus-gql-server.jar"]
-
-# startup
-ENTRYPOINT [ "exec appStart.sh" ]
+ENTRYPOINT /webapp/dockstart.sh
