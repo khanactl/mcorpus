@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# mcorpus startup bash script for startup in a Docker container.
+# mcorpus Docker entrypoint bash shell script.
 
 export MCORPUS_DB_DATA_SOURCE_CLASS_NAME=org.postgresql.ds.PGSimpleDataSource
 # export MCORPUS_DB_URL=$(aws ssm get-parameters --region us-west-2 --names mcorpusDbUrl --with-decryption --query Parameters[0].Value)
