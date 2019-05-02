@@ -3,7 +3,8 @@ package com.tll.jwt;
 import java.time.Instant;
 
 /**
- * Contract for obtaining needed JWT info held in an incoming http request.
+ * Contract for obtaining the status of a possibly absent JWT 
+ * for an incoming http request.
  * 
  * @author jpk
  */
@@ -35,7 +36,7 @@ public interface IJwtHttpRequestProvider {
    * the scope of JWT processing.
    * 
    * @param clientOrigin the client origin token to validate
-   * @return true if the given client origin matches the one held.
+   * @return true if the given client origin was successfully verified
    */
   boolean verifyClientOrigin(final String clientOrigin);
 }

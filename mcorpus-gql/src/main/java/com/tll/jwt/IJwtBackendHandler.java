@@ -55,10 +55,10 @@ public interface IJwtBackendHandler {
   /**
    * Do a JWT login in the backend system.
    * 
-   * @param username
-   * @param pswd
-   * @param pendingJwtId
-   * @param clientOriginToken
+   * @param username the jwt user username
+   * @param pswd the jwt user password
+   * @param pendingJwtId the generated jwt id that will be valid upon successful backend login
+   * @param clientOriginToken the http request "client origin" token of the originating http request
    * @param requestInstantMillis
    * @param jwtExpirationMillis
    * @return Fetch result holding the JWT user entity object.
@@ -77,10 +77,12 @@ public interface IJwtBackendHandler {
   FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken, long requestInstantMillis);
 
   /**
-   * Get the number of active JWTs in plan for a given jwt user.
+   * Get the number of active JWTs in play for a known jwt user.
    * 
-   * @param jwtUserId
-   * @return Fetch result holding the the number of active JWT logins.
+   * @param jwtUserId the id of a known user - someone who logged successfully 
+   *                  and was issued a JWT at least once sometime in the recent past
+   * @return Fetch result holding the the number of currently active JWTs for the 
+   *         given user id.
    */
   FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId);
 }

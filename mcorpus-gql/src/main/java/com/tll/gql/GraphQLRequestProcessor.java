@@ -29,7 +29,7 @@ import graphql.validation.ValidationErrorType;
  * Also, this processing construct affords us a way to separate mutating 
  * operations from fetch-only operations in a straight-forward way.
  * <p>
- * This class depends on the graphql-java library:
+ * This class depends only on the graphql-java library:
  * https://github.com/graphql-java/graphql-java.
  * 
  * @author jpk
