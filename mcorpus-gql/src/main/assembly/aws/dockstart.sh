@@ -4,10 +4,8 @@ set -e
 # mcorpus Docker entrypoint bash shell script.
 
 export MCORPUS_DB_DATA_SOURCE_CLASS_NAME=org.postgresql.ds.PGSimpleDataSource
-# export MCORPUS_DB_URL=$(aws ssm get-parameters --region us-west-2 --names mcorpusDbUrl --with-decryption --query Parameters[0].Value)
-# export MCORPUS_JWT_SALT=$(aws ssm get-parameters --region us-west-2 --names jwtSalt --with-decryption --query Parameters[0].Value)
-export MCORPUS_DB_URL='jdbc:postgresql://localbox:5432/mcorpus?user=mcweb&password=aPvumfTgxv2A/butD/9WrApiF93swos890X5YFOKwQFZ&ssl=false'
-export MCORPUS_JWT_SALT='4E521B8861508F17C423162845BBC5E916C4FDE82A73B6E2BE292DDA7AEE6FF6'
+export MCORPUS_DB_URL=$(aws ssm get-parameters --region us-west-2 --names mcorpusDbUrl --with-decryption --query Parameters[0].Value)
+export MCORPUS_JWT_SALT=$(aws ssm get-parameters --region us-west-2 --names jwtSalt --with-decryption --query Parameters[0].Value)
 export MCORPUS_JWT_TTL_IN_MILLIS=172800000
 export MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES=10
 export MCORPUS_JWT_STATUS_CACHE_MAX_SIZE=60
