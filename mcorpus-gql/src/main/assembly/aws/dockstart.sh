@@ -15,6 +15,7 @@ export RATPACK_SERVER__PORT=5150
 export RATPACK_SERVER__PUBLIC_ADDRESS=https://www.mcorpus-aws.net
 
 JAVA_OPTS=(
+  '-server'
   '-Xms100M'
   '-Xmx1000M'
   '-Djava.net.preferIPv4Stack=true'
