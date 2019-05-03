@@ -1,0 +1,1 @@
+Dedicated project sub-dir for housing meta info pertaining to aws.

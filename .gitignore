@@ -20,13 +20,7 @@ target
 *.crt
 
 # aws
-aws-iam-*
-aws-secure-*
 aws-env*
-aws-mcorpus-db-psql.sh
-aws-mcorpus-dev.sh
-aws-ec2-run.sh
-codedeploy*.json
 
 # app
 mcorpus-creds.txt
