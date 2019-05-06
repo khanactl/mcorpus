@@ -1,0 +1,119 @@
+{
+  "taskDefinition": {
+    "taskDefinitionArn": "arn:aws:ecs:us-west-2:524006177124:task-definition/mcorpus-gql:1",
+    "containerDefinitions": [
+      {
+        "name": "mcorpus-default-container",
+        "image": "524006177124.dkr.ecr.us-west-2.amazonaws.com/mcorpus-gql:0.9.5-20190503152313",
+        "cpu": 0,
+        "portMappings": [
+          {
+            "containerPort": 5150,
+            "hostPort": 5150,
+            "protocol": "tcp"
+          },
+          {
+            "containerPort": 5432,
+            "hostPort": 5432,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "environment": [
+          {
+            "name": "RATPACK_SERVER__PUBLIC_ADDRESS",
+            "value": "https://www.mcorpus-aws.net"
+          },
+          {
+            "name": "RATPACK_SERVER__DEVELOPMENT",
+            "value": "false"
+          },
+          {
+            "name": "MCORPUS_JWT_TTL_IN_MILLIS",
+            "value": "172800000"
+          },
+          {
+            "name": "MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES",
+            "value": "10"
+          },
+          {
+            "name": "MCORPUS_JWT_STATUS_CACHE_MAX_SIZE",
+            "value": "60"
+          },
+          {
+            "name": "RATPACK_SERVER__PORT",
+            "value": "5150"
+          },
+          {
+            "name": "MCORPUS_DB_DATA_SOURCE_CLASS_NAME",
+            "value": "org.postgresql.ds.PGSimpleDataSource"
+          },
+          {
+            "name": "MCORPUS_COOKIE_SECURE",
+            "value": "true"
+          }
+        ],
+        "mountPoints": [],
+        "volumesFrom": [],
+        "secrets": [
+          {
+            "name": "MCORPUS_DB_URL",
+            "valueFrom": "arn:aws:ssm:us-west-2:524006177124:parameter/mcorpusDbUrl"
+          },
+          {
+            "name": "MCORPUS_JWT_SALT",
+            "valueFrom": "arn:aws:ssm:us-west-2:524006177124:parameter/jwtSalt"
+          }
+        ],
+        "startTimeout": 30,
+        "stopTimeout": 60,
+        "readonlyRootFilesystem": true
+      }
+    ],
+    "family": "mcorpus-gql",
+    "executionRoleArn": "arn:aws:iam::524006177124:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 1,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
+      },
+      {
+        "name": "ecs.capability.container-ordering"
+      },
+      {
+        "name": "ecs.capability.execution-role-ecr-pull"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+      },
+      {
+        "name": "ecs.capability.task-eni"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.ecr-auth"
+      },
+      {
+        "name": "ecs.capability.secrets.ssm.environment-variables"
+      }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+      "EC2",
+      "FARGATE"
+    ],
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+  },
+  "tags": [
+    {
+      "key": "Name",
+      "value": "mcorpus-default-ecs-taskdef"
+    }
+  ]
+}

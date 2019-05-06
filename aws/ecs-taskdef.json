@@ -5,7 +5,7 @@
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "mcorpus-default-container",
+      "name": "mcorpus-ecs-container",
       "image": "524006177124.dkr.ecr.us-west-2.amazonaws.com/mcorpus-gql:0.9.5-20190503152313",
       "portMappings": [
         {
@@ -76,7 +76,7 @@
   "tags": [
     {
       "key": "Name",
-      "value": "mcorpus-default-ecs-taskdef"
+      "value": "mcorpus-fargate-taskdef"
     }
   ]
 }
