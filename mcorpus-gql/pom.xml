@@ -247,6 +247,7 @@
         </executions>
       </plugin>
 
+      <!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -268,6 +269,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
 
       <!-- docker -->
       <!-- https://cloud.docker.com/repository/docker/ -->
