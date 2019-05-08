@@ -20,9 +20,11 @@
     "aws-cdk": "^0.31.0"
   },
   "dependencies": {
+    "@aws-cdk/aws-certificatemanager": "^0.31.0",
     "@aws-cdk/aws-ec2": "^0.31.0",
     "@aws-cdk/aws-ecr": "^0.31.0",
     "@aws-cdk/aws-ecs": "^0.31.0",
+    "@aws-cdk/aws-ssm": "^0.31.0",
     "@aws-cdk/cdk": "^0.31.0",
     "source-map-support": "^0.5.12"
   },
