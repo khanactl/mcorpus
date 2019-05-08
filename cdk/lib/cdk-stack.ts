@@ -1,7 +1,8 @@
 import cdk = require('@aws-cdk/cdk');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
-import ecr = require('@aws-cdk/aws-ecr');
+// import ecr = require('@aws-cdk/aws-ecr');
+import cert = require('@aws-cdk/aws-certificatemanager');
 
 export class CdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -12,17 +13,49 @@ export class CdkStack extends cdk.Stack {
       maxAZs: 1
     });
 
-    const cluster = new ecs.Cluster(this, 'MyCluster', {
-      vpc: vpc
+    const cluster = new ecs.Cluster(this, 'McorpusFargateCluster', {
+      vpc: vpc,
+      clusterName: "McorpusFargateCluster"
     });
+
+    // ref to existing TLS cert used by the https application load balancer
+    const cert443 = cert.Certificate.import(this, 'loadBalancerCert', {
+      certificateArn: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a'
+    });
+
+    const javaOpts = 
+     '-server \
+      -Xms100M \
+      -Xmx1000M \
+      -Djava.net.preferIPv4Stack=true \
+      -Dlog4j.configurationFile=log4j2-aws.xml \
+      -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector \
+      -cp log4j-api-2.11.1.jar:log4j-core-2.11.1.jar:log4j-slf4j-impl-2.11.1.jar:disruptor-3.4.2.jar';
 
     const fargateService = new ecs.LoadBalancedFargateService(this, 'MyFargateService', {
       cluster: cluster,  // Required
+      loadBalancerType: ecs.LoadBalancerType.Application,
       cpu: '256', // Default is 256
       desiredCount: 1,  // Default is 1
-      image: ecs.ContainerImage.fromRegistry("amazon/amazon-ecs-sample"), // Required
+      image: ecs.ContainerImage.fromRegistry("524006177124.dkr.ecr.us-west-2.amazonaws.com/mcorpus-gql:0.9.5-20190504203944"), // Required
       memoryMiB: '512',  // Default is 512
-      publicLoadBalancer: true  // Default is false
+      publicLoadBalancer: true,  // Default is false
+      certificate: cert443,
+      containerPort: 5150,
+      environment: {
+        "JAVA_OPTS": javaOpts,
+        "MCORPUS_DB_DATA_SOURCE_CLASS_NAME": "org.postgresql.ds.PGSimpleDataSource",
+        // TODO ssm-ize
+        // "MCORPUS_DB_URL": "",
+        // "MCORPUS_JWT_SALT": "",
+        "MCORPUS_JWT_TTL_IN_MILLIS": "172800000",
+        "MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES": "11",
+        "MCORPUS_JWT_STATUS_CACHE_MAX_SIZE": "60",
+        "MCORPUS_COOKIE_SECURE": "true",
+        "RATPACK_SERVER__DEVELOPMENT": "false",
+        "RATPACK_SERVER__PORT": "5150",
+        "RATPACK_SERVER__PUBLIC_ADDRESS": "https://www-mcorpus-aws.net"
+      }
     });
 
     // Output the DNS where you can access your service
@@ -31,7 +64,8 @@ export class CdkStack extends cdk.Stack {
     });
 
     // ecr
-    const repository = new ecr.Repository(this, 'Repository');
-    repository.addLifecycleRule({ tagPrefixList: ['prod'], maxImageCount: 9999 });
-    repository.addLifecycleRule({ maxImageAgeDays: 30 }); }
+    // const repository = new ecr.Repository(this, 'Repository');
+    // repository.addLifecycleRule({ tagPrefixList: ['dev'], maxImageCount: 9999 });
+    // repository.addLifecycleRule({ maxImageAgeDays: 30 });
+  }
 }
