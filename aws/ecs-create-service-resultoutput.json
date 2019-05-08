@@ -1,0 +1,64 @@
+{
+  "service": {
+    "serviceArn": "arn:aws:ecs:us-west-2:524006177124:service/mcorpus-fargate-service",
+    "serviceName": "mcorpus-fargate-service",
+    "clusterArn": "arn:aws:ecs:us-west-2:524006177124:cluster/mcorpus-fargate-cluster",
+    "loadBalancers": [],
+    "serviceRegistries": [],
+    "status": "ACTIVE",
+    "desiredCount": 1,
+    "runningCount": 0,
+    "pendingCount": 0,
+    "launchType": "FARGATE",
+    "platformVersion": "LATEST",
+    "taskDefinition": "arn:aws:ecs:us-west-2:524006177124:task-definition/mcorpus-gql:1",
+    "deploymentConfiguration": {
+      "maximumPercent": 200,
+      "minimumHealthyPercent": 100
+    },
+    "deployments": [
+      {
+        "id": "ecs-svc/9223370479939156821",
+        "status": "PRIMARY",
+        "taskDefinition": "arn:aws:ecs:us-west-2:524006177124:task-definition/mcorpus-gql:1",
+        "desiredCount": 1,
+        "pendingCount": 0,
+        "runningCount": 0,
+        "createdAt": 1556915618.986,
+        "updatedAt": 1556915618.986,
+        "launchType": "FARGATE",
+        "platformVersion": "1.3.0",
+        "networkConfiguration": {
+          "awsvpcConfiguration": {
+            "subnets": [
+              "subnet-04395d68bc6f80fc4"
+            ],
+            "securityGroups": [
+              "sg-04bfbc00df1b8166a"
+            ],
+            "assignPublicIp": "DISABLED"
+          }
+        }
+      }
+    ],
+    "roleArn": "arn:aws:iam::524006177124:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+    "events": [],
+    "createdAt": 1556915618.986,
+    "placementConstraints": [],
+    "placementStrategy": [],
+    "networkConfiguration": {
+      "awsvpcConfiguration": {
+        "subnets": [
+          "subnet-04395d68bc6f80fc4"
+        ],
+        "securityGroups": [
+          "sg-04bfbc00df1b8166a"
+        ],
+        "assignPublicIp": "DISABLED"
+      }
+    },
+    "schedulingStrategy": "REPLICA",
+    "enableECSManagedTags": false,
+    "propagateTags": "NONE"
+  }
+}
