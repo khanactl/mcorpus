@@ -18,6 +18,8 @@ target
 # cert files
 *.pem
 *.crt
+*.key
+localhost-certgen.sh
 
 # aws
 aws-env*
