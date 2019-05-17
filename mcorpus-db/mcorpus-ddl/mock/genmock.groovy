@@ -381,9 +381,9 @@ class Member {
   }
 
   static void moutHeaders(FileWriter fwMem, FileWriter fwMaut, fwAdd) {
-    fwMem.write("mid,emp_id,location,name_first,name_middle,name_last,display_name\n")
-    fwMaut.write("mid,dob,ssn,email_personal,email_work,mobile_phone,home_phone,work_phone,fax,username,pswd\n")
-    fwAdd.write("mid,address_name,attn,street1,street2,city,state,postal_code,country\n")
+    if(fwMem != null) fwMem.write("mid,emp_id,location,name_first,name_middle,name_last,display_name\n")
+    if(fwMaut != null) fwMaut.write("mid,dob,ssn,email_personal,email_work,mobile_phone,home_phone,work_phone,fax,username,pswd\n")
+    if(fwAdd != null) fwAdd.write("mid,address_name,attn,street1,street2,city,state,postal_code,country\n")
   }
 
   static void moutMember(Member m, FileWriter fwMem, FileWriter fwMaut, fwAdd) {
@@ -412,18 +412,27 @@ class Member {
    */
   static void mout(Data d, int n) {    
     File fmem = new File('mout-member.csv')
-    // fmem.createNewFile()
-    FileWriter fwMem = new FileWriter(fmem)
+    boolean fmemExists = fmem.exists()
+    if(!fmemExists) fmem.createNewFile()
+    FileWriter fwMem = new FileWriter(fmem, fmemExists)
     
     File fmaut = new File('mout-mauth.csv')
-    // fmaut.createNewFile()
-    FileWriter fwMaut = new FileWriter(fmaut)
+    boolean fmautExists = fmaut.exists()
+    if(!fmautExists) fmaut.createNewFile()
+    FileWriter fwMaut = new FileWriter(fmaut, fmautExists)
     
     File fadd = new File('mout-maddress.csv')
-    // fadd.createNewFile()
-    FileWriter fwAdd = new FileWriter(fadd)
+    boolean faddExists = fadd.exists()
+    if(!faddExists) fadd.createNewFile()
+    FileWriter fwAdd = new FileWriter(fadd, faddExists)
 
-    moutHeaders(fwMem, fwMaut, fwAdd)
+    // output headers dependening on if the file exists already or not
+    // if the file exists, assume the headers are already present 
+    moutHeaders(
+      fmemExists ? null : fwMem, 
+      fmautExists ? null : fwMaut, 
+      faddExists ? null : fwAdd
+    )
     
     for(int i = 0; i < n; i++) {
       Member m = new Member(d)
