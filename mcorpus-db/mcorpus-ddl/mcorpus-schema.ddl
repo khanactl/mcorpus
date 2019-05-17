@@ -118,7 +118,7 @@ create table mcuser (
   pswd                    text not null,
   status                  mcuser_status not null default 'ACTIVE'::mcuser_status,
 
-  roles                   mcuser_role[]
+  roles                   mcuser_role[],
 
   unique(username)
 );

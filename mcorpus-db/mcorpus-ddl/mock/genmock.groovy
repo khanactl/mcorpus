@@ -412,15 +412,15 @@ class Member {
    */
   static void mout(Data d, int n) {    
     File fmem = new File('mout-member.csv')
-    fmem.createNewFile()
+    // fmem.createNewFile()
     FileWriter fwMem = new FileWriter(fmem)
     
     File fmaut = new File('mout-mauth.csv')
-    fmaut.createNewFile()
+    // fmaut.createNewFile()
     FileWriter fwMaut = new FileWriter(fmaut)
     
     File fadd = new File('mout-maddress.csv')
-    fadd.createNewFile()
+    // fadd.createNewFile()
     FileWriter fwAdd = new FileWriter(fadd)
 
     moutHeaders(fwMem, fwMaut, fwAdd)
