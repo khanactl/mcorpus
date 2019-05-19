@@ -152,26 +152,26 @@
 
       <!-- copy log4j2 deps to build output dir -->
       <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-log4j2-deps</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-						  <includeGroupIds>org.apache.logging.log4j, com.lmax</includeGroupIds>
-							<outputDirectory>${project.build.directory}</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-log4j2-deps</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>org.apache.logging.log4j, com.lmax</includeGroupIds>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
               <stripVersion>false</stripVersion>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       
       <!-- gql-server uber-jar -->
       <plugin>
@@ -222,7 +222,7 @@
           </execution>
         </executions>
       </plugin>
-			
+      
       <!-- aws zip assembly -->
       <!--
       <plugin>
