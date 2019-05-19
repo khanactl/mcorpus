@@ -170,7 +170,7 @@ create type mcuser_audit_type as enum (
 comment on type mcuser_audit_type is 'The allowed mcuser audit types.';
 
 create table mcuser_audit (
-  uid                     uuid not null REFERENCES mcuser ON DELETE SET NULL,
+  uid                     uuid not null REFERENCES mcuser ON DELETE CASCADE,
   created                 timestamp not null default now(),
   type                    mcuser_audit_type not null,
   request_timestamp       timestamp not null,
@@ -667,7 +667,7 @@ create table member_audit (
   request_origin          text not null,
 
   primary key (created, type),
-  foreign key ("mid") references member ("mid") on delete set null
+  foreign key ("mid") references member ("mid") on delete cascade
 );
 comment on type member_audit is 'Log of member events.';
 
