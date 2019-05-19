@@ -17,11 +17,10 @@ JAVA_OPTS=(
 )
 
 docker run \
-  --add-host=localbox:10.0.6.5 \
   -p 5150:5150/tcp -p 5432/tcp \
   -e JAVA_OPTS="${JAVA_OPTS[*]}" \
   -e MCORPUS_DB_DATA_SOURCE_CLASS_NAME='org.postgresql.ds.PGSimpleDataSource' \
-  -e MCORPUS_DB_URL='jdbc:postgresql://localbox:5432/mcorpus?user=mcweb&password=aPvumfTgxv2A/butD/9WrApiF93swos890X5YFOKwQFZ&ssl=false' \
+  -e MCORPUS_DB_URL='jdbc:postgresql://host.docker.internal:5432/mcorpus?user=mcweb&password=mcweb&ssl=false' \
   -e MCORPUS_JWT_SALT='4E521B8861508F17C423162845BBC5E916C4FDE82A73B6E2BE292DDA7AEE6FF6' \
   -e MCORPUS_JWT_TTL_IN_MILLIS='172800000' \
   -e MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES='11' \
