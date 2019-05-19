@@ -21,7 +21,6 @@ import static org.junit.Assert.fail;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import com.tll.UnitTest;
@@ -51,6 +50,7 @@ public class MCorpusRepoTest {
 
   private static final Logger log = LoggerFactory.getLogger(MCorpusRepoTest.class);
 
+  /*
   private static final Random rand = new Random();
   
   public static String randomEmpId() {
@@ -64,9 +64,10 @@ public class MCorpusRepoTest {
   public static Location randomLocation() {
     return Location.values()[rand.nextInt(Location.values().length)];
   }
+  */
 
-  static final String           TEST_MEMBER_EMP_ID = randomEmpId();
-  static final Location         TEST_MEMBER_LOCATION = randomLocation();
+  static final String           TEST_MEMBER_EMP_ID = "00-0000000";
+  static final Location         TEST_MEMBER_LOCATION = Location._01;
   static final String           TEST_MEMBER_FIRST_NAME = "Jake";
   static final String           TEST_MEMBER_MIDDLE_NAME = "Arthur";
   static final String           TEST_MEMBER_LAST_NAME = "McGidrich";
