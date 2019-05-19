@@ -3,8 +3,10 @@ package com.tll.mcorpus.web;
 import static com.tll.TestUtil.cpr;
 import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
 import static com.tll.mcorpus.McorpusTestUtil.jwt;
+import static com.tll.mcorpus.McorpusTestUtil.testDslMcweb;
 import static com.tll.mcorpus.McorpusTestUtil.testJwtBackendHandler;
 import static com.tll.mcorpus.McorpusTestUtil.testJwtResponseProvider;
+import static com.tll.mcorpus.db.Tables.MEMBER;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,6 +36,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 
+
 @Category(UnitTest.class)
 public class MCorpusGraphQLTest {
   private static final Logger log = LoggerFactory.getLogger(MCorpusGraphQLTest.class);
@@ -45,6 +48,10 @@ public class MCorpusGraphQLTest {
   static final ObjectMapper mapper = new ObjectMapper();
 
   static final TypeReference<Map<String, Object>> strObjMapTypeRef = new TypeReference<Map<String, Object>>() { };
+
+  static UUID queryRandomMemberId() {
+    return testDslMcweb().select(MEMBER.MID).from(MEMBER).limit(1).fetchOne().value1();
+  }
 
   /**
    * Converts a JSON string to a map.
@@ -193,7 +200,12 @@ public class MCorpusGraphQLTest {
   @Test
   public void testSchemaQuery() {
     log.info("Testing mcorpus gql with simple query..");
-    final ExecutionResult result = queryNoContext("query { mrefByMid(mid: \"bLYU_FNrT6O3T917UPSAbw==\") { mid\nempId\nlocation} }");
+    final ExecutionResult result = queryNoContext(
+      String.format(
+        "query { mrefByMid(mid: \"%s\") { mid\nempId\nlocation} }",
+        queryRandomMemberId()
+      )
+    );
     assertNotNull(result);
     assertTrue(result.getErrors().isEmpty());
     final Map<?, ?> rmap = result.getData();
@@ -203,8 +215,10 @@ public class MCorpusGraphQLTest {
 
   @Test
   public void testSimpleQueryParse() throws Exception {
-    final String initialQuery = "{\"query\":\"{\\n  mrefByMid(mid: \\\"bLYU_FNrT6O3T917UPSAbw==\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}";
-
+    final String initialQuery = String.format(
+      "{\"query\":\"{\\n  mrefByMid(mid: \\\"%s\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}", 
+      queryRandomMemberId()
+    );
     final Map<String, Object> qmap = jsonStringToMap(initialQuery);
     log.info("qmap: {}", qmap);
 
