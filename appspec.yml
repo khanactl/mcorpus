@@ -4,11 +4,11 @@ os: linux
 files:
   - source: disruptor-3.4.2.jar
     destination: /home/ec2-user/webapp
-  - source: log4j-api-2.11.1.jar
+  - source: log4j-api-2.11.2.jar
     destination: /home/ec2-user/webapp
-  - source: log4j-core-2.11.1.jar
+  - source: log4j-core-2.11.2.jar
     destination: /home/ec2-user/webapp
-  - source: log4j-slf4j-impl-2.11.1.jar
+  - source: log4j-slf4j-impl-2.11.2.jar
     destination: /home/ec2-user/webapp
   - source: log4j2-aws.xml
     destination: /home/ec2-user/webapp

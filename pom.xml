@@ -18,7 +18,7 @@
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 
-    <log4j2.version>2.11.1</log4j2.version>
+    <log4j2.version>2.11.2</log4j2.version>
     <slf4j-api.version>1.7.25</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
@@ -27,14 +27,14 @@
     <jooq.version>3.11.11</jooq.version>
     <hikari-cp.version>3.3.1</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>7.1</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>7.2.1</nimbus-jose-jwt.version>
 
     <guava.version>27.1-jre</guava.version>
     <guice.version>4.2.2</guice.version>
     
     <caffeine.version>2.7.0</caffeine.version>
     
-    <jackson.version>2.9.8</jackson.version>
+    <jackson.version>2.9.9</jackson.version>
     
     <netty.version>4.1.36.Final</netty.version>
     <ratpack.version>1.6.1</ratpack.version>
