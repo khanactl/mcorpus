@@ -474,7 +474,7 @@ public class MCorpusGraphQL {
       .type("McuserHistory", typeWiring -> typeWiring
         .dataFetcher("uid", env -> {
           final McuserHistory mh = env.getSource();
-          return mh.uid;
+          return uuidToToken(mh.uid);
         })
         .dataFetcher("logins", env -> {
           final McuserHistory mh = env.getSource();
@@ -490,7 +490,7 @@ public class MCorpusGraphQL {
       .type("McuserLoginEvent", typeWiring -> typeWiring
         .dataFetcher("jwtId", env -> {
           final LoginEvent le = env.getSource();
-          return le.jwtId;
+          return uuidToToken(le.jwtId);
         })
         .dataFetcher("timestamp", env -> {
           final LoginEvent le = env.getSource();
@@ -502,7 +502,7 @@ public class MCorpusGraphQL {
       .type("McuserLogoutEvent", typeWiring -> typeWiring
         .dataFetcher("jwtId", env -> {
           final LogoutEvent le = env.getSource();
-          return le.jwtId;
+          return uuidToToken(le.jwtId);
         })
         .dataFetcher("timestamp", env -> {
           final LogoutEvent le = env.getSource();
