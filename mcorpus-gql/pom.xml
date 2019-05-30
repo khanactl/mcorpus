@@ -22,15 +22,7 @@
 
   <properties>
     <mcorpus-build.mode>DEV</mcorpus-build.mode>
-    
     <mcorpus-db.version>1.4.5</mcorpus-db.version>
-    
-    <aws.accountId>524006177124</aws.accountId>
-    <aws.targetRegion>us-west-2</aws.targetRegion>
-
-    <docker.image.prefix>${aws.accountId}.dkr.ecr.${aws.targetRegion}.amazonaws.com</docker.image.prefix>
-    <docker.image.name>${project.artifactId}</docker.image.name>
-    <docker.image.tag>${project.version}-${timestamp}</docker.image.tag>
   </properties>
 
   <profiles>
@@ -49,16 +41,6 @@
   </profiles>
 
   <build>
-    <!--
-    <extensions>
-      <extension>
-        <groupId>kr.motd.maven</groupId>
-        <artifactId>os-maven-plugin</artifactId>
-        <version>1.5.0.Final</version>
-      </extension>
-    </extensions>
-    -->
-
     <resources>
       <resource>
         <directory>src/main/resources</directory>
@@ -269,48 +251,6 @@
         </executions>
       </plugin>
       -->
-
-      <!-- docker -->
-      <!-- https://github.com/spotify/dockerfile-maven/blob/master/docs/usage.md -->
-      <!-- 
-        -Ddockerfile.skip         skips the docker plugin entirely
-        -Ddockerfile.push.skip    skip the docker push phase only
-      -->
-      <plugin>
-        <groupId>com.spotify</groupId>
-        <artifactId>dockerfile-maven-plugin</artifactId>
-        <configuration>
-          <contextDirectory>target</contextDirectory><!-- must use relative path -->
-          <repository>${docker.image.prefix}/${docker.image.name}</repository>
-          <tag>${docker.image.tag}</tag>
-        </configuration>
-        <executions>
-          <execution>
-            <id>default</id>
-            <phase>package</phase>
-            <goals>
-              <goal>build</goal>
-              <goal>push</goal>
-            </goals>
-          </execution>
-          <!--
-          <execution>
-            <id>build</id>
-            <phase>package</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>push</goal>
-            </goals>
-          </execution>
-          -->
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
