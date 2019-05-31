@@ -16,7 +16,6 @@ phases:
   pre_build:
     commands:
       - echo Test started on `date`
-      
       - aws --version
       - docker --version
       - mvn --version
@@ -35,7 +34,7 @@ phases:
       - mvn -DskipTests package
 
       - echo Building the Docker image...
-      - cd target
+      - cd mcorpus-gql/target
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
@@ -44,7 +43,7 @@ phases:
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '[{"name":"mcorpus-ecs-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"mcorpus-gql","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
       
       - echo Build completed on `date`
 artifacts:
