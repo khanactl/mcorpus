@@ -47,4 +47,5 @@ phases:
       
       - echo Build completed on `date`
 artifacts:
-    files: imagedefinitions.json
+    files: mcorpus-gql/target/imagedefinitions.json
+discard-paths: yes
