@@ -7,16 +7,23 @@ env:
 
 phases:
   install:
+    runtime-versions:
+      java: openjdk8
+      docker: 18
     commands:
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
   pre_build:
     commands:
       - echo Test started on `date`
+      
+      - aws --version
+      - docker --version
+      - mvn --version
+      
       - mvn clean test
       
       - echo Logging in to Amazon ECR...
-      - aws --version
       - echo $AWS_DEFAULT_REGION
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=524006177124.dkr.ecr.us-west-2.amazonaws.com/mcorpus-gql
