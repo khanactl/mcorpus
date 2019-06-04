@@ -9,7 +9,7 @@ phases:
   install:
     commands:
       # Upgrade AWS CLI to the latest version
-      - pip install --upgrade awscli
+      # - pip install --upgrade awscli
   pre_build:
     commands:
       - echo Test started on `date`
@@ -24,7 +24,7 @@ phases:
 
 artifacts:
   files:
-    - appspec.yml
+    - appspec-ec2.yml
     - mcorpus-gql/target/aws/appStart.sh
     - mcorpus-gql/target/aws/appStop.sh
     - mcorpus-gql/target/aws/appValidate.sh
