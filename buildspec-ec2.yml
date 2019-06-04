@@ -9,7 +9,7 @@ phases:
   install:
     commands:
       # Upgrade AWS CLI to the latest version
-      # - pip install --upgrade awscli
+      - pip install --upgrade awscli
   pre_build:
     commands:
       - echo Test started on `date`
