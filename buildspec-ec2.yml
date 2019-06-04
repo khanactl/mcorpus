@@ -7,12 +7,19 @@ env:
 
 phases:
   install:
+    runtime-versions:
+      java: openjdk8
+      docker: 18
     commands:
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
   pre_build:
     commands:
       - echo Test started on `date`
+      - aws --version
+      - docker --version
+      - mvn --version
+      
       - mvn clean test
   build:
     commands:
