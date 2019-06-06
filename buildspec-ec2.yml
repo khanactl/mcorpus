@@ -7,12 +7,19 @@ env:
 
 phases:
   install:
+    runtime-versions:
+      java: openjdk8
+      docker: 18
     commands:
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
   pre_build:
     commands:
       - echo Test started on `date`
+      - aws --version
+      - docker --version
+      - mvn --version
+      
       - mvn clean test
   build:
     commands:
@@ -24,7 +31,7 @@ phases:
 
 artifacts:
   files:
-    - appspec.yml
+    - appspec-ec2.yml
     - mcorpus-gql/target/aws/appStart.sh
     - mcorpus-gql/target/aws/appStop.sh
     - mcorpus-gql/target/aws/appValidate.sh
