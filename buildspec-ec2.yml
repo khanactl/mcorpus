@@ -31,7 +31,7 @@ phases:
 
 artifacts:
   files:
-    - appspec-ec2.yml
+    - appspec.yml
     - mcorpus-gql/target/aws/appStart.sh
     - mcorpus-gql/target/aws/appStop.sh
     - mcorpus-gql/target/aws/appValidate.sh
