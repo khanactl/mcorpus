@@ -14,8 +14,6 @@ files:
     destination: /home/ec2-user/webapp
   - source: mcorpus-gql-server.jar
     destination: /home/ec2-user/webapp
-  - source: run.sh
-    destination: /home/ec2-user/webapp
 permissions:
   - object: /home/ec2-user/webapp
     pattern: "*.jar"

@@ -18,5 +18,17 @@ export RATPACK_SERVER__DEVELOPMENT=false
 export RATPACK_SERVER__PORT=5150
 export RATPACK_SERVER__PUBLIC_ADDRESS=https://www.mcorpus-aws.net
 
+JAVA_OPTS=(
+  '-server'
+  '-Xms64M'
+  '-Xmx768M'
+  '-Djava.net.preferIPv4Stack=true'
+  '-Dlog4j.configurationFile=log4j2-aws.xml'
+  '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector'
+  '-cp log4j-api-2.11.2.jar:log4j-core-2.11.2.jar:log4j-slf4j-impl-2.11.2.jar:disruptor-3.4.2.jar'
+)
+
 cd /home/ec2-user/webapp
-./run.sh >/dev/null 2>&1 &
+
+exec java ${JAVA_OPTS[*]} -jar mcorpus-gql-server.jar >/dev/null 2>&1 &
+
