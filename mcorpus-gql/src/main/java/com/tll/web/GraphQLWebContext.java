@@ -127,6 +127,6 @@ public class GraphQLWebContext {
   
   @Override
   public String toString() {
-    return String.format("op: %s qry: %s - %n%s%n", getOperationName(), getQueryMethodName(), query);
+    return String.format("qry: %s", getQueryMethodName());
   }
 }

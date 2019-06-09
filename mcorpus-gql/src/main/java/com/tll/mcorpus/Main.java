@@ -59,14 +59,18 @@ public class Main {
         .module(MCorpusWebModule.class)
       ))
       .handlers(chain -> chain
-        .all(RequestLogger.ncsa()) // log all incoming requests
+        // .all(RequestLogger.ncsa()) // log all incoming requests (too chatty)
 
         // redirect to /index if coming in under /
         .path(redirect(301, "index"))
 
+        // health check
+        .get("health", ctx -> ctx.render("ok"))
+
         // graphql/
         .prefix("graphql", chainsub -> chainsub
-         
+          .all(RequestLogger.ncsa()) // log all graphql requests
+          
           // the mcorpus GraphQL api (post only)
           .post(JWTStatusHandler.class)
           .post(CsrfGuardByCookieAndHeaderHandler.class)
@@ -79,8 +83,11 @@ public class Main {
         )
 
         // mcorpus graphql api html landing page
-        .get("index", ctx -> ctx.render(ctx.file("templates/index.html")))
-
+        .prefix("index", chainsub -> chainsub
+          .all(RequestLogger.ncsa())
+          .get(ctx -> ctx.render(ctx.file("templates/index.html")))
+        )
+        
         .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")))
       )
     );

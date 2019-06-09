@@ -267,17 +267,7 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
   @Override
   public String toString() {
     return String.format(
-        "RequestSnapshot [%n"
-        + "  requestInstant=%s,%n"
-        + "  clientOrigin=%s, %n"
-        + "  jwtCookie %s, %n"
-        + "  rstCookie=%s, %n"
-        + "  rstHeader=%s %n"
-        + "]",
-        requestInstant, 
-        clientOrigin,
-        jwtCookie == null ? "--NOT present--" : "-present-", 
-        rstCookie, 
-        rstHeader);
+      "Request ClientOrigin: %s", clientOrigin
+    );
   }
 }

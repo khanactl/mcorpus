@@ -47,7 +47,7 @@ public class RequestUtil {
     catch(NotInRegistryException e) {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
-      glog().debug("Request snapshot taken and cached in request.\n{}\n", rs);
+      glog().info(rs.toString());
       return rs;
     }
   }
