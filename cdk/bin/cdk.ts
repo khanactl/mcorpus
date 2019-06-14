@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import cdk = require('@aws-cdk/cdk');
-import { CdkStack } from '../lib/cdk-stack';
+import { McorpusVpc } from '../lib/mcorpus-vpc';
 
 const app = new cdk.App();
-new CdkStack(app, 'CdkStack');
+new McorpusVpc(app, 'McorpusVpc');
