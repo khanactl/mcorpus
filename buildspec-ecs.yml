@@ -48,6 +48,6 @@ phases:
       - echo Build completed on `date`
 artifacts:
   files: 
-    - appspec.yml
+    - appspec.yaml
     - mcorpus-gql/target/imageDetail.json
   discard-paths: yes

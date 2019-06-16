@@ -1,0 +1,10 @@
+# for ECS deployents
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "arn:aws:ecs:us-west-2:524006177124:task-definition/mcorpus-gql:15"
+        LoadBalancerInfo:
+          ContainerName: "mcorpus-gql"
+          ContainerPort: 5150
