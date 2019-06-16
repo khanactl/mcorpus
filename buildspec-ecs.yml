@@ -42,10 +42,12 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"mcorpus-gql","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Writing image detail file...
+      - printf '[{"name":"mcorpus-gql","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
       
       - echo Build completed on `date`
 artifacts:
-    files: mcorpus-gql/target/imagedefinitions.json
-discard-paths: yes
+  files: 
+    - appspec.yml
+    - mcorpus-gql/target/imageDetail.json
+  discard-paths: yes
