@@ -4,7 +4,7 @@ Resources:
   - TargetService:
       Type: AWS::ECS::Service
       Properties:
-        TaskDefinition: "arn:aws:ecs:us-west-2:524006177124:task-definition/mcorpus-gql:16"
+        TaskDefinition: "arn:aws:ecs:us-west-2:524006177124:task-definition/mcorpus-gql:17"
         LoadBalancerInfo:
           ContainerName: "mcorpus-gql"
           ContainerPort: 5150
