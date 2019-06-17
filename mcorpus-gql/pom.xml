@@ -117,6 +117,7 @@
                   <includes>
                     <include>log4j2-*.xml</include>
                     <include>Dockerfile</include>
+                    <include>dockerbuild.sh</include>
                   </includes>
                 </resource>
                 <resource>
@@ -228,7 +229,6 @@
       </plugin>
       -->
 
-      <!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -243,14 +243,13 @@
             <configuration>
               <executable>chmod</executable>
               <arguments>
-                <argument>+x</argument>
-                <argument>${project.build.directory}/dockstart.sh</argument>
+                <argument>u+x</argument>
+                <argument>${project.build.directory}/dockerbuild.sh</argument>
               </arguments>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      -->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
