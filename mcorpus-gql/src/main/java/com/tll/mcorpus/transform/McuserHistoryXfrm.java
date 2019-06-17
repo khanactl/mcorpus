@@ -14,14 +14,14 @@ public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHist
 
   public static List<McuserHistory.LoginEvent> backToFrontLogin(final List<McuserHistoryDomain.LoginEventDomain> blist) {
     return isNull(blist) ? null : blist.stream()
-      .map(b -> new McuserHistory.LoginEvent(b.jwtId, b.timestamp))
+      .map(b -> new McuserHistory.LoginEvent(b.jwtId, b.timestamp, b.requestOrigin))
       .collect(Collectors.toList())
     ;
   }
 
   public static List<McuserHistory.LogoutEvent> backToFrontLogout(final List<McuserHistoryDomain.LogoutEventDomain> blist) {
     return isNull(blist) ? null : blist.stream()
-      .map(b -> new McuserHistory.LogoutEvent(b.jwtId, b.timestamp))
+      .map(b -> new McuserHistory.LogoutEvent(b.jwtId, b.timestamp, b.requestOrigin))
       .collect(Collectors.toList())
     ;
   }

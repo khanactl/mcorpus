@@ -496,6 +496,10 @@ public class MCorpusGraphQL {
           final LoginEvent le = env.getSource();
           return le.timestamp;
         })
+        .dataFetcher("clientOrigin", env -> {
+          final LoginEvent le = env.getSource();
+          return le.clientOrigin;
+        })
       )
 
       // McuserLogoutEvent
@@ -507,6 +511,10 @@ public class MCorpusGraphQL {
         .dataFetcher("timestamp", env -> {
           final LogoutEvent le = env.getSource();
           return le.timestamp;
+        })
+        .dataFetcher("clientOrigin", env -> {
+          final LogoutEvent le = env.getSource();
+          return le.clientOrigin;
         })
       )
 

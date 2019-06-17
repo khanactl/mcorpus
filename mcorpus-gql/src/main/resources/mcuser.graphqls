@@ -73,6 +73,8 @@ type McuserLoginEvent {
   jwtId: ID
   # the login timestamp
   timestamp: Date
+  # the client origin
+  clientOrigin: String
 }
 
 # a single mcuser logout event
@@ -81,6 +83,8 @@ type McuserLogoutEvent {
   jwtId: ID
   # the logout timestamp
   timestamp: Date
+  # the client origin
+  clientOrigin: String
 }
 
 # mcuser status

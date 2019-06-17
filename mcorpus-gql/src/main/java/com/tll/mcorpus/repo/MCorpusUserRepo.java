@@ -34,7 +34,7 @@ import com.tll.mcorpus.dmodel.McuserHistoryDomain.LogoutEventDomain;
 import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
-import org.jooq.Record3;
+import org.jooq.Record4;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
@@ -133,8 +133,8 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<McuserHistoryDomain> mcuserHistory(final UUID uid) {
     if(uid == null) return new FetchResult<>(null, "No mcuser id provided.");
     try {
-      final Result<Record3<UUID, Timestamp, McuserAuditType>> result = dsl
-        .select(MCUSER_AUDIT.JWT_ID, MCUSER_AUDIT.CREATED, MCUSER_AUDIT.TYPE)
+      final Result<Record4<UUID, Timestamp, String, McuserAuditType>> result = dsl
+        .select(MCUSER_AUDIT.JWT_ID, MCUSER_AUDIT.CREATED, MCUSER_AUDIT.REQUEST_ORIGIN, MCUSER_AUDIT.TYPE)
         .from(MCUSER_AUDIT)
         .where(MCUSER_AUDIT.UID.eq(uid))
         .orderBy(MCUSER_AUDIT.CREATED.desc())
@@ -142,17 +142,18 @@ public class MCorpusUserRepo implements Closeable {
       if(result.isNotEmpty()) {
         final List<LoginEventDomain> logins = new ArrayList<>();
         final List<LogoutEventDomain> logouts = new ArrayList<>();
-        final Iterator<Record3<UUID, Timestamp, McuserAuditType>> itr = result.iterator();
+        final Iterator<Record4<UUID, Timestamp, String, McuserAuditType>> itr = result.iterator();
         while(itr.hasNext()) {
-          Record3<UUID, Timestamp, McuserAuditType> rec = itr.next();
+          Record4<UUID, Timestamp, String, McuserAuditType> rec = itr.next();
           UUID jwtId = rec.get(MCUSER_AUDIT.JWT_ID);
           Timestamp created = rec.get(MCUSER_AUDIT.CREATED);
+          String requestOrigin = rec.get(MCUSER_AUDIT.REQUEST_ORIGIN);
           switch(rec.get(MCUSER_AUDIT.TYPE)) {
             case LOGIN:
-              logins.add(new LoginEventDomain(jwtId, created));
+              logins.add(new LoginEventDomain(jwtId, created, requestOrigin));
               break;
             case LOGOUT:
-              logouts.add(new LogoutEventDomain(jwtId, created));
+              logouts.add(new LogoutEventDomain(jwtId, created, requestOrigin));
               break;
             default:
               throw new Exception("Unhandled mcuser audit type.");

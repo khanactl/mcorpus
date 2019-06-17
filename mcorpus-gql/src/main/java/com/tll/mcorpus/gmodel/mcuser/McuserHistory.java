@@ -15,20 +15,24 @@ public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
   public static class LoginEvent {
     public final UUID jwtId;
     public final Date timestamp;
+    public final String clientOrigin;
 
-    public LoginEvent(UUID jwtId, Date timestamp) {
+    public LoginEvent(UUID jwtId, Date timestamp, String clientOrigin) {
       this.jwtId = jwtId;
       this.timestamp = copy(timestamp);
+      this.clientOrigin = clientOrigin;
     }
   }
 
   public static class LogoutEvent {
     public final UUID jwtId;
     public final Date timestamp;
+    public final String clientOrigin;
 
-    public LogoutEvent(UUID jwtId, Date timestamp) {
+    public LogoutEvent(UUID jwtId, Date timestamp, String clientOrigin) {
       this.jwtId = jwtId;
       this.timestamp = copy(timestamp);
+      this.clientOrigin = clientOrigin;
     }
   }
 
