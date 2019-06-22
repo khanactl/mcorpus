@@ -258,4 +258,9 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     log.error("JWT user '{}' logout failed.", jwtStatus.userId());
     return false;
   }
+
+  @Override
+  public String toString() {
+    return String.format("qry: %s, %s", getQueryMethodName(), jwtStatus);
+  }
 }

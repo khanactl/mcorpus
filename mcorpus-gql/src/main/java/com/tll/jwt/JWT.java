@@ -127,6 +127,7 @@ public class JWT {
    */
   public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq) 
       throws Exception {
+    final String requestId = httpreq.getRequestId();
     final long requestTimestamp = httpreq.getRequestInstant().toEpochMilli();
     final long loginExpirationTimestamp = requestTimestamp + jwtCookieTtlInMillis;
     final String audience = httpreq.getClientOrigin();
@@ -156,7 +157,10 @@ public class JWT {
       jweObject.encrypt(new DirectEncrypter(jkey.getEncoded()));
       return jweObject.serialize();
     } catch (Exception e) {
-      throw new Exception("JWT signing/encryption error: " + e.getMessage());
+      throw new Exception(String.format("JWT signing/encryption error '%s' for request %s.", 
+        e.getMessage(), 
+        requestId
+      ));
     }
   }
 
@@ -179,9 +183,12 @@ public class JWT {
    * @return Never-null {@link JWTHttpRequestStatus}.
    */
   public JWTHttpRequestStatus jwtHttpRequestStatus(final IJwtHttpRequestProvider httpreq, IJwtBackendHandler jbsp) {
+    
+    final String requestId = isNull(httpreq) ? "UNKNOWN" : httpreq.getRequestId();
+    
     // present?
     if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwtCookie())) 
-      return JWTHttpRequestStatus.create(JWTStatus.NOT_PRESENT_IN_REQUEST);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.NOT_PRESENT_IN_REQUEST);
     
     // decrypt JWT cookie
     final JWEObject jweObject;
@@ -189,8 +196,8 @@ public class JWT {
       jweObject = JWEObject.parse(httpreq.getJwtCookie());
       jweObject.decrypt(new DirectDecrypter(jkey.getEncoded()));
     } catch (Exception e) {
-      log.error("JWT decrypt error: {}", e.getMessage());
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_TOKEN);
+      log.error("JWT decrypt error '{}' for request {}.", e.getMessage(), requestId);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_TOKEN);
     }
     
     // parse to object
@@ -199,8 +206,8 @@ public class JWT {
       sjwt = jweObject.getPayload().toSignedJWT();
       if(sjwt == null) throw new Exception();
     } catch (Exception e) {
-      log.error("JWT un-signing error: {}", e.getMessage());
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_TOKEN);
+      log.error("JWT un-signing error '{}' for request {}.'", e.getMessage(), requestId);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_TOKEN);
     }
     
     // verify signature
@@ -208,8 +215,8 @@ public class JWT {
       if(not(sjwt.verify(new MACVerifier(jkey.getEncoded())))) 
         throw new Exception();
     } catch (Exception e) {
-      log.error("JWT verify signature error: {}", e.getMessage());
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_SIGNATURE);
+      log.error("JWT verify signature error '{}' for request {}.'", e.getMessage(), requestId);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_SIGNATURE);
     }
     
     // extract and verify the held JWT claims
@@ -243,32 +250,35 @@ public class JWT {
         || isNullOrEmpty(jwtAudience)
         // NOTE: roles claim is optional
       ) {
-        throw new Exception("One or more missing required claims.");
+        throw new Exception(String.format("JWT one or more missing required claims for request %s.", requestId));
       }
       
-      log.debug("JWT issuer: {}, audience: {}", issuer, jwtAudience);
+      log.debug("JWT id: {}, issuer: {}, audience: {}, request: {}.", jwtId, issuer, jwtAudience, requestId);
     }
     catch (Exception e) {
-      log.error("JWT bad claims: {}", e.getMessage());
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
+      log.error("JWT bad claims '{}' for request {}.'", e.getMessage(), requestId);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_CLAIMS);
     }
     
     // verify issuer (this server's public host name)
     if(not(issuer.equals(serverIssuer))) {
-      log.error("JWT bad issuer: {} (expected: {})", issuer, serverIssuer);
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
+      log.error("JWT {} bad issuer: {} (expected: {}) for request {}.", jwtId, issuer, serverIssuer, requestId);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_CLAIMS);
     }
     
     // verify audience (client origin)
     if(not(httpreq.verifyClientOrigin(jwtAudience))) {
-      log.error("JWT client origin mis-match (JWT: {} (current request: {})", jwtAudience, httpreq.getClientOrigin());
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
+      log.error(
+        "JWT {} client origin mis-match (JWT: {} (current request: {}) for request {}.", 
+        jwtId, jwtAudience, httpreq.getClientOrigin(), requestId
+      );
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_CLAIMS);
     }
     
     // expired? (check for exp. time in the past)
     if(new Date().after(new Date(expires))) {
-      log.info("JWT expired for JWT ID: {}", jwtId);
-      return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
+      log.info("JWT {} expired for request {}.", jwtId, requestId);
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
     }
     
     // Backend verification:
@@ -283,10 +293,12 @@ public class JWT {
       new FetchResult<>(JwtBackendStatus.NOT_PRESENT, null) : 
       jbsp.getBackendJwtStatus(jwtId);
     if(isNull(fr) || isNull(fr.get())) {
-      log.error("JWT (jwtId: {}) fetch backend status error: {}", 
+      log.error("JWT {} fetch backend status error '{}' for request {}.", 
         jwtId, 
-        isNull(fr) ? "UNKNOWN" : fr.getErrorMsg());
-      return JWTHttpRequestStatus.create(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
+        isNull(fr) ? "UNKNOWN" : fr.getErrorMsg(), 
+        requestId
+      );
+      return JWTHttpRequestStatus.create(requestId, JWTStatus.ERROR, jwtId, userId, null, issued, expires);
     }
     final JwtBackendStatus jwtBackendStatus = fr.get();
     final JWTStatus jwtRequestStatus;
@@ -295,25 +307,25 @@ public class JWT {
     switch(jwtBackendStatus) {
     case NOT_PRESENT:
       // jwt id not found in db - treat as blocked then
-      log.warn("JWT not present on backend.  jwtId: {}", jwtId.toString());
+      log.warn("JWT {} not present in backend for request {}.", jwtId, requestId);
       jwtRequestStatus = JWTStatus.NOT_PRESENT_BACKEND;
       break;
     case PRESENT_BAD_STATE:
       // jwt id found in db but the status could not be determined
-      log.warn("JWT present but status is unknown.  jwtId: {}", jwtId.toString());
+      log.warn("JWT {} present in backend but in bad state for request {}.", jwtId, requestId);
       jwtRequestStatus = JWTStatus.ERROR;
       break;
     case BLACKLISTED:
-      log.warn("JWT blacklisted.  jwtId: {}", jwtId.toString());
+      log.warn("JWT {} blacklisted for request {}.", jwtId, requestId);
       jwtRequestStatus = JWTStatus.BLOCKED;
       break;
     case BAD_USER:
-      log.warn("JWT bad user.  jwtId: {}", jwtId.toString());
+      log.warn("JWT {} bad user for requeset {}.", jwtId, requestId);
       jwtRequestStatus = JWTStatus.BLOCKED;
       break;
     case EXPIRED:
       // jwt (login) expired
-      log.warn("JWT expired.  jwtId: {}", jwtId.toString());
+      log.warn("JWT {} expired for request {}.", jwtId, requestId);
       jwtRequestStatus = JWTStatus.EXPIRED;
       break;
     case VALID:
@@ -323,11 +335,11 @@ public class JWT {
     case ERROR:
     default:
       // unhandled jwt status so convey status as backend error
-      log.error("JWT backend status error: {}!  jwtId: {}", jwtBackendStatus);
+      log.error("JWT {} backend status error '{}' for request {}.", jwtId, jwtBackendStatus, requestId);
       jwtRequestStatus = JWTStatus.ERROR;
       break;
     }
 
-    return JWTHttpRequestStatus.create(jwtRequestStatus, jwtId, userId, roles, issued, expires);
+    return JWTHttpRequestStatus.create(requestId, jwtRequestStatus, jwtId, userId, roles, issued, expires);
   }
 }

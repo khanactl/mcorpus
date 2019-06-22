@@ -11,6 +11,11 @@ import java.time.Instant;
 public interface IJwtHttpRequestProvider {
 
   /**
+   * @return The ascribed id of the assockated http request.
+   */
+  String getRequestId();
+
+  /**
    * @return the instant the associated http request reached the server.
    */
   Instant getRequestInstant();

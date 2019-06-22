@@ -71,6 +71,8 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
   
   private final String clientOrigin;
 
+  private final String requestId;
+
   /**
    * Constructor.
    *
@@ -86,6 +88,7 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
    * @param jwtCookie the http JWT token cookie value
    * @param rstCookie the http request sync token cookie value
    * @param rstHeader the http request sync token http header value
+   * @param requestId the http request id gotten from web layer impl
    */
   public RequestSnapshot(
       Instant requestInstant, 
@@ -99,7 +102,8 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
       String xForwardedPort,
       String jwtCookie, 
       String rstCookie, 
-      String rstHeader
+      String rstHeader,
+      String requestId
   ) {
     super();
     this.requestInstant = requestInstant;
@@ -119,6 +123,8 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
     this.rstHeader = rstHeader;
     
     this.clientOrigin = String.format("%s|%s", nullwiseClean(remoteAddressHost), nullwiseClean(xForwardedFor));
+
+    this.requestId = requestId;
   }
   
   /**
@@ -239,6 +245,15 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
     return rstHeader;
   }
 
+  /**
+   * @return Opaque id associated with this request.
+   *         <p>
+   *         This is mainly intended to correlate log statements.
+   */
+  public String getRequestId() {
+    return requestId;
+  }
+
   @Override
   public boolean verifyClientOrigin(final String clientOrigin) {
     if(isNull(clientOrigin)) return false;
@@ -267,7 +282,9 @@ public class RequestSnapshot implements IJwtHttpRequestProvider {
   @Override
   public String toString() {
     return String.format(
-      "Request ClientOrigin: %s", clientOrigin
+      "Http-Request Id: %s, clientOrigin: %s", 
+      requestId, 
+      clientOrigin 
     );
   }
 }

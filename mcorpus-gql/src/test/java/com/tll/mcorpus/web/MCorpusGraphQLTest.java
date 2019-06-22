@@ -92,13 +92,15 @@ public class MCorpusGraphQLTest {
         "X-Forwarded-Port",
         null, // jwt cookie
         null, // rst cookie
-        null // rst header
+        null, // rst header
+        UUID.randomUUID().toString()
     );
   }
 
   static JWTHttpRequestStatus testJwtStatus(JWTStatus jwtStatus, String roles) {
     final long lnow = System.currentTimeMillis();
     return JWTHttpRequestStatus.create(
+      UUID.randomUUID().toString(), 
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),

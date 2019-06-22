@@ -63,7 +63,9 @@ public class JWTTest {
       "5150",
       null,
       "rst",
-      "rsth");
+      "rsth", 
+      UUID.randomUUID().toString()
+    );
     
       // generate jwt
     String jwt = jwti.jwtGenerate(jwtId, jwtUserId, roles, rsPre);
@@ -82,7 +84,9 @@ public class JWTTest {
       "5150",
       jwt,
       "rst",
-      "rsth");
+      "rsth", 
+      UUID.randomUUID().toString()
+    );
     
     // get jwt status
     JWTHttpRequestStatus jwtStatus = jwti.jwtHttpRequestStatus(rsPost, null);

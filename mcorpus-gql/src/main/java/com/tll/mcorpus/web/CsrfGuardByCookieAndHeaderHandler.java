@@ -56,7 +56,7 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
     // this serves as a way for the clients to sync up and issue a valid subsequent request
     if(isNull(cookieRst) && isNull(headerRst)) {
       final String nextRst = UUID.randomUUID().toString();
-      log.warn("No rst(s) present.  Re-setting with short-lived rst: {}..", nextRst);
+      log.warn("No request sync tokens present in request {}.  Re-setting with short-lived token: {}..", requestSnapshot.getRequestId(), nextRst);
       addRstCookieToResponse(ctx, nextRst, 120); // you got 2 mins to re-submit
       ctx.getResponse().getHeaders().add("rst", nextRst);
       ctx.clientError(205); // 205 - Reset Content
@@ -65,26 +65,26 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
     
     // one of expected 2 rst(s) not present
     if(isNull(cookieRst) || isNull(headerRst)) {
-      log.error("rst missing: cookieRst: {}, headerRst: {}).", cookieRst, headerRst);
+      log.error("Request sync token(s) missing in request {}: cookie: {}, header: {}).", requestSnapshot.getRequestId(), cookieRst, headerRst);
       ctx.clientError(400); // bad request
       return;
     }
     
     // rst match verify (both are non-null)
     if(not(Objects.equals(headerRst, cookieRst))) {
-      log.error("rst mismatch: headerRst: {}, cookieRst: {}.", headerRst, cookieRst);
+      log.error("Request sync token mismatch in request {}: header: {}, cookie: {}.", requestSnapshot.getRequestId(), headerRst, cookieRst);
       ctx.clientError(400); // bad request
       return;
     }
     // rst now verified
-    log.info("rst(s) verified ({}).", headerRst);
+    log.info("Request sync tokens verified for incoming http request {}: {}.", requestSnapshot.getRequestId(), headerRst);
     
     // reset the current rst and provide the new rst in the response
     final String nextRst = UUID.randomUUID().toString();
     // here we set the rst time to live to equal the time to live of the JWT cookie
     addRstCookieToResponse(ctx, nextRst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
     ctx.getResponse().getHeaders().add("rst", nextRst);
-    log.info("long-lived next rst added to response: {}.", nextRst);
+    log.info("Long-lived request sync token added to response {} from request {}.", nextRst, requestSnapshot.getRequestId());
 
     ctx.next(); // we may proceed forward
   }

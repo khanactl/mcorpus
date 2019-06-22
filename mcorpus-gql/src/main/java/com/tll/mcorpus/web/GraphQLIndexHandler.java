@@ -1,6 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.web.RequestUtil.addRstCookieToResponse;
+import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import static com.tll.mcorpus.web.WebFileRenderer.html;
 import static java.util.Collections.singletonMap;
 
@@ -33,7 +34,7 @@ public class GraphQLIndexHandler implements Handler {
     final String rst = UUID.randomUUID().toString();
     addRstCookieToResponse(ctx, rst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
     ctx.render(html("graphql/index.html", singletonMap("rst", rst), true));
-    log.info("GraphiQL page rendered with rst: {}", rst);
+    log.info("GraphiQL page rendered with rst: {} for request {}.", rst, getOrCreateRequestSnapshot(ctx));
   }
 
 }

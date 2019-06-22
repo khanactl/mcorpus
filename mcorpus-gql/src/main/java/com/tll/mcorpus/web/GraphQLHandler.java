@@ -12,6 +12,7 @@ import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.JWTUserGraphQLWebContext;
+import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class GraphQLHandler implements Handler {
   public void handle(Context ctx) throws Exception {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
       
+      final RequestSnapshot rsnap = getOrCreateRequestSnapshot(ctx);
       final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
       
       // grab the http request info
@@ -58,7 +60,7 @@ public class GraphQLHandler implements Handler {
       final JWTUserGraphQLWebContext gqlWebCtx = new JWTUserGraphQLWebContext(
         query, 
         vmap, 
-        getOrCreateRequestSnapshot(ctx), 
+        rsnap, 
         jwtRequestStatus, 
         ctx.get(JWT.class), 
         ctx.get(IJwtBackendHandler.class), 
@@ -69,7 +71,7 @@ public class GraphQLHandler implements Handler {
       
       // validate graphql query request
       if(not(gqlWebCtx.isValid())) {
-        log.error("Invalid graphql query.");
+        log.error("Invalid graphql query in request {}.", rsnap.getRequestId());
         ctx.clientError(403);
         return;
       }
@@ -113,10 +115,10 @@ public class GraphQLHandler implements Handler {
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {
           ctx.render(json(executionResult.toSpecification()));
-          log.info("graphql request handled successfully.");
+          log.info("graphql request handled successfully for request {}.", rsnap.getRequestId());
         } else {
           ctx.render(json(executionResult.getErrors()));
-          log.info("graphql request handled with errors.");
+          log.info("graphql request handled with errors for request {}.", rsnap.getRequestId());
         }
       });
     });

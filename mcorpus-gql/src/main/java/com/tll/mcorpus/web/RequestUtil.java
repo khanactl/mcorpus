@@ -2,11 +2,15 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Main.glog;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.web.RequestSnapshot;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import ratpack.handling.Context;
+import ratpack.handling.RequestId;
 import ratpack.http.Request;
 import ratpack.registry.NotInRegistryException;
 
@@ -47,7 +51,7 @@ public class RequestUtil {
     catch(NotInRegistryException e) {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
-      glog().info(rs.toString());
+      glog().info("Request snapshot taken: {}", rs.toString());
       return rs;
     }
   }
@@ -113,6 +117,8 @@ public class RequestUtil {
    * @return newly created, never null {@link RequestSnapshot} instance.
    */
   private static RequestSnapshot takeRequestSnapshot(final Request req) {
+    final Optional<RequestId> rid = req.maybeGet(RequestId.class);
+    final String requestId = rid.isPresent() ? rid.get().toString() : UUID.randomUUID().toString();
     return new RequestSnapshot(
         req.getTimestamp(),
         req.getRemoteAddress().getHost(),
@@ -125,7 +131,8 @@ public class RequestUtil {
         req.getHeaders().get("X-Forwarded-Port"),
         req.oneCookie("jwt"),
         req.oneCookie("rst"),
-        req.getHeaders().get("rst")
+        req.getHeaders().get("rst"),
+        requestId
     );
   }
 }
