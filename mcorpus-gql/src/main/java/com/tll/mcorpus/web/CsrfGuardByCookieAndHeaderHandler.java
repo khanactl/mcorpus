@@ -82,7 +82,7 @@ public class CsrfGuardByCookieAndHeaderHandler implements Handler {
     // reset the current rst and provide the new rst in the response
     final String nextRst = UUID.randomUUID().toString();
     // here we set the rst time to live to equal the time to live of the JWT cookie
-    addRstCookieToResponse(ctx, nextRst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
+    addRstCookieToResponse(ctx, nextRst, (int) ctx.get(JWT.class).jwtCookieTtl().getSeconds());
     ctx.getResponse().getHeaders().add("rst", nextRst);
     log.info("Long-lived request sync token added to response {} from request {}.", nextRst, requestSnapshot.getRequestId());
 

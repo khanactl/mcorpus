@@ -32,7 +32,7 @@ public class GraphQLIndexHandler implements Handler {
   @Override
   public void handle(Context ctx) throws Exception {
     final String rst = UUID.randomUUID().toString();
-    addRstCookieToResponse(ctx, rst, (int) ctx.get(JWT.class).jwtCookieTtlInSeconds());
+    addRstCookieToResponse(ctx, rst, (int) ctx.get(JWT.class).jwtCookieTtl().getSeconds());
     ctx.render(html("graphql/index.html", singletonMap("rst", rst), true));
     log.info("GraphiQL page rendered with rst: {} for request {}.", rst, getOrCreateRequestSnapshot(ctx));
   }

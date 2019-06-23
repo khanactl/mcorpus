@@ -23,11 +23,11 @@ public class MCorpusServerConfig {
   public String jwtSalt;
   
   /**
-   * The JWT time to live in milli-seconds.
+   * The JWT time to live in seconds.
    * <p>
-   * Default is 2 days (172800000 milli-seconds).
+   * Default is 2 days (172800 seconds).
    */
-  public long jwtTtlInMillis = 172800000L;
+  public long jwtTtlInSeconds = 172800L;
 
   /**
    * The number of minutes the status of JWTs should be held in-memory 

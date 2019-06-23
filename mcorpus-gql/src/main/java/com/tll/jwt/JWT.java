@@ -5,6 +5,7 @@ import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -83,39 +84,32 @@ public class JWT {
   
   private final Logger log = LoggerFactory.getLogger(JWT.class);
   
-  private final long jwtCookieTtlInMillis; 
-  private final long jwtCookieTtlInSeconds;
+  private final Duration jwtCookieTtl;
   private final SecretKey jkey;
   private final String serverIssuer; 
 
   /**
    * Constructor.
    * 
-   * @param jwtCookieTtlInMillis the jwt cookie time to live in milliseconds
+   * @param jwtCookieTtlInSeconds the jwt cookie time to live in seconds
    * @param jwtSharedSecret
    *          the cryptographically strong salt (or shared secret) to be used for
    *          signing and later verifying JWTs
    * @param serverIssuer the expected JWT issuer used to verify received JWTs
    */
-  public JWT(long jwtCookieTtlInMillis, byte[] jwtSharedSecret, String serverIssuer) {
+  public JWT(long jwtCookieTtlInSeconds, byte[] jwtSharedSecret, String serverIssuer) {
     super();
-    this.jwtCookieTtlInMillis = jwtCookieTtlInMillis;
-    this.jwtCookieTtlInSeconds = Math.floorDiv(jwtCookieTtlInMillis, 1000);
+    this.jwtCookieTtl = Duration.ofSeconds(jwtCookieTtlInSeconds);
     this.jkey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = serverIssuer;
     log.info("JWT configured with cookie time-to-live: {} seconds, serverIssuer: {}.", jwtCookieTtlInSeconds, serverIssuer);
   }
 
   /**
-   * @return the configured JWT cookie time to live in milliseconds.
+   * @return the configured JWT cookie time to live duration.
    */
-  public long jwtCookieTtlInMillis() { return jwtCookieTtlInMillis; }
+  public Duration jwtCookieTtl() { return jwtCookieTtl; }
 
-  /**
-   * @return the configured JWT cookie time to live in seconds.
-   */
-  public long jwtCookieTtlInSeconds() { return jwtCookieTtlInSeconds; }
-  
   /**
    * Generate an encrypted and signed JWT.
    * 
@@ -129,8 +123,8 @@ public class JWT {
   public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq) 
       throws Exception {
     final String requestId = httpreq.getRequestId();
-    final Instant requestTimestamp = httpreq.getRequestInstant();
-    final Instant loginExpirationTimestamp = requestTimestamp.plusMillis(jwtCookieTtlInMillis);
+    final Instant requestInstant = httpreq.getRequestInstant();
+    final Instant loginExpiration = requestInstant.plus(jwtCookieTtl);
     final String audience = httpreq.getClientOrigin();
 
     // create signed jwt object
@@ -141,8 +135,8 @@ public class JWT {
         .audience(audience)
         .jwtID(jwtId.toString())
         .subject(userId.toString())
-        .issueTime(Date.from(requestTimestamp))
-        .expirationTime(Date.from(loginExpirationTimestamp))
+        .issueTime(Date.from(requestInstant))
+        .expirationTime(Date.from(loginExpiration))
         .claim("roles", roles)
         .build());
     

@@ -59,7 +59,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Singleton
   JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config) {
     return new JWT(
-      config.jwtTtlInMillis, 
+      config.jwtTtlInSeconds, 
       JWT.deserialize(config.jwtSalt), 
       serverConfig.getPublicAddress().toString()
     );

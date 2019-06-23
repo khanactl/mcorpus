@@ -193,7 +193,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final UUID pendingJwtID = UUID.randomUUID();
     final String clientOriginToken = requestSnapshot.getClientOrigin();
     final Instant requestInstant = requestSnapshot.getRequestInstant();
-    final Instant loginExpiration = requestInstant.plusMillis(jwtbiz.jwtCookieTtlInMillis());
+    final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtCookieTtl());
 
     // call db login
     log.debug("Authenticating JWT user '{}' in request {}..", username, requestId);
@@ -227,7 +227,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       );
       
       // jwt cookie
-      jwtResponse.setJwtCookie(jwt, jwtbiz.jwtCookieTtlInSeconds());
+      jwtResponse.setJwtCookie(jwt, jwtbiz.jwtCookieTtl().getSeconds());
       
       log.info("JWT user '{}' logged in.  JWT {} generated from request {}.", jwtUser.getJwtUserId(), pendingJwtID, requestId);
       return true;
