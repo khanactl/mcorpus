@@ -4,7 +4,7 @@ import static com.tll.core.Util.not;
 import static com.tll.core.Util.isNull;
 import static com.tll.transform.BaseTransformer.uuidToToken;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -23,7 +23,7 @@ public class JWTHttpRequestStatus {
    * @return Newly created {@link JWTHttpRequestStatus}
    */
   public static JWTHttpRequestStatus create(String requestId, JWTStatus status) { 
-    return new JWTHttpRequestStatus(requestId, status, null, null, null, -1, -1); 
+    return new JWTHttpRequestStatus(requestId, status, null, null, null, null, null); 
   }
   
   /**
@@ -38,7 +38,7 @@ public class JWTHttpRequestStatus {
    * @param expires
    * @return Newly created {@link JWTHttpRequestStatus}
    */
-  public static JWTHttpRequestStatus create(String requestId, JWTStatus status, UUID jwtId, UUID userId, String roles, long issued, long expires) { 
+  public static JWTHttpRequestStatus create(String requestId, JWTStatus status, UUID jwtId, UUID userId, String roles, Instant issued, Instant expires) { 
     return new JWTHttpRequestStatus(requestId, status, jwtId, userId, roles, issued, expires); 
   }
   
@@ -118,8 +118,8 @@ public class JWTHttpRequestStatus {
   private final UUID jwtId;
   private final UUID userId;
   private final String roles;
-  private final long issued;
-  private final long expires;
+  private final Instant issued;
+  private final Instant expires;
 
   /**
    * Constructor.
@@ -132,7 +132,7 @@ public class JWTHttpRequestStatus {
    * @param issued the issue date as a long of the associated JWT in the received request
    * @param expires the expiration date as a long of the JWT in the received request
    */
-  JWTHttpRequestStatus(String requestId, JWTStatus status, UUID jwtId, UUID userId, String roles, long issued, long expires) {
+  JWTHttpRequestStatus(String requestId, JWTStatus status, UUID jwtId, UUID userId, String roles, Instant issued, Instant expires) {
     super();
     this.requestId = requestId;
     this.status = status;
@@ -179,12 +179,12 @@ public class JWTHttpRequestStatus {
   /**
    * @return the Date when the JWT was created
    */
-  public Date issued() { return issued < 0 ? null : new Date(issued); }
+  public Instant issued() { return issued; }
   
   /**
    * @return the Date when the JWT expires
    */
-  public Date expires() { return expires < 0 ? null : new Date(expires); }
+  public Instant expires() { return expires; }
   
   @Override
   public String toString() {
@@ -194,8 +194,8 @@ public class JWTHttpRequestStatus {
       requestId(), 
       isNull(jwtId()) ? "-" : uuidToToken(jwtId()), 
       isNull(userId()) ? "-" : uuidToToken(userId()), 
-      issued == -1 ? "-" : issued().toString(), 
-      expires == -1 ? "-" : expires().toString(), 
+      isNull(issued ) ? "-" : issued().toString(), 
+      isNull(expires) ? "-" : expires().toString(), 
       isNull(roles) ? "-" : roles
     );
   }

@@ -2,6 +2,7 @@ package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.isNull;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import com.tll.jwt.IJwtBackendHandler;
@@ -55,35 +56,37 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
     return new FetchResult<>(jstat, fr.getErrorMsg());
   }
- 
-  @Override
-  public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId, String clientOriginToken, long requestInstantMillis, long jwtExpirationMillis) {
-    log.debug("Authenticating mcuser '{}'..", username);
-    final FetchResult<Mcuser> loginResult = mcuserRepo.login(
-      username, 
-      pswd, 
-      pendingJwtId, 
-      jwtExpirationMillis, 
-      requestInstantMillis, 
-      clientOriginToken
-    );
-    if(loginResult.isSuccess()) {
-      final McuserXfrm xfrm = new McuserXfrm();
-      return new FetchResult<>(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
-    } else {
-      return new FetchResult<>(null, loginResult.getErrorMsg());
-    }    
-  }
-
-  @Override
-  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken, long requestInstantMillis) {
-    FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstantMillis, clientOriginToken);
-    return fr;
-  }
 
   @Override
   public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
     FetchResult<Integer> fr = mcuserRepo.getNumActiveLogins(jwtUserId);
     return fr;
   }
+
+  @Override
+  public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
+      String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
+    log.debug("Authenticating mcuser '{}'..", username);
+    final FetchResult<Mcuser> loginResult = mcuserRepo.login(username, pswd, pendingJwtId, jwtExpiration,
+        requestInstant, clientOriginToken);
+    if (loginResult.isSuccess()) {
+      final McuserXfrm xfrm = new McuserXfrm();
+      return new FetchResult<>(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
+    } else {
+      return new FetchResult<>(null, loginResult.getErrorMsg());
+    }
+  }
+
+  @Override
+  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
+      Instant requestInstant) {
+    FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstant, clientOriginToken);
+    return fr;
+  }
+
+  @Override
+  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken, Instant requestInstant) {
+    return mcuserRepo.invalidateJwtsFor(jwtUserId, requestInstant, clientOriginToken);
+  }
+
 }

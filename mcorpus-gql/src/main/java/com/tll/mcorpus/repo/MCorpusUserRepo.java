@@ -180,23 +180,23 @@ public class MCorpusUserRepo implements Closeable {
    * @param username the mcuser username
    * @param pswd the mcuser password
    * @param pendingJwtId the pending JWT id (the login must succeed first)
-   * @param jwtExpirationMillis the JWT expiration date in milli-seconds
-   * @param requestInstantMillis the instant the sourcing http request reached the server in milli-seconds
+   * @param jwtExpiration the JWT expiration date
+   * @param requestInstant the instant the sourcing http request reached the server
    * @param clientOriginToken the client origin token gnerated from the sourcing http request
    * 
    * @return Never null {@link FetchResult} object<br> 
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, long jwtExpirationMillis, long requestInstantMillis, final String clientOriginToken) {
+  public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, Instant jwtExpiration, Instant requestInstant, final String clientOriginToken) {
     try {
       final McuserLogin mcuserLogin = new McuserLogin();
       mcuserLogin.setMcuserUsername(username);
       mcuserLogin.setMcuserPassword(pswd);
       mcuserLogin.setInJwtId(pendingJwtId);
-      mcuserLogin.setInLoginExpiration(new Timestamp(jwtExpirationMillis));
+      mcuserLogin.setInLoginExpiration(Timestamp.from(jwtExpiration));
       mcuserLogin.setInRequestOrigin(clientOriginToken);
-      mcuserLogin.setInRequestTimestamp(new Timestamp(requestInstantMillis));
+      mcuserLogin.setInRequestTimestamp(Timestamp.from(requestInstant));
       
       mcuserLogin.execute(dsl.configuration());
       final Mcuser rval = mcuserLogin.getReturnValue().into(Mcuser.class);
@@ -220,18 +220,18 @@ public class MCorpusUserRepo implements Closeable {
    * 
    * @param mcuserId the mcuser id (jwt user id)
    * @param jwtId the JWT id
-   * @param requestInstantMillis the instant the sourcing http request reached the server in milli-seconds
+   * @param requestInstant the instant the sourcing http request reached the server
    * @param clientOriginToken the client origin token gnerated from the sourcing http request
    *
    * @return Never null {@link FetchResult} object 
    *         holding an error message if unsuccessful.
    */
-  public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, long requestInstantMillis, final String clientOriginToken) {
+  public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, Instant requestInstant, final String clientOriginToken) {
     try {
       final McuserLogout mcuserLogout = new McuserLogout();
       mcuserLogout.setMcuserUid(mcuserId);
       mcuserLogout.setJwtId(jwtId);
-      mcuserLogout.setRequestTimestamp(new Timestamp(requestInstantMillis));
+      mcuserLogout.setRequestTimestamp(Timestamp.from(requestInstant));
       mcuserLogout.setRequestOrigin(clientOriginToken);
       
       mcuserLogout.execute(dsl.configuration());

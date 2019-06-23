@@ -1,8 +1,8 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
-import static com.tll.mcorpus.transform.BaseMcorpusTransformer.uuidFromToken;
-import static com.tll.mcorpus.transform.BaseMcorpusTransformer.uuidToToken;
+import static com.tll.transform.BaseTransformer.uuidFromToken;
+import static com.tll.transform.BaseTransformer.uuidToToken;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +20,6 @@ import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
 import com.tll.mcorpus.gmodel.Mlogin;
 import com.tll.mcorpus.gmodel.Mlogout;
 import com.tll.mcorpus.gmodel.Mref;
-import com.tll.mcorpus.gmodel.mcuser.JwtInvalidateFor;
 import com.tll.mcorpus.gmodel.mcuser.Mcuser;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory;
 import com.tll.mcorpus.gmodel.mcuser.McuserHistory.LoginEvent;
@@ -290,29 +289,20 @@ public class MCorpusGraphQL {
 
         // mcpswd
         .dataFetcher("mcpswd", env -> processor.handleSimpleMutation(
-            env, 
-            () -> new McuserIdAndPswdKey(
-              uuidFromToken(env.getArgument("uid")), 
-              clean(env.getArgument("pswd"))
-            ), 
-            key -> mcuserRepo.setPswd(key.getUid(), key.getPswd()), 
-            b -> b
-          )
-        )        
+          env, 
+          () -> new McuserIdAndPswdKey(
+            uuidFromToken(env.getArgument("uid")), 
+            clean(env.getArgument("pswd"))
+          ), 
+          key -> mcuserRepo.setPswd(key.getUid(), key.getPswd()), 
+          b -> b) 
+        )
         
         // invalidateJwtsFor
-        .dataFetcher("invalidateJwtsFor", env -> processor.handleMutation(
+        .dataFetcher("invalidateJwtsFor", env -> processor.handleSimpleMutation(
           env, 
-          () -> new JwtInvalidateFor(
-            uuidFromToken(env.getArgument("uid")), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
-          ), 
-          jif -> mcuserRepo.invalidateJwtsFor(
-            jif.getUid(), 
-            jif.getRequestInstant(), 
-            jif.getRequestOrigin() 
-          ), 
+          () -> uuidFromToken(env.getArgument("uid")), 
+          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key), 
           b -> b)
         )
         

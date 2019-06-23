@@ -200,8 +200,8 @@ public class MCorpusUserRepoTest {
   }
 
   static FetchResult<Mcuser> mcuserLogin(MCorpusUserRepo repo, String username, String pswd) {
-    final long lnow = System.currentTimeMillis();
-    final long expiry = lnow + Duration.ofMinutes(30).toMillis();
+    final Instant lnow = Instant.now();
+    final Instant expiry = lnow.plus(Duration.ofMinutes(30));
     FetchResult<Mcuser> fr = repo.login(
       username, 
       pswd, 
@@ -214,7 +214,7 @@ public class MCorpusUserRepoTest {
   }
 
   static FetchResult<Boolean> mcuserLogout(MCorpusUserRepo repo, UUID mcuserId, UUID jwtId) {
-    final long lnow = System.currentTimeMillis();
+    final Instant lnow = Instant.now();
     FetchResult<Boolean> fr = repo.logout(
       mcuserId, 
       jwtId, 

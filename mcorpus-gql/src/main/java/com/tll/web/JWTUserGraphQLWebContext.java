@@ -6,6 +6,7 @@ import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.not;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
@@ -144,8 +145,8 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
         // success
         final JWTUserStatus jus = new JWTUserStatus(
           jwtUserId, 
-          jwtRequestStatus.issued(), 
-          jwtRequestStatus.expires(), 
+          Date.from(jwtRequestStatus.issued()), 
+          Date.from(jwtRequestStatus.expires()), 
           fr.get().intValue()
         );
         return jus;
@@ -191,8 +192,8 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final String requestId = requestSnapshot.getRequestId();
     final UUID pendingJwtID = UUID.randomUUID();
     final String clientOriginToken = requestSnapshot.getClientOrigin();
-    final long requestInstantMillis = requestSnapshot.getRequestInstant().toEpochMilli();
-    final long loginExpiration = requestInstantMillis + jwtbiz.jwtCookieTtlInMillis();
+    final Instant requestInstant = requestSnapshot.getRequestInstant();
+    final Instant loginExpiration = requestInstant.plusMillis(jwtbiz.jwtCookieTtlInMillis());
 
     // call db login
     log.debug("Authenticating JWT user '{}' in request {}..", username, requestId);
@@ -201,7 +202,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       pswd, 
       pendingJwtID, 
       clientOriginToken, 
-      requestInstantMillis, 
+      requestInstant, 
       loginExpiration
     );
     if(not(loginResult.isSuccess())) {
@@ -252,7 +253,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       jwtStatus.userId(), 
       jwtStatus.jwtId(), 
       requestSnapshot.getClientOrigin(), 
-      requestSnapshot.getRequestInstant().toEpochMilli()
+      requestSnapshot.getRequestInstant()
     );
     if(fetchResult.isSuccess()) {
       // logout success - nix all cookies clientside
@@ -263,6 +264,33 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
     // default - logout failed
     log.error("JWT {} (user '{}') logout failed in request {}.", jwtStatus.jwtId(), jwtStatus.userId(), jwtStatus.requestId());
+    return false;
+  }
+
+  /**
+   * Invalidate all active JWTs for the given jwt user.
+   * <p>
+   * If the jwt user is the same as the one currently logged in, 
+   * they will be logged out immediately.
+   * 
+   * @param jwtUserId the id of the target jwt user
+   * @return true if the operation was successful
+   */
+  public boolean jwtInvalidateAllForUser(final UUID jwtUserId) {
+    final FetchResult<Boolean> fr = jwtBackend.jwtInvalidateAllForUser(
+      jwtUserId, 
+      requestSnapshot.getClientOrigin(), 
+      requestSnapshot.getRequestInstant()
+    );
+    if(fr.isSuccess()) {
+      if(jwtUserId.equals(jwtStatus.userId())) {
+        // this is the current jwt user so nix jwt state clientside
+        jwtResponse.expireAllCookies();
+      }
+      log.info("All JWTs for user {} successfully invalidated in request {}.", jwtUserId, jwtStatus.requestId());
+      return true;
+    }
+    // default - op failed
     return false;
   }
 

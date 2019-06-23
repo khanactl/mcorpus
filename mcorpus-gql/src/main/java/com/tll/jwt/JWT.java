@@ -5,6 +5,7 @@ import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
@@ -128,8 +129,8 @@ public class JWT {
   public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq) 
       throws Exception {
     final String requestId = httpreq.getRequestId();
-    final long requestTimestamp = httpreq.getRequestInstant().toEpochMilli();
-    final long loginExpirationTimestamp = requestTimestamp + jwtCookieTtlInMillis;
+    final Instant requestTimestamp = httpreq.getRequestInstant();
+    final Instant loginExpirationTimestamp = requestTimestamp.plusMillis(jwtCookieTtlInMillis);
     final String audience = httpreq.getClientOrigin();
 
     // create signed jwt object
@@ -140,8 +141,8 @@ public class JWT {
         .audience(audience)
         .jwtID(jwtId.toString())
         .subject(userId.toString())
-        .issueTime(new Date(requestTimestamp))
-        .expirationTime(new Date(loginExpirationTimestamp))
+        .issueTime(Date.from(requestTimestamp))
+        .expirationTime(Date.from(loginExpirationTimestamp))
         .claim("roles", roles)
         .build());
     
@@ -225,8 +226,8 @@ public class JWT {
     //       will keep this secret and unaltered.
     final UUID jwtId;
     final UUID userId;
-    final long issued;
-    final long expires;
+    final Instant issued;
+    final Instant expires;
     final String issuer;
     final String jwtAudience;
     final String roles; // bound to the user
@@ -235,8 +236,8 @@ public class JWT {
       
       jwtId = UUID.fromString(claims.getJWTID());
       userId = UUID.fromString(claims.getSubject());
-      issued = isNull(claims.getIssueTime()) ? -1 : claims.getIssueTime().getTime();
-      expires = isNull(claims.getExpirationTime()) ? -1 : claims.getExpirationTime().getTime();
+      issued = isNull(claims.getIssueTime()) ? null : claims.getIssueTime().toInstant();
+      expires = isNull(claims.getExpirationTime()) ? null : claims.getExpirationTime().toInstant();
       issuer = claims.getIssuer();
       jwtAudience = isNullOrEmpty(claims.getAudience()) ? "" : claims.getAudience().get(0);
       roles = (String) claims.getClaim("roles");
@@ -276,7 +277,7 @@ public class JWT {
     }
     
     // expired? (check for exp. time in the past)
-    if(new Date().after(new Date(expires))) {
+    if(Instant.now().isAfter(expires)) {
       log.info("JWT {} expired for request {}.", jwtId, requestId);
       return JWTHttpRequestStatus.create(requestId, JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
     }

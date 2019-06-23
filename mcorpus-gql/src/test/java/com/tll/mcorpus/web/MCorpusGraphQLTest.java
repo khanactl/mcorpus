@@ -98,7 +98,7 @@ public class MCorpusGraphQLTest {
   }
 
   static JWTHttpRequestStatus testJwtStatus(JWTStatus jwtStatus, String roles) {
-    final long lnow = System.currentTimeMillis();
+    final Instant lnow = Instant.now();
     return JWTHttpRequestStatus.create(
       UUID.randomUUID().toString(), 
       jwtStatus,

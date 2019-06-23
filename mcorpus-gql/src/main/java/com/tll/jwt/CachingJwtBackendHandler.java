@@ -1,5 +1,8 @@
 package com.tll.jwt;
 
+import static com.tll.core.Util.isNotNull;
+
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -26,18 +29,17 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
   /**
    * Constructor.
    * 
-   * @param jwtBackendHandler the sourcing {@link IJwtBackendHandler} this caching 
+   * @param jwtBackendHandler the sourcing {@link IJwtBackendHandler} this caching
    *                          instance encapsulates
-   * @param minutesTolive     the number of minutes a JWT status object shall be cached
-   *                          in-memory
-   * @param maxCacheSize      the max number of JWT status instances to hold in cache 
-   *                          at any one time
+   * @param minutesTolive     the number of minutes a JWT status object shall be
+   *                          cached in-memory
+   * @param maxCacheSize      the max number of JWT status instances to hold in
+   *                          cache at any one time
    */
-  public CachingJwtBackendHandler(final IJwtBackendHandler jwtBackendHandler, int minutesTolive,
-      int maxCacheSize) {
+  public CachingJwtBackendHandler(final IJwtBackendHandler jwtBackendHandler, int minutesTolive, int maxCacheSize) {
     this.targetHandler = jwtBackendHandler;
-    this.jwtStatusCache = Caffeine.newBuilder().expireAfterWrite(minutesTolive, TimeUnit.MINUTES).maximumSize(maxCacheSize)
-        .build(key -> {
+    this.jwtStatusCache = Caffeine.newBuilder().expireAfterWrite(minutesTolive, TimeUnit.MINUTES)
+        .maximumSize(maxCacheSize).build(key -> {
           log.info("Fetching backend JWT status for {}.", key);
           return this.targetHandler.getBackendJwtStatus(key);
         });
@@ -51,18 +53,31 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
-  public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId, String clientOriginToken,
-      long requestInstantMillis, long jwtExpirationMillis) {
-    return targetHandler.jwtBackendLogin(username, pswd, pendingJwtId, clientOriginToken, requestInstantMillis, jwtExpirationMillis);
-  }
-
-  @Override
-  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken, long requestInstantMillis) {
-    return targetHandler.jwtBackendLogout(jwtUserId, jwtId, clientOriginToken, requestInstantMillis);
-  }
-
-  @Override
   public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
     return targetHandler.getNumActiveJwtLogins(jwtUserId);
   }
+
+  @Override
+  public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
+      String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
+    return targetHandler.jwtBackendLogin(username, pswd, pendingJwtId, clientOriginToken, requestInstant,
+        jwtExpiration);
+  }
+
+  @Override
+  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
+      Instant requestInstant) {
+    return targetHandler.jwtBackendLogout(jwtUserId, jwtId, clientOriginToken, requestInstant);
+  }
+
+  @Override
+  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken,
+      Instant requestInstant) {
+    final FetchResult<Boolean> fr = targetHandler.jwtInvalidateAllForUser(jwtUserId, clientOriginToken, requestInstant);
+    if(isNotNull(fr) && fr.isSuccess()) {
+      jwtStatusCache.invalidate(jwtUserId);
+    }
+    return fr;
+  }
+
 }
