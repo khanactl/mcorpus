@@ -176,10 +176,10 @@ create table mcuser_audit (
   request_timestamp       timestamp not null,
   request_origin          text not null,
   login_expiration        timestamp,
-  jwt_id                  uuid,
-  jwt_id_status           jwt_id_status,
+  jwt_id                  uuid not null,
+  jwt_id_status           jwt_id_status not null,
 
-  primary key (uid, created, type)
+  primary key (uid, created, type, jwt_id)
 );
 create index mcuser_audit__jwt_id on mcuser_audit (jwt_id);
 comment on type mcuser_audit is 'Log of when mcusers login/out and access the api.';
@@ -198,14 +198,16 @@ BEGIN
   select into num_valid_logins count(jwt_id) 
   from mcuser_audit 
   where 
-    type = 'LOGIN' and jwt_id_status = 'OK' 
+    type = 'LOGIN' 
+    and jwt_id_status = 'OK' 
     and login_expiration >= now() 
     and uid = $1
     and jwt_id not in (
       select jwt_id 
       from mcuser_audit 
-      where (type = 'LOGOUT' or jwt_id_status = 'BLACKLISTED') 
-      and uid = $1); 
+      where (type != 'LOGIN' or jwt_id_status != 'OK') 
+      and uid = $1
+    ); 
     return num_valid_logins;
 END
 $_$;
@@ -305,12 +307,12 @@ $_$;
  * by the given mcuser id so that subsequent jwt id status queries 
  * will report them as blacklisted.
  *
- * @param uid the mcuser id for whom the jwt ids apply
+ * @param in_uid the mcuser id for whom the jwt ids apply
  * @param in_request_timestamp the instigating http request timestamp
  * @param in_request_origin the instigating http request origin 
  */
 CREATE OR REPLACE FUNCTION blacklist_jwt_ids_for(
-  uid uuid, 
+  in_uid uuid, 
   in_request_timestamp timestamp without time zone, 
   in_request_origin text 
 ) RETURNS void 
@@ -318,14 +320,20 @@ LANGUAGE plpgsql AS
 $_$
 BEGIN
   insert into mcuser_audit 
-  (type, request_timestamp, request_origin, jwt_id, jwt_id_status) 
-  select 'LOGOUT'::mcuser_audit_type, $2, $3, adt.jwt_id, 'BLACKLISTED'::jwt_id_status 
+  (uid, type, request_timestamp, request_origin, jwt_id, jwt_id_status) 
+  select $1, 'LOGOUT'::mcuser_audit_type, $2, $3, adt.jwt_id, 'BLACKLISTED'::jwt_id_status 
   from mcuser_audit adt 
   where 
     adt.uid = $1 
     and adt.type = 'LOGIN'::mcuser_audit_type 
     and adt.login_expiration >= now() 
     and adt.jwt_id_status = 'OK'::jwt_id_status 
+    and adt.jwt_id not in (
+      select jwt_id 
+      from mcuser_audit adtsub
+      where (adtsub.type != 'LOGIN'::mcuser_audit_type or adtsub.jwt_id_status != 'OK'::jwt_id_status) 
+      and adtsub.uid = $1
+    )
   ;
 END
 $_$;
