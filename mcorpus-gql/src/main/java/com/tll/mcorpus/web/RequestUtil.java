@@ -15,7 +15,7 @@ import ratpack.http.Request;
 import ratpack.registry.NotInRegistryException;
 
 /**
- * Utility methods for processing incoming http requests.
+ * MCorpus-specific utility methods for processing incoming http requests.
  * 
  * @author jkirton
  */
@@ -70,7 +70,7 @@ public class RequestUtil {
     rstCookieRef.setSecure(secure);
     rstCookieRef.setHttpOnly(true);
     rstCookieRef.setDomain(getServerDomainName(ctx));
-    rstCookieRef.setPath("/");
+    rstCookieRef.setPath("/graphql");
     rstCookieRef.setMaxAge(maxAge);
   }
   
@@ -89,7 +89,7 @@ public class RequestUtil {
     jwtCookieRef.setMaxAge(maxAge);
     jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
     jwtCookieRef.setSecure(secure);
-    jwtCookieRef.setPath("/");
+    jwtCookieRef.setPath("/graphql");
   }
   
   /**
@@ -102,11 +102,11 @@ public class RequestUtil {
     final String cookieServerName = getServerDomainName(ctx);
     // rst cookie
     final Cookie rstCookieRef = ctx.getResponse().expireCookie("rst");
-    rstCookieRef.setPath("/");
+    rstCookieRef.setPath("/graphql");
     rstCookieRef.setDomain(cookieServerName);
     // jwt cookie
     final Cookie jwtCookieRef = ctx.getResponse().expireCookie("jwt");
-    jwtCookieRef.setPath("/");
+    jwtCookieRef.setPath("/graphql");
     jwtCookieRef.setDomain(cookieServerName);
   }
   
