@@ -151,10 +151,16 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
         return jus;
       } else {
         final String emsg = fr.getErrorMsg();
-        log.error("Invalid JWT user login status fetch result for JWT of id: {}: {}", jwtId, emsg);
+        log.error(
+          "Invalid JWT user login status fetch result (emsg: {}) for JWT {} in request {}.", 
+          emsg, jwtId, jwtRequestStatus.requestId()
+        );
       }
     } else {
-      log.warn("Invalid JWT ({}) presented for JWT user login status.", jwtId);
+      log.warn(
+        "Invalid JWT {} presented for JWT user login status in request {}.", 
+        jwtId, jwtRequestStatus.requestId()
+      );
     }
 
     // default
@@ -182,13 +188,14 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       return false;
     }
     
+    final String requestId = requestSnapshot.getRequestId();
     final UUID pendingJwtID = UUID.randomUUID();
     final String clientOriginToken = requestSnapshot.getClientOrigin();
     final long requestInstantMillis = requestSnapshot.getRequestInstant().toEpochMilli();
     final long loginExpiration = requestInstantMillis + jwtbiz.jwtCookieTtlInMillis();
 
     // call db login
-    log.debug("Authenticating JWT user '{}'..", username);
+    log.debug("Authenticating JWT user '{}' in request {}..", username, requestId);
     final FetchResult<IJwtUser> loginResult = jwtBackend.jwtBackendLogin(
       username, 
       pswd, 
@@ -198,13 +205,13 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       loginExpiration
     );
     if(not(loginResult.isSuccess())) {
-      log.error("JWT user login failed: {}", loginResult.getErrorMsg());
+      log.error("JWT user login failed (emsg: {}) in request {}.", loginResult.getErrorMsg(), requestId);
       return false;
     }
-    log.info("JWT user '{}' authenticated.", username);
+    log.info("JWT user '{}' authenticated in request {}.", username, requestId);
     // at this point, we're authenticated
     
-    log.debug("Generating JWT for user '{}'..", username);
+    log.debug("Generating JWT for user '{}' in request {}..", username, requestId);
     final IJwtUser jwtUser = loginResult.get();
     try {
       // create the JWT - and set as a cookie to go back to user
@@ -221,11 +228,11 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       // jwt cookie
       jwtResponse.setJwtCookie(jwt, jwtbiz.jwtCookieTtlInSeconds());
       
-      log.info("JWT user '{}' logged in.  JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
+      log.info("JWT user '{}' logged in.  JWT {} generated from request {}.", jwtUser.getJwtUserId(), pendingJwtID, requestId);
       return true;
     }
     catch(Exception e) {
-      log.error("JWT user '{}' login error: {}", jwtUser.getJwtUserId(), e.getMessage());
+      log.error("JWT user '{}' login error: '{}' from request {}.", jwtUser.getJwtUserId(), e.getMessage(), requestId);
     }
     
     // default
@@ -250,12 +257,12 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     if(fetchResult.isSuccess()) {
       // logout success - nix all cookies clientside
       jwtResponse.expireAllCookies();
-      log.info("JWT user '{}' logged out.", jwtStatus.userId());
+      log.info("JWT {} (user '{}') logged out in request {}.", jwtStatus.jwtId(), jwtStatus.userId(), jwtStatus.requestId());
       return true;
     }
 
     // default - logout failed
-    log.error("JWT user '{}' logout failed.", jwtStatus.userId());
+    log.error("JWT {} (user '{}') logout failed in request {}.", jwtStatus.jwtId(), jwtStatus.userId(), jwtStatus.requestId());
     return false;
   }
 
