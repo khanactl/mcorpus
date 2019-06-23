@@ -22,7 +22,7 @@
 
   <properties>
     <mcorpus-build.mode>DEV</mcorpus-build.mode>
-    <mcorpus-db.version>1.4.5</mcorpus-db.version>
+    <mcorpus-db.version>1.4.6-SNAPSHOT</mcorpus-db.version>
   </properties>
 
   <profiles>

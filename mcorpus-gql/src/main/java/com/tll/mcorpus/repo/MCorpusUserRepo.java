@@ -448,7 +448,7 @@ public class MCorpusUserRepo implements Closeable {
     String emsg = null;
     try {
       final BlacklistJwtIdsFor sp = new BlacklistJwtIdsFor();
-      sp.setUid(uid);
+      sp.setInUid(uid);
       sp.setInRequestTimestamp(Timestamp.from(requestInstant));
       sp.setInRequestOrigin(clientOrigin);
       sp.execute(dsl.configuration());
