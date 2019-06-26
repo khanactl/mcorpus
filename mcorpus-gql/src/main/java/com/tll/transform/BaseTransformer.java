@@ -4,7 +4,12 @@ import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,6 +22,28 @@ import java.util.UUID;
  * @author jpk
  */
 public abstract class BaseTransformer<G, D> implements IGTransformer<G, D> {
+
+  protected static final ZoneOffset localToUtc = ZoneId.systemDefault().getRules().getOffset(Instant.MIN);
+
+  /**
+   * Convert an {@link OffsetDateTime} to a {@link Date}.
+   * 
+   * @param odt the offset date time object to convert
+   * @return Newly created {@link Date} -OR- null if the input param is null
+   */
+  public static Date odtToDate(final OffsetDateTime odt) {
+    return odt == null ? null : Date.from(odt.toInstant());
+  }
+
+  /**
+   * Convert a {@link Date} to an {@link OffsetDateTime}.
+   * 
+   * @param d the date to convert
+   * @return Newly created {@link OffsetDateTime} -OR- null if the input param is null
+   */
+  public static OffsetDateTime odtFromDate(final Date d) {
+    return d == null ? null : d.toInstant().atOffset(localToUtc);
+  }
 
   /**
    * Converts a {@link UUID} to a URL-safe base64-encoded string 24 characters long.

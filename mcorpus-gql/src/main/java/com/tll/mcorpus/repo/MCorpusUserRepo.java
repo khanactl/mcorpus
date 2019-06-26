@@ -7,8 +7,9 @@ import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 
 import java.io.Closeable;
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,12 +21,12 @@ import javax.sql.DataSource;
 
 import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
-import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
+import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor2;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.InsertMcuser;
-import com.tll.mcorpus.db.routines.McuserLogin;
-import com.tll.mcorpus.db.routines.McuserLogout;
+import com.tll.mcorpus.db.routines.McuserLogin2;
+import com.tll.mcorpus.db.routines.McuserLogout2;
 import com.tll.mcorpus.db.routines.McuserPswd;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain;
@@ -133,7 +134,7 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<McuserHistoryDomain> mcuserHistory(final UUID uid) {
     if(uid == null) return new FetchResult<>(null, "No mcuser id provided.");
     try {
-      final Result<Record4<UUID, Timestamp, String, McuserAuditType>> result = dsl
+      final Result<Record4<UUID, OffsetDateTime, String, McuserAuditType>> result = dsl
         .select(MCUSER_AUDIT.JWT_ID, MCUSER_AUDIT.CREATED, MCUSER_AUDIT.REQUEST_ORIGIN, MCUSER_AUDIT.TYPE)
         .from(MCUSER_AUDIT)
         .where(MCUSER_AUDIT.UID.eq(uid))
@@ -142,11 +143,11 @@ public class MCorpusUserRepo implements Closeable {
       if(result.isNotEmpty()) {
         final List<LoginEventDomain> logins = new ArrayList<>();
         final List<LogoutEventDomain> logouts = new ArrayList<>();
-        final Iterator<Record4<UUID, Timestamp, String, McuserAuditType>> itr = result.iterator();
+        final Iterator<Record4<UUID, OffsetDateTime, String, McuserAuditType>> itr = result.iterator();
         while(itr.hasNext()) {
-          Record4<UUID, Timestamp, String, McuserAuditType> rec = itr.next();
+          Record4<UUID, OffsetDateTime, String, McuserAuditType> rec = itr.next();
           UUID jwtId = rec.get(MCUSER_AUDIT.JWT_ID);
-          Timestamp created = rec.get(MCUSER_AUDIT.CREATED);
+          OffsetDateTime created = rec.get(MCUSER_AUDIT.CREATED);
           String requestOrigin = rec.get(MCUSER_AUDIT.REQUEST_ORIGIN);
           switch(rec.get(MCUSER_AUDIT.TYPE)) {
             case LOGIN:
@@ -190,13 +191,13 @@ public class MCorpusUserRepo implements Closeable {
    */
   public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, Instant jwtExpiration, Instant requestInstant, final String clientOriginToken) {
     try {
-      final McuserLogin mcuserLogin = new McuserLogin();
+      final McuserLogin2 mcuserLogin = new McuserLogin2();
       mcuserLogin.setMcuserUsername(username);
       mcuserLogin.setMcuserPassword(pswd);
       mcuserLogin.setInJwtId(pendingJwtId);
-      mcuserLogin.setInLoginExpiration(Timestamp.from(jwtExpiration));
+      mcuserLogin.setInLoginExpiration(OffsetDateTime.ofInstant(jwtExpiration, ZoneId.systemDefault()));
       mcuserLogin.setInRequestOrigin(clientOriginToken);
-      mcuserLogin.setInRequestTimestamp(Timestamp.from(requestInstant));
+      mcuserLogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       
       mcuserLogin.execute(dsl.configuration());
       final Mcuser rval = mcuserLogin.getReturnValue().into(Mcuser.class);
@@ -228,10 +229,10 @@ public class MCorpusUserRepo implements Closeable {
    */
   public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, Instant requestInstant, final String clientOriginToken) {
     try {
-      final McuserLogout mcuserLogout = new McuserLogout();
+      final McuserLogout2 mcuserLogout = new McuserLogout2();
       mcuserLogout.setMcuserUid(mcuserId);
       mcuserLogout.setJwtId(jwtId);
-      mcuserLogout.setRequestTimestamp(Timestamp.from(requestInstant));
+      mcuserLogout.setRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mcuserLogout.setRequestOrigin(clientOriginToken);
       
       mcuserLogout.execute(dsl.configuration());
@@ -447,9 +448,9 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<Boolean> invalidateJwtsFor(final UUID uid, final Instant requestInstant, final String clientOrigin) {
     String emsg = null;
     try {
-      final BlacklistJwtIdsFor sp = new BlacklistJwtIdsFor();
+      final BlacklistJwtIdsFor2 sp = new BlacklistJwtIdsFor2();
       sp.setInUid(uid);
-      sp.setInRequestTimestamp(Timestamp.from(requestInstant));
+      sp.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       sp.setInRequestOrigin(clientOrigin);
       sp.execute(dsl.configuration());
 

@@ -14,7 +14,7 @@ import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 import static java.util.Collections.singletonList;
 import static org.jooq.impl.DSL.not;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -207,45 +207,45 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     return c;
   }
 
-  private static Condition timestampPredicateAsJooqCondition(final DatePredicate dp, final Field<Timestamp> f) {
+  private static Condition timestampPredicateAsJooqCondition(final DatePredicate dp, final Field<OffsetDateTime> f) {
     final Condition c;
     switch(dp.getDateOp()) {
       default:
       case EQUAL_TO:
-        c = f.eq(new Timestamp(dp.getA().getTime()));
+        c = f.eq(odtFromDate(dp.getA()));
         break;
       case NOT_EQUAL_TO:
-        c = f.notEqual(new Timestamp(dp.getA().getTime()));
+        c = f.notEqual(odtFromDate(dp.getA()));
         break;
       case LESS_THAN:
-        c = f.lessThan(new Timestamp(dp.getA().getTime()));
+        c = f.lessThan(odtFromDate(dp.getA()));
         break;
       case NOT_LESS_THAN:
-        c = not(f.lessThan(new Timestamp(dp.getA().getTime())));
+        c = not(f.lessThan(odtFromDate(dp.getA())));
         break;
       case LESS_THAN_OR_EQUAL_TO:
-        c = f.lessOrEqual(new Timestamp(dp.getA().getTime()));
+        c = f.lessOrEqual(odtFromDate(dp.getA()));
         break;
       case NOT_LESS_THAN_OR_EQUAL_TO:
-        c = not(f.lessOrEqual(new Timestamp(dp.getA().getTime())));
+        c = not(f.lessOrEqual(odtFromDate(dp.getA())));
         break;
       case GREATER_THAN:
-        c = f.greaterThan(new Timestamp(dp.getA().getTime()));
+        c = f.greaterThan(odtFromDate(dp.getA()));
         break;
       case NOT_GREATER_THAN:
-        c = not(f.greaterThan(new Timestamp(dp.getA().getTime())));
+        c = not(f.greaterThan(odtFromDate(dp.getA())));
         break;
       case GREATER_THAN_OR_EQUAL_TO:
-        c = f.greaterOrEqual(new Timestamp(dp.getA().getTime()));
+        c = f.greaterOrEqual(odtFromDate(dp.getA()));
         break;
       case NOT_GREATER_THAN_OR_EQUAL_TO:
-        c = not(f.greaterOrEqual(new Timestamp(dp.getA().getTime())));
+        c = not(f.greaterOrEqual(odtFromDate(dp.getA())));
         break;
       case BETWEEN:
-        c = f.between(new Timestamp(dp.getA().getTime()), new Timestamp(dp.getB().getTime()));
+        c = f.between(odtFromDate(dp.getA()), odtFromDate(dp.getB()));
         break;
       case NOT_BETWEEN:
-        c = not(f.between(new Timestamp(dp.getA().getTime()), new Timestamp(dp.getB().getTime())));
+        c = not(f.between(odtFromDate(dp.getA()), odtFromDate(dp.getB())));
         break;
     }
     return c;

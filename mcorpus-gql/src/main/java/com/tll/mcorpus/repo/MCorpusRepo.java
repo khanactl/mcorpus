@@ -12,8 +12,9 @@ import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 
 import java.io.Closeable;
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,8 +28,8 @@ import javax.sql.DataSource;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.routines.InsertMember;
-import com.tll.mcorpus.db.routines.MemberLogin;
-import com.tll.mcorpus.db.routines.MemberLogout;
+import com.tll.mcorpus.db.routines.MemberLogin2;
+import com.tll.mcorpus.db.routines.MemberLogout2;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.db.tables.pojos.Mauth;
 import com.tll.mcorpus.db.tables.pojos.Member;
@@ -131,10 +132,10 @@ public class MCorpusRepo implements Closeable {
    */
   public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final String clientOrigin) {
     try {
-      final MemberLogin mlogin = new MemberLogin();
+      final MemberLogin2 mlogin = new MemberLogin2();
       mlogin.setMemberUsername(username);
       mlogin.setMemberPassword(pswd);
-      mlogin.setInRequestTimestamp(new Timestamp(requestInstant.toEpochMilli()));
+      mlogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mlogin.setInRequestOrigin(clientOrigin);
       mlogin.execute(dsl.configuration());
       final MrefRecord rec = mlogin.getReturnValue();
@@ -164,9 +165,9 @@ public class MCorpusRepo implements Closeable {
    */
   public FetchResult<UUID> memberLogout(final UUID mid, final Instant requestInstant, final String clientOrigin) {
     try {
-      final MemberLogout mlogout = new MemberLogout();
+      final MemberLogout2 mlogout = new MemberLogout2();
       mlogout.setMid(mid);
-      mlogout.setInRequestTimestamp(new Timestamp(requestInstant.toEpochMilli()));
+      mlogout.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mlogout.setInRequestOrigin(clientOrigin);
       mlogout.execute(dsl.configuration());
       final UUID rmid = mlogout.getReturnValue();
@@ -536,7 +537,7 @@ public class MCorpusRepo implements Closeable {
 
         // update member record (always to maintain modified integrity)
         final Map<String, Object> fmapMember = new HashMap<>();
-        fput(MEMBER.MODIFIED, Timestamp.from(Instant.now()), fmapMember); // force
+        fput(MEMBER.MODIFIED, OffsetDateTime.now(), fmapMember); // force
         fputWhenNotNull(MEMBER.EMP_ID, memberToUpdate.dbMember.getEmpId(), fmapMember);
         fputWhenNotNull(MEMBER.LOCATION, memberToUpdate.dbMember.getLocation(), fmapMember);
         fputWhenNotNull(MEMBER.NAME_FIRST, memberToUpdate.dbMember.getNameFirst(), fmapMember);

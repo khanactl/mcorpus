@@ -6,7 +6,6 @@ import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
-import static com.tll.transform.TransformUtil.dateToTimestamp;
 import static com.tll.transform.TransformUtil.fval;
 
 import java.util.Arrays;
@@ -101,8 +100,8 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   protected Mcuser fromNonNullBackend(final com.tll.mcorpus.db.tables.pojos.Mcuser d) {
     return new Mcuser(
       d.getUid(),
-      d.getCreated(),
-      d.getModified(),
+      odtToDate(d.getCreated()),
+      odtToDate(d.getModified()),
       d.getName(),
       d.getEmail(),
       d.getUsername(),
@@ -116,8 +115,8 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   protected com.tll.mcorpus.db.tables.pojos.Mcuser toBackendFromNonNull(final Mcuser g) {
     return new com.tll.mcorpus.db.tables.pojos.Mcuser(
       g.getUid(),
-      dateToTimestamp(g.getCreated()),
-      dateToTimestamp(g.getModified()),
+      odtFromDate(g.getCreated()),
+      odtFromDate(g.getModified()),
       neclean(g.getName()),
       neclean(g.getEmail()),
       neclean(g.getUsername()),

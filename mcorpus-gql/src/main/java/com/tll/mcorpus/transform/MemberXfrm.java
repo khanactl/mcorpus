@@ -5,7 +5,6 @@ import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
 import static com.tll.transform.TransformUtil.asSqlDate;
-import static com.tll.transform.TransformUtil.dateToTimestamp;
 import static com.tll.transform.TransformUtil.digits;
 import static com.tll.transform.TransformUtil.fval;
 
@@ -83,8 +82,8 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
   protected Member fromNonNullBackend(final MemberAndMauth d) {
     return new Member(
       d.dbMember.getMid(),
-      d.dbMember.getCreated(),
-      d.dbMember.getModified(),
+      odtToDate(d.dbMember.getCreated()),
+      odtToDate(d.dbMember.getModified()),
       d.dbMember.getEmpId(),
       locationToString(d.dbMember.getLocation()),
       d.dbMember.getNameFirst(),
@@ -109,8 +108,8 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
     return new MemberAndMauth(
       new com.tll.mcorpus.db.tables.pojos.Member(
         g.getMid(),
-        dateToTimestamp(g.getCreated()),
-        dateToTimestamp(g.getModified()),
+        odtFromDate(g.getCreated()),
+        odtFromDate(g.getModified()),
         neclean(g.getEmpId()),
         locationFromString(g.getLocation()),
         upper(neclean(g.getNameFirst())),

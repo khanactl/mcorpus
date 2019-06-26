@@ -15,9 +15,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import com.tll.UnitTest;
@@ -146,16 +147,17 @@ public class MCorpusUserRepoTest {
    * @throws Exception upon test record insert failure
    */
   static McuserAudit addTestMcuserAuditRecord(final UUID uid) throws Exception {
-    long lnow = Instant.now().toEpochMilli();
-    final long expiry = lnow + Duration.ofMinutes(30).toMillis();
-    
+    Instant now = Instant.now();
+    final Instant expiry = now.plus(Duration.ofMinutes(30));
+    final ZoneOffset zo = ZoneOffset.systemDefault().getRules().getOffset(now);
+
     McuserAudit e = new McuserAudit(
         UUID.randomUUID(),
         null,
         McuserAuditType.LOGIN,
-        new Timestamp(lnow),
+        now.atOffset(zo),
         testRequestOrigin,
-        new Timestamp(expiry),
+        expiry.atOffset(zo),
         UUID.randomUUID(),
         JwtIdStatus.OK);
     

@@ -5,7 +5,6 @@ import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.lower;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
-import static com.tll.transform.TransformUtil.dateToTimestamp;
 import static com.tll.transform.TransformUtil.fval;
 
 import java.util.Map;
@@ -54,7 +53,7 @@ public class MemberAddressXfrm extends BaseMcorpusTransformer<MemberAddress, Mad
     return new MemberAddress(
       d.getMid(),
       upper(addressnameToString(d.getAddressName())),
-      d.getModified(),
+      odtToDate(d.getModified()),
       d.getAttn(),
       d.getStreet1(),
       d.getStreet2(),
@@ -70,7 +69,7 @@ public class MemberAddressXfrm extends BaseMcorpusTransformer<MemberAddress, Mad
     return new Maddress(
       g.getMid(),
       addressnameFromString(g.getAddressName()),
-      dateToTimestamp(g.getModified()),
+      odtFromDate(g.getModified()),
       neclean(g.getAttn()),
       neclean(g.getStreet1()),
       neclean(g.getStreet2()),
