@@ -109,8 +109,8 @@ comment on type mcuser_status is 'The allowed mcuser status values.';
 create table mcuser (
   uid                     uuid primary key default gen_random_uuid(),
 
-  created                 timestamp not null default now(),
-  modified                timestamp null,
+  created                 timestamptz not null default now(),
+  modified                timestamptz null,
 
   name                    text not null,
   email                   text not null,
@@ -171,11 +171,11 @@ comment on type mcuser_audit_type is 'The allowed mcuser audit types.';
 
 create table mcuser_audit (
   uid                     uuid not null REFERENCES mcuser ON DELETE CASCADE,
-  created                 timestamp not null default now(),
+  created                 timestamptz not null default now(),
   type                    mcuser_audit_type not null,
-  request_timestamp       timestamp not null,
+  request_timestamp       timestamptz not null,
   request_origin          text not null,
-  login_expiration        timestamp,
+  login_expiration        timestamptz,
   jwt_id                  uuid not null,
   jwt_id_status           jwt_id_status not null,
 
@@ -216,7 +216,7 @@ CREATE TYPE jwt_mcuser_status AS (
   mcuser_audit_record_type mcuser_audit_type,
   jwt_id uuid,
   jwt_id_status jwt_id_status,
-  login_expiration timestamp,
+  login_expiration timestamptz,
   uid uuid,
   mcuser_status mcuser_status
 );
@@ -313,7 +313,7 @@ $_$;
  */
 CREATE OR REPLACE FUNCTION blacklist_jwt_ids_for(
   in_uid uuid, 
-  in_request_timestamp timestamp without time zone, 
+  in_request_timestamp timestamptz, 
   in_request_origin text 
 ) RETURNS void 
 LANGUAGE plpgsql AS 
@@ -374,9 +374,9 @@ and the associated mcuser record is returned.
 CREATE OR REPLACE FUNCTION mcuser_login(
   mcuser_username text, 
   mcuser_password text, 
-  in_request_timestamp timestamp without time zone, 
+  in_request_timestamp timestamptz, 
   in_request_origin text, 
-  in_login_expiration timestamp without time zone, 
+  in_login_expiration timestamptz, 
   in_jwt_id uuid
 ) RETURNS mcuser
     LANGUAGE plpgsql
@@ -461,7 +461,7 @@ $_$;
 CREATE OR REPLACE FUNCTION mcuser_logout(
   mcuser_uid uuid, 
   jwt_id uuid, 
-  request_timestamp timestamp without time zone, 
+  request_timestamp timestamptz, 
   request_origin text
 ) RETURNS boolean
     LANGUAGE plpgsql
@@ -535,8 +535,8 @@ create table member (
                           -- NOTE: the member table only generates member ids!
   mid                     uuid primary key default gen_random_uuid(),
 
-  created                 timestamp not null default now(),
-  modified                timestamp null,
+  created                 timestamptz not null default now(),
+  modified                timestamptz null,
 
   emp_id                  text not null,
   location                Location not null,
@@ -570,7 +570,7 @@ comment on type mref is 'Uniquely identifies a single member in the corpus';
 create table mauth (
   mid                     uuid primary key,
 
-  modified                timestamp not null default now(),
+  modified                timestamptz not null default now(),
 
   dob                     date not null,
   ssn                     char(9) not null,
@@ -624,8 +624,8 @@ CREATE OR REPLACE FUNCTION insert_member(
   in_pswd text,
 
   OUT out_mid UUID,
-  OUT out_created timestamp,
-  OUT out_modified timestamp,
+  OUT out_created timestamptz,
+  OUT out_modified timestamptz,
   OUT out_emp_id text,
   OUT out_location Location,
   OUT out_name_first text,
@@ -669,9 +669,9 @@ comment on type member_audit_type is 'The member audit record/event type.';
 
 create table member_audit (
   mid                     uuid not null, -- i.e. the member.mid
-  created                 timestamp not null default now(),
+  created                 timestamptz not null default now(),
   type                    member_audit_type not null,
-  request_timestamp       timestamp not null,
+  request_timestamp       timestamptz not null,
   request_origin          text not null,
 
   primary key (created, type),
@@ -693,7 +693,7 @@ with the given username and pswd.
 CREATE OR REPLACE FUNCTION member_login(
   member_username text, 
   member_password text, 
-  in_request_timestamp timestamp without time zone, 
+  in_request_timestamp timestamptz, 
   in_request_origin text
 ) RETURNS public.mref
     LANGUAGE plpgsql
@@ -756,7 +756,7 @@ A member_audit record is created of LOGOUT type.
 */
 CREATE OR REPLACE FUNCTION member_logout(
   mid uuid, 
-  in_request_timestamp timestamp without time zone, 
+  in_request_timestamp timestamptz, 
   in_request_origin text
 ) RETURNS UUID
     LANGUAGE plpgsql
@@ -802,7 +802,7 @@ create table maddress (
   mid                     uuid not null,
   address_name            AddressName not null,
 
-  modified                timestamp not null default now(),
+  modified                timestamptz not null default now(),
 
   attn                    text null,
   street1                 text not null,
@@ -844,7 +844,7 @@ comment on type Beli is 'Benefit Eligibility Level Indicator.';
 create table mbenefits (
   mid                     uuid primary key,
 
-  modified                timestamp not null default now(),
+  modified                timestamptz not null default now(),
 
   foreign_adrs_flag       char null,
 

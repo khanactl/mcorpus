@@ -10,7 +10,7 @@ import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.tables.records.MauthRecord;
 
 import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth extends TableImpl<MauthRecord> {
 
-    private static final long serialVersionUID = -1107706578;
+    private static final long serialVersionUID = 2025130085;
 
     /**
      * The reference instance of <code>public.mauth</code>
@@ -66,7 +66,7 @@ public class Mauth extends TableImpl<MauthRecord> {
     /**
      * The column <code>public.mauth.modified</code>.
      */
-    public final TableField<MauthRecord, Timestamp> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMP)), this, "");
+    public final TableField<MauthRecord, OffsetDateTime> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mauth.dob</code>.

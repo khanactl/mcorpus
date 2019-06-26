@@ -8,7 +8,7 @@ import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -28,17 +28,17 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser implements Serializable {
 
-    private static final long serialVersionUID = 763903171;
+    private static final long serialVersionUID = -1997956434;
 
-    private final UUID         uid;
-    private final Timestamp    created;
-    private final Timestamp    modified;
-    private final String       name;
-    private final String       email;
-    private final String       username;
-    private final String       pswd;
-    private final McuserStatus status;
-    private final McuserRole[] roles;
+    private final UUID           uid;
+    private final OffsetDateTime created;
+    private final OffsetDateTime modified;
+    private final String         name;
+    private final String         email;
+    private final String         username;
+    private final String         pswd;
+    private final McuserStatus   status;
+    private final McuserRole[]   roles;
 
     public Mcuser(Mcuser value) {
         this.uid = value.uid;
@@ -53,15 +53,15 @@ public class Mcuser implements Serializable {
     }
 
     public Mcuser(
-        UUID         uid,
-        Timestamp    created,
-        Timestamp    modified,
-        String       name,
-        String       email,
-        String       username,
-        String       pswd,
-        McuserStatus status,
-        McuserRole[] roles
+        UUID           uid,
+        OffsetDateTime created,
+        OffsetDateTime modified,
+        String         name,
+        String         email,
+        String         username,
+        String         pswd,
+        McuserStatus   status,
+        McuserRole[]   roles
     ) {
         this.uid = uid;
         this.created = created;
@@ -78,11 +78,11 @@ public class Mcuser implements Serializable {
         return this.uid;
     }
 
-    public Timestamp getCreated() {
+    public OffsetDateTime getCreated() {
         return this.created;
     }
 
-    public Timestamp getModified() {
+    public OffsetDateTime getModified() {
         return this.modified;
     }
 

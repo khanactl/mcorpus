@@ -10,7 +10,7 @@ import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -35,7 +35,7 @@ import org.jooq.impl.UDTImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
 
-    private static final long serialVersionUID = -264683276;
+    private static final long serialVersionUID = -740768286;
 
     /**
      * The reference instance of <code>public.jwt_mcuser_status</code>
@@ -68,7 +68,7 @@ public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
     /**
      * The attribute <code>public.jwt_mcuser_status.login_expiration</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, Timestamp> LOGIN_EXPIRATION = createField("login_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, OffsetDateTime> LOGIN_EXPIRATION = createField("login_expiration", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.uid</code>.

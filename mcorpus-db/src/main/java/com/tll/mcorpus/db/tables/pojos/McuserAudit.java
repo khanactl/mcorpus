@@ -8,7 +8,7 @@ import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -27,14 +27,14 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit implements Serializable {
 
-    private static final long serialVersionUID = 2084364566;
+    private static final long serialVersionUID = -1835213679;
 
     private final UUID            uid;
-    private final Timestamp       created;
+    private final OffsetDateTime  created;
     private final McuserAuditType type;
-    private final Timestamp       requestTimestamp;
+    private final OffsetDateTime  requestTimestamp;
     private final String          requestOrigin;
-    private final Timestamp       loginExpiration;
+    private final OffsetDateTime  loginExpiration;
     private final UUID            jwtId;
     private final JwtIdStatus     jwtIdStatus;
 
@@ -51,11 +51,11 @@ public class McuserAudit implements Serializable {
 
     public McuserAudit(
         UUID            uid,
-        Timestamp       created,
+        OffsetDateTime  created,
         McuserAuditType type,
-        Timestamp       requestTimestamp,
+        OffsetDateTime  requestTimestamp,
         String          requestOrigin,
-        Timestamp       loginExpiration,
+        OffsetDateTime  loginExpiration,
         UUID            jwtId,
         JwtIdStatus     jwtIdStatus
     ) {
@@ -73,7 +73,7 @@ public class McuserAudit implements Serializable {
         return this.uid;
     }
 
-    public Timestamp getCreated() {
+    public OffsetDateTime getCreated() {
         return this.created;
     }
 
@@ -81,7 +81,7 @@ public class McuserAudit implements Serializable {
         return this.type;
     }
 
-    public Timestamp getRequestTimestamp() {
+    public OffsetDateTime getRequestTimestamp() {
         return this.requestTimestamp;
     }
 
@@ -89,7 +89,7 @@ public class McuserAudit implements Serializable {
         return this.requestOrigin;
     }
 
-    public Timestamp getLoginExpiration() {
+    public OffsetDateTime getLoginExpiration() {
         return this.loginExpiration;
     }
 

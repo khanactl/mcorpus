@@ -9,7 +9,7 @@ import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
 
 import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -32,7 +32,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class InsertMember extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = 1129520088;
+    private static final long serialVersionUID = 1240634045;
 
     /**
      * The parameter <code>public.insert_member.in_emp_id</code>.
@@ -127,12 +127,12 @@ public class InsertMember extends AbstractRoutine<java.lang.Void> {
     /**
      * The parameter <code>public.insert_member.out_created</code>.
      */
-    public static final Parameter<Timestamp> OUT_CREATED = Internal.createParameter("out_created", org.jooq.impl.SQLDataType.TIMESTAMP, false, false);
+    public static final Parameter<OffsetDateTime> OUT_CREATED = Internal.createParameter("out_created", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_modified</code>.
      */
-    public static final Parameter<Timestamp> OUT_MODIFIED = Internal.createParameter("out_modified", org.jooq.impl.SQLDataType.TIMESTAMP, false, false);
+    public static final Parameter<OffsetDateTime> OUT_MODIFIED = Internal.createParameter("out_modified", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_emp_id</code>.
@@ -387,14 +387,14 @@ public class InsertMember extends AbstractRoutine<java.lang.Void> {
     /**
      * Get the <code>out_created</code> parameter OUT value from the routine
      */
-    public Timestamp getOutCreated() {
+    public OffsetDateTime getOutCreated() {
         return get(OUT_CREATED);
     }
 
     /**
      * Get the <code>out_modified</code> parameter OUT value from the routine
      */
-    public Timestamp getOutModified() {
+    public OffsetDateTime getOutModified() {
         return get(OUT_MODIFIED);
     }
 

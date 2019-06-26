@@ -11,7 +11,7 @@ import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.tables.records.McuserAuditRecord;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = -338446340;
+    private static final long serialVersionUID = 842640575;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -67,7 +67,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.created</code>.
      */
-    public final TableField<McuserAuditRecord, Timestamp> CREATED = createField("created", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMP)), this, "");
+    public final TableField<McuserAuditRecord, OffsetDateTime> CREATED = createField("created", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mcuser_audit.type</code>.
@@ -77,7 +77,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.request_timestamp</code>.
      */
-    public final TableField<McuserAuditRecord, Timestamp> REQUEST_TIMESTAMP = createField("request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+    public final TableField<McuserAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField("request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser_audit.request_origin</code>.
@@ -87,7 +87,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.login_expiration</code>.
      */
-    public final TableField<McuserAuditRecord, Timestamp> LOGIN_EXPIRATION = createField("login_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+    public final TableField<McuserAuditRecord, OffsetDateTime> LOGIN_EXPIRATION = createField("login_expiration", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.mcuser_audit.jwt_id</code>.

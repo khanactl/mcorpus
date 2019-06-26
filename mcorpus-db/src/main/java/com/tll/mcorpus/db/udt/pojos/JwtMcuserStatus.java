@@ -9,7 +9,7 @@ import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserStatus;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -28,12 +28,12 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus implements Serializable {
 
-    private static final long serialVersionUID = -1667539529;
+    private static final long serialVersionUID = -1188236832;
 
     private final McuserAuditType mcuserAuditRecordType;
     private final UUID            jwtId;
     private final JwtIdStatus     jwtIdStatus;
-    private final Timestamp       loginExpiration;
+    private final OffsetDateTime  loginExpiration;
     private final UUID            uid;
     private final McuserStatus    mcuserStatus;
 
@@ -50,7 +50,7 @@ public class JwtMcuserStatus implements Serializable {
         McuserAuditType mcuserAuditRecordType,
         UUID            jwtId,
         JwtIdStatus     jwtIdStatus,
-        Timestamp       loginExpiration,
+        OffsetDateTime  loginExpiration,
         UUID            uid,
         McuserStatus    mcuserStatus
     ) {
@@ -74,7 +74,7 @@ public class JwtMcuserStatus implements Serializable {
         return this.jwtIdStatus;
     }
 
-    public Timestamp getLoginExpiration() {
+    public OffsetDateTime getLoginExpiration() {
         return this.loginExpiration;
     }
 

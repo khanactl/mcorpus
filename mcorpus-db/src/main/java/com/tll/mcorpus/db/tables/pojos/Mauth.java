@@ -6,7 +6,7 @@ package com.tll.mcorpus.db.tables.pojos;
 
 import java.io.Serializable;
 import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -25,20 +25,20 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth implements Serializable {
 
-    private static final long serialVersionUID = 1741157006;
+    private static final long serialVersionUID = -102988447;
 
-    private final UUID      mid;
-    private final Timestamp modified;
-    private final Date      dob;
-    private final String    ssn;
-    private final String    emailPersonal;
-    private final String    emailWork;
-    private final String    mobilePhone;
-    private final String    homePhone;
-    private final String    workPhone;
-    private final String    fax;
-    private final String    username;
-    private final String    pswd;
+    private final UUID           mid;
+    private final OffsetDateTime modified;
+    private final Date           dob;
+    private final String         ssn;
+    private final String         emailPersonal;
+    private final String         emailWork;
+    private final String         mobilePhone;
+    private final String         homePhone;
+    private final String         workPhone;
+    private final String         fax;
+    private final String         username;
+    private final String         pswd;
 
     public Mauth(Mauth value) {
         this.mid = value.mid;
@@ -56,18 +56,18 @@ public class Mauth implements Serializable {
     }
 
     public Mauth(
-        UUID      mid,
-        Timestamp modified,
-        Date      dob,
-        String    ssn,
-        String    emailPersonal,
-        String    emailWork,
-        String    mobilePhone,
-        String    homePhone,
-        String    workPhone,
-        String    fax,
-        String    username,
-        String    pswd
+        UUID           mid,
+        OffsetDateTime modified,
+        Date           dob,
+        String         ssn,
+        String         emailPersonal,
+        String         emailWork,
+        String         mobilePhone,
+        String         homePhone,
+        String         workPhone,
+        String         fax,
+        String         username,
+        String         pswd
     ) {
         this.mid = mid;
         this.modified = modified;
@@ -87,7 +87,7 @@ public class Mauth implements Serializable {
         return this.mid;
     }
 
-    public Timestamp getModified() {
+    public OffsetDateTime getModified() {
         return this.modified;
     }
 

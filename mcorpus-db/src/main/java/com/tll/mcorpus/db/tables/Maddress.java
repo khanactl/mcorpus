@@ -10,7 +10,7 @@ import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.tables.records.MaddressRecord;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Maddress extends TableImpl<MaddressRecord> {
 
-    private static final long serialVersionUID = -881634818;
+    private static final long serialVersionUID = -752047757;
 
     /**
      * The reference instance of <code>public.maddress</code>
@@ -71,7 +71,7 @@ public class Maddress extends TableImpl<MaddressRecord> {
     /**
      * The column <code>public.maddress.modified</code>.
      */
-    public final TableField<MaddressRecord, Timestamp> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMP)), this, "");
+    public final TableField<MaddressRecord, OffsetDateTime> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.maddress.attn</code>.

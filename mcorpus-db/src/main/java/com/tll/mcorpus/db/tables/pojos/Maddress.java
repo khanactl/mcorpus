@@ -7,7 +7,7 @@ package com.tll.mcorpus.db.tables.pojos;
 import com.tll.mcorpus.db.enums.Addressname;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -26,18 +26,18 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Maddress implements Serializable {
 
-    private static final long serialVersionUID = 527248448;
+    private static final long serialVersionUID = -830619161;
 
-    private final UUID        mid;
-    private final Addressname addressName;
-    private final Timestamp   modified;
-    private final String      attn;
-    private final String      street1;
-    private final String      street2;
-    private final String      city;
-    private final String      state;
-    private final String      postalCode;
-    private final String      country;
+    private final UUID           mid;
+    private final Addressname    addressName;
+    private final OffsetDateTime modified;
+    private final String         attn;
+    private final String         street1;
+    private final String         street2;
+    private final String         city;
+    private final String         state;
+    private final String         postalCode;
+    private final String         country;
 
     public Maddress(Maddress value) {
         this.mid = value.mid;
@@ -53,16 +53,16 @@ public class Maddress implements Serializable {
     }
 
     public Maddress(
-        UUID        mid,
-        Addressname addressName,
-        Timestamp   modified,
-        String      attn,
-        String      street1,
-        String      street2,
-        String      city,
-        String      state,
-        String      postalCode,
-        String      country
+        UUID           mid,
+        Addressname    addressName,
+        OffsetDateTime modified,
+        String         attn,
+        String         street1,
+        String         street2,
+        String         city,
+        String         state,
+        String         postalCode,
+        String         country
     ) {
         this.mid = mid;
         this.addressName = addressName;
@@ -84,7 +84,7 @@ public class Maddress implements Serializable {
         return this.addressName;
     }
 
-    public Timestamp getModified() {
+    public OffsetDateTime getModified() {
         return this.modified;
     }
 

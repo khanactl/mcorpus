@@ -8,7 +8,7 @@ import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.enums.MemberStatus;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -27,18 +27,18 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Member implements Serializable {
 
-    private static final long serialVersionUID = 1360578625;
+    private static final long serialVersionUID = 1244856968;
 
-    private final UUID         mid;
-    private final Timestamp    created;
-    private final Timestamp    modified;
-    private final String       empId;
-    private final Location     location;
-    private final String       nameFirst;
-    private final String       nameMiddle;
-    private final String       nameLast;
-    private final String       displayName;
-    private final MemberStatus status;
+    private final UUID           mid;
+    private final OffsetDateTime created;
+    private final OffsetDateTime modified;
+    private final String         empId;
+    private final Location       location;
+    private final String         nameFirst;
+    private final String         nameMiddle;
+    private final String         nameLast;
+    private final String         displayName;
+    private final MemberStatus   status;
 
     public Member(Member value) {
         this.mid = value.mid;
@@ -54,16 +54,16 @@ public class Member implements Serializable {
     }
 
     public Member(
-        UUID         mid,
-        Timestamp    created,
-        Timestamp    modified,
-        String       empId,
-        Location     location,
-        String       nameFirst,
-        String       nameMiddle,
-        String       nameLast,
-        String       displayName,
-        MemberStatus status
+        UUID           mid,
+        OffsetDateTime created,
+        OffsetDateTime modified,
+        String         empId,
+        Location       location,
+        String         nameFirst,
+        String         nameMiddle,
+        String         nameLast,
+        String         displayName,
+        MemberStatus   status
     ) {
         this.mid = mid;
         this.created = created;
@@ -81,11 +81,11 @@ public class Member implements Serializable {
         return this.mid;
     }
 
-    public Timestamp getCreated() {
+    public OffsetDateTime getCreated() {
         return this.created;
     }
 
-    public Timestamp getModified() {
+    public OffsetDateTime getModified() {
         return this.modified;
     }
 

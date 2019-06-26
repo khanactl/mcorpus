@@ -10,7 +10,7 @@ import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.enums.Beli;
 import com.tll.mcorpus.db.tables.records.MbenefitsRecord;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mbenefits extends TableImpl<MbenefitsRecord> {
 
-    private static final long serialVersionUID = 522281533;
+    private static final long serialVersionUID = -237834526;
 
     /**
      * The reference instance of <code>public.mbenefits</code>
@@ -66,7 +66,7 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     /**
      * The column <code>public.mbenefits.modified</code>.
      */
-    public final TableField<MbenefitsRecord, Timestamp> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMP)), this, "");
+    public final TableField<MbenefitsRecord, OffsetDateTime> MODIFIED = createField("modified", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mbenefits.foreign_adrs_flag</code>.

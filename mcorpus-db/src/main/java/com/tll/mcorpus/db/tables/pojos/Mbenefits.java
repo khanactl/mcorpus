@@ -7,7 +7,7 @@ package com.tll.mcorpus.db.tables.pojos;
 import com.tll.mcorpus.db.enums.Beli;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -26,21 +26,21 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mbenefits implements Serializable {
 
-    private static final long serialVersionUID = 45657906;
+    private static final long serialVersionUID = 52458083;
 
-    private final UUID      mid;
-    private final Timestamp modified;
-    private final String    foreignAdrsFlag;
-    private final Beli      beli;
-    private final Object    mcb;
-    private final String    medPlanCode;
-    private final String    medOptOut;
-    private final String    denPlanCode;
-    private final String    denOptOut;
-    private final String    visPlanCode;
-    private final String    visOptOut;
-    private final String    legPlanCode;
-    private final String    legOptOut;
+    private final UUID           mid;
+    private final OffsetDateTime modified;
+    private final String         foreignAdrsFlag;
+    private final Beli           beli;
+    private final Object         mcb;
+    private final String         medPlanCode;
+    private final String         medOptOut;
+    private final String         denPlanCode;
+    private final String         denOptOut;
+    private final String         visPlanCode;
+    private final String         visOptOut;
+    private final String         legPlanCode;
+    private final String         legOptOut;
 
     public Mbenefits(Mbenefits value) {
         this.mid = value.mid;
@@ -59,19 +59,19 @@ public class Mbenefits implements Serializable {
     }
 
     public Mbenefits(
-        UUID      mid,
-        Timestamp modified,
-        String    foreignAdrsFlag,
-        Beli      beli,
-        Object    mcb,
-        String    medPlanCode,
-        String    medOptOut,
-        String    denPlanCode,
-        String    denOptOut,
-        String    visPlanCode,
-        String    visOptOut,
-        String    legPlanCode,
-        String    legOptOut
+        UUID           mid,
+        OffsetDateTime modified,
+        String         foreignAdrsFlag,
+        Beli           beli,
+        Object         mcb,
+        String         medPlanCode,
+        String         medOptOut,
+        String         denPlanCode,
+        String         denOptOut,
+        String         visPlanCode,
+        String         visOptOut,
+        String         legPlanCode,
+        String         legOptOut
     ) {
         this.mid = mid;
         this.modified = modified;
@@ -92,7 +92,7 @@ public class Mbenefits implements Serializable {
         return this.mid;
     }
 
-    public Timestamp getModified() {
+    public OffsetDateTime getModified() {
         return this.modified;
     }
 
