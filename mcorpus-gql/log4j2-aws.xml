@@ -5,18 +5,21 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d%d{ISO8601} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
+    <!--
     <File name="File" fileName="logs/mcorpus-gql-server.log">
       <PatternLayout>
         <Pattern>%d{ISO8601} [%t] %-5level %logger{36} - %msg%n</Pattern>
       </PatternLayout>
     </File>
+    -->
   </Appenders>
   <Loggers>
     <Logger name="com.zaxxer.hikari" level="warn" />
+    <Logger name="graphql" level="off" /><!-- do NOT output raw graphql queries in error or otherwise! -->
     
     <Root level="INFO">
       <AppenderRef ref="Console"/>
-      <AppenderRef ref="File"/>
+      <!-- <AppenderRef ref="File"/> -->
     </Root>
   </Loggers>
 </Configuration>
