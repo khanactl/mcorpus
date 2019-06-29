@@ -257,7 +257,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     );
     if(fetchResult.isSuccess()) {
       // logout success - nix all cookies clientside
-      jwtResponse.expireAllCookies();
+      jwtResponse.expireJwtCookies();
       log.info("JWT {} (user '{}') logged out in request {}.", jwtStatus.jwtId(), jwtStatus.userId(), jwtStatus.requestId());
       return true;
     }
@@ -285,7 +285,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     if(fr.isSuccess()) {
       if(jwtUserId.equals(jwtStatus.userId())) {
         // this is the current jwt user so nix jwt state clientside
-        jwtResponse.expireAllCookies();
+        jwtResponse.expireJwtCookies();
       }
       log.info("All JWTs for user {} successfully invalidated in request {}.", jwtUserId, jwtStatus.requestId());
       return true;

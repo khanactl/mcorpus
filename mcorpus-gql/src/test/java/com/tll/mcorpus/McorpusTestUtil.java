@@ -121,7 +121,7 @@ public class McorpusTestUtil {
       }
     
       @Override
-      public void expireAllCookies() {
+      public void expireJwtCookies() {
         // testing no-op
       }
     };

@@ -23,7 +23,7 @@ public class MCorpusJwtHttpResponseAction implements IJwtHttpResponseAction {
   }
 
   @Override
-  public void expireAllCookies() {
+  public void expireJwtCookies() {
     com.tll.mcorpus.web.RequestUtil.expireAllCookies(ctx);
   }
 
