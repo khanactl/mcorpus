@@ -97,8 +97,8 @@ public class McorpusTestUtil {
    */
   public static JWT jwt() {
     byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
-    long jwtTtlInMillis = Duration.ofDays(2).toMillis();
-    return new JWT(jwtTtlInMillis, jwtSharedSecret, testServerPublicAddress);
+    Duration jwtTtl = Duration.ofDays(2);
+    return new JWT(jwtTtl, jwtSharedSecret, testServerPublicAddress);
   }
 
   /**

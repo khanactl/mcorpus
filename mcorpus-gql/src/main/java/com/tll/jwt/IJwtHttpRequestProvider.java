@@ -30,9 +30,9 @@ public interface IJwtHttpRequestProvider {
   String getClientOrigin();
 
   /**
-   * @return the JWT cookie value of the incoming http request.
+   * @return the JWT value of the incoming http request.
    */
-  String getJwtCookie();
+  String getJwt();
 
   /**
    * Verify the given client origin token against the held client origin in this instance.

@@ -19,6 +19,7 @@ import com.tll.jwt.IJwtUser;
 import com.tll.jwt.IJwtUserStatus;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
+import com.tll.mcorpus.web.McorpusJwtRequestProvider;
 import com.tll.repo.FetchResult;
 import com.tll.web.GraphQLWebContext;
 import com.tll.web.RequestSnapshot;
@@ -193,7 +194,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final UUID pendingJwtID = UUID.randomUUID();
     final String clientOriginToken = requestSnapshot.getClientOrigin();
     final Instant requestInstant = requestSnapshot.getRequestInstant();
-    final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtCookieTtl());
+    final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
 
     // call db login
     log.debug("Authenticating JWT user '{}' in request {}..", username, requestId);
@@ -223,11 +224,11 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
           isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" : 
             Arrays.stream(jwtUser.getJwtUserRoles())
             .collect(Collectors.joining(",")),
-          requestSnapshot
+            McorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot)
       );
       
       // jwt cookie
-      jwtResponse.setJwtCookie(jwt, jwtbiz.jwtCookieTtl().getSeconds());
+      jwtResponse.setJwtCookie(jwt, jwtbiz.jwtTimeToLive().getSeconds());
       
       log.info("JWT user '{}' logged in.  JWT {} generated from request {}.", jwtUser.getJwtUserId(), pendingJwtID, requestId);
       return true;

@@ -1,5 +1,7 @@
 package com.tll.mcorpus.web;
 
+import java.time.Duration;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -59,7 +61,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Singleton
   JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config) {
     return new JWT(
-      config.jwtTtlInSeconds, 
+      Duration.ofSeconds(config.jwtTtlInSeconds), 
       JWT.deserialize(config.jwtSalt), 
       serverConfig.getPublicAddress().toString()
     );

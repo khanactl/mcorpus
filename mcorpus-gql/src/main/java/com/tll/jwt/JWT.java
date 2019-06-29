@@ -84,31 +84,30 @@ public class JWT {
   
   private final Logger log = LoggerFactory.getLogger(JWT.class);
   
-  private final Duration jwtCookieTtl;
+  private final Duration jwtTimeToLive;
   private final SecretKey jkey;
   private final String serverIssuer; 
 
   /**
    * Constructor.
    * 
-   * @param jwtCookieTtlInSeconds the jwt cookie time to live in seconds
-   * @param jwtSharedSecret
-   *          the cryptographically strong salt (or shared secret) to be used for
-   *          signing and later verifying JWTs
+   * @param jwtTimeToLive the amount of time a JWT shall live clientside
+   * @param jwtSharedSecret the cryptographically strong secret to be used for
+   *                        signing and verifying JWTs
    * @param serverIssuer the expected JWT issuer used to verify received JWTs
    */
-  public JWT(long jwtCookieTtlInSeconds, byte[] jwtSharedSecret, String serverIssuer) {
+  public JWT(Duration jwtTimeToLive, byte[] jwtSharedSecret, String serverIssuer) {
     super();
-    this.jwtCookieTtl = Duration.ofSeconds(jwtCookieTtlInSeconds);
+    this.jwtTimeToLive = jwtTimeToLive;
     this.jkey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = serverIssuer;
-    log.info("JWT configured with cookie time-to-live: {} seconds, serverIssuer: {}.", jwtCookieTtlInSeconds, serverIssuer);
+    log.info("JWT configured with Time-to-live: {} hours, Issuer: {}.", jwtTimeToLive.toHours(), serverIssuer);
   }
 
   /**
-   * @return the configured JWT cookie time to live duration.
+   * @return the configured amount of time a JWT is considered valid.
    */
-  public Duration jwtCookieTtl() { return jwtCookieTtl; }
+  public Duration jwtTimeToLive() { return jwtTimeToLive; }
 
   /**
    * Generate an encrypted and signed JWT.
@@ -124,7 +123,7 @@ public class JWT {
       throws Exception {
     final String requestId = httpreq.getRequestId();
     final Instant requestInstant = httpreq.getRequestInstant();
-    final Instant loginExpiration = requestInstant.plus(jwtCookieTtl);
+    final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
     final String audience = httpreq.getClientOrigin();
 
     // create signed jwt object
@@ -182,13 +181,13 @@ public class JWT {
     final String requestId = isNull(httpreq) ? "UNKNOWN" : httpreq.getRequestId();
     
     // present?
-    if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwtCookie())) 
+    if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwt())) 
       return JWTHttpRequestStatus.create(requestId, JWTStatus.NOT_PRESENT_IN_REQUEST);
     
-    // decrypt JWT cookie
+    // decrypt JWT
     final JWEObject jweObject;
     try {
-      jweObject = JWEObject.parse(httpreq.getJwtCookie());
+      jweObject = JWEObject.parse(httpreq.getJwt());
       jweObject.decrypt(new DirectDecrypter(jkey.getEncoded()));
     } catch (Exception e) {
       log.error("JWT decrypt error '{}' for request {}.", e.getMessage(), requestId);

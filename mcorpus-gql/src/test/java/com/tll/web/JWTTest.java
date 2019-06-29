@@ -10,10 +10,10 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import com.tll.UnitTest;
+import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
-import com.tll.web.RequestSnapshot;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -42,54 +42,81 @@ public class JWTTest {
   @Test
   public void testJwtGenerateAndParse() throws Exception {
     
-    byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
-    long jwtTtlInMillis = Duration.ofDays(2).toMillis();
-    final JWT jwti = new JWT(jwtTtlInMillis, jwtSharedSecret, "https://site.com");
+    final byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
+    final Duration jwtTtl = Duration.ofDays(2);
+    final JWT jwti = new JWT(jwtTtl, jwtSharedSecret, "https://site.com");
     
-    Instant now = Instant.now();
-    UUID jwtId = UUID.randomUUID();
-    String roles = "AROLE";
-    UUID jwtUserId = UUID.randomUUID();
+    final Instant instantA = Instant.now();
+    final Instant instantB = Instant.now().plus(Duration.ofSeconds(120));
+    final String requestIdA = "ridA";
+    final String requestIdB = "ridB";
+    final UUID jwtId = UUID.randomUUID();
+    final String roles = "AROLE";
+    final UUID jwtUserId = UUID.randomUUID();
     
-    final RequestSnapshot rsPre = new RequestSnapshot(
-      now,
-      "127.0.0.1",
-      "localhost",
-      "https://site.com/index",
-      "https://site.com/index/target",
-      "",
-      "127.0.0.1",
-      "https",
-      "5150",
-      null,
-      "rst",
-      "rsth", 
-      UUID.randomUUID().toString()
-    );
+    final IJwtHttpRequestProvider jwtRpPre = new IJwtHttpRequestProvider(){
     
-      // generate jwt
-    String jwt = jwti.jwtGenerate(jwtId, jwtUserId, roles, rsPre);
+      @Override
+      public boolean verifyClientOrigin(String clientOrigin) {
+        return true;
+      }
+    
+      @Override
+      public Instant getRequestInstant() {
+        return instantA;
+      }
+    
+      @Override
+      public String getRequestId() {
+        return requestIdA;
+      }
+    
+      @Override
+      public String getJwt() {
+        return null;
+      }
+    
+      @Override
+      public String getClientOrigin() {
+        return "localhost|localhost";
+      }
+    };
+        
+    // generate jwt
+    String jwt = jwti.jwtGenerate(jwtId, jwtUserId, roles, jwtRpPre);
     assertNotNull(jwt);
     log.info("JWT generated: {}", jwt);
     
-    final RequestSnapshot rsPost = new RequestSnapshot(
-      now,
-      "127.0.0.1",
-      "localhost",
-      "https://site.com/index",
-      "https://site.com/index/target",
-      "",
-      "127.0.0.1",
-      "https",
-      "5150",
-      jwt,
-      "rst",
-      "rsth", 
-      UUID.randomUUID().toString()
-    );
+    final IJwtHttpRequestProvider jwtRpPost = new IJwtHttpRequestProvider(){
+    
+      @Override
+      public boolean verifyClientOrigin(String clientOrigin) {
+        return true;
+      }
+    
+      @Override
+      public Instant getRequestInstant() {
+        return instantB;
+      }
+    
+      @Override
+      public String getRequestId() {
+        return requestIdB;
+      }
+    
+      @Override
+      public String getJwt() {
+        return jwt;
+      }
+    
+      @Override
+      public String getClientOrigin() {
+        return "localhost|localhost";
+      }
+    };
     
     // get jwt status
-    JWTHttpRequestStatus jwtStatus = jwti.jwtHttpRequestStatus(rsPost, null);
+    JWTHttpRequestStatus jwtStatus = jwti.jwtHttpRequestStatus(jwtRpPost, null);
     assertNotNull(jwtStatus);
     assertEquals(JWTStatus.NOT_PRESENT_BACKEND, jwtStatus.status());
   }
