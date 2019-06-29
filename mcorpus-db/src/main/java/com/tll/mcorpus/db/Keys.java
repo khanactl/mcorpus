@@ -84,7 +84,7 @@ public class Keys {
         public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, "mcuser_audit_pkey", McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID);
         public static final UniqueKey<MemberRecord> MEMBER_PKEY = Internal.createUniqueKey(Member.MEMBER, "member_pkey", Member.MEMBER.MID);
         public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = Internal.createUniqueKey(Member.MEMBER, "member_emp_id_location_key", Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION);
-        public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = Internal.createUniqueKey(MemberAudit.MEMBER_AUDIT, "member_audit_pkey", MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE);
+        public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = Internal.createUniqueKey(MemberAudit.MEMBER_AUDIT, "member_audit_pkey", MemberAudit.MEMBER_AUDIT.MID, MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE);
     }
 
     private static class ForeignKeys0 {

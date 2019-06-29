@@ -13,7 +13,7 @@ import java.util.UUID;
 import javax.annotation.Generated;
 
 import org.jooq.Field;
-import org.jooq.Record2;
+import org.jooq.Record3;
 import org.jooq.Record5;
 import org.jooq.Row5;
 import org.jooq.impl.UpdatableRecordImpl;
@@ -32,7 +32,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAuditRecord extends UpdatableRecordImpl<MemberAuditRecord> implements Record5<UUID, Timestamp, MemberAuditType, Timestamp, String> {
 
-    private static final long serialVersionUID = 631178167;
+    private static final long serialVersionUID = 1494436041;
 
     /**
      * Setter for <code>public.member_audit.mid</code>.
@@ -112,8 +112,8 @@ public class MemberAuditRecord extends UpdatableRecordImpl<MemberAuditRecord> im
      * {@inheritDoc}
      */
     @Override
-    public Record2<Timestamp, MemberAuditType> key() {
-        return (Record2) super.key();
+    public Record3<UUID, Timestamp, MemberAuditType> key() {
+        return (Record3) super.key();
     }
 
     // -------------------------------------------------------------------------

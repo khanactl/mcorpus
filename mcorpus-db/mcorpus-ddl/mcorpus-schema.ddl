@@ -674,10 +674,10 @@ create table member_audit (
   request_timestamp       timestamptz not null,
   request_origin          text not null,
 
-  primary key (created, type),
+  primary key (mid, created, type),
   foreign key ("mid") references member ("mid") on delete cascade
 );
-comment on type member_audit is 'Log of member events.';
+comment on type member_audit is 'Log of member login/logout events.';
 
 /*
 member_login
