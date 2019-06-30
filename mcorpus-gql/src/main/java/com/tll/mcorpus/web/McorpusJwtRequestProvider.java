@@ -1,7 +1,9 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.lower;
 import static com.tll.core.Util.not;
 
 import java.time.Instant;
@@ -17,7 +19,21 @@ import com.tll.web.RequestSnapshot;
 public class McorpusJwtRequestProvider implements IJwtHttpRequestProvider {
 
   public static McorpusJwtRequestProvider fromRequestSnapshot(final RequestSnapshot rs) {
-    return new McorpusJwtRequestProvider(rs);
+    return new McorpusJwtRequestProvider(
+      rs, 
+      String.format("%s|%s", 
+        nullwiseClean(rs.getRemoteAddressHost()), 
+        nullwiseClean(rs.getxForwardedFor())
+      )
+    );
+  }
+
+  private static boolean isNullwiseOrEmpty(final String s) {
+    return isNullOrEmpty(s) || "null".equals(lower(s));
+  }
+
+  private static String nullwiseClean(final String s) {
+    return isNullwiseOrEmpty(s) ? "" : clean(s);
   }
 
   /**
@@ -44,14 +60,16 @@ public class McorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   private static final Pattern clientOriginExtractor = Pattern.compile("^(.*)\\|(.*)$");
   
   private final RequestSnapshot rs;
+  private final String clientOrigin;
 
-  private McorpusJwtRequestProvider(final RequestSnapshot rs) {
+  private McorpusJwtRequestProvider(final RequestSnapshot rs, String clientOrigin) {
     this.rs = rs;
+    this.clientOrigin = clientOrigin;
   }
 
   @Override
   public String getClientOrigin() {
-    return rs.getClientOrigin();
+    return clientOrigin;
   }
 
   @Override

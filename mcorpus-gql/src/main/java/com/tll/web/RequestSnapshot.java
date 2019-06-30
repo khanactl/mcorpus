@@ -1,6 +1,5 @@
 package com.tll.web;
 
-import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 import static com.tll.core.Util.not;
@@ -17,10 +16,6 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
   
   private static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
-  }
-
-  private static String nullwiseClean(final String s) {
-    return isNullwiseOrEmpty(s) ? "" : clean(s);
   }
 
   private final Instant requestInstant;
@@ -41,8 +36,6 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
   
   private final String rstHeader;
   
-  private final String clientOrigin;
-
   private final String requestId;
 
   /**
@@ -94,27 +87,9 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
     this.rstCookie = rstCookie;
     this.rstHeader = rstHeader;
     
-    this.clientOrigin = String.format("%s|%s", nullwiseClean(remoteAddressHost), nullwiseClean(xForwardedFor));
-
     this.requestId = requestId;
   }
   
-  /**
-   * The client origin token.
-   * <p>
-   * <b>FORMAT:</b> <br>
-   * <code>
-   * "{remote-address-host}|{X-Forwarded-For}"
-   * </code>
-   * 
-   * @return Never-null resolved client origin token containing both the remote
-   *         address host of the received request and the X-Forwarded-For 
-   *         http header values.
-   */
-  public String getClientOrigin() {
-    return clientOrigin;
-  }
-
   /**
    * @return the instant the associated http request reached the server.
    */
@@ -226,9 +201,8 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
   @Override
   public String toString() {
     return String.format(
-      "Http-Request Id: %s, clientOrigin: %s", 
-      requestId, 
-      clientOrigin 
+      "Http-Request Id: %s", 
+      requestId 
     );
   }
 }
