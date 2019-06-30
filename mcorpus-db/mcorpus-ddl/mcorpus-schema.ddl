@@ -73,10 +73,12 @@ $$;
 /*
 pass_hash()
 
-Use to generate a hash from a raw password to manually create mcuser passwords.
+Use to generate a persistence-ready hash from a raw password.
+<p>
+Only store password hashes with a salt and *never* raw passwords.
 
 @return the generated hash of a text password
-        with a randomly generated salt.
+        with a randomly generated and self-contained salt.
 */
 create or replace function pass_hash(pswd text) returns text as $$
   begin
@@ -658,6 +660,23 @@ BEGIN
   RETURNING mauth.dob, mauth.ssn, mauth.email_personal, mauth.email_work, mauth.mobile_phone, mauth.home_phone, mauth.work_phone, mauth.fax, mauth.username
   INTO out_dob, out_ssn, out_email_personal, out_email_work, out_mobile_phone, out_home_phone, out_work_phone, out_fax, out_username
   ;
+END
+$_$;
+
+/**
+ * member_pswd
+ * 
+ * @param in_mid the subject member id 
+ * @param in_pswd the pswd to set
+ */
+CREATE OR REPLACE FUNCTION member_pswd(
+  in_mid uuid, 
+  in_pswd text  
+) RETURNS void 
+LANGUAGE plpgsql AS 
+$_$
+BEGIN
+  update mauth set pswd = pass_hash($2) where mid = $1;
 END
 $_$;
 

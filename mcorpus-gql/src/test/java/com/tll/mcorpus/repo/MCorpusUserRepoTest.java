@@ -17,7 +17,6 @@ import static org.junit.Assert.fail;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
@@ -508,6 +507,31 @@ public class MCorpusUserRepoTest {
       try { uid = testMcuser.getUid(); } catch(Exception e) {}
 
       FetchResult<Boolean> fetchResult = repo.deleteMcuser(uid);
+      assertNotNull(fetchResult);
+      assertNull(fetchResult.getErrorMsg());
+      assertTrue(fetchResult.get());
+    }
+    catch(Exception e) {
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        if(uid != null) deleteTestMcuser(uid);
+        repo.close();
+      }
+    }
+  }
+
+  @Test
+  public void testMcuserSetPswd() throws Exception {
+    MCorpusUserRepo repo = null;
+    UUID uid = null;
+    try {
+      repo = mcuserRepo();
+      Mcuser testMcuser = insertTestMcuser();
+      try { uid = testMcuser.getUid(); } catch(Exception e) {}
+
+      FetchResult<Boolean> fetchResult = repo.setPswd(uid, "test123");
       assertNotNull(fetchResult);
       assertNull(fetchResult.getErrorMsg());
       assertTrue(fetchResult.get());

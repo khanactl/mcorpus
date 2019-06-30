@@ -553,6 +553,30 @@ public class MCorpusRepoTest {
   }
 
   @Test
+  public void testMemberSetPswd() throws Exception {
+    MCorpusRepo repo = null;
+    UUID mid = null;
+    try {
+      repo = mcorpusRepo();
+      mid = insertTestMember();
+
+      FetchResult<Boolean> fetchResult = repo.setMemberPswd(mid, "test123");
+      assertNotNull(fetchResult);
+      assertNull(fetchResult.getErrorMsg());
+      assertTrue(fetchResult.get());
+    }
+    catch(Exception e) {
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        if(mid != null) deleteTestMember(mid);
+        repo.close();
+      }
+    }
+  }
+
+  @Test
   public void testAddMemberAddress() {
     MCorpusRepo repo = null;
     UUID mid = insertTestMember();

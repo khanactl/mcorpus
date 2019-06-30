@@ -44,6 +44,9 @@ type Mutation {
   # physical removal of a member from the corpus - returns true when successful
   deleteMember(mid: ID!): Boolean! @auth(role: "mcorpus")
 
+  # set/reset a member pswd by member id
+  mpswd(mid: ID!, pswd: String!): Boolean! @auth(role: "mcorpus")
+  
   # add a member address of a given address name (type)
   addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress @auth(role: "mcorpus")
 
@@ -52,7 +55,7 @@ type Mutation {
 
   # delete a member address of the given address name (type) returning true when successful
   deleteMemberAddress(mid: ID!, addressName: AddressName!): Boolean! @auth(role: "mcorpus")
-
+  
 }
 
 # member locations
@@ -356,8 +359,6 @@ input MemberToUpdate {
 
   # member username
   username: String
-  # member password
-  pswd: String
 }
 
 # required properties for adding a new member address

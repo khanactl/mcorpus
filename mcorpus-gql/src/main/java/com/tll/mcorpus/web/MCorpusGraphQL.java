@@ -16,6 +16,7 @@ import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.mcorpus.gmodel.MemberAddress;
+import com.tll.mcorpus.gmodel.MemberIdAndPswdKey;
 import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
 import com.tll.mcorpus.gmodel.Mlogin;
 import com.tll.mcorpus.gmodel.Mlogout;
@@ -295,7 +296,7 @@ public class MCorpusGraphQL {
             clean(env.getArgument("pswd"))
           ), 
           key -> mcuserRepo.setPswd(key.getUid(), key.getPswd()), 
-          b -> b) 
+          fr -> fr.get()) 
         )
         
         // invalidateJwtsFor
@@ -368,6 +369,17 @@ public class MCorpusGraphQL {
           () -> uuidFromToken(env.getArgument("mid")), 
           key -> key, 
           b -> mcorpusRepo.deleteMember(b))
+        )
+
+        // member pswd
+        .dataFetcher("mpswd", env -> processor.handleSimpleMutation(
+          env, 
+          () -> new MemberIdAndPswdKey(
+            uuidFromToken(env.getArgument("mid")), 
+            clean(env.getArgument("pswd"))
+          ), 
+          key -> mcorpusRepo.setMemberPswd(key.getMid(), key.getPswd()), 
+          fr -> fr.get()) 
         )
 
         // add member address

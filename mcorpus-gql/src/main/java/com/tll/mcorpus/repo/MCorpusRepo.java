@@ -30,6 +30,7 @@ import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.routines.MemberLogin2;
 import com.tll.mcorpus.db.routines.MemberLogout2;
+import com.tll.mcorpus.db.routines.MemberPswd;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.db.tables.pojos.Mauth;
 import com.tll.mcorpus.db.tables.pojos.Member;
@@ -607,6 +608,36 @@ public class MCorpusRepo implements Closeable {
 
     // fail
     return new FetchResult<>(null, emsg);
+  }
+
+  /**
+   * Set/reset a member pswd.
+   * 
+   * @param mid the id of the member
+   * @param pswd the pswd to set
+   */
+  public FetchResult<Boolean> setMemberPswd(final UUID mid, final String pswd) {
+    String emsg = null;
+    try {
+      final MemberPswd sp = new MemberPswd();
+      sp.setInMid(mid);
+      sp.setInPswd(pswd);
+      sp.execute(dsl.configuration());
+
+      // success
+      return new FetchResult<>(Boolean.TRUE, null);
+    }
+    catch(DataAccessException e) {
+      log.error(e.getMessage());
+      emsg = "A data access exception occurred setting member pswd.";
+    }
+    catch(Throwable t) {
+      log.error(t.getMessage());
+      emsg = "A technical error occurred setting member pswd.";
+    }
+    
+    // fail
+    return new FetchResult<>(Boolean.FALSE, emsg);
   }
 
   public FetchResult<Maddress> addMemberAddress(final Maddress memberAddressToAdd) {

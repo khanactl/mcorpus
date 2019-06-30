@@ -99,7 +99,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
       d.dbMauth.getHomePhone(),
       d.dbMauth.getWorkPhone(),
       d.dbMauth.getUsername(),
-      null
+      null // pswd
     );
   }
 
@@ -120,7 +120,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
       ),
       new com.tll.mcorpus.db.tables.pojos.Mauth(
         g.getMid(),
-        null,
+        null, // modified
         asSqlDate(g.getDob()),
         digits(neclean(g.getSsn())),
         neclean(g.getPersonalEmail()),
@@ -130,7 +130,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
         null, // fax
         digits(neclean(g.getWorkPhone())),
         neclean(g.getUsername()),
-        neclean(g.getPswd())
+        null // pswd
       )
     );
   }

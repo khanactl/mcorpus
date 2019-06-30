@@ -41,6 +41,7 @@ import com.tll.mcorpus.db.routines.MemberLogin1;
 import com.tll.mcorpus.db.routines.MemberLogin2;
 import com.tll.mcorpus.db.routines.MemberLogout1;
 import com.tll.mcorpus.db.routines.MemberLogout2;
+import com.tll.mcorpus.db.routines.MemberPswd;
 import com.tll.mcorpus.db.routines.PassHash;
 import com.tll.mcorpus.db.routines.PgpKeyId;
 import com.tll.mcorpus.db.routines.PgpPubDecrypt1;
@@ -1171,6 +1172,17 @@ public class Routines {
         f.setInRequestOrigin(inRequestOrigin);
 
         return f.asField();
+    }
+
+    /**
+     * Call <code>public.member_pswd</code>
+     */
+    public static void memberPswd(Configuration configuration, UUID inMid, String inPswd) {
+        MemberPswd p = new MemberPswd();
+        p.setInMid(inMid);
+        p.setInPswd(inPswd);
+
+        p.execute(configuration);
     }
 
     /**
