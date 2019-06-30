@@ -194,28 +194,6 @@ public class GraphQLRequestProcessor {
   }
 
   /**
-   * Process a GraphQL mutation request whose persist operation returns a simple boolean.
-   * 
-   * @param env
-   * @param persisOp the persist op that returns {@link Boolean}.
-   * @return true upon success, false otherwise.
-   */
-  public boolean handleSimpleMutation(
-    final DataFetchingEnvironment env, 
-    final Supplier<Boolean> persistOp 
-  ) {
-    try {
-      final Boolean rval = persistOp.get();
-      return isNull(rval) ? false : rval.booleanValue();
-    } catch(Exception e) {
-      // mutation processing error
-      log.error("Mutation (persist op only) processing error: {}", e.getMessage());
-      processException(env, e);
-      return false;
-    }
-  }
-
-  /**
    * Do a backend entity deletion for the case of a signle key 
    * input argument and a boolean return value.
    * 
@@ -334,11 +312,11 @@ public class GraphQLRequestProcessor {
   /**
    * Process a simple GraphQL op.
    * 
-   * @param <G> the GraphQL type
+   * @param <G> the GraphQL op return type
    * 
    * @param env the GraphQL context
    * @param op provides the G type return value
-   * @return the target frontend GraphQL type
+   * @return the returned op value
    */
   public <G> G process(
     final DataFetchingEnvironment env, 
@@ -347,7 +325,7 @@ public class GraphQLRequestProcessor {
     try {
       return op.get();
     } catch(Exception e) {
-      log.error("Process by supplier error: {}", e.getMessage());
+      log.error("Process error: {}", e.getMessage());
       processException(env, e);
       return null;
     }

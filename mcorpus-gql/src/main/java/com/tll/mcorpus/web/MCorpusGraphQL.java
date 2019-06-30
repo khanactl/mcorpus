@@ -255,7 +255,7 @@ public class MCorpusGraphQL {
         )
 
         // mcuser logout
-        .dataFetcher("mclogout", env -> processor.handleSimpleMutation(
+        .dataFetcher("mclogout", env -> processor.process(
           env, 
           () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogout())
         )
