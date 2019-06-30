@@ -114,7 +114,7 @@ public class MCorpusGraphQLTest {
     return new JWTUserGraphQLWebContext(
       query, 
       null, 
-      requestSnapshot, 
+      McorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot), 
       jwtRequestStatus, 
       jwt(), 
       testJwtBackendHandler(), 

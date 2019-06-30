@@ -14,15 +14,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.tll.jwt.IJwtBackendHandler;
+import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.IJwtUser;
 import com.tll.jwt.IJwtUserStatus;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
-import com.tll.mcorpus.web.McorpusJwtRequestProvider;
 import com.tll.repo.FetchResult;
 import com.tll.web.GraphQLWebContext;
-import com.tll.web.RequestSnapshot;
 
 /**
  * JWT specific extension of {@link GraphQLWebContext} to facilitate 
@@ -63,6 +62,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   private final JWTHttpRequestStatus jwtStatus;
   private final JWT jwtbiz;
   private final IJwtBackendHandler jwtBackend;
+  private final IJwtHttpRequestProvider jwtRequest;
   private final IJwtHttpResponseAction jwtResponse;
   private final String jwtUserLoginQueryMethodName;
 
@@ -71,7 +71,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    *
    * @param query           the GraphQL query string
    * @param vmap            optional query variables expressed as a name/value map
-   * @param requestSnapshot snapshot of the sourcing http request
+   * @param jwtRequest      snapshot of the sourcing http request providing the JWT if present
    * @param jwtStatus       the status of the JWT of the sourcing http request
    * @param jwtbiz          the JWT manager
    * @param jwtBackend      the JWT backend handler
@@ -81,17 +81,18 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   public JWTUserGraphQLWebContext(
     String query, 
     Map<String, Object> vmap, 
-    RequestSnapshot requestSnapshot, 
+    IJwtHttpRequestProvider jwtRequest, 
     JWTHttpRequestStatus jwtStatus, 
     JWT jwtbiz, 
     IJwtBackendHandler jwtBackend, 
     IJwtHttpResponseAction jwtResponse, 
     String jwtUserLoginQueryMethodName
   ) {
-    super(query, vmap, requestSnapshot);
+    super(query, vmap);
     this.jwtStatus = jwtStatus;
     this.jwtbiz = jwtbiz;
     this.jwtBackend = jwtBackend;
+    this.jwtRequest = jwtRequest;
     this.jwtResponse = jwtResponse;
     this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
   }
@@ -102,10 +103,16 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       isNotNull(jwtStatus) && 
       isNotNull(jwtbiz) && 
       isNotNull(jwtBackend) && 
+      isNotNull(jwtRequest) && 
       isNotNull(jwtResponse) && 
       isNotNullOrEmpty(jwtUserLoginQueryMethodName)
     ;
   }
+
+  /**
+   * @return the JWT request provider instance of the sourcing http request.
+   */
+  public IJwtHttpRequestProvider getJwtRequestProvider() { return jwtRequest; }
   
   /**
    * @return the JWT status instance of the sourcing http request.
@@ -190,10 +197,10 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       return false;
     }
     
-    final String requestId = requestSnapshot.getRequestId();
+    final String requestId = jwtRequest.getRequestId();
     final UUID pendingJwtID = UUID.randomUUID();
-    final String clientOriginToken = requestSnapshot.getClientOrigin();
-    final Instant requestInstant = requestSnapshot.getRequestInstant();
+    final String clientOriginToken = jwtRequest.getClientOrigin();
+    final Instant requestInstant = jwtRequest.getRequestInstant();
     final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
 
     // call db login
@@ -224,7 +231,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
           isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" : 
             Arrays.stream(jwtUser.getJwtUserRoles())
             .collect(Collectors.joining(",")),
-            McorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot)
+            jwtRequest
       );
       
       // jwt cookie
@@ -253,8 +260,8 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final FetchResult<Boolean> fetchResult = jwtBackend.jwtBackendLogout(
       jwtStatus.userId(), 
       jwtStatus.jwtId(), 
-      requestSnapshot.getClientOrigin(), 
-      requestSnapshot.getRequestInstant()
+      jwtRequest.getClientOrigin(), 
+      jwtRequest.getRequestInstant()
     );
     if(fetchResult.isSuccess()) {
       // logout success - nix all cookies clientside
@@ -280,8 +287,8 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   public boolean jwtInvalidateAllForUser(final UUID jwtUserId) {
     final FetchResult<Boolean> fr = jwtBackend.jwtInvalidateAllForUser(
       jwtUserId, 
-      requestSnapshot.getClientOrigin(), 
-      requestSnapshot.getRequestInstant()
+      jwtRequest.getClientOrigin(), 
+      jwtRequest.getRequestInstant()
     );
     if(fr.isSuccess()) {
       if(jwtUserId.equals(jwtStatus.userId())) {

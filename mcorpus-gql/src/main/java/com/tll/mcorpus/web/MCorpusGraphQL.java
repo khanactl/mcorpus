@@ -315,8 +315,8 @@ public class MCorpusGraphQL {
           () -> new Mlogin(
             clean(env.getArgument("username")), 
             clean(env.getArgument("pswd")), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
+            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(), 
+            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getClientOrigin()
           ), 
           mclogin -> mcorpusRepo.memberLogin(
             mclogin.getUsername(), 
@@ -332,8 +332,8 @@ public class MCorpusGraphQL {
           env, 
           () -> new Mlogout(
             uuidFromToken(env.getArgument("mid")), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getRequestInstant(), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getRequestSnapshot().getClientOrigin()
+            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(), 
+            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getClientOrigin()
           ), 
           mclogout -> mcorpusRepo.memberLogout(
             mclogout.getMid(), 

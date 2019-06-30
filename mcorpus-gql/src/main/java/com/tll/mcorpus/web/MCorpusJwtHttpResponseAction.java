@@ -11,6 +11,10 @@ import ratpack.handling.Context;
  */
 public class MCorpusJwtHttpResponseAction implements IJwtHttpResponseAction {
 
+  public static MCorpusJwtHttpResponseAction fromRatpackContext(final Context ctx) {
+    return new MCorpusJwtHttpResponseAction(ctx);
+  }
+  
   private final Context ctx;
 
   /**
@@ -18,7 +22,7 @@ public class MCorpusJwtHttpResponseAction implements IJwtHttpResponseAction {
    * 
    * @param ctx the Ratpack http request context
    */
-  public MCorpusJwtHttpResponseAction(final Context ctx) {
+  private MCorpusJwtHttpResponseAction(final Context ctx) {
     this.ctx = ctx;
   }
 

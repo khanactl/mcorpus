@@ -1,9 +1,7 @@
 package com.tll.web;
 
 import static com.tll.core.Util.clean;
-import static com.tll.core.Util.isNull;
-import static com.tll.core.Util.isNullOrEmpty;
-import static com.tll.core.Util.not;
+import static com.tll.core.Util.isNotNullOrEmpty;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -42,21 +40,19 @@ public class GraphQLWebContext {
   protected final String query;
   protected final String queryCleaned;
   protected final Map<String, Object> vmap;
-  protected final RequestSnapshot requestSnapshot;
+  // protected final RequestSnapshot requestSnapshot;
 
   /**
    * Constructor.
    *
    * @param query           the GraphQL query string
    * @param vmap            optional query variables expressed as a name/value map
-   * @param requestSnapshot snapshot of the sourcing http request
    */
-  public GraphQLWebContext(String query, Map<String, Object> vmap, RequestSnapshot requestSnapshot) {
+  public GraphQLWebContext(String query, Map<String, Object> vmap) {
     super();
     this.query = query;
     this.queryCleaned = clean(query).replaceAll("\\n", "").replaceAll("\n", "");
     this.vmap = vmap;
-    this.requestSnapshot = requestSnapshot;
   }
   
   /**
@@ -65,10 +61,7 @@ public class GraphQLWebContext {
    * @return true/false
    */
   public boolean isValid() { 
-    return 
-      not(isNullOrEmpty(query)) && 
-      not(isNull(requestSnapshot))
-    ;
+    return isNotNullOrEmpty(query) && isNotNullOrEmpty(queryCleaned);
   }
   
   /**
@@ -120,11 +113,6 @@ public class GraphQLWebContext {
     return b;
   }
 
-  /**
-   * @return the snapshot of the sourcing http request.
-   */
-  public RequestSnapshot getRequestSnapshot() { return requestSnapshot; }
-  
   @Override
   public String toString() {
     return String.format("qry: %s", getQueryMethodName());
