@@ -1,11 +1,11 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.TestUtil.cpr;
-import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
-import static com.tll.mcorpus.McorpusTestUtil.jwt;
-import static com.tll.mcorpus.McorpusTestUtil.testDslMcweb;
-import static com.tll.mcorpus.McorpusTestUtil.testJwtBackendHandler;
-import static com.tll.mcorpus.McorpusTestUtil.testJwtResponseProvider;
+import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
+import static com.tll.mcorpus.MCorpusTestUtil.jwt;
+import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
+import static com.tll.mcorpus.MCorpusTestUtil.testJwtBackendHandler;
+import static com.tll.mcorpus.MCorpusTestUtil.testJwtResponseProvider;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -114,7 +114,7 @@ public class MCorpusGraphQLTest {
     return new JWTUserGraphQLWebContext(
       query, 
       null, 
-      McorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot), 
+      MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot), 
       jwtRequestStatus, 
       jwt(), 
       testJwtBackendHandler(), 

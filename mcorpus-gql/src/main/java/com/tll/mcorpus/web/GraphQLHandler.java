@@ -60,7 +60,7 @@ public class GraphQLHandler implements Handler {
       final JWTUserGraphQLWebContext gqlWebCtx = new JWTUserGraphQLWebContext(
         query, 
         vmap, 
-        McorpusJwtRequestProvider.fromRequestSnapshot(rsnap), 
+        MCorpusJwtRequestProvider.fromRequestSnapshot(rsnap), 
         jwtRequestStatus, 
         ctx.get(JWT.class), 
         ctx.get(IJwtBackendHandler.class), 

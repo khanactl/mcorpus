@@ -2,11 +2,11 @@ package com.tll.mcorpus.repo;
 
 
 import static com.tll.TestUtil.toSqlDate;
-import static com.tll.mcorpus.McorpusTestUtil.ds_mcweb;
-import static com.tll.mcorpus.McorpusTestUtil.isTestDslMcwebTestLoaded;
-import static com.tll.mcorpus.McorpusTestUtil.testDslMcweb;
-import static com.tll.mcorpus.McorpusTestUtil.testDslMcwebTest;
-import static com.tll.mcorpus.McorpusTestUtil.testRequestOrigin;
+import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
+import static com.tll.mcorpus.MCorpusTestUtil.isTestDslMcwebTestLoaded;
+import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
+import static com.tll.mcorpus.MCorpusTestUtil.testDslMcwebTest;
+import static com.tll.mcorpus.MCorpusTestUtil.testRequestOrigin;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;

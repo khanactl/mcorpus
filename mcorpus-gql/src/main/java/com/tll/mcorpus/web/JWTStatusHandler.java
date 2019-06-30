@@ -36,7 +36,7 @@ public class JWTStatusHandler implements Handler {
   public void handle(Context ctx) throws Exception {
     Blocking.get(() -> 
       ctx.get(JWT.class).jwtHttpRequestStatus(
-        McorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx)), 
+        MCorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx)), 
         ctx.get(IJwtBackendHandler.class)
       )
     ).then(jwtStatus -> {

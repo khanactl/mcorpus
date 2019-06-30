@@ -18,7 +18,7 @@ import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.postgresql.ds.PGSimpleDataSource;
 
-public class McorpusTestUtil {
+public class MCorpusTestUtil {
   
   public static final String testRequestOrigin = "localhost|localhost";
 
@@ -127,5 +127,5 @@ public class McorpusTestUtil {
     };
   }
   
-  private McorpusTestUtil() {}
+  private MCorpusTestUtil() {}
 }

@@ -16,10 +16,10 @@ import com.tll.web.RequestSnapshot;
 /**
  * Mcorpus specific implementation of {@link IJwtHttpRequestProvider}.
  */
-public class McorpusJwtRequestProvider implements IJwtHttpRequestProvider {
+public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
 
-  public static McorpusJwtRequestProvider fromRequestSnapshot(final RequestSnapshot rs) {
-    return new McorpusJwtRequestProvider(
+  public static MCorpusJwtRequestProvider fromRequestSnapshot(final RequestSnapshot rs) {
+    return new MCorpusJwtRequestProvider(
       rs, 
       String.format("%s|%s", 
         nullwiseClean(rs.getRemoteAddressHost()), 
@@ -62,7 +62,7 @@ public class McorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   private final RequestSnapshot rs;
   private final String clientOrigin;
 
-  private McorpusJwtRequestProvider(final RequestSnapshot rs, String clientOrigin) {
+  private MCorpusJwtRequestProvider(final RequestSnapshot rs, String clientOrigin) {
     this.rs = rs;
     this.clientOrigin = clientOrigin;
   }
