@@ -3,6 +3,7 @@ import ec2 = require('@aws-cdk/aws-ec2');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
 import { Duration } from '@aws-cdk/core';
 import { SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { ApplicationProtocol, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
 
 /**
  * Load Balancer Stack config properties.
@@ -66,30 +67,22 @@ export class LbStack extends cdk.Stack {
     const albTargetGroup = new elb.ApplicationTargetGroup(this, 'alb-target-group', {
       vpc: props.vpc,
       healthCheck: {
-        port: String(props.innerPort),
+        // port: String(props.innerPort),
         protocol: elb.Protocol.HTTP,
         path: '/health',
-        // healthyThreshold: 5,
-        // unhealthyThreshold: 2,
-        interval: Duration.seconds(30),
-        timeout: Duration.seconds(5)
+        port: 'traffic-port',
+        healthyThresholdCount: 5,
+        unhealthyThresholdCount: 2,
+        timeout: Duration.seconds(20),
+        interval: Duration.seconds(120),
       },
+      port: props.innerPort,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.IP
     });
 
-    listener.addTargets('app-lb-tgtrp', {
-      port: props.innerPort,
-      // targets: [ albTargetGroup ],
-      /*
-      healthCheck: {
-        port: `props.innerPort`,
-        protocol: elb.Protocol.HTTP,
-        path: '/health',
-        // healthyThreshold: 5,
-        // unhealthyThreshold: 2,
-        interval: Duration.seconds(30),
-        timeout: Duration.seconds(5)
-      },
-      */
+    listener.addTargetGroups('app-lb-tgtrp', {
+      targetGroups: [ albTargetGroup ]
     });
 
   }
