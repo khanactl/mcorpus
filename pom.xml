@@ -305,7 +305,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.8.1</version>
           <configuration>
             <source>${java.version}</source>
             <target>${java.version}</target>
@@ -314,12 +314,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.1.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.1.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -342,21 +342,21 @@
           <version>3.0.0</version>
         </plugin>
         <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>3.1.11</version>
+          <version>3.1.12</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.0</version>
           <configuration>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>com.spotify</groupId>
-          <artifactId>dockerfile-maven-plugin</artifactId>
-          <version>1.4.10</version>
         </plugin>
       </plugins>
     </pluginManagement>

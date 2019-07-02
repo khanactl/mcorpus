@@ -8,18 +8,27 @@
     }
     p.ftr {
       margin-top: 2em;
-      font-size: 11px;
-      font-style: italic;
-      color: darkgray;
+      color: gray;
+      font-size: 12px;
     }
     p.lnk {
-      margin: 1.5em 0 2em 0;
+      margin: 1.5em 0 2em 1em;
+      font-size: 20px;
+    }
+    p.lnk a:link, p.lnk a:visited {
+      color: darkblue;
+    }
+    p.lnk a:hover {
+      color: skyblue;
+    }
+    p.lnk a:active {
+      color: red;
     }
   </style>
 </head>
 <body>
-<h1 class="hdr">mcorpus GraphQL API</h1>
-<p class="lnk"><a href="graphql/index" title="mcorpus GraphiQL developer interface">GraphiQL</a></p>
-<p class="ftr">&copy; 2018 University of California - v${project.version} @ ${timestamp}</p>
+  <h1 class="hdr">mcorpus GraphQL API</h1>
+  <p class="lnk"><a href="graphql/index" title="mcorpus GraphiQL developer interface">GraphiQL</a></p>
+  <p class="ftr">&copy; 2018 University of California - v${project.version} (${git.commit.id.abbrev}) @ ${timestamp}</p>
 </body>
 </html>
