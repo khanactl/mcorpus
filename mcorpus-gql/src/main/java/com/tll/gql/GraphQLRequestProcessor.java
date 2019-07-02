@@ -1,6 +1,7 @@
 package com.tll.gql;
 
 import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,7 +60,7 @@ public class GraphQLRequestProcessor {
   private static <G> DataFetcherResult<G> dfr(final G data, final String emsg) {
     return (DataFetcherResult<G>) DataFetcherResult.newResult()
       .data(data)
-      .error(new GraphQLDataFetchError(emsg))
+      .error(new GraphQLDataFetchError(isNullOrEmpty(emsg) ? "Unspecified data fetch error." : emsg))
       .build();
   }
   
@@ -131,10 +132,10 @@ public class GraphQLRequestProcessor {
         final D d = tfrmToBack.apply(g);
         final FetchResult<D> fr = persistOp.apply(d);
         final G gpost = isNull(fr.get()) ? null : trfmToFront.apply(fr.get());
-        if(fr.hasErrorMsg()) {
-          return dfr(fr.getErrorMsg());
+        if(fr.isSuccess()) {
+          return dfr(gpost);
         }
-        return dfr(gpost);
+        return dfr(gpost, fr.getErrorMsg());
       } else {
         return dfr(vresult);
       }
@@ -168,10 +169,10 @@ public class GraphQLRequestProcessor {
       final G g = gextractor.get();
       final FetchResult<D> fr = persistOp.apply(g);
       final GR gpost = isNull(fr.get()) ? null : trfmToFront.apply(fr.get());
-      if(fr.hasErrorMsg()) {
-        return dfr(fr.getErrorMsg());
+      if(fr.isSuccess()) {
+        return dfr(gpost);
       }
-      return dfr(gpost);
+      return dfr(gpost, fr.getErrorMsg());
     } catch(Exception e) {
       // mutation processing error
       log.error("Mutation (extract, persist, transform) processing error: {}", e.getMessage());
@@ -235,7 +236,7 @@ public class GraphQLRequestProcessor {
       if(fr.isSuccess()) {
         return dfr(fr.get());
       } 
-      return dfr(fr.getErrorMsg());
+      return dfr(fr.get(), fr.getErrorMsg());
     } catch(Exception e) {
       log.error("Deletion by key (extract, transform, delete) processing error: {}", e.getMessage());
       return dfr(e);
