@@ -27,5 +27,3 @@ aws-env*
 # app
 mcorpus-creds.txt
 *.log
-MCorpusLoadTest-localdev.jmx
-MCorpusLoadTest-aws.jmx
