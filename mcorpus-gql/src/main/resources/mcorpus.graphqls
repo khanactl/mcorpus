@@ -180,7 +180,7 @@ type MemberAddress {
   # street address two
   street2: String @auth(role: "mpii")
   # city
-  city: String! @auth(role: "mpii")
+  city: String @auth(role: "mpii")
   # state/province
   state: String @auth(role: "mpii")
   # postal/zip code
