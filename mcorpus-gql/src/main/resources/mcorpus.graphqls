@@ -33,7 +33,7 @@ type Mutation {
   mlogin(username: String!, pswd: String!): MRef @auth(role: "member")
   
   # member logout (the member ID is returned upon success and null upon failure)
-  mlogout(mid: ID!): Boolean! @auth(role: "member")
+  mlogout(mid: ID!): Boolean @auth(role: "member")
   
   # add a member into the corpus
   addMember(member: MemberToAdd!): Member @auth(role: "mcorpus")
@@ -42,10 +42,10 @@ type Mutation {
   updateMember(member: MemberToUpdate!): Member @auth(role: "mcorpus")
 
   # physical removal of a member from the corpus - returns true when successful
-  deleteMember(mid: ID!): Boolean! @auth(role: "mcorpus")
+  deleteMember(mid: ID!): Boolean @auth(role: "mcorpus")
 
   # set/reset a member pswd by member id
-  mpswd(mid: ID!, pswd: String!): Boolean! @auth(role: "mcorpus")
+  mpswd(mid: ID!, pswd: String!): Boolean @auth(role: "mcorpus")
   
   # add a member address of a given address name (type)
   addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress @auth(role: "mcorpus")
@@ -54,7 +54,7 @@ type Mutation {
   updateMemberAddress(memberAddress: MemberAddressToUpdate!): MemberAddress @auth(role: "mcorpus")
 
   # delete a member address of the given address name (type) returning true when successful
-  deleteMemberAddress(mid: ID!, addressName: AddressName!): Boolean! @auth(role: "mcorpus")
+  deleteMemberAddress(mid: ID!, addressName: AddressName!): Boolean @auth(role: "mcorpus")
   
 }
 
@@ -160,7 +160,7 @@ type Member {
   workPhone: String @auth(role: "mpii")
 
   # member username
-  username: String! @auth(role: "mpii")
+  username: String @auth(role: "mpii")
 }
 
 # member address type
@@ -176,17 +176,17 @@ type MemberAddress {
   # attn
   attn: String @auth(role: "mpii")
   # street address one
-  street1: String! @auth(role: "mpii")
+  street1: String @auth(role: "mpii")
   # street address two
   street2: String @auth(role: "mpii")
   # city
   city: String! @auth(role: "mpii")
   # state/province
-  state: String! @auth(role: "mpii")
+  state: String @auth(role: "mpii")
   # postal/zip code
   postalCode: String @auth(role: "mpii")
   # country
-  country: String! @auth(role: "mpii")
+  country: String @auth(role: "mpii")
 }
 
 # string value criterion

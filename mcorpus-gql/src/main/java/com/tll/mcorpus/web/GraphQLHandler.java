@@ -121,7 +121,7 @@ public class GraphQLHandler implements Handler {
           log.info("graphql request handled successfully for request {}.", rsnap.getRequestId());
         } else {
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
-            if(err.getErrorType() == ErrorType.ValidationError) {              
+            if(err.getErrorType() == ErrorType.ValidationError) {
               return GraphqlErrorBuilder.newError()
                 .errorType(err.getErrorType())
                 .locations(err.getLocations())

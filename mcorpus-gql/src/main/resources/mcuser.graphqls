@@ -30,10 +30,10 @@ extend type Mutation {
   deleteMcuser(uid: ID!): Boolean @auth(role: "admin")
 
   # set/reset an mucser pswd by mcuser id
-  mcpswd(uid: ID!, pswd: String!): Boolean! @auth(role: "admin")
+  mcpswd(uid: ID!, pswd: String!): Boolean @auth(role: "admin")
 
   # invalidate all active JWTs issued to an mcuser
-  invalidateJwtsFor(uid: ID!): Boolean! @auth(role: "admin")
+  invalidateJwtsFor(uid: ID!): Boolean @auth(role: "admin")
 
 }
 
