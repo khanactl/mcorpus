@@ -6,6 +6,7 @@ import static ratpack.jackson.Jackson.fromJson;
 import static ratpack.jackson.Jackson.json;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.common.reflect.TypeToken;
 import com.tll.jwt.IJwtBackendHandler;
@@ -17,8 +18,10 @@ import com.tll.web.RequestSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import graphql.ErrorType;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
+import graphql.GraphqlErrorBuilder;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
@@ -117,7 +120,17 @@ public class GraphQLHandler implements Handler {
           ctx.render(json(executionResult.toSpecification()));
           log.info("graphql request handled successfully for request {}.", rsnap.getRequestId());
         } else {
-          ctx.render(json(executionResult.getErrors()));
+          ctx.render(json(executionResult.getErrors().stream().map(err -> {
+            if(err.getErrorType() == ErrorType.ValidationError) {              
+              return GraphqlErrorBuilder.newError()
+                .errorType(err.getErrorType())
+                .locations(err.getLocations())
+                .message("Invalid query.")
+                .build();
+            }
+            // default
+            return err;
+          }).collect(Collectors.toList())));
           log.warn("graphql request handled with errors for request {}.", rsnap.getRequestId());
         }
       });

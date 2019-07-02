@@ -28,7 +28,7 @@ public class GraphQLDataFetchError extends ExceptionWhileDataFetching {
   /**
    * Constructor - Exception instance case.
    * 
-   * @param emsg the error message
+   * @param exception the data fetching related exception
    */
   public GraphQLDataFetchError(final Throwable exception) {
     this(ExecutionPath.rootPath(), exception, null);
@@ -37,7 +37,7 @@ public class GraphQLDataFetchError extends ExceptionWhileDataFetching {
   /**
    * Constructor - Full details case.
    * 
-   * @param emsg path the GraphQL execution path
+   * @param path the GraphQL execution path
    * @param exception the data fetching related exception
    * @param sourceLocation the optional source location
    */

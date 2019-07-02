@@ -39,7 +39,7 @@
     <netty.version>4.1.36.Final</netty.version>
     <ratpack.version>1.6.1</ratpack.version>
     
-    <graphql-java.version>11.0</graphql-java.version>
+    <graphql-java.version>13.0</graphql-java.version>
 
     <junit.version>4.12</junit.version>
   </properties>

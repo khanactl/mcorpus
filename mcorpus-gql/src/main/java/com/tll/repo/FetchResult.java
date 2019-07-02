@@ -2,7 +2,7 @@ package com.tll.repo;
 
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
-import static com.tll.core.Util.not;
+import static com.tll.core.Util.isNotNullOrEmpty;
 
 /**
  * A simple wrapper object around a 'fetched' object of type &lt;T&gt;
@@ -48,7 +48,7 @@ public final class FetchResult<T> {
   /**
    * @return true when an error message exists.
    */
-  public boolean hasErrorMsg() { return not(isNullOrEmpty(errorMsg)); }
+  public boolean hasErrorMsg() { return isNotNullOrEmpty(errorMsg); }
 
   /**
    * @return the error message.

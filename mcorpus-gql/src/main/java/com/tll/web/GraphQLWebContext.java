@@ -2,7 +2,9 @@ package com.tll.web;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNull;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,10 +77,10 @@ public class GraphQLWebContext {
   public String getQuery() { return query; }
   
   /**
-   * @return map of name/value pairs representing 
-   *          the GraphQL variables associated with this query instance.
+   * @return Never-null, possibly empty, map of name/value pairs representing 
+   *         the GraphQL variables associated with this query instance.
    */
-  public Map<String, Object> getVariables() { return vmap; }
+  public Map<String, Object> getVariables() { return isNull(vmap) ? Collections.emptyMap() : vmap; }
 
   /**
    * @return the never-null GraphQL query/mutation <em>operation</em> name.
