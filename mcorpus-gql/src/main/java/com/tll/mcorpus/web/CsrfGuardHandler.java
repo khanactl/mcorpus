@@ -31,9 +31,9 @@ import ratpack.handling.Handler;
  * 
  * @author d2d
  */
-public class CsrfGuardByCookieAndHeaderHandler implements Handler {
+public class CsrfGuardHandler implements Handler {
   
-  private final Logger log = LoggerFactory.getLogger(CsrfGuardByCookieAndHeaderHandler.class);
+  private final Logger log = LoggerFactory.getLogger(CsrfGuardHandler.class);
 
   @Override
   public void handle(Context ctx) throws Exception {

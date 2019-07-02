@@ -29,7 +29,7 @@ public class MCorpusWebModule extends AbstractModule {
   protected void configure() {
     bind(JWTStatusHandler.class);
     bind(GraphQLIndexHandler.class);
-    bind(CsrfGuardByCookieAndHeaderHandler.class);
+    bind(CsrfGuardHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
   }

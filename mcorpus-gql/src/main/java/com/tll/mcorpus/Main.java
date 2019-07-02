@@ -3,7 +3,7 @@ package com.tll.mcorpus;
 import static ratpack.handling.Handlers.redirect;
 
 import com.tll.mcorpus.repo.MCorpusRepoModule;
-import com.tll.mcorpus.web.CsrfGuardByCookieAndHeaderHandler;
+import com.tll.mcorpus.web.CsrfGuardHandler;
 import com.tll.mcorpus.web.GraphQLHandler;
 import com.tll.mcorpus.web.GraphQLIndexHandler;
 import com.tll.mcorpus.web.JWTStatusHandler;
@@ -73,7 +73,7 @@ public class Main {
           
           // the mcorpus GraphQL api (post only)
           .post(JWTStatusHandler.class)
-          .post(CsrfGuardByCookieAndHeaderHandler.class)
+          .post(CsrfGuardHandler.class)
           .post(GraphQLHandler.class)
          
           // the GraphiQL developer interface (get only)
