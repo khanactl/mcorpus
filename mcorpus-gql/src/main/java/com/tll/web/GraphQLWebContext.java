@@ -40,9 +40,10 @@ public class GraphQLWebContext {
   protected final Logger log = LoggerFactory.getLogger(getClass());
 
   protected final String query;
-  protected final String queryCleaned;
   protected final Map<String, Object> vmap;
-  // protected final RequestSnapshot requestSnapshot;
+  protected final String opName;
+  protected final String queryMethodName;
+  protected final boolean introspectionQuery;
 
   /**
    * Constructor.
@@ -53,8 +54,18 @@ public class GraphQLWebContext {
   public GraphQLWebContext(String query, Map<String, Object> vmap) {
     super();
     this.query = query;
-    this.queryCleaned = clean(query).replaceAll("\\n", "").replaceAll("\n", "");
     this.vmap = vmap;
+    
+    String queryCleaned = clean(query).replaceAll("\\n", "").replaceAll("\n", "");
+    
+    final Matcher matcher = gqlOperationName.matcher(queryCleaned);
+    this.opName = matcher.matches() ? matcher.group(2) : "";
+    
+    final Matcher matcher2 = gqlMethodName.matcher(queryCleaned);
+    this.queryMethodName = matcher2.matches() ? matcher2.group(1) : "";
+
+    final Matcher matcher3 = gqlIntrospectQuery.matcher(queryCleaned);
+    this.introspectionQuery = matcher3.matches();
   }
   
   /**
@@ -63,7 +74,7 @@ public class GraphQLWebContext {
    * @return true/false
    */
   public boolean isValid() { 
-    return isNotNullOrEmpty(query) && isNotNullOrEmpty(queryCleaned);
+    return isNotNullOrEmpty(query) && isNotNullOrEmpty(queryMethodName);
   }
   
   /**
@@ -88,11 +99,7 @@ public class GraphQLWebContext {
    *         The operation name is not required and when not present, 
    *         a zero-length string is returned.
    */
-  public String getOperationName() {
-    final Matcher matcher = gqlOperationName.matcher(queryCleaned);
-    final String s = matcher.matches() ? matcher.group(2) : "";
-    return s;
-  }
+  public String getOperationName() { return opName; }
 
   /**
    * @return the never-null GraphQL query/mutation <em>method</em> name.
@@ -100,19 +107,18 @@ public class GraphQLWebContext {
    *         The method name is expected to always be present 
    *         in a <em>valid</em> qraphql query string.
    */
-  public String getQueryMethodName() {
-    final Matcher matcher = gqlMethodName.matcher(queryCleaned);
-    final String s = matcher.matches() ? matcher.group(1) : "";
-    return s;
-  }
+  public String getQueryMethodName() { return queryMethodName; }
 
   /**
    * @return true when the graphql query is an Introspection query.
    */
-  public boolean isIntrospectionQuery() {
-    final Matcher matcher = gqlIntrospectQuery.matcher(queryCleaned);
-    boolean b = matcher.matches();
-    return b;
+  public boolean isIntrospectionQuery() { return introspectionQuery; }
+
+  public String opAndQueryToken() { 
+    return String.format("%s %s", 
+      isNotNullOrEmpty(opName) ? opName : "query", 
+      queryMethodName
+    );
   }
 
   @Override
