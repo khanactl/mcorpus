@@ -104,7 +104,7 @@ public class GraphQLHandler implements Handler {
 
       default:
         ctx.clientError(403); // forbidden
-        return;          
+        return;
       }
       
       // execute the query
@@ -118,20 +118,27 @@ public class GraphQLHandler implements Handler {
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {
           ctx.render(json(executionResult.toSpecification()));
-          log.info("graphql request handled successfully for request {}.", rsnap.getRequestId());
+          log.info("graphql request {} handled successfully for request {}.", gqlWebCtx.opAndQueryToken(), rsnap.getRequestId());
         } else {
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
             if(err.getErrorType() == ErrorType.ValidationError) {
               return GraphqlErrorBuilder.newError()
                 .errorType(err.getErrorType())
                 .locations(err.getLocations())
-                .message("Invalid query.")
+                .message("One or more type-mismatches and/or missing field(s) in query.")
+                .build();
+            }
+            else if(err.getErrorType() == ErrorType.InvalidSyntax) {
+              return GraphqlErrorBuilder.newError()
+                .errorType(err.getErrorType())
+                .locations(err.getLocations())
+                .message("Invalid query syntax.")
                 .build();
             }
             // default
             return err;
           }).collect(Collectors.toList())));
-          log.warn("graphql request handled with errors for request {}.", rsnap.getRequestId());
+          log.warn("graphql request {} handled with errors for request {}.", gqlWebCtx.opAndQueryToken(), rsnap.getRequestId());
         }
       });
     });
