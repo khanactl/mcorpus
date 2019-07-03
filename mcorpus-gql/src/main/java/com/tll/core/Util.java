@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Core (language-level), project-agnostic static utility methods.
@@ -214,10 +215,7 @@ public class Util {
    * @return Never-null string
    */
   public static String flatten(final List<String> list, final String delim) {
-    if(isNull(list) || list.isEmpty()) return "";
-    final StringBuilder sb = new StringBuilder();
-    for(final String s : list) sb.append(clean(s)).append(delim);
-    return sb.toString();
+    return isNullOrEmpty(list) ? "" : list.stream().map(s -> clean(s)).collect(Collectors.joining(delim)).toString();
   }
 
   /**
