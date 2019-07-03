@@ -29,6 +29,7 @@ import java.util.Date;
  */
 public class GraphQLDate extends GraphQLScalarType {
 
+    @SuppressWarnings("deprecation")
     public GraphQLDate() {
         super("Date", "Date type", new Coercing<Date, String>() {
             private Date convertImpl(Object input) {
