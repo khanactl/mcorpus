@@ -131,7 +131,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
         null, // fax
         digits(neclean(g.getWorkPhone())),
         neclean(g.getUsername()),
-        null // pswd
+        neclean(g.getPswd())
       )
     );
   }
