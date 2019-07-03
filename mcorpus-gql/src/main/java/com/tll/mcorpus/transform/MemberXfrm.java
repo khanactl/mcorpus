@@ -57,7 +57,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
       fval("empId", gqlMap),
       fval("location", gqlMap),
       fval("nameFirst", gqlMap),
-      fval("nameMiddle", gqlMap),
+      clean(fval("nameMiddle", gqlMap)), // make empty if null for middle name (not null in db ddl)
       fval("nameLast", gqlMap),
       fval("displayName", gqlMap),
       fval("status", gqlMap),
