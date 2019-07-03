@@ -2,6 +2,7 @@ package com.tll.mcorpus.transform;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.nclean;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
 import static com.tll.transform.TransformUtil.asSqlDate;
@@ -113,7 +114,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
         neclean(g.getEmpId()),
         locationFromString(g.getLocation()),
         upper(neclean(g.getNameFirst())),
-        upper(neclean(g.getNameMiddle())),
+        upper(nclean(g.getNameMiddle())),
         upper(neclean(g.getNameLast())),
         neclean(g.getDisplayName()),
         memberStatusFromString(g.getStatus())
