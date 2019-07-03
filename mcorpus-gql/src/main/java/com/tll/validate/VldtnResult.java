@@ -6,6 +6,7 @@ import static com.tll.core.Util.isNullOrEmpty;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Houses the results of a validation check on a target entity object.
@@ -58,6 +59,20 @@ public class VldtnResult {
    * @return the number of held validation errors which may be zero.
    */
   public int getNumErrors() { return errors.size(); }
+
+  /**
+   * A presentation-worthy validation error message conveying 
+   * all validation errors separated by the given delimeter.
+   * 
+   * @param delim the delimiter token to use to separate individual validation errors
+   * @return the assembled error message containing all contained validaiton errors.
+   */
+  public String formalErrMsgs(final String delim) {
+    return errors.stream()
+      .map(ve -> ve.formalErrMsg())
+      .collect(Collectors.joining(delim))
+      .toString();
+  }
 
   @Override
   public String toString() { return String.format("VldtnResult[isValid: %b, numErrors: %d", isValid(), getNumErrors()); }

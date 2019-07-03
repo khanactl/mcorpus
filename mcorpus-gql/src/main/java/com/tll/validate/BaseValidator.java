@@ -15,6 +15,13 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    * @return the root name of the validation resource bundle property file.
    */
   protected abstract String getValidationMsgsRootName();
+
+  /**
+   * @return The presentation-worthy name of the entity type being validated.
+   *         <p>
+   *         This name is used, if present, when constructing validation error messages.
+   */
+  protected abstract String getEntityTypeName();
   
   @Override
   public final VldtnResult validate(final T e) {
@@ -81,7 +88,7 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    */
   protected VldtnResult validate(final T e, final Consumer<VldtnBuilder<T>> vfunc) {
     try {
-      final VldtnBuilder<T> vldtn = new VldtnBuilder<>(getValidationMsgsRootName(), e);
+      final VldtnBuilder<T> vldtn = new VldtnBuilder<>(getValidationMsgsRootName(), e, getEntityTypeName());
       vfunc.accept(vldtn); // do validation
       return new VldtnResult(vldtn.getErrors());
     } catch(Exception ex) {

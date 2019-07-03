@@ -15,6 +15,9 @@ import com.tll.validate.VldtnBuilder;
 public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> {
 
   @Override
+  protected String getEntityTypeName() { return "MemberAddress"; }
+  
+  @Override
   protected void validateForAdd(final VldtnBuilder<MemberAddress> vldtn) {
     vldtn
       // require pk

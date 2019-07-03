@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 public class VldtnBuilder<E> {
 
   private final E entity;
+  private final String entityTypeName;
 
   private final Set<VldtnErr> errs;
 
@@ -32,10 +33,12 @@ public class VldtnBuilder<E> {
    * 
    * @param vldtnBundleName the ROOT name of the validation messages property file (resource bundle root name)
    * @param entity the entity instance to be validated
+   * @param entityTypeName the name of the entity type
    */
-  public VldtnBuilder(final String vldtnBundleName, final E entity) {
+  public VldtnBuilder(final String vldtnBundleName, final E entity, String entityTypeName) {
     this.vmsgBundle = ResourceBundle.getBundle(vldtnBundleName);
     this.entity = entity;
+    this.entityTypeName = entityTypeName;
     this.errs = new HashSet<>();
   }
 
@@ -146,6 +149,6 @@ public class VldtnBuilder<E> {
    */
   protected <T> void vaddErr(String vmk, String fname, T fval) {
     final String vmsg = vmsgBundle.getString(vmk);
-    errs.add(verr(vmsg, fname, fval, entity.getClass()));
+    errs.add(verr(vmsg, fname, fval, entityTypeName));
   }
 }

@@ -64,6 +64,11 @@ public class ValidatorTest {
   static class TestValidator extends BaseValidator<TestEntity> {
 
     @Override
+    protected String getEntityTypeName() {
+      return "TestEntity";
+    }
+
+    @Override
     protected String getValidationMsgsRootName() {
       return "validate-test";
     }
@@ -88,6 +93,7 @@ public class ValidatorTest {
         return false;
       }
     }
+
   } // TestValidator
 
   @Test
@@ -106,7 +112,7 @@ public class ValidatorTest {
     
     VldtnErr verr = verrs.iterator().next();
     assertNotNull(verr);
-    assertEquals(TestEntity.class, verr.etype());
+    assertEquals("TestEntity", verr.etype());
     assertEquals("name", verr.getFieldName());
     assertEquals(name, verr.getFieldValue());
     assertEquals("Invalid test Name.", verr.getVldtnErrMsg());

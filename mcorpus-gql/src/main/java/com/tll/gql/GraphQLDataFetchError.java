@@ -1,8 +1,19 @@
 package com.tll.gql;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
 
-import graphql.ExceptionWhileDataFetching;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tll.validate.VldtnResult;
+
+import graphql.ErrorClassification;
+import graphql.ErrorType;
+import graphql.GraphQLError;
 import graphql.execution.ExecutionPath;
 import graphql.language.SourceLocation;
 
@@ -13,43 +24,53 @@ import graphql.language.SourceLocation;
  * 
  * @author jpk
  */
-public class GraphQLDataFetchError extends ExceptionWhileDataFetching {
+public class GraphQLDataFetchError implements GraphQLError {
   private static final long serialVersionUID = 1L;
 
+  public static GraphQLDataFetchError inst(final ExecutionPath epath, String emsg) {
+    return new GraphQLDataFetchError(
+      (isNull(epath) ? ExecutionPath.rootPath() : epath).toString(), 
+      isNullOrEmpty(emsg) ? "Unspecified data fetch error." : clean(emsg)
+    );
+  }
+
+  public static GraphQLDataFetchError inst(final ExecutionPath epath, final Throwable exception) {
+    return inst(epath, exception.getMessage());
+  }
+
+  public static GraphQLDataFetchError inst(final ExecutionPath epath, VldtnResult vrslt, final String delim) {
+    return inst(epath, vrslt.formalErrMsgs(delim));
+  }
+
+  private final String epath;
+  private final String emsg;
+
   /**
-   * Constructor - simple error message case.
+   * Constructor
    * 
+   * @param epath the graphql execution path associated with the error(s)
    * @param emsg the error message
    */
-  public GraphQLDataFetchError(String emsg) {
-    this(ExecutionPath.rootPath(), new Exception(emsg), null);
+  private GraphQLDataFetchError(String epath, String emsg) {
+    this.epath = epath;
+    this.emsg = emsg;
   }
 
-  /**
-   * Constructor - Exception instance case.
-   * 
-   * @param exception the data fetching related exception
-   */
-  public GraphQLDataFetchError(final Throwable exception) {
-    this(ExecutionPath.rootPath(), exception, null);
-  }
+  @Override
+  public String getMessage() { return emsg; }
 
-  /**
-   * Constructor - Full details case.
-   * 
-   * @param path the GraphQL execution path
-   * @param exception the data fetching related exception
-   * @param sourceLocation the optional source location
-   */
-  public GraphQLDataFetchError(final ExecutionPath path, final Throwable exception, final SourceLocation sourceLocation) {
-    super(path, exception, sourceLocation);
-  }
-
-  /**
-   * {@inheritDoc}
-   * <p>
-   * Deny stack trace visibility when serialized to JSON!
-   */
   @Override @JsonIgnore
-  public Throwable getException() { return super.getException(); }
+  public List<SourceLocation> getLocations() { return null; }
+
+  @Override
+  public ErrorClassification getErrorType() { return ErrorType.DataFetchingException; }
+
+  @Override
+  public List<Object> getPath() { return Collections.singletonList(epath); }
+
+  @Override @JsonIgnore
+  public Map<String, Object> getExtensions() { return null; }
+
+  @Override
+  public String toString() { return getMessage(); }
 }
