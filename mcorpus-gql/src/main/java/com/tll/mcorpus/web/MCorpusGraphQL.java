@@ -176,11 +176,13 @@ public class MCorpusGraphQL {
 
         // mcuser status
         .dataFetcher("mcstatus", env -> processor.process(
+          env, 
           () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserStatus())
         )
 
         // mcuser history
         .dataFetcher("mchistory", env -> processor.fetch(
+          env, 
           () -> uuidFromToken(env.getArgument("uid")), 
           uid -> mcuserRepo.mcuserHistory(uid), 
           b -> xfrmMcuserHistory.fromBackend(b))
@@ -188,6 +190,7 @@ public class MCorpusGraphQL {
 
         // fetch mcuser
         .dataFetcher("fetchMcuser", env -> processor.fetch(
+          env, 
           () -> uuidFromToken(env.getArgument("uid")), 
           uid -> mcuserRepo.fetchMcuser(uid), 
           b -> xfrmMcuser.fromBackend(b))
@@ -196,11 +199,13 @@ public class MCorpusGraphQL {
         // mcorpus
 
         .dataFetcher("mrefByMid", env -> processor.fetch(
+          env, 
           () -> uuidFromToken(env.getArgument("mid")), 
           mid -> mcorpusRepo.fetchMRefByMid(mid), 
           b -> xfrmMref.fromBackend(b))
         )
         .dataFetcher("mrefByEmpIdAndLoc", env -> processor.fetch(
+          env, 
           () -> new EmpIdAndLocationKey(
             clean(env.getArgument("empId")), 
             clean(env.getArgument("location"))
@@ -211,6 +216,7 @@ public class MCorpusGraphQL {
           b -> xfrmMref.fromBackend(b))
         )
         .dataFetcher("mrefsByEmpId", env -> processor.fetch(
+          env, 
           () -> clean(env.getArgument("empId")), 
           empId -> mcorpusRepo.fetchMRefsByEmpId(empId), 
           blist -> blist.stream()
@@ -218,11 +224,13 @@ public class MCorpusGraphQL {
                       .collect(Collectors.toList()))
         )
         .dataFetcher("memberByMid", env -> processor.fetch(
+          env, 
           () -> uuidFromToken(env.getArgument("mid")), 
           mid -> mcorpusRepo.fetchMember(mid), 
           b -> xfrmMember.fromBackend(b))
         )
         .dataFetcher("members", env -> processor.fetch(
+          env, 
           () -> xfrmMemberFilter.fromGraphQLMap(env.getArgument("filter")), 
           null, 
           mfilter -> xfrmMemberFilter.toBackend(mfilter), 
@@ -238,6 +246,7 @@ public class MCorpusGraphQL {
 
         // mcuser login
         .dataFetcher("mclogin", env -> processor.handleSimpleMutation(
+          env, 
           () -> new McusernameAndPswdKey(
             clean(env.getArgument("username")), 
             clean(env.getArgument("pswd"))
@@ -248,11 +257,13 @@ public class MCorpusGraphQL {
 
         // mcuser logout
         .dataFetcher("mclogout", env -> processor.process(
+          env, 
           () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogout())
         )
 
         // add mcuser
         .dataFetcher("addMcuser", env -> processor.handleMutation(
+          env, 
           () -> xfrmMcuser.fromGraphQLMapForAdd(env.getArgument("mcuser")),
           g -> vldtnMcuser.validateForAdd(g), 
           (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
@@ -262,6 +273,7 @@ public class MCorpusGraphQL {
 
         // update mcuser
         .dataFetcher("updateMcuser", env -> processor.handleMutation(
+          env, 
           () -> xfrmMcuser.fromGraphQLMapForUpdate(env.getArgument("mcuser")),
           g -> vldtnMcuser.validateForUpdate(g), 
           (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
@@ -271,6 +283,7 @@ public class MCorpusGraphQL {
 
         // delete mcuser
         .dataFetcher("deleteMcuser", env -> processor.handleDeletion(
+          env, 
           () -> uuidFromToken(env.getArgument("uid")), 
           key -> key, 
           b -> mcuserRepo.deleteMcuser(b))
@@ -278,6 +291,7 @@ public class MCorpusGraphQL {
 
         // mcpswd
         .dataFetcher("mcpswd", env -> processor.handleSimpleMutation(
+          env, 
           () -> new McuserIdAndPswdKey(
             uuidFromToken(env.getArgument("uid")), 
             clean(env.getArgument("pswd"))
@@ -288,6 +302,7 @@ public class MCorpusGraphQL {
         
         // invalidateJwtsFor
         .dataFetcher("invalidateJwtsFor", env -> processor.handleSimpleMutation(
+          env, 
           () -> uuidFromToken(env.getArgument("uid")), 
           key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key), 
           b -> b)
@@ -297,6 +312,7 @@ public class MCorpusGraphQL {
 
         // member login
         .dataFetcher("mlogin", env -> processor.handleMutation(
+          env, 
           () -> new Mlogin(
             clean(env.getArgument("username")), 
             clean(env.getArgument("pswd")), 
@@ -314,6 +330,7 @@ public class MCorpusGraphQL {
         
         // member logout
         .dataFetcher("mlogout", env -> processor.handleMutation(
+          env, 
           () -> new Mlogout(
             uuidFromToken(env.getArgument("mid")), 
             ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(), 
@@ -329,6 +346,7 @@ public class MCorpusGraphQL {
         
         // add member
         .dataFetcher("addMember", env -> processor.handleMutation(
+          env, 
           () -> xfrmMember.fromGraphQLMapForAdd(env.getArgument("member")), 
           (Member g) -> vldtnMember.validateForAdd(g), 
           gvldtd -> xfrmMember.toBackend(gvldtd), 
@@ -338,6 +356,7 @@ public class MCorpusGraphQL {
 
         // update member
         .dataFetcher("updateMember", env -> processor.handleMutation(
+          env, 
           () -> xfrmMember.fromGraphQLMapForUpdate(env.getArgument("member")), 
           (Member g) -> vldtnMember.validateForUpdate(g), 
           gvldtd -> xfrmMember.toBackend(gvldtd), 
@@ -347,6 +366,7 @@ public class MCorpusGraphQL {
 
         // delete member
         .dataFetcher("deleteMember", env -> processor.handleDeletion(
+          env, 
           () -> uuidFromToken(env.getArgument("mid")), 
           key -> key, 
           b -> mcorpusRepo.deleteMember(b))
@@ -354,6 +374,7 @@ public class MCorpusGraphQL {
 
         // member pswd
         .dataFetcher("mpswd", env -> processor.handleSimpleMutation(
+          env, 
           () -> new MemberIdAndPswdKey(
             uuidFromToken(env.getArgument("mid")), 
             clean(env.getArgument("pswd"))
@@ -364,6 +385,7 @@ public class MCorpusGraphQL {
 
         // add member address
         .dataFetcher("addMemberAddress", env -> processor.handleMutation(
+          env, 
           () -> xfrmMemberAddress.fromGraphQLMapForAdd(env.getArgument("memberAddress")), 
           (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g), 
           gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
@@ -373,6 +395,7 @@ public class MCorpusGraphQL {
 
         // update member address
         .dataFetcher("updateMemberAddress", env -> processor.handleMutation(
+          env, 
           () -> xfrmMemberAddress.fromGraphQLMapForUpdate(env.getArgument("memberAddress")), 
           (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g), 
           gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
@@ -382,6 +405,7 @@ public class MCorpusGraphQL {
 
         // delete member address
         .dataFetcher("deleteMemberAddress", env -> processor.handleDeletion(
+          env, 
           () -> new MidAndAddressNameKey(
             uuidFromToken(env.getArgument("mid")), 
             clean(env.getArgument("addressName"))
@@ -591,6 +615,7 @@ public class MCorpusGraphQL {
         })
         .dataFetcher("addresses", env -> {
           return processor.fetch(
+            env, 
             () -> ((Member) env.getSource()).getMid(), 
             mid -> mcorpusRepo.fetchMemberAddresses(mid), 
             blist -> blist.stream().map(b -> xfrmMemberAddress.fromBackend(b)).collect(Collectors.toList())

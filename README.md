@@ -4,9 +4,9 @@ A robust GraphQL server endpoint POC written in Java 8.
 
 A Maven-based Java project with two sub-projects:
 
-- mcorpus-gql
+- **mcorpus-gql**
   The MCorpus GraphQL server endpoint packaged as an über jar.
-- mcorpus-db
+- **mcorpus-db**
   Houses the JooQ generated types representing the db-schema and data access api in the form of Java classes.  Used by mcorpus-gql.
 
 ## docs

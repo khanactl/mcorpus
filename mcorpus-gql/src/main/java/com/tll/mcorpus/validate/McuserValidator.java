@@ -15,6 +15,9 @@ import com.tll.validate.VldtnCore;
 public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
 
   @Override
+  protected String getEntityTypeName() { return "Member"; }
+  
+  @Override
   protected void validateForAdd(final VldtnBuilder<Mcuser> vldtn) {
     vldtn
       .vrqd(McuserValidator::mcuserNameValid, Mcuser::getName, "mcuser.name.emsg", "name")
