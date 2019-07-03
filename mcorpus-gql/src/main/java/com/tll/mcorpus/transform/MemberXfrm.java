@@ -114,7 +114,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
         neclean(g.getEmpId()),
         locationFromString(g.getLocation()),
         upper(neclean(g.getNameFirst())),
-        upper(nclean(g.getNameMiddle())),
+        upper(nclean(g.getNameMiddle())), // middle name do not set to null when empty
         upper(neclean(g.getNameLast())),
         neclean(g.getDisplayName()),
         memberStatusFromString(g.getStatus())
