@@ -1,5 +1,7 @@
 package com.tll.mcorpus.web;
 
+import java.time.Duration;
+
 import com.tll.jwt.IJwtHttpResponseAction;
 
 import ratpack.handling.Context;
@@ -27,13 +29,13 @@ public class MCorpusJwtHttpResponseAction implements IJwtHttpResponseAction {
   }
 
   @Override
-  public void expireJwtCookies() {
+  public void expireJwtClientside() {
     com.tll.mcorpus.web.RequestUtil.expireAllCookies(ctx);
   }
 
   @Override
-  public void setJwtCookie(String jwt, long jwtCookieTtlInSeconds) {
-    com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse(ctx, jwt, jwtCookieTtlInSeconds);
+  public void setJwtClientside(String jwt, Duration jwtTimeToLive) {
+    com.tll.mcorpus.web.RequestUtil.addJwtCookieToResponse(ctx, jwt, jwtTimeToLive.getSeconds());
   }
 
 }

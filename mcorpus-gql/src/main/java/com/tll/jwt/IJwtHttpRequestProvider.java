@@ -40,8 +40,8 @@ public interface IJwtHttpRequestProvider {
    * This allows for the client origin definition to be defined and maintained outside 
    * the scope of JWT processing.
    * 
-   * @param clientOrigin the client origin token to validate
+   * @param jwtAudience the JWT audience claim extracted from the incoming JWT
    * @return true if the given client origin was successfully verified
    */
-  boolean verifyClientOrigin(final String clientOrigin);
+  boolean verifyClientOrigin(final String jwtAudience);
 }

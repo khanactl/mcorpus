@@ -3,8 +3,16 @@ package com.tll.transform;
 import static com.tll.core.Util.emptyIfNull;
 import static com.tll.core.Util.isNull;
 
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * G entity tranform utility methods.
@@ -12,6 +20,8 @@ import java.util.Map;
  * @author jpk
  */
 public class TransformUtil {
+
+  protected static final ZoneOffset localToUtc = ZoneId.systemDefault().getRules().getOffset(Instant.MIN);
 
   /**
    * RegEx filter that removes all NON-alphanumeric characters.
@@ -70,5 +80,74 @@ public class TransformUtil {
   @SuppressWarnings("unchecked")
   public static <T> T fval(final String fname, final Map<String, Object> fmap) { return (T) fmap.get(fname); }
   
+  /**
+   * Convert an {@link OffsetDateTime} to a {@link Date}.
+   * 
+   * @param odt the offset date time object to convert
+   * @return Newly created {@link Date} -OR- null if the input param is null
+   */
+  public static Date odtToDate(final OffsetDateTime odt) {
+    return odt == null ? null : Date.from(odt.toInstant());
+  }
+
+  /**
+   * Convert a {@link Date} to an {@link OffsetDateTime}.
+   * 
+   * @param d the date to convert
+   * @return Newly created {@link OffsetDateTime} -OR- null if the input param is null
+   */
+  public static OffsetDateTime odtFromDate(final Date d) {
+    return d == null ? null : d.toInstant().atOffset(localToUtc);
+  }
+
+  /**
+   * Converts a {@link UUID} to a URL-safe base64-encoded string 24 characters long.
+   *
+   * @param uuid the uuid
+   * @return unique token that is URL safe or null if null input
+   */
+  public static String uuidToToken(final UUID uuid) {
+    if(uuid == null) return null;
+    final ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+    bb.putLong(uuid.getMostSignificantBits());
+    bb.putLong(uuid.getLeastSignificantBits());
+    return Base64.getUrlEncoder().encodeToString(bb.array());
+  }
+
+  /**
+   * Converts either a uuid string (36 chars)
+   * -OR- a base64-encoded uuid string (24 chars)
+   * to a UUID object.
+   *
+   * <p>No exceptions are thrown and null is always
+   * returned upon missing (null) or bad input.</p>
+   *
+   * <p>Nothing is logged on conversion failure
+   * rather only null is returned.</p>
+   *
+   * @param str the base64-encoded token uuid
+   * @return the matching {@link UUID} or null if null or invalid uuid token
+   */
+  public static UUID uuidFromToken(final String str) {
+    if(str == null) return null;
+    try {
+      switch (str.length()) {
+        case 36:
+          // assume raw uuid string
+          return UUID.fromString(str);
+        case 24:
+          // assume base64 url encoded uuid string
+          final byte[] bytes = Base64.getUrlDecoder().decode(str);
+          final ByteBuffer bb = ByteBuffer.wrap(bytes);
+          return new UUID(bb.getLong(), bb.getLong());
+      }
+    }
+    catch(Throwable t) {
+      // this function shall not leak info - log nothing
+    }
+    // default
+    return null;
+  }
+
   private TransformUtil() {}
 }

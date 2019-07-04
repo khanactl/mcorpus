@@ -2,7 +2,7 @@ package com.tll.jwt;
 
 import static com.tll.core.Util.not;
 import static com.tll.core.Util.isNull;
-import static com.tll.transform.BaseTransformer.uuidToToken;
+import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
 import java.util.UUID;

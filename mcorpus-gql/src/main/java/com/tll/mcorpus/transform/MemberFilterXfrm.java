@@ -1,16 +1,17 @@
 package com.tll.mcorpus.transform;
 
-import static com.tll.mcorpus.transform.MemberXfrm.memberStatusFromString;
 import static com.tll.core.Util.asString;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isBlank;
-import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.upper;
-import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.db.Tables.MAUTH;
+import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
+import static com.tll.mcorpus.transform.MemberXfrm.memberStatusFromString;
+import static com.tll.transform.TransformUtil.odtFromDate;
 import static java.util.Collections.singletonList;
 import static org.jooq.impl.DSL.not;
 
@@ -30,10 +31,10 @@ import com.tll.mcorpus.dmodel.MemberSearch;
 import com.tll.mcorpus.gmodel.MemberFilter;
 import com.tll.mcorpus.gmodel.MemberFilter.DatePredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.DatePredicate.DateOp;
-import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate.Operation;
 import com.tll.mcorpus.gmodel.MemberFilter.LocationPredicate;
 import com.tll.mcorpus.gmodel.MemberFilter.OrderBy;
 import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate;
+import com.tll.mcorpus.gmodel.MemberFilter.StringPredicate.Operation;
 import com.tll.transform.BaseTransformer;
 
 import org.jooq.Condition;

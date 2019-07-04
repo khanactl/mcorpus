@@ -144,11 +144,11 @@ class AuthorizationDirective implements SchemaDirectiveWiring {
           }
         } else {
           // not authorized
-          log.warn("Role(s) {} NOT authorized for {}", requestingRoles, f.getName());
+          log.debug("Role(s) {} NOT authorized for {}", requestingRoles, f.getName());
         }
         // default
         return null;
-        }
+      }
     };
     // now change the field definition to have the new authorising data fetcher
     env.getCodeRegistry().dataFetcher(parentType, f, auth);

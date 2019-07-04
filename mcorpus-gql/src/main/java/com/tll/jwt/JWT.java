@@ -263,11 +263,12 @@ public class JWT {
     // verify audience (client origin)
     if(not(httpreq.verifyClientOrigin(jwtAudience))) {
       log.error(
-        "JWT {} client origin mis-match (JWT: {} (current request: {}) for request {}.", 
+        "JWT {} client origin mis-match (JwtAudience: {} (current request: {}) for request {}.", 
         jwtId, jwtAudience, httpreq.getClientOrigin(), requestId
       );
       return JWTHttpRequestStatus.create(requestId, JWTStatus.BAD_CLAIMS);
     }
+    log.info("JWT audience {} verified against http request client origin {}.", jwtAudience, httpreq.getClientOrigin());
     
     // expired? (check for exp. time in the past)
     if(Instant.now().isAfter(expires)) {

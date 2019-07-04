@@ -1,7 +1,7 @@
 package com.tll.transform;
 
 import static org.junit.Assert.*;
-import static com.tll.transform.BaseTransformer.*;
+import static com.tll.transform.TransformUtil.*;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-public class BaseTransformerTest {
+public class TransformUtilTest {
 
   @Test
   public void testOdtTranslation() {
@@ -25,16 +25,16 @@ public class BaseTransformerTest {
   }
 
   /**
-   * Verifies both {@link BaseTransformer#uuidToToken(UUID)} and 
-   * {@link BaseTransformer#uuidFromToken(String)} methods.
+   * Verifies both {@link TransformUtil#uuidToToken(UUID)} and 
+   * {@link TransformUtil#uuidFromToken(String)} methods.
    */
   @Test
   public void testUuidTokenTranslation() {
     final UUID testUuid = UUID.randomUUID();
-    final String token = BaseTransformer.uuidToToken(testUuid);
+    final String token = uuidToToken(testUuid);
     assertNotNull(token);
     assertEquals(24, token.length());
-    final UUID reTestUuid = BaseTransformer.uuidFromToken(token);
+    final UUID reTestUuid = uuidFromToken(token);
     assertNotNull(reTestUuid);
     assertEquals(testUuid, reTestUuid);
   }

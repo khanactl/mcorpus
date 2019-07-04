@@ -88,24 +88,24 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   }
 
   @Override
-  public boolean verifyClientOrigin(final String clientOrigin) {
-    if(isNull(clientOrigin)) return false;
+  public boolean verifyClientOrigin(final String jwtAudience) {
+    if(isNull(jwtAudience)) return false;
     
-    final String[] thisParsed = parseClientOriginToken(getClientOrigin());
-    final String[] toverifyParsed = parseClientOriginToken(clientOrigin);
+    final String[] httpReqClientOriginParsed = parseClientOriginToken(getClientOrigin());
+    final String[] jwtAudienceParsed = parseClientOriginToken(jwtAudience);
     
-    String thisRemoteAddrHost = thisParsed[0];
-    String thisXForwardedFor = thisParsed[1];
+    String httpReqRemoteAddrHost = httpReqClientOriginParsed[0];
+    String httpReqXForwardedFor = httpReqClientOriginParsed[1];
     
-    String toverifyRemoteAddrHost = toverifyParsed[0];
-    String toverifyXForwardedFor = toverifyParsed[1];
+    String jwtAudienceRemoteAddrHost = jwtAudienceParsed[0];
+    String jwtAudienceXForwardedFor = jwtAudienceParsed[1];
     
     // if the original remote address host matches either the current remote address host 
     // -OR- the x-forwarded-for then we approve this message
-    if(thisRemoteAddrHost.equals(toverifyRemoteAddrHost) || thisRemoteAddrHost.equals(toverifyXForwardedFor)) 
+    if(httpReqRemoteAddrHost.equals(jwtAudienceRemoteAddrHost) || httpReqRemoteAddrHost.equals(jwtAudienceXForwardedFor)) 
       return true;
     
-    if(thisXForwardedFor.equals(toverifyRemoteAddrHost) || thisXForwardedFor.equals(toverifyXForwardedFor)) 
+    if(httpReqXForwardedFor.equals(jwtAudienceRemoteAddrHost) || httpReqXForwardedFor.equals(jwtAudienceXForwardedFor)) 
       return true;
     
     // denied

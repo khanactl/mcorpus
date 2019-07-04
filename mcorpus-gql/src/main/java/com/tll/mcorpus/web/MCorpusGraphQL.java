@@ -1,8 +1,8 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
-import static com.tll.transform.BaseTransformer.uuidFromToken;
-import static com.tll.transform.BaseTransformer.uuidToToken;
+import static com.tll.transform.TransformUtil.uuidFromToken;
+import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +16,8 @@ import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.mcorpus.gmodel.MemberAddress;
-import com.tll.mcorpus.gmodel.MemberIdAndPswdKey;
 import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
+import com.tll.mcorpus.gmodel.MemberIdAndPswdKey;
 import com.tll.mcorpus.gmodel.Mlogin;
 import com.tll.mcorpus.gmodel.Mlogout;
 import com.tll.mcorpus.gmodel.Mref;

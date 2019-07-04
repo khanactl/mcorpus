@@ -116,12 +116,12 @@ public class MCorpusTestUtil {
     return new IJwtHttpResponseAction(){
     
       @Override
-      public void setJwtCookie(String jwt, long jwtCookieTtlInSeconds) {
+      public void setJwtClientside(String jwt, Duration jwtTimeToLive) {
         // testing no-op
       }
     
       @Override
-      public void expireJwtCookies() {
+      public void expireJwtClientside() {
         // testing no-op
       }
     };
