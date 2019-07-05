@@ -1,6 +1,8 @@
 package com.tll.mcorpus;
 
 import static ratpack.handling.Handlers.redirect;
+import static com.tll.transform.TransformUtil.uuidFromToken;
+import static com.tll.transform.TransformUtil.uuidToToken;
 
 import com.tll.mcorpus.repo.MCorpusRepoModule;
 import com.tll.mcorpus.web.CsrfGuardHandler;
@@ -63,7 +65,7 @@ public class Main {
         // slf4j MDC Ratpack style
         .add(MDCInterceptor.withInit(e -> 
           e.maybeGet(RequestId.class).ifPresent(rid -> 
-            MDC.put("requestId", rid.toString())
+            MDC.put("requestId", uuidToToken(uuidFromToken(rid.toString())))
           )
         ))
       ))

@@ -111,12 +111,14 @@ public class TransformUtil {
     final ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
     bb.putLong(uuid.getMostSignificantBits());
     bb.putLong(uuid.getLeastSignificantBits());
-    return Base64.getUrlEncoder().encodeToString(bb.array());
+    String tok = Base64.getUrlEncoder().encodeToString(bb.array());
+    return tok.endsWith("==") ? tok.substring(0, tok.length() - 2) : tok;
   }
 
   /**
-   * Converts either a uuid string (36 chars)
+   * Converts either a 'raw' uuid string (36 chars)
    * -OR- a base64-encoded uuid string (24 chars)
+   * -OR- a base65-encoded-and-trimmed (ending "==" stripped) uuid string (22 chars)
    * to a UUID object.
    *
    * <p>No exceptions are thrown and null is always
@@ -131,14 +133,18 @@ public class TransformUtil {
   public static UUID uuidFromToken(final String str) {
     if(str == null) return null;
     try {
+      final ByteBuffer bb;
       switch (str.length()) {
         case 36:
           // assume raw uuid string
           return UUID.fromString(str);
         case 24:
-          // assume base64 url encoded uuid string
-          final byte[] bytes = Base64.getUrlDecoder().decode(str);
-          final ByteBuffer bb = ByteBuffer.wrap(bytes);
+          // assume base64 url encoded uuid string WITH trailing "=="
+          bb = ByteBuffer.wrap(Base64.getUrlDecoder().decode(str));
+          return new UUID(bb.getLong(), bb.getLong());
+        case 22:
+          // assume base64 url encoded uuid string WITHOUT trailing "=="
+          bb = ByteBuffer.wrap(Base64.getUrlDecoder().decode(str + "=="));
           return new UUID(bb.getLong(), bb.getLong());
       }
     }

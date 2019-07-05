@@ -33,7 +33,7 @@ public class TransformUtilTest {
     final UUID testUuid = UUID.randomUUID();
     final String token = uuidToToken(testUuid);
     assertNotNull(token);
-    assertEquals(24, token.length());
+    assertTrue(token.length() == 24 || token.length() == 22);
     final UUID reTestUuid = uuidFromToken(token);
     assertNotNull(reTestUuid);
     assertEquals(testUuid, reTestUuid);
