@@ -125,7 +125,7 @@ public class GraphQLHandler implements Handler {
               return GraphqlErrorBuilder.newError()
                 .errorType(err.getErrorType())
                 .locations(err.getLocations())
-                .message("One or more type-mismatches and/or missing field(s) in query.")
+                .message("Query validation error.  Check field name spelling, type-mismatching or missing fields.")
                 .build();
             }
             else if(err.getErrorType() == ErrorType.InvalidSyntax) {
