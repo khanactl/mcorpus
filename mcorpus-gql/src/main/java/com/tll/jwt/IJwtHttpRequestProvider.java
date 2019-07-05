@@ -13,7 +13,7 @@ public interface IJwtHttpRequestProvider {
   /**
    * @return The ascribed id of the assockated http request.
    */
-  String getRequestId();
+  // String getRequestId();
 
   /**
    * @return the instant the associated http request reached the server.

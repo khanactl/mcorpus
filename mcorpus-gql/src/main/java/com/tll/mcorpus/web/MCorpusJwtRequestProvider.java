@@ -78,11 +78,6 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   }
 
   @Override
-  public String getRequestId() {
-    return rs.getRequestId();
-  }
-
-  @Override
   public Instant getRequestInstant() {
     return rs.getRequestInstant();
   }

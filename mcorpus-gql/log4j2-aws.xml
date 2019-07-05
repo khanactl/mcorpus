@@ -3,15 +3,8 @@
 <Configuration status="WARN">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d%d{ISO8601} [%t] %-5level %logger{36} - %msg%n"/>
+      <PatternLayout pattern="%d{ISO8601} [%t] [%X{requestId}] %-5level %msg%n"/>
     </Console>
-    <!--
-    <File name="File" fileName="logs/mcorpus-gql-server.log">
-      <PatternLayout>
-        <Pattern>%d{ISO8601} [%t] %-5level %logger{36} - %msg%n</Pattern>
-      </PatternLayout>
-    </File>
-    -->
   </Appenders>
   <Loggers>
     <Logger name="com.zaxxer.hikari" level="warn" />
@@ -19,7 +12,6 @@
     
     <Root level="INFO">
       <AppenderRef ref="Console"/>
-      <!-- <AppenderRef ref="File"/> -->
     </Root>
   </Loggers>
 </Configuration>

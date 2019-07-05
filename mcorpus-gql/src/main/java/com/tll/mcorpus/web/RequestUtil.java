@@ -2,7 +2,6 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.Main.glog;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import com.tll.mcorpus.MCorpusServerConfig;
@@ -117,8 +116,6 @@ public class RequestUtil {
    * @return newly created, never null {@link RequestSnapshot} instance.
    */
   private static RequestSnapshot takeRequestSnapshot(final Request req) {
-    final Optional<RequestId> rid = req.maybeGet(RequestId.class);
-    final String requestId = rid.isPresent() ? rid.get().toString() : UUID.randomUUID().toString();
     return new RequestSnapshot(
         req.getTimestamp(),
         req.getRemoteAddress().getHost(),
@@ -132,7 +129,8 @@ public class RequestUtil {
         req.oneCookie("jwt"),
         req.oneCookie("rst"),
         req.getHeaders().get("rst"),
-        requestId
+        req.maybeGet(RequestId.class)
+          .orElse(RequestId.of(UUID.randomUUID().toString())).toString()
     );
   }
 }

@@ -197,7 +197,7 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
   public String getRequestId() {
     return requestId;
   }
-  
+
   @Override
   public String toString() {
     return String.format(

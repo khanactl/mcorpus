@@ -41,7 +41,7 @@ public class JWTStatusHandler implements Handler {
       )
     ).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);
-      log.info("{} cached for incoming request {}.", jwtStatus, getOrCreateRequestSnapshot(ctx).getRequestId());
+      log.info("{} cached for incoming request.", jwtStatus);
       ctx.next();
     });
   }

@@ -11,10 +11,13 @@ import com.tll.mcorpus.web.MCorpusWebModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import ratpack.guice.Guice;
+import ratpack.handling.RequestId;
 import ratpack.handling.RequestLogger;
 import ratpack.hikari.HikariModule;
+import ratpack.logging.MDCInterceptor;
 import ratpack.server.BaseDir;
 import ratpack.server.RatpackServer;
 
@@ -57,9 +60,15 @@ public class Main {
         })
         .module(MCorpusRepoModule.class)
         .module(MCorpusWebModule.class)
+        // slf4j MDC Ratpack style
+        .add(MDCInterceptor.withInit(e -> 
+          e.maybeGet(RequestId.class).ifPresent(rid -> 
+            MDC.put("requestId", rid.toString())
+          )
+        ))
       ))
       .handlers(chain -> chain
-        // .all(RequestLogger.ncsa()) // log all incoming requests (too chatty)
+        .all(RequestLogger.ncsa()) // log all incoming requests
 
         // redirect to /index if coming in under /
         .path(redirect(301, "index"))
@@ -69,7 +78,6 @@ public class Main {
 
         // graphql/
         .prefix("graphql", chainsub -> chainsub
-          .all(RequestLogger.ncsa()) // log all graphql requests
           
           // the mcorpus GraphQL api (post only)
           .post(JWTStatusHandler.class)
@@ -84,7 +92,6 @@ public class Main {
 
         // mcorpus graphql api html landing page
         .prefix("index", chainsub -> chainsub
-          .all(RequestLogger.ncsa())
           .get(ctx -> ctx.render(ctx.file("templates/index.html")))
         )
         

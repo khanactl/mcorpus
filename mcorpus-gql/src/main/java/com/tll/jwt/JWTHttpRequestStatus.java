@@ -18,12 +18,11 @@ public class JWTHttpRequestStatus {
   /**
    * Factory method to generate a {@link JWTHttpRequestStatus} from only a {@link JWTStatus}.
    * 
-   * @param requestId the id of the associated http request
    * @param status the JWT status
    * @return Newly created {@link JWTHttpRequestStatus}
    */
-  public static JWTHttpRequestStatus create(String requestId, JWTStatus status) { 
-    return new JWTHttpRequestStatus(requestId, status, null, null, null, null, null); 
+  public static JWTHttpRequestStatus create(JWTStatus status) { 
+    return new JWTHttpRequestStatus(status, null, null, null, null, null); 
   }
   
   /**
@@ -38,8 +37,8 @@ public class JWTHttpRequestStatus {
    * @param expires
    * @return Newly created {@link JWTHttpRequestStatus}
    */
-  public static JWTHttpRequestStatus create(String requestId, JWTStatus status, UUID jwtId, UUID userId, String roles, Instant issued, Instant expires) { 
-    return new JWTHttpRequestStatus(requestId, status, jwtId, userId, roles, issued, expires); 
+  public static JWTHttpRequestStatus create(JWTStatus status, UUID jwtId, UUID userId, String roles, Instant issued, Instant expires) { 
+    return new JWTHttpRequestStatus(status, jwtId, userId, roles, issued, expires); 
   }
   
   /**
@@ -113,7 +112,6 @@ public class JWTHttpRequestStatus {
 
   } // JWTStatus enum
 
-  private final String requestId;
   private final JWTStatus status;
   private final UUID jwtId;
   private final UUID userId;
@@ -124,7 +122,6 @@ public class JWTHttpRequestStatus {
   /**
    * Constructor.
    *
-   * @param requestId the id of the associated http request
    * @param status the status of the JWT in the received request
    * @param jwtId the bound jwt id claim
    * @param userId the associated user id
@@ -132,9 +129,8 @@ public class JWTHttpRequestStatus {
    * @param issued the issue date as a long of the associated JWT in the received request
    * @param expires the expiration date as a long of the JWT in the received request
    */
-  JWTHttpRequestStatus(String requestId, JWTStatus status, UUID jwtId, UUID userId, String roles, Instant issued, Instant expires) {
+  JWTHttpRequestStatus(JWTStatus status, UUID jwtId, UUID userId, String roles, Instant issued, Instant expires) {
     super();
-    this.requestId = requestId;
     this.status = status;
     this.userId = userId;
     this.jwtId = jwtId;
@@ -143,11 +139,6 @@ public class JWTHttpRequestStatus {
     this.roles = roles;
   }
 
-  /**
-   * @return the id of the associated http request.
-   */
-  public String requestId() { return requestId; }
-  
   /**
    * @return the status of the JWT in the associated http request
    */
@@ -189,9 +180,8 @@ public class JWTHttpRequestStatus {
   @Override
   public String toString() {
     return String.format(
-      "JWT HTTP Request Status: %s (requestId: %s, jwtId: %s, userId: %s, issued: %s, expires: %s, roles: %s).", 
+      "JWT HTTP Request Status: %s (jwtId: %s, userId: %s, issued: %s, expires: %s, roles: %s).", 
       status().toString(), 
-      requestId(), 
       isNull(jwtId()) ? "-" : uuidToToken(jwtId()), 
       isNull(userId()) ? "-" : uuidToToken(userId()), 
       isNull(issued ) ? "-" : issued().toString(), 

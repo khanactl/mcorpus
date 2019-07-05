@@ -74,7 +74,7 @@ public class GraphQLHandler implements Handler {
       
       // validate graphql query request
       if(not(gqlWebCtx.isValid())) {
-        log.error("Invalid graphql query in request {}.", rsnap.getRequestId());
+        log.error("Invalid graphql query.");
         ctx.clientError(403);
         return;
       }
@@ -118,7 +118,7 @@ public class GraphQLHandler implements Handler {
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {
           ctx.render(json(executionResult.toSpecification()));
-          log.info("graphql request {} handled successfully for request {}.", gqlWebCtx.opAndQueryToken(), rsnap.getRequestId());
+          log.info("graphql request {} handled successfully.", gqlWebCtx.opAndQueryToken());
         } else {
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
             if(err.getErrorType() == ErrorType.ValidationError) {
@@ -138,7 +138,7 @@ public class GraphQLHandler implements Handler {
             // default
             return err;
           }).collect(Collectors.toList())));
-          log.warn("graphql request {} handled with errors for request {}.", gqlWebCtx.opAndQueryToken(), rsnap.getRequestId());
+          log.warn("graphql request {} handled with errors.", gqlWebCtx.opAndQueryToken());
         }
       });
     });

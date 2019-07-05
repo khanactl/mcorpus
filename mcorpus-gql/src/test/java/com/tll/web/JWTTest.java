@@ -48,8 +48,6 @@ public class JWTTest {
     
     final Instant instantA = Instant.now();
     final Instant instantB = Instant.now().plus(Duration.ofSeconds(120));
-    final String requestIdA = "ridA";
-    final String requestIdB = "ridB";
     final UUID jwtId = UUID.randomUUID();
     final String roles = "AROLE";
     final UUID jwtUserId = UUID.randomUUID();
@@ -64,11 +62,6 @@ public class JWTTest {
       @Override
       public Instant getRequestInstant() {
         return instantA;
-      }
-    
-      @Override
-      public String getRequestId() {
-        return requestIdA;
       }
     
       @Override
@@ -97,11 +90,6 @@ public class JWTTest {
       @Override
       public Instant getRequestInstant() {
         return instantB;
-      }
-    
-      @Override
-      public String getRequestId() {
-        return requestIdB;
       }
     
       @Override
