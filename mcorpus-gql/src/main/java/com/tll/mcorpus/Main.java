@@ -49,7 +49,6 @@ public class Main {
         .baseDir(BaseDir.find())
         .args(args)
         .sysProps()
-        .env()
         .env("MCORPUS_")
         .require("", MCorpusServerConfig.class)
         // .require("/metrics", DropwizardMetricsConfig.class)
