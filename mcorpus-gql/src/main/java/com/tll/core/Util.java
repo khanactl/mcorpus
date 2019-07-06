@@ -36,9 +36,17 @@ public class Util {
    * Is the given string null or 0-length ("")?
    *
    * @param s the string to check
-   * @return true if the given string is empty, false otherwise.
+   * @return true if the given string is null or empty, false otherwise.
    */
   public static boolean isNullOrEmpty(final String s) { return s == null || s.isEmpty(); }
+  
+  /**
+   * Is the given string 0-length ("")?
+   *
+   * @param s the string to check
+   * @return true if the given string is empty, false otherwise.
+   */
+  public static boolean isEmpty(final String s) { return s != null && s.isEmpty(); }
   
   /**
    * Is the given string non-null and not-empty (greater than zero-length)?
