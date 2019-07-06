@@ -27,18 +27,21 @@ public class JWTUserGraphQLWebContextTest {
     assertFalse(ctx.isJwtUserLoginQuery());
   
     ctx = create("{ jwtLogin");
-    assertTrue(ctx.isJwtUserLoginQuery());
+    assertFalse(ctx.isJwtUserLoginQuery());
     
     ctx = create("login { jwtLogin");
-    assertTrue(ctx.isJwtUserLoginQuery());
+    assertFalse(ctx.isJwtUserLoginQuery());
     
-    ctx = create("mutation login { jwtLogin");
-    assertTrue(ctx.isJwtUserLoginQuery());
-
     ctx = create("query IntrospectionQuery {");
     assertFalse(ctx.isJwtUserLoginQuery());
     
     ctx = create("IntrospectionQuery {");
     assertFalse(ctx.isJwtUserLoginQuery());
+
+    ctx = create("mutation login { jwtLogin }");
+    assertTrue(ctx.isJwtUserLoginQuery());
+
+    ctx = create("mutation { jwtLogin }");
+    assertTrue(ctx.isJwtUserLoginQuery());
   }
 }

@@ -20,46 +20,119 @@ public class GraphQLWebContextTest {
   }
 
   @Test
-  public void testOperationName() throws Exception {
-    GraphQLWebContext ctx;
-
-    ctx = create("query { opName");
-    assertEquals("", ctx.getOperationName());
-  
-    ctx = create("query opname { opName");
-    assertEquals("opname", ctx.getOperationName());
-
-    ctx = create("  query opname { opName");
-    assertEquals("opname", ctx.getOperationName());
-    
-    ctx = create("opname { opName");
-    assertEquals("", ctx.getOperationName());
-    
-    ctx = create("  opname { opName");
-    assertEquals("", ctx.getOperationName());
+  public void testRemoveBackslashN() throws Exception {
+    String tstr = "testing \\n test";
+    String pstr = tstr.replaceAll("\\\\n", "");
+    assertEquals("testing  test", pstr);
   }
 
   @Test
-  public void testQueryMethodName() throws Exception {
+  public void testReduceWhitespace() throws Exception {
+    String tstr = "    testing   \n \n     test  \n  \n  ";
+    String pstr = tstr.replaceAll("\\s+", " ");
+    assertEquals(" testing test ", pstr);
+  }
+
+  @Test
+  public void testQueryType() throws Exception {
+    GraphQLWebContext ctx;
+
+    ctx = create("query");
+    assertEquals("", ctx.getQueryType());
+  
+    ctx = create("query {");
+    assertEquals("query", ctx.getQueryType());
+  
+    ctx = create(" query {");
+    assertEquals("query", ctx.getQueryType());
+  
+    ctx = create(" query {  ");
+    assertEquals("query", ctx.getQueryType());
+  
+    ctx = create("query { methodName");
+    assertEquals("query", ctx.getQueryType());
+  
+    ctx = create("query qname { methodName");
+    assertEquals("query", ctx.getQueryType());
+
+    ctx = create("  query qname { methodName  ");
+    assertEquals("query", ctx.getQueryType());
+    
+    ctx = create("mutation");
+    assertEquals("", ctx.getQueryType());
+  
+    ctx = create("mutation {");
+    assertEquals("mutation", ctx.getQueryType());
+  
+    ctx = create(" mutation {");
+    assertEquals("mutation", ctx.getQueryType());
+  
+    ctx = create("mutation { methodName");
+    assertEquals("mutation", ctx.getQueryType());
+  
+    ctx = create("mutation qname { methodName");
+    assertEquals("mutation", ctx.getQueryType());
+
+    ctx = create("  mutation qname { methodName  ");
+    assertEquals("mutation", ctx.getQueryType());
+  }
+
+  @Test
+  public void testOperationName() throws Exception {
+    GraphQLWebContext ctx;
+
+    ctx = create("query");
+    assertEquals("", ctx.getOpName());
+  
+    ctx = create("query {}");
+    assertEquals("", ctx.getOpName());
+  
+    ctx = create("query { method }");
+    assertEquals("", ctx.getOpName());
+  
+    ctx = create("query opname { method }");
+    assertEquals("opname", ctx.getOpName());
+    
+    ctx = create("query opname($mid : ID!) { method(mid: $mid) }");
+    assertEquals("opname", ctx.getOpName());
+  }
+
+  @Test
+  public void testFirstMethodName() throws Exception {
     GraphQLWebContext ctx;
     
-    ctx = create("{ gquery");
-    assertEquals("gquery", ctx.getQueryMethodName());
+    ctx = create("query qname($mid: ID) { methodName {} }");
+    assertEquals("methodName", ctx.getFirstMethodName());
   
-    ctx = create("query { gquery");
-    assertEquals("gquery", ctx.getQueryMethodName());
+    ctx = create("query { methodName }");
+    assertEquals("methodName", ctx.getFirstMethodName());
   
-    ctx = create("  query  { gquery");
-    assertEquals("gquery", ctx.getQueryMethodName());
+    ctx = create("{ methodName {");
+    assertEquals("", ctx.getFirstMethodName());
   
-    ctx = create("  query  { gquery(id: ) {}");
-    assertEquals("gquery", ctx.getQueryMethodName());
+    ctx = create("{ methodName }");
+    assertEquals("methodName", ctx.getFirstMethodName());
+  
+    ctx = create("{ methodName }");
+    assertEquals("methodName", ctx.getFirstMethodName());
+  
+    ctx = create("  { methodName }  ");
+    assertEquals("methodName", ctx.getFirstMethodName());
+  
+    ctx = create("query { methodName");
+    assertEquals("", ctx.getFirstMethodName());
+  
+    ctx = create("  query  { methodName");
+    assertEquals("", ctx.getFirstMethodName());
+  
+    ctx = create("  query  { methodName(id: \"tank\") {} } ");
+    assertEquals("methodName", ctx.getFirstMethodName());
   
     ctx = create("  query  { ");
-    assertEquals("", ctx.getQueryMethodName());
+    assertEquals("", ctx.getFirstMethodName());
   
     ctx = create(" ");
-    assertEquals("", ctx.getQueryMethodName());
+    assertEquals("", ctx.getFirstMethodName());
   }
 
   @Test
@@ -78,13 +151,13 @@ public class GraphQLWebContextTest {
     ctx = create("mutation login { loginmethod");
     assertFalse(ctx.isIntrospectionQuery());
 
-    ctx = create("query IntrospectionQuery {");
-    assertTrue(ctx.isIntrospectionQuery());
-
     ctx = create("IntrospectionQuery {");
-    assertTrue(ctx.isIntrospectionQuery());
+    assertFalse(ctx.isIntrospectionQuery());
     
     ctx = create(" IntrospectionQuery {");
+    assertFalse(ctx.isIntrospectionQuery());
+
+    ctx = create("query IntrospectionQuery {");
     assertTrue(ctx.isIntrospectionQuery());
 
     ctx = create("query IntrospectionQuery {    __schema { ");

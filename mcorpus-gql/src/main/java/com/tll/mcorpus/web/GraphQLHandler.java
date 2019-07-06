@@ -22,6 +22,7 @@ import graphql.ErrorType;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
 import graphql.GraphqlErrorBuilder;
+import graphql.execution.ExecutionId;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
@@ -57,6 +58,8 @@ public class GraphQLHandler implements Handler {
       
       // grab the http request info
       final String query = ((String) qmap.get("query"));
+      log.debug("Received gql query:\n\n{}\n", query);
+      
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
       
@@ -70,11 +73,11 @@ public class GraphQLHandler implements Handler {
         MCorpusJwtHttpResponseAction.fromRatpackContext(ctx), 
         "mclogin"
       );
-      log.info("{}", gqlWebCtx);
+      log.info("graphql query pending: {}.", gqlWebCtx);
       
       // validate graphql query request
       if(not(gqlWebCtx.isValid())) {
-        log.error("Invalid graphql query.");
+        log.error("graphql query {} is INVALID.", gqlWebCtx.getExecutionId());
         ctx.clientError(403);
         return;
       }
@@ -112,13 +115,14 @@ public class GraphQLHandler implements Handler {
           ExecutionInput.newExecutionInput()
                         .query(gqlWebCtx.getQuery())
                         .variables(gqlWebCtx.getVariables())
-                        .operationName(gqlWebCtx.getOperationName())
+                        .operationName(gqlWebCtx.getOpName())
+                        .executionId(ExecutionId.from(gqlWebCtx.getExecutionId()))
                         .context(gqlWebCtx)
                         .build();
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {
           ctx.render(json(executionResult.toSpecification()));
-          log.info("graphql request {} handled successfully.", gqlWebCtx.opAndQueryToken());
+          log.info("graphql request {} handled successfully.", gqlWebCtx.getExecutionId());
         } else {
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
             if(err.getErrorType() == ErrorType.ValidationError) {
@@ -138,7 +142,7 @@ public class GraphQLHandler implements Handler {
             // default
             return err;
           }).collect(Collectors.toList())));
-          log.warn("graphql request {} handled with errors.", gqlWebCtx.opAndQueryToken());
+          log.warn("graphql request {} handled with errors.", gqlWebCtx.getExecutionId());
         }
       });
     });

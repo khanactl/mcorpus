@@ -2,8 +2,8 @@ package com.tll.web;
 
 import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNotNull;
-import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
 
 import java.time.Instant;
@@ -21,7 +21,6 @@ import com.tll.jwt.IJwtUserStatus;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.repo.FetchResult;
-import com.tll.web.GraphQLWebContext;
 
 /**
  * JWT specific extension of {@link GraphQLWebContext} to facilitate 
@@ -123,7 +122,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @return true when the GraphQL query is for JWT user login, false otherwise.
    */
   public boolean isJwtUserLoginQuery() {
-    return jwtUserLoginQueryMethodName.equals(getQueryMethodName());
+    return isMutation() && jwtUserLoginQueryMethodName.equals(getFirstMethodName());
   }
 
   /**
@@ -296,10 +295,5 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     }
     // default - op failed
     return false;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("qry: %s, %s", getQueryMethodName(), jwtStatus);
   }
 }
