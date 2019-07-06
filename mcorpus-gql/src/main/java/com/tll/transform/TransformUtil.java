@@ -101,7 +101,9 @@ public class TransformUtil {
   }
 
   /**
-   * Converts a {@link UUID} to a URL-safe base64-encoded string 24 characters long.
+   * Converts a {@link UUID} to a URL-safe base64-encoded string of either 
+   * 22 characters in length when it ends with "==" -OR- 24 chars in length 
+   * when it does NOT end in "==".
    *
    * @param uuid the uuid
    * @return unique token that is URL safe or null if null input
@@ -118,7 +120,7 @@ public class TransformUtil {
   /**
    * Converts either a 'raw' uuid string (36 chars)
    * -OR- a base64-encoded uuid string (24 chars)
-   * -OR- a base65-encoded-and-trimmed (ending "==" stripped) uuid string (22 chars)
+   * -OR- a base64-encoded-and-trimmed (ending "==" stripped) uuid string (22 chars)
    * to a UUID object.
    *
    * <p>No exceptions are thrown and null is always
