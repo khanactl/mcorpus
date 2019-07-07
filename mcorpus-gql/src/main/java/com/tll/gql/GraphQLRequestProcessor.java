@@ -71,7 +71,7 @@ public class GraphQLRequestProcessor {
    * @return Newly created {@link DataFetcherResult}
    */
   private static <G> DataFetcherResult<G> dfr(final DataFetchingEnvironment env, final String emsg) {
-    return dfr(null, emsg);
+    return dfr(env, null, emsg);
   }
 
   /**
@@ -82,7 +82,7 @@ public class GraphQLRequestProcessor {
    * @return Newly created {@link DataFetcherResult}
    */
   private static <G> DataFetcherResult<G> dfr(final DataFetchingEnvironment env, final Exception ex) {
-    return dfr(null, ex.getMessage());
+    return dfr(env, null, ex.getMessage());
   }
 
   /**
@@ -95,7 +95,7 @@ public class GraphQLRequestProcessor {
   @SuppressWarnings("unchecked")
   private static <G> DataFetcherResult<G> dfr(final DataFetchingEnvironment env, final VldtnResult vresult) {
     return (DataFetcherResult<G>) DataFetcherResult.newResult()
-      .error(GraphQLDataFetchError.inst(env.getExecutionStepInfo().getPath(), vresult, "  "))
+      .error(GraphQLDataValidationError.inst(env.getExecutionStepInfo().getPath(), vresult))
       .build();
   }
 
