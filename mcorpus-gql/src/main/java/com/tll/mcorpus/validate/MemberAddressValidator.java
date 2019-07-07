@@ -21,7 +21,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
   protected void validateForAdd(final VldtnBuilder<MemberAddress> vldtn) {
     vldtn
       // require pk
-      .vrqd(t -> vldtn.getTarget().getPk().isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
+      .vrqd(t -> t.isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
 
       .vrqd(MemberAddressValidator::addressAttnValid, MemberAddress::getAttn, "maddress.attn.emsg", "attn")
       .vrqd(MemberAddressValidator::addressStreet1Valid, MemberAddress::getStreet1, "maddress.street1.emsg", "street1")
@@ -37,7 +37,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
   protected void validateForUpdate(final VldtnBuilder<MemberAddress> vldtn) {
     vldtn
       // require pk
-      .vrqd(t -> vldtn.getTarget().getPk().isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
+      .vrqd(t -> t.isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
       
       .vtok(MemberAddressValidator::addressAttnValid, MemberAddress::getAttn, "maddress.attn.emsg", "attn")
       .vtok(MemberAddressValidator::addressStreet1Valid, MemberAddress::getStreet1, "maddress.street1.emsg", "street1")

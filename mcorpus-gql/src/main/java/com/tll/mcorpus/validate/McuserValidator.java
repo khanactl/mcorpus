@@ -32,7 +32,7 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
   protected void validateForUpdate(final VldtnBuilder<Mcuser> vldtn) {
     vldtn
       // require pk
-      .vrqd(t -> vldtn.getTarget().getPk().isSet(), Mcuser::getPk, "mcuser.nopk.emsg", "pk")
+      .vrqd(t -> t.isSet(), Mcuser::getPk, "mcuser.nopk.emsg", "pk")
       
       .vtok(McuserValidator::mcuserNameValid, Mcuser::getName, "mcuser.name.emsg", "name")
       .vtok(VldtnCore::emailValid, Mcuser::getEmail, "mcuser.email.emsg", "email")

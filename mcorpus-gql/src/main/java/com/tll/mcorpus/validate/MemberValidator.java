@@ -47,7 +47,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   protected void validateForUpdate(final VldtnBuilder<Member> vldtn) {
     vldtn
       // require pk
-      .vrqd(t -> vldtn.getTarget().getPk().isSet(), Member::getPk, "member.nopk.emsg", "pk")
+      .vrqd(t -> t.isSet(), Member::getPk, "member.nopk.emsg", "pk")
       
       // member
       .vtok(MemberValidator::empIdValid, Member::getEmpId, "member.empId.emsg", "empId")
