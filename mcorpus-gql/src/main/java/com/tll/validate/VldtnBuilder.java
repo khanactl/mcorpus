@@ -2,6 +2,9 @@ package com.tll.validate;
 
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 import static com.tll.validate.VldtnErr.verr;
 
 import java.util.LinkedHashSet;
@@ -43,10 +46,24 @@ public class VldtnBuilder<E> {
   }
 
   /**
-   * @return the entity instance under validation 
-   *         by way of this {@link VldtnBuilder} instance.
+   * @return the held entity instance under validation.
    */
   public E getTarget() { return entity; }
+
+  /**
+   * Require a field be non-null.
+   * 
+   * @param fval the entity accessor method ref for the field under validation
+   * @param vmk the validation message key used when the field value is found to be null
+   * @param fname the entity field name used when the validation fails
+   * @return this builder instance
+   */
+  public <T> VldtnBuilder<E> vrqd(Function<E, T> fval, String vmk, String fname) {
+    if(isNull(fval.apply(entity))) {
+      vaddErr(vmk, fname);
+    }
+    return this;
+  }
 
   /**
    * Validation check for a required entity field.
@@ -54,14 +71,15 @@ public class VldtnBuilder<E> {
    * If a field is NULL the field is considered invalid.<br>
    * If a field is NON-NULL the field IS validated.
    * 
-   * @param p the validation predicate
+   * @param vchk the validation check
    * @param fval the entity accessor method ref for the field under validation
    * @param vmk the validation message key used when the validation fails
    * @param fname the entity field name used when the validation fails
+   * @return this builder instance
    */
-  public <T> VldtnBuilder<E> vrqd(Predicate<T> p, Function<E, T> fval, String vmk, String fname) {
+  public <T> VldtnBuilder<E> vrqd(Predicate<T> vchk, Function<E, T> fval, String vmk, String fname) {
     final T fv = fval.apply(entity);
-    if(!p.test(fv)) {
+    if(not(vchk.test(fv))) {
       vaddErr(vmk, fname);
     }
     return this;
@@ -73,15 +91,28 @@ public class VldtnBuilder<E> {
    * If a field is NON-NULL it IS validated.<br>
    * If a field is NULL it IS NOT validated.
    * 
-   * @param p the validation check
+   * @param vchk the validation check
    * @param fval the entity accessor method ref for the field under validation
-   * @param vmk the validation message key used to obtain the validation error message 
-   *            when the validation check (param <code>p</code>) fails.
+   * @param vmk the validation message key used when the validation fails
    * @param fname the entity field name used when the validation fails
    */
-  public <T> VldtnBuilder<E> vopt(Predicate<T> p, Function<E, T> fval, String vmk, String fname) {
+  public <T> VldtnBuilder<E> vopt(Predicate<T> vchk, Function<E, T> fval, String vmk, String fname) {
     final T fv = fval.apply(entity);
-    if(isNotNull(fv) && !p.test(fv)) {
+    if(isNotNull(fv) && not(vchk.test(fv))) {
+      vaddErr(vmk, fname);
+    }
+    return this;
+  }
+
+  /**
+   * Verify a string field value is non-null and non-empty.
+   * 
+   * @param fval the entity accessor method ref for the field under validation
+   * @param vmk the validation message key used when the validation fails
+   * @param fname the entity field name used when the validation fails
+   */
+  public VldtnBuilder<E> vtok(Function<E, String> fval, String vmk, String fname) {
+    if(isNullOrEmpty(fval.apply(entity))) {
       vaddErr(vmk, fname);
     }
     return this;
@@ -93,15 +124,15 @@ public class VldtnBuilder<E> {
    * If the string is NON-NULL and NOT-EMPTY it IS validated.<br>
    * If the string is NULL or EMPTY it IS NOT validated.
    * 
-   * @param p the validation check
+   * @param vchk the validation check
    * @param fval the entity accessor method ref for the field under validation
    * @param vmk the validation message key used to obtain the validation error message 
    *            when the validation check (param <code>p</code>) fails.
    * @param fname the entity field name used when the validation fails
    */
-  public VldtnBuilder<E> vtok(Predicate<String> p, Function<E, String> fval, String vmk, String fname) {
+  public VldtnBuilder<E> vtok(Predicate<String> vchk, Function<E, String> fval, String vmk, String fname) {
     final String fv = fval.apply(entity);
-    if(isNotNullOrEmpty(fv) && !p.test(fv)) {
+    if(isNotNullOrEmpty(fv) && not(vchk.test(fv))) {
       vaddErr(vmk, fname);
     }
     return this;
@@ -110,17 +141,17 @@ public class VldtnBuilder<E> {
   /**
    * Validation check when a given condition is met (validate when..).
    * 
-   * @param c the condition for which the validation <code>p</code> check is run
-   * @param p the validation check
+   * @param c the condition for which the validation <code>vchk</code> is run
+   * @param vchk the validation check
    * @param fval the entity accessor method ref for the field under validation
    * @param vmk the validation message key used to obtain the validation error message 
    *            when the validation check (param <code>p</code>) fails.
    * @param fname the entity field name used when the validation fails
    */
-  public <T> VldtnBuilder<E> vwhn(Supplier<Boolean> c, Predicate<T> p, Function<E, T> fval, String vmk, String fname) {
+  public <T> VldtnBuilder<E> vwhn(Supplier<Boolean> c, Predicate<T> vchk, Function<E, T> fval, String vmk, String fname) {
     if(Boolean.TRUE.equals(c.get())) {
       final T fv = fval.apply(entity);
-      if(isNotNull(fv) && !p.test(fv)) {
+      if(isNotNull(fv) && not(vchk.test(fv))) {
         vaddErr(vmk, fname);
       }
     }
