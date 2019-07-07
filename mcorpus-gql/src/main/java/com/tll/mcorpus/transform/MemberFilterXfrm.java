@@ -145,7 +145,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     if(!mf.isSet()) return new Condition[0];
     final List<Condition> conditions = new ArrayList<>(8);
     if(mf.hasCreated()) conditions.add(timestampPredicateAsJooqCondition(mf.getCreated(), MEMBER.CREATED));
-    if(mf.hasModified()) conditions.add(timestampPredicateAsJooqCondition(mf.getCreated(), MEMBER.MODIFIED));
+    if(mf.hasModified()) conditions.add(timestampPredicateAsJooqCondition(mf.getModified(), MEMBER.MODIFIED));
     if(mf.hasEmpId()) conditions.add(stringPredicateAsJooqCondition(mf.getEmpId(), MEMBER.EMP_ID));
     if(mf.hasLocation()) conditions.add(locationPredicateAsJooqCondition(mf.getLocation(), MEMBER.LOCATION));
     if(mf.hasNameFirst()) conditions.add(stringPredicateAsJooqCondition(mf.getNameFirst(), MEMBER.NAME_FIRST));
