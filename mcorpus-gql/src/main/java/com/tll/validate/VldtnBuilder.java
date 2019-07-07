@@ -4,7 +4,7 @@ import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.validate.VldtnErr.verr;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Function;
@@ -39,7 +39,7 @@ public class VldtnBuilder<E> {
     this.vmsgBundle = ResourceBundle.getBundle(vldtnBundleName);
     this.entity = entity;
     this.entityTypeName = entityTypeName;
-    this.errs = new HashSet<>();
+    this.errs = new LinkedHashSet<>();
   }
 
   /**

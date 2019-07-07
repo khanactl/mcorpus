@@ -51,42 +51,20 @@ public class VldtnErr {
   public String getFieldName() { return fname; }
 
   /**
-   * The parent entity {@link Class} ref to convey the entity type in error
+   * The parent entity type name of the field in error.
    */
-  public String etype() { return etype; }
+  public String getParentType() { return etype; }
 
   /**
-   * @return A presentation-worthy validation error message conveying all relevant
-   *         aspects of the error.
-   *         <p>
-   *         Possible display formats: 
-   * <pre>
-   * etype.fname: vmsg
-   * fname: vmsg
-   * fname
-   * vmsg
-   * </pre>
+   * @return [{parent type}.]{field name} never null.
    */
-  public String formalErrMsg() {
+  public String getFieldPath() { 
     final boolean hasEType = isNotNullOrEmpty(etype);
     final boolean hasField = isNotNullOrEmpty(fname);
-    final boolean hasVmsg = isNotNullOrEmpty(vmsg);
-    final boolean hasAll = hasEType && hasField && hasVmsg;
-
-    if(hasAll) {
-      return String.format("%s.%s: %s", etype, fname, vmsg);
-    }
-    else if(hasField && hasVmsg) {
-      return String.format("%s: %s", fname, vmsg);
-    }
-    else if(hasField) {
-      return String.format("%s", fname);
-    }
-    else if(hasVmsg) {
-      return String.format("%s", vmsg);
-    }
-
-    // default
+    if(hasEType && hasField) 
+      return String.format("%s.%s", etype, fname);
+    else if(hasField) 
+      return fname;
     return "";
   }
 

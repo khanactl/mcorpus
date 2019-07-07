@@ -5,7 +5,9 @@ import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.validate.VldtnErr.verr;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Houses the results of a validation check on a target entity object.
@@ -64,6 +66,16 @@ public class VldtnResult {
    */
   public String getSummaryMsg() {
     return String.format("%d validation errors.", getNumErrors());
+  }
+
+  /**
+   * @return map of field validation messages keyed by 
+   *         {@link VldtnErr#getFieldPath}.
+   */
+  public Map<String, String> getMappedFieldErrors() {
+    return errors.stream().collect(Collectors.toMap(
+            ve -> ve.getFieldPath(), 
+            ve -> ve.getVldtnErrMsg()) );
   }
 
   @Override

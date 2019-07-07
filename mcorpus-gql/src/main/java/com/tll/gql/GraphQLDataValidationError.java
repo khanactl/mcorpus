@@ -2,9 +2,8 @@ package com.tll.gql;
 
 import static com.tll.core.Util.isNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.tll.validate.VldtnResult;
 
@@ -24,11 +23,11 @@ public class GraphQLDataValidationError extends GraphQLDataFetchError {
     return new GraphQLDataValidationError(
       (isNull(epath) ? ExecutionPath.rootPath() : epath).toString(), 
       vrslt.getSummaryMsg(),
-      vrslt.getErrors().stream().map(ve -> ve.formalErrMsg()).collect(Collectors.toList())
+      vrslt.getMappedFieldErrors()
     );
   }
 
-  private final List<String> verrs;
+  private final Map<String, String> verrs;
 
   /**
    * Constructor
@@ -37,10 +36,10 @@ public class GraphQLDataValidationError extends GraphQLDataFetchError {
    * @param emsg the error message
    * @param verrs the validation errors
    */
-  private GraphQLDataValidationError(String epath, String emsg, List<String> verrs) {
+  private GraphQLDataValidationError(String epath, String emsg, Map<String, String> verrs) {
     super(epath, emsg);
-    this.verrs = new ArrayList<>(verrs);
+    this.verrs = new HashMap<>(verrs);
   }
 
-  public List<String> getValidationErrors() { return verrs; }
+  public Map<String, String> getValidationErrors() { return verrs; }
 }
