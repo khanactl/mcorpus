@@ -114,7 +114,6 @@ public class ValidatorTest {
     assertNotNull(verr);
     assertEquals("TestEntity", verr.etype());
     assertEquals("name", verr.getFieldName());
-    assertEquals(name, verr.getFieldValue());
     assertEquals("Invalid test Name.", verr.getVldtnErrMsg());
 
     log.info(verr);

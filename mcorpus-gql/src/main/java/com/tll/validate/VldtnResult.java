@@ -1,12 +1,11 @@
 package com.tll.validate;
 
-import static com.tll.validate.VldtnErr.verr;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.validate.VldtnErr.verr;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Houses the results of a validation check on a target entity object.
@@ -61,17 +60,10 @@ public class VldtnResult {
   public int getNumErrors() { return errors.size(); }
 
   /**
-   * A presentation-worthy validation error message conveying 
-   * all validation errors separated by the given delimeter.
-   * 
-   * @param delim the delimiter token to use to separate individual validation errors
-   * @return the assembled error message containing all contained validaiton errors.
+   * @return A presentation-worthy validation summary message.
    */
-  public String formalErrMsgs(final String delim) {
-    return errors.stream()
-      .map(ve -> ve.formalErrMsg())
-      .collect(Collectors.joining(delim))
-      .toString();
+  public String getSummaryMsg() {
+    return String.format("%d validation errors.", getNumErrors());
   }
 
   @Override

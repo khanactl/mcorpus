@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tll.validate.VldtnResult;
 
 import graphql.ErrorClassification;
 import graphql.ErrorType;
@@ -38,10 +37,6 @@ public class GraphQLDataFetchError implements GraphQLError {
     return inst(epath, exception.getMessage());
   }
 
-  public static GraphQLDataFetchError inst(final ExecutionPath epath, VldtnResult vrslt, final String delim) {
-    return inst(epath, vrslt.formalErrMsgs(delim));
-  }
-
   private final String epath;
   private final String emsg;
 
@@ -51,7 +46,7 @@ public class GraphQLDataFetchError implements GraphQLError {
    * @param epath the graphql execution path associated with the error(s)
    * @param emsg the error message
    */
-  private GraphQLDataFetchError(String epath, String emsg) {
+  protected GraphQLDataFetchError(String epath, String emsg) {
     this.epath = epath;
     this.emsg = emsg;
   }
