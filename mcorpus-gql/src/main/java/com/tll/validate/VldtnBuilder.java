@@ -62,7 +62,7 @@ public class VldtnBuilder<E> {
   public <T> VldtnBuilder<E> vrqd(Predicate<T> p, Function<E, T> fval, String vmk, String fname) {
     final T fv = fval.apply(entity);
     if(!p.test(fv)) {
-      vaddErr(vmk, fname, fv);
+      vaddErr(vmk, fname);
     }
     return this;
   }
@@ -82,7 +82,7 @@ public class VldtnBuilder<E> {
   public <T> VldtnBuilder<E> vopt(Predicate<T> p, Function<E, T> fval, String vmk, String fname) {
     final T fv = fval.apply(entity);
     if(isNotNull(fv) && !p.test(fv)) {
-      vaddErr(vmk, fname, fv);
+      vaddErr(vmk, fname);
     }
     return this;
   }
@@ -102,7 +102,7 @@ public class VldtnBuilder<E> {
   public VldtnBuilder<E> vtok(Predicate<String> p, Function<E, String> fval, String vmk, String fname) {
     final String fv = fval.apply(entity);
     if(isNotNullOrEmpty(fv) && !p.test(fv)) {
-      vaddErr(vmk, fname, fv);
+      vaddErr(vmk, fname);
     }
     return this;
   }
@@ -121,7 +121,7 @@ public class VldtnBuilder<E> {
     if(Boolean.TRUE.equals(c.get())) {
       final T fv = fval.apply(entity);
       if(isNotNull(fv) && !p.test(fv)) {
-        vaddErr(vmk, fname, fv);
+        vaddErr(vmk, fname);
       }
     }
     return this;
@@ -145,10 +145,9 @@ public class VldtnBuilder<E> {
    * 
    * @param vmk the required validation message key
    * @param fname the optional name of the field in error
-   * @param fval the optional value of the field in error
    */
-  protected <T> void vaddErr(String vmk, String fname, T fval) {
+  protected <T> void vaddErr(String vmk, String fname) {
     final String vmsg = vmsgBundle.getString(vmk);
-    errs.add(verr(vmsg, fname, fval, entityTypeName));
+    errs.add(verr(vmsg, fname, entityTypeName));
   }
 }

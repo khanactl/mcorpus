@@ -1,8 +1,6 @@
 package com.tll.validate;
 
-import static com.tll.core.Util.asString;
 import static com.tll.core.Util.clean;
-import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNotNullOrEmpty;
 
 /**
@@ -13,24 +11,19 @@ import static com.tll.core.Util.isNotNullOrEmpty;
 public class VldtnErr {
 
   public static VldtnErr verr(String vmsg) {
-    return verr(vmsg, null, null, null);
+    return verr(vmsg, null, null);
   }
 
   public static VldtnErr verr(String vmsg, String fname) {
-    return verr(vmsg, fname, null, null);
+    return verr(vmsg, fname, null);
   }
 
-  public static VldtnErr verr(String vmsg, String fname, Object fval) {
-    return verr(vmsg, fname, fval, null);
-  }
-
-  public static VldtnErr verr(String vmsg, String fname, Object fval, String etype) {
-    return new VldtnErr(vmsg, fname, fval, etype);
+  public static VldtnErr verr(String vmsg, String fname, String etype) {
+    return new VldtnErr(vmsg, fname, etype);
   }
 
   private final String vmsg;
   private final String fname;
-  private final Object fval;
   private final String etype;
 
   /**
@@ -41,10 +34,9 @@ public class VldtnErr {
    * @param fval optional field value
    * @param etype optional parent entity type
    */
-  private VldtnErr(final String vmsg, final String fname, final Object fval, final String etype) {
+  private VldtnErr(final String vmsg, final String fname, final String etype) {
     this.vmsg = clean(vmsg);
     this.fname = clean(fname);
-    this.fval = fval;
     this.etype = clean(etype);
   }
 
@@ -59,11 +51,6 @@ public class VldtnErr {
   public String getFieldName() { return fname; }
 
   /**
-   * @return the entity field value in error which may be null.
-   */
-  public Object getFieldValue() { return fval; }
-
-  /**
    * The parent entity {@link Class} ref to convey the entity type in error
    */
   public String etype() { return etype; }
@@ -74,31 +61,26 @@ public class VldtnErr {
    *         <p>
    *         Possible display formats: 
    * <pre>
-   * etype.fname(fval): vmsg
-   * fname(fval): vmsg
-   * fname(fval)
-   * vmsg (fval)
+   * etype.fname: vmsg
+   * fname: vmsg
+   * fname
    * vmsg
    * </pre>
    */
   public String formalErrMsg() {
     final boolean hasEType = isNotNullOrEmpty(etype);
-    final boolean hasFieldValue = isNotNull(fval);
-    final boolean hasFieldAndValue = isNotNullOrEmpty(fname) && hasFieldValue;
+    final boolean hasField = isNotNullOrEmpty(fname);
     final boolean hasVmsg = isNotNullOrEmpty(vmsg);
-    final boolean hasAll = hasEType && hasFieldAndValue && hasVmsg;
+    final boolean hasAll = hasEType && hasField && hasVmsg;
 
     if(hasAll) {
-      return String.format("%s.%s(%s): %s", etype, fname, fval, vmsg);
+      return String.format("%s.%s: %s", etype, fname, vmsg);
     }
-    else if(hasFieldAndValue && hasVmsg) {
-      return String.format("%s(%s): %s", fname, fval, vmsg);
+    else if(hasField && hasVmsg) {
+      return String.format("%s: %s", fname, vmsg);
     }
-    else if(hasFieldAndValue) {
-      return String.format("%s(%s)", fname, fval);
-    }
-    else if(hasVmsg && hasFieldValue) {
-      return String.format("%s (%s)", vmsg, fval);
+    else if(hasField) {
+      return String.format("%s", fname);
     }
     else if(hasVmsg) {
       return String.format("%s", vmsg);
@@ -110,7 +92,7 @@ public class VldtnErr {
 
   @Override
   public String toString() {
-    return String.format("VldtnErr[vmsg: %s, fname: %s, fval: '%s', etype: %s]", 
-      vmsg, fname, asString(fval), etype == null ? "null" : etype );
+    return String.format("VldtnErr[vmsg: %s, fname: %s, etype: %s]", 
+      vmsg, fname, etype == null ? "null" : etype );
   }
 }
