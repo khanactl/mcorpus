@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,33 +33,48 @@ public class ValidatorTest {
     ACTIVE, INACTIVE;
   }
 
-  static class TestEntity extends BaseEntity<TestEntity, IKey> {
+  static class NestedEntity extends BaseEntity<TestEntity, IKey> {
     private final IKey pk;
-    private final UUID id;
+    private final String nprop;
+
+    public NestedEntity(String nprop) {
+      this.pk = IKey.uuid("NestedEntity", UUID.randomUUID());
+      this.nprop = nprop;
+    }
+
+    @Override
+    public IKey getPk() { return pk; }
+
+    public String getNProp() { return nprop; }
+  } // NestedEntity
+  static class TestEntity extends BaseEntity<TestEntity, IKey> {
+
+    private final IKey pk;
     private final Date created;
     private final String name;
     private final String email;
     private final String username;
     private final String status;
+    private final NestedEntity nentity;
 
-    public TestEntity(UUID id, String name, String email, String username, String status) {
-      this.pk = IKey.uuid("TestEntity", id);
-      this.id = id;
+    public TestEntity(String name, String email, String username, String status, String nprop) {
+      this.pk = IKey.uuid("TestEntity", UUID.randomUUID());
       this.created = new Date();
       this.name = name;
       this.email = email;
       this.username = username;
       this.status = status;
+      this.nentity = new NestedEntity(nprop);
     }
 
     @Override
     public IKey getPk() { return pk; }
-    public UUID getId() { return id; }
     public Date getCreated() { return created; }
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
     public String getStatus() { return status; }
+    public NestedEntity getNEntity() { return nentity; }
   } // TestEntity
   
   static class TestValidator extends BaseValidator<TestEntity> {
@@ -79,6 +95,14 @@ public class ValidatorTest {
         .vrqd(VldtnCore::emailValid, TestEntity::getEmail, "test.email.emsg", "email")
         .vrqd(VldtnCore::usernameValid, TestEntity::getUsername, "test.username.emsg", "username")
         .vrqd(TestValidator::statusValid, TestEntity::getStatus, "test.status.emsg", "status")
+        
+        // nested entity validation example
+        .vrqd(TestEntity::getNEntity, "test.nentity.notPresent.emsg", "nested")
+        .vrqd(
+          ne -> lenchk(ne.getNProp(), 2), 
+          TestEntity::getNEntity,
+          "test.nentity.nprop.emsg", "nested.nprop"
+        )
       ;
     }
   
@@ -103,18 +127,27 @@ public class ValidatorTest {
     String email = "testentity@myfrigginmail.com";
     String username = "testuser";
     String status = "ACTIVE";
-    TestEntity e = new TestEntity(UUID.randomUUID(), name, email, username, status);
+    String nprop = "1234";
+    TestEntity e = new TestEntity(name, email, username, status, nprop);
     
     TestValidator validator = new TestValidator();
     VldtnResult vresult = validator.validate(e);
     Set<VldtnErr> verrs = vresult.getErrors();
-    verify(vresult, false, 1);
+    verify(vresult, false, 2);
+
+    Iterator<VldtnErr> veitr = verrs.iterator();
     
-    VldtnErr verr = verrs.iterator().next();
+    VldtnErr verr = veitr.next();
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("name", verr.getFieldName());
     assertEquals("Invalid test Name.", verr.getVldtnErrMsg());
+
+    verr = veitr.next();
+    assertNotNull(verr);
+    assertEquals("TestEntity", verr.getParentType());
+    assertEquals("nested.nprop", verr.getFieldName());
+    assertEquals("Invalid nested entity property value.", verr.getVldtnErrMsg());
 
     log.info(verr);
   }
