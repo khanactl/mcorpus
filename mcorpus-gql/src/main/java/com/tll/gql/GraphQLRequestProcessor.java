@@ -139,7 +139,7 @@ public class GraphQLRequestProcessor {
       }
     } catch(Exception e) {
       // mutation processing error
-      log.error("Mutation (extract, validate, transform persist, transform) processing error: {}", e.getMessage());
+      log.error("Mutation (extract, validate, transform, persist, transform) processing error: {}", e.getMessage());
       return dfr(env, e);
     }
   }
