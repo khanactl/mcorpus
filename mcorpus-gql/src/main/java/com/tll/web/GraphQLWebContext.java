@@ -56,6 +56,11 @@ public class GraphQLWebContext {
   private static final Pattern gqlFirstMethodName = 
     Pattern.compile("^(mutation|query)*.*?\\{\\s?(\\w+).*\\}");
 
+  private static final Pattern regxWSBR = Pattern.compile("\\s+");
+  
+  private static final Pattern regxNLMU = Pattern.compile("\\\\n");
+  
+  
   protected final Logger log = LoggerFactory.getLogger(getClass());
 
   protected final String query;
@@ -74,9 +79,14 @@ public class GraphQLWebContext {
   public GraphQLWebContext(String query, Map<String, Object> vmap) {
     super();
     
-    // clean query: trim, replace all literal '\n' with space then replace all whitespace blocks with single space
-    String queryCleaned = clean(query).replaceAll("\\\\n", " ").replaceAll("\\s+", " ");
-    
+    // clean query: 
+    //   trim, 
+    //   replace all literal '\n' with space 
+    //   then replace all whitespace blocks with single space
+    String queryCleaned = 
+      // clean(query).replaceAll("\\\\n", " ").replaceAll("\\s+", " ");
+      regxWSBR.matcher( regxNLMU.matcher(clean(query)).replaceAll(" ") ).replaceAll(" ");
+
     Matcher matcher;
     
     matcher = gqlType.matcher(queryCleaned);
@@ -171,11 +181,11 @@ public class GraphQLWebContext {
   @Override
   public String toString() {
     // FORMAT: type [opName] firstMethodName (id)
-    return String.format("%s %s %s (%s)", 
+    return regxWSBR.matcher(String.format("%s %s %s (%s)", 
       isNotNullOrEmpty(qtype) ? qtype : "query", 
       isNotNullOrEmpty(opName) ? opName : "", 
       firstMethodName,
       executionId
-    ).replaceAll("\\s+", " ");
+    )).replaceAll(" ");
   }
 }
