@@ -15,6 +15,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.tll.validate.IValidator.VldtnOp;
+
 /**
  * The prescribed way to implmenent entity validation.
  * <p>
@@ -27,6 +29,7 @@ public class VldtnBuilder<E> {
 
   private final E entity;
   private final String entityTypeName;
+  private final VldtnOp vop;
 
   private final Set<VldtnErr> errs;
 
@@ -38,11 +41,13 @@ public class VldtnBuilder<E> {
    * @param vldtnBundleName the ROOT name of the validation messages property file (resource bundle root name)
    * @param entity the entity instance to be validated
    * @param entityTypeName the name of the entity type
+   * @param vop the validation op
    */
-  public VldtnBuilder(final String vldtnBundleName, final E entity, String entityTypeName) {
+  public VldtnBuilder(final String vldtnBundleName, final E entity, String entityTypeName, VldtnOp vop) {
     this.vmsgBundle = ResourceBundle.getBundle(vldtnBundleName);
     this.entity = entity;
     this.entityTypeName = entityTypeName;
+    this.vop = vop;
     this.errs = new LinkedHashSet<>();
   }
 
@@ -173,8 +178,21 @@ public class VldtnBuilder<E> {
   ) {
     final NE nested = fval.apply(entity);
     if(isNotNull(nested)) {
-      VldtnResult vnr = nvalidator.validate(nested);
+      final VldtnResult vnr;
+      switch(vop) {
+      default:
+      case INPUT:
+        vnr = nvalidator.validate(nested);
+        break;
+      case ADD:
+        vnr = nvalidator.validateForAdd(nested);
+        break;
+      case UPDATE:
+        vnr = nvalidator.validateForUpdate(nested);
+        break;
+      }
       if(vnr.hasErrors()) {
+        // transform the validation errors to prepend the parent path
         errs.addAll(
           vnr.getErrors().stream().map(ve -> verr(
             ve.getVldtnErrMsg(), 

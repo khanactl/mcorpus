@@ -18,17 +18,17 @@ public abstract class BaseValidator<T> implements IValidator<T> {
 
   @Override
   public final VldtnResult validate(final T e) {
-    return validate(e, this::validate);
+    return validate(e, this::validate, VldtnOp.INPUT);
   }
 
   @Override
   public final VldtnResult validateForAdd(final T e) {
-    return validate(e, this::validateForAdd);
+    return validate(e, this::validateForAdd, VldtnOp.ADD);
   }
 
   @Override
   public final VldtnResult validateForUpdate(final T e) {
-    return validate(e, this::validateForUpdate);
+    return validate(e, this::validateForUpdate, VldtnOp.UPDATE);
   }
 
   /**
@@ -77,13 +77,14 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    * 
    * @param e the target object to be validated
    * @param vfunc the validation method to call to perform the validation
+   * @param vop the explicit validation op (needed for nested object(s) validation case)
    * @return Newly created {@link VldtnResult} instance conveying the validation results.
    */
-  protected VldtnResult validate(final T e, final Consumer<VldtnBuilder<T>> vfunc) {
+  protected VldtnResult validate(final T e, final Consumer<VldtnBuilder<T>> vfunc, final VldtnOp vop) {
     try {
-      final VldtnBuilder<T> vldtn = new VldtnBuilder<>(getValidationMsgsRootName(), e, getEntityTypeName());
-      vfunc.accept(vldtn); // do validation
-      return new VldtnResult(vldtn.getErrors());
+      final VldtnBuilder<T> vbldr = new VldtnBuilder<>(getValidationMsgsRootName(), e, getEntityTypeName(), vop);
+      vfunc.accept(vbldr); // do validation
+      return new VldtnResult(vbldr.getErrors());
     } catch(Exception ex) {
       final String vmsg = String.format("Validation processing error ('%s').", ex.getMessage());
       return new VldtnResult(vmsg);

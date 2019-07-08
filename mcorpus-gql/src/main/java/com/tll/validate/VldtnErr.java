@@ -22,6 +22,9 @@ public class VldtnErr {
     return verr(vmsg, fname, etype, null);
   }
 
+  /**
+   * Nested level case - specify the parent path.
+   */
   public static VldtnErr verr(String vmsg, String fname, String etype, String ppath) {
     return new VldtnErr(vmsg, fname, etype, ppath);
   }
