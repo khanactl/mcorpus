@@ -18,7 +18,7 @@ import com.tll.validate.VldtnCore;
 public class MemberValidator extends BaseMcorpusValidator<Member> {
 
   @Override
-  protected String getEntityTypeName() { return "Member"; }
+  public String getEntityTypeName() { return "Member"; }
   
   @Override
   protected void validateForAdd(final VldtnBuilder<Member> vldtn) {

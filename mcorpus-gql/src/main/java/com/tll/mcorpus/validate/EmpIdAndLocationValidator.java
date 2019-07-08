@@ -7,7 +7,7 @@ import com.tll.validate.VldtnBuilder;
 public class EmpIdAndLocationValidator extends BaseMcorpusValidator<EmpIdAndLocationKey> {
 
   @Override
-  protected String getEntityTypeName() { return "EmpIdAndLocation"; }
+  public String getEntityTypeName() { return "EmpIdAndLocation"; }
   
   @Override
   protected void validate(final VldtnBuilder<EmpIdAndLocationKey> vldtn) {

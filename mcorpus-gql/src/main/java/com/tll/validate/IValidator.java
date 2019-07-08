@@ -10,6 +10,13 @@ package com.tll.validate;
 public interface IValidator<T> {
 
   /**
+   * @return The presentation-worthy name of the entity type being validated.
+   *         <p>
+   *         This name is used, if present, when constructing validation error messages.
+   */
+  String getEntityTypeName();
+  
+  /**
    * Validate an entity or supporting object type 
    * for a backend fetch/query operation 
    * or as a way to validate a required input argument for a backend operation.

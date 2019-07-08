@@ -16,13 +16,6 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    */
   protected abstract String getValidationMsgsRootName();
 
-  /**
-   * @return The presentation-worthy name of the entity type being validated.
-   *         <p>
-   *         This name is used, if present, when constructing validation error messages.
-   */
-  protected abstract String getEntityTypeName();
-  
   @Override
   public final VldtnResult validate(final T e) {
     return validate(e, this::validate);
