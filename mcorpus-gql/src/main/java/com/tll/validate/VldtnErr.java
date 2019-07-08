@@ -19,12 +19,17 @@ public class VldtnErr {
   }
 
   public static VldtnErr verr(String vmsg, String fname, String etype) {
-    return new VldtnErr(vmsg, fname, etype);
+    return verr(vmsg, fname, etype, null);
+  }
+
+  public static VldtnErr verr(String vmsg, String fname, String etype, String ppath) {
+    return new VldtnErr(vmsg, fname, etype, ppath);
   }
 
   private final String vmsg;
   private final String fname;
   private final String etype;
+  private final String ppath;
 
   /**
    * Constructor.
@@ -33,11 +38,13 @@ public class VldtnErr {
    * @param fname the name of the invalid entity field
    * @param fval optional field value
    * @param etype optional parent entity type
+   * @param ppath optional parent path
    */
-  private VldtnErr(final String vmsg, final String fname, final String etype) {
+  private VldtnErr(final String vmsg, final String fname, final String etype, final String ppath) {
     this.vmsg = clean(vmsg);
     this.fname = clean(fname);
     this.etype = clean(etype);
+    this.ppath = clean(ppath);
   }
 
   /**
@@ -56,13 +63,24 @@ public class VldtnErr {
   public String getParentType() { return etype; }
 
   /**
-   * @return [{parent type}.]{field name} never null.
+   * @return the parent path.
+   * <p>
+   * Root-level entity validation implies an empty parent path 
+   * whereas nested entity validation implies a non-empty parent path.
+   */
+  public String getParentPath() { return ppath; }
+
+  /**
+   * @return the full <em>property path</em> identifying the field in error 
+   *         relative to the root entity under validation.
+   *         <p>
+   *         [{ppath}.]{fname} never null.
    */
   public String getFieldPath() { 
-    final boolean hasEType = isNotNullOrEmpty(etype);
+    final boolean hasPPath = isNotNullOrEmpty(ppath);
     final boolean hasField = isNotNullOrEmpty(fname);
-    if(hasEType && hasField) 
-      return String.format("%s.%s", etype, fname);
+    if(hasPPath && hasField) 
+      return String.format("%s.%s", ppath, fname);
     else if(hasField) 
       return fname;
     return "";
@@ -70,7 +88,6 @@ public class VldtnErr {
 
   @Override
   public String toString() {
-    return String.format("VldtnErr[vmsg: %s, fname: %s, etype: %s]", 
-      vmsg, fname, etype == null ? "null" : etype );
+    return String.format("VldtnErr[vmsg: %s, fname: %s, etype: %s, ppath: %s]",  vmsg, fname, etype, ppath);
   }
 }

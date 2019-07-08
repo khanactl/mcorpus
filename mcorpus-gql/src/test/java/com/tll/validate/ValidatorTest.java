@@ -76,11 +76,31 @@ public class ValidatorTest {
     public String getStatus() { return status; }
     public NestedEntity getNEntity() { return nentity; }
   } // TestEntity
+
+  static class NestedValidator extends BaseValidator<NestedEntity> {
+    
+    @Override
+    public String getEntityTypeName() {
+      return "TestEntity";
+    }
+
+    @Override
+    protected String getValidationMsgsRootName() {
+      return "validate-test";
+    }
+
+    protected void validate(final VldtnBuilder<NestedEntity> vldtn) {
+      vldtn
+        .vtok(nprop -> lenchk(nprop, 2), NestedEntity::getNProp, "nested.nprop.emsg", "nprop")
+      ;
+    }
+
+  }
   
   static class TestValidator extends BaseValidator<TestEntity> {
 
     @Override
-    protected String getEntityTypeName() {
+    public String getEntityTypeName() {
       return "TestEntity";
     }
 
@@ -95,13 +115,13 @@ public class ValidatorTest {
         .vrqd(VldtnCore::emailValid, TestEntity::getEmail, "test.email.emsg", "email")
         .vrqd(VldtnCore::usernameValid, TestEntity::getUsername, "test.username.emsg", "username")
         .vrqd(TestValidator::statusValid, TestEntity::getStatus, "test.status.emsg", "status")
+        .vrqd(TestEntity::getNEntity, "test.nentity.notPresent.emsg", "nested")
         
         // nested entity validation example
-        .vrqd(TestEntity::getNEntity, "test.nentity.notPresent.emsg", "nested")
-        .vrqd(
-          ne -> lenchk(ne.getNProp(), 2), 
+        .vnested(
           TestEntity::getNEntity,
-          "test.nentity.nprop.emsg", "nested.nprop"
+          "nentity", 
+          new NestedValidator()
         )
       ;
     }
@@ -141,12 +161,14 @@ public class ValidatorTest {
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("name", verr.getFieldName());
+    assertEquals("name", verr.getFieldPath());
     assertEquals("Invalid test Name.", verr.getVldtnErrMsg());
 
     verr = veitr.next();
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
-    assertEquals("nested.nprop", verr.getFieldName());
+    assertEquals("nprop", verr.getFieldName());
+    assertEquals("nentity.nprop", verr.getFieldPath());
     assertEquals("Invalid nested entity property value.", verr.getVldtnErrMsg());
 
     log.info(verr);

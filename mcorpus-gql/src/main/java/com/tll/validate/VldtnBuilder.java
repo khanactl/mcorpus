@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * The prescribed way to implmenent entity validation.
@@ -153,6 +154,35 @@ public class VldtnBuilder<E> {
       final T fv = fval.apply(entity);
       if(isNotNull(fv) && not(vchk.test(fv))) {
         vaddErr(vmk, fname);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Validate a nested entity.
+   * 
+   * @param fval the entity accessor method providing the nested entity instance to validate
+   * @param fname the nested entity field name used when the validation fails
+   * @param nvalidator the nested entity validator that is invoked when the nested entity is non-null.
+   */
+  public <NE> VldtnBuilder<E> vnested(
+    Function<E, NE> fval, 
+    String fname, 
+    IValidator<NE> nvalidator
+  ) {
+    final NE nested = fval.apply(entity);
+    if(isNotNull(nested)) {
+      VldtnResult vnr = nvalidator.validate(nested);
+      if(vnr.hasErrors()) {
+        errs.addAll(
+          vnr.getErrors().stream().map(ve -> verr(
+            ve.getVldtnErrMsg(), 
+            ve.getFieldName(), 
+            nvalidator.getEntityTypeName(), 
+            fname
+          )).collect(Collectors.toSet())
+        );
       }
     }
     return this;

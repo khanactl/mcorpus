@@ -2,6 +2,7 @@ package com.tll.validate;
 
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 import static com.tll.validate.VldtnErr.verr;
 
 import java.util.Collections;
@@ -52,6 +53,11 @@ public class VldtnResult {
   public boolean isValid() { return errors.isEmpty(); }
 
   /**
+   * @return true when at least one error exists, false otherwise.
+   */
+  public boolean hasErrors() { return not(errors.isEmpty()); }
+
+  /**
    * @return Never-null set of errors which may be empty.
    */
   public Set<VldtnErr> getErrors() { return errors; }
@@ -69,8 +75,7 @@ public class VldtnResult {
   }
 
   /**
-   * @return map of field validation messages keyed by 
-   *         {@link VldtnErr#getFieldPath}.
+   * @return map of field validation messages keyed by {@link VldtnErr#getFieldPath}.
    */
   public Map<String, String> getMappedFieldErrors() {
     return errors.stream().collect(Collectors.toMap(
