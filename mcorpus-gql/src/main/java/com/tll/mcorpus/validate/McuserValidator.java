@@ -18,8 +18,8 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
   public String getEntityTypeName() { return "Member"; }
   
   @Override
-  protected void validateForAdd(final VldtnBuilder<Mcuser> vldtn) {
-    vldtn
+  protected void doValidateForAdd(final VldtnBuilder<Mcuser> vbldr) {
+    vbldr
       .vrqd(McuserValidator::mcuserNameValid, Mcuser::getName, "mcuser.name.emsg", "name")
       .vrqd(VldtnCore::emailValid, Mcuser::getEmail, "mcuser.email.emsg", "email")
       .vrqd(VldtnCore::usernameValid, Mcuser::getUsername, "mcuser.username.emsg", "username")
@@ -29,8 +29,8 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
   }
 
   @Override
-  protected void validateForUpdate(final VldtnBuilder<Mcuser> vldtn) {
-    vldtn
+  protected void doValidateForUpdate(final VldtnBuilder<Mcuser> vbldr) {
+    vbldr
       // require pk
       .vrqd(t -> t.isSet(), Mcuser::getPk, "mcuser.nopk.emsg", "pk")
       
@@ -41,6 +41,21 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
     ;
   }
 
+  @Override
+  protected boolean hasAnyUpdatableFields(Mcuser e) {
+    return 
+      isNotBlank(e.getName()) && 
+      isNotBlank(e.getEmail()) && 
+      isNotBlank(e.getUsername()) && 
+      isNotNull(e.getStatus()) 
+      ;
+  }
+
+  @Override
+  protected String getVmkForNoUpdateFieldsPresent() {
+    return "mcuser.noupdatefields.emsg";
+  }
+  
   public static boolean mcuserNameValid(final String name) {
     return isNotBlank(name) && lenchk(name, 64) && namePattern.matcher(name).matches();
   }
@@ -55,5 +70,5 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
     } catch(Exception e) {
       return null;
     }
-  }  
+  }
 }

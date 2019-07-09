@@ -79,7 +79,27 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
 
   @Override
   public Member fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
-    return fromNotEmptyGraphQLMapForAdd(gqlMap);
+    return new Member(
+      uuidFromToken(fval("mid", gqlMap)),
+      fval("created", gqlMap),
+      fval("modified", gqlMap),
+      fval("empId", gqlMap),
+      fval("location", gqlMap),
+      fval("nameFirst", gqlMap),
+      fval("nameMiddle", gqlMap),
+      fval("nameLast", gqlMap),
+      fval("displayName", gqlMap),
+      fval("status", gqlMap),
+      fval("dob", gqlMap),
+      fval("ssn", gqlMap),
+      fval("personalEmail", gqlMap),
+      fval("workEmail", gqlMap),
+      fval("mobilePhone", gqlMap),
+      fval("homePhone", gqlMap),
+      fval("workPhone", gqlMap),
+      fval("username", gqlMap),
+      fval("pswd", gqlMap)
+    );
   }
 
   @Override

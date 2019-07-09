@@ -10,11 +10,16 @@ public class EmpIdAndLocationValidator extends BaseMcorpusValidator<EmpIdAndLoca
   public String getEntityTypeName() { return "EmpIdAndLocation"; }
   
   @Override
-  protected void validate(final VldtnBuilder<EmpIdAndLocationKey> vldtn) {
+  protected void doValidate(final VldtnBuilder<EmpIdAndLocationKey> vldtn) {
     vldtn
       .vtok(MemberValidator::empIdValid, EmpIdAndLocationKey::empId, "member.empId.emsg", "empId")
       .vtok(MemberValidator::locationValid, EmpIdAndLocationKey::location, "member.location.emsg", "location")
     ;
   }
 
+  @Override
+  protected boolean hasAnyUpdatableFields(EmpIdAndLocationKey e) { return false; }
+
+  @Override
+  protected String getVmkForNoUpdateFieldsPresent() { return null; }
 }

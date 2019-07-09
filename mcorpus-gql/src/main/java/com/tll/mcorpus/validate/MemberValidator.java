@@ -2,6 +2,7 @@ package com.tll.mcorpus.validate;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
@@ -21,7 +22,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   public String getEntityTypeName() { return "Member"; }
   
   @Override
-  protected void validateForAdd(final VldtnBuilder<Member> vldtn) {
+  protected void doValidateForAdd(final VldtnBuilder<Member> vldtn) {
     vldtn
       // member
       .vrqd(MemberValidator::empIdValid, Member::getEmpId, "member.empId.emsg", "empId")
@@ -44,7 +45,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   }
 
   @Override
-  protected void validateForUpdate(final VldtnBuilder<Member> vldtn) {
+  protected void doValidateForUpdate(final VldtnBuilder<Member> vldtn) {
     vldtn
       // require pk
       .vrqd(t -> t.isSet(), Member::getPk, "member.nopk.emsg", "pk")
@@ -69,6 +70,32 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
     ;
   }
 
+  @Override
+  protected boolean hasAnyUpdatableFields(Member e) {
+    return 
+      // member
+      isNotBlank(e.getEmpId()) && 
+      isNotBlank(e.getLocation()) && 
+      isNotBlank(e.getNameFirst()) && 
+      isNotBlank(e.getNameMiddle()) && 
+      isNotBlank(e.getNameLast()) && 
+      // mauth
+      isNotNull(e.getDob()) && 
+      isNotBlank(e.getSsn()) && 
+      isNotBlank(e.getPersonalEmail()) && 
+      isNotBlank(e.getWorkEmail()) && 
+      isNotBlank(e.getMobilePhone()) && 
+      isNotBlank(e.getHomePhone()) && 
+      isNotBlank(e.getWorkPhone()) && 
+      isNotBlank(e.getUsername()) 
+      ;
+  }
+
+  @Override
+  protected String getVmkForNoUpdateFieldsPresent() {
+    return "member.noupdatefields.emsg";
+  }
+  
   /**
    * empIdPattern: RegEx for strict enforcement of member emp id format:
    *               <code>dd-ddddddd</code> where d is 0-9.

@@ -16,6 +16,23 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    */
   protected abstract String getValidationMsgsRootName();
 
+  /**
+   * Are there any updatable fields present?
+   * <p>
+   * This is used to assess whether or not we have at least one field to update to
+   * ensure we have a valid update operation to pass on.
+   * 
+   * @param e the entity under validation
+   * @return true if at least one updatable field value is present, false otherwise
+   */
+  protected abstract boolean hasAnyUpdatableFields(final T e);
+
+  /**
+   * @return the validation message key for the case of 
+   *         'no (non-pk) update fields present for updating'.
+   */
+  protected abstract String getVmkForNoUpdateFieldsPresent();
+
   @Override
   public final VldtnResult validate(final T e) {
     return validate(e, this::validate, VldtnOp.INPUT);
@@ -31,6 +48,10 @@ public abstract class BaseValidator<T> implements IValidator<T> {
     return validate(e, this::validateForUpdate, VldtnOp.UPDATE);
   }
 
+  private void validate(final VldtnBuilder<T> vbldr) {
+    doValidate(vbldr);
+  }
+
   /**
    * Validate the given entity for a backend fetch/query op or 
    * as a way to validate an input argument type for a backend operation.
@@ -39,10 +60,14 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    * where the default behavior throws {@link UnsupportedOperationException}.
    * 
    * @param e the entity to validate
-   * @param vldtn the validation builder to use to validate
+   * @param vbldr the validation builder to use to validate
    */
-  protected void validate(final VldtnBuilder<T> vldtn) {
+  protected void doValidate(final VldtnBuilder<T> vbldr) {
     throw new UnsupportedOperationException();
+  }
+
+  private void validateForAdd(final VldtnBuilder<T> vbldr) {
+    doValidateForAdd(vbldr);
   }
 
   /**
@@ -51,10 +76,15 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    * Concrete sub-classes may elect to implment or not 
    * where the default behavior throws {@link UnsupportedOperationException}.
    
-   * @param vldtn the validation builder to use to validate
+   * @param vbldr the validation builder to use to validate
    */
-  protected void validateForAdd(final VldtnBuilder<T> vldtn) {
+  protected void doValidateForAdd(final VldtnBuilder<T> vbldr) {
     throw new UnsupportedOperationException();
+  }
+
+  private void validateForUpdate(final VldtnBuilder<T> vbldr) {
+    vbldr.vchk(e -> hasAnyUpdatableFields(e), getVmkForNoUpdateFieldsPresent());
+    if(vbldr.isValid()) doValidateForUpdate(vbldr); // only do update validation when a field is present
   }
 
   /**
@@ -63,9 +93,9 @@ public abstract class BaseValidator<T> implements IValidator<T> {
    * Concrete sub-classes may elect to implment or not 
    * where the default behavior throws {@link UnsupportedOperationException}.
    * 
-   * @param vldtn the validation builder to use to validate
+   * @param vbldr the validation builder to use to validate
    */
-  protected void validateForUpdate(final VldtnBuilder<T> vldtn) {
+  protected void doValidateForUpdate(final VldtnBuilder<T> vbldr) {
     throw new UnsupportedOperationException();
   }
   

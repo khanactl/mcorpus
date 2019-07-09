@@ -1,6 +1,7 @@
 package com.tll.mcorpus.validate;
 
 import static com.tll.core.Util.clean;
+import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
@@ -18,7 +19,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
   public String getEntityTypeName() { return "MemberAddress"; }
   
   @Override
-  protected void validateForAdd(final VldtnBuilder<MemberAddress> vldtn) {
+  protected void doValidateForAdd(final VldtnBuilder<MemberAddress> vldtn) {
     vldtn
       // require pk
       .vrqd(t -> t.isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
@@ -34,7 +35,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
   }
 
   @Override
-  protected void validateForUpdate(final VldtnBuilder<MemberAddress> vldtn) {
+  protected void doValidateForUpdate(final VldtnBuilder<MemberAddress> vldtn) {
     vldtn
       // require pk
       .vrqd(t -> t.isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
@@ -49,6 +50,24 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
     ;
   }
 
+  @Override
+  protected boolean hasAnyUpdatableFields(MemberAddress e) {
+    return 
+      isNotBlank(e.getAttn()) && 
+      isNotBlank(e.getStreet1()) && 
+      isNotBlank(e.getStreet2()) && 
+      isNotBlank(e.getCity()) && 
+      isNotNull(e.getState()) && 
+      isNotNull(e.getPostalCode()) && 
+      isNotNull(e.getCountry()) 
+      ;
+  }
+
+  @Override
+  protected String getVmkForNoUpdateFieldsPresent() {
+    return "maddress.noupdatefields.emsg";
+  }
+  
   /**
    * Verify an address name is specified.
    *

@@ -57,6 +57,20 @@ public class VldtnBuilder<E> {
   public E getTarget() { return entity; }
 
   /**
+   * Do an entity-level validation check.
+   * 
+   * @param vldtn the validation check
+   * @param vmk the associated validation message key used when the check fails
+   * @return this builder instance
+   */
+  public VldtnBuilder<E> vchk(Predicate<E> vldtn, String vmk) {
+    if(not(vldtn.test(entity))) {
+      vaddErr(vmk, null);
+    }
+    return this;
+  }
+
+  /**
    * Require a field be non-null.
    * 
    * @param fval the entity accessor method ref for the field under validation
@@ -212,12 +226,30 @@ public class VldtnBuilder<E> {
   public boolean isValid() { return errs.isEmpty(); }
 
   /**
+   * @return the current error count.
+   */
+  public int getNumErrors() { return errs.size(); }
+
+  /**
    * @return Never-null set of validation errors which may be empty.
    */
   public Set<VldtnErr> getErrors() { return errs; }
 
   /**
-   * Add a single error.
+   * Add a single entity-level error.
+   * <p>
+   * The held resource bundle is accessed to resolve the validation error message 
+   * from the given validation messaage key <code>vmk</code>.
+   * 
+   * @param vmk the required validation message key
+   */
+  protected <T> void vaddErr(String vmk) {
+    final String vmsg = vmsgBundle.getString(vmk);
+    errs.add(verr(vmsg, null, entityTypeName));
+  }
+
+  /**
+   * Add a single field-level error.
    * <p>
    * The held resource bundle is accessed to resolve the validation error message 
    * from the given validation messaage key <code>vmk</code>.

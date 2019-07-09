@@ -89,10 +89,26 @@ public class ValidatorTest {
       return "validate-test";
     }
 
-    protected void validate(final VldtnBuilder<NestedEntity> vldtn) {
+    @Override
+    protected void doValidate(final VldtnBuilder<NestedEntity> vldtn) {
       vldtn
         .vtok(nprop -> lenchk(nprop, 2), NestedEntity::getNProp, "nested.nprop.emsg", "nprop")
       ;
+    }
+
+    @Override
+    protected void doValidateForUpdate(final VldtnBuilder<NestedEntity> vldtn) {
+      doValidate(vldtn);
+    }
+
+    @Override
+    protected boolean hasAnyUpdatableFields(NestedEntity e) {
+      return isNotBlank(e.getNProp());
+    }
+
+    @Override
+    protected String getVmkForNoUpdateFieldsPresent() {
+      return "nested.noupdatefields.emsg";
     }
 
   }
@@ -109,7 +125,8 @@ public class ValidatorTest {
       return "validate-test";
     }
 
-    protected void validate(final VldtnBuilder<TestEntity> vldtn) {
+    @Override
+    protected void doValidate(final VldtnBuilder<TestEntity> vldtn) {
       vldtn
         .vtok(TestValidator::nameValid, TestEntity::getName, "test.name.emsg", "name")
         .vrqd(VldtnCore::emailValid, TestEntity::getEmail, "test.email.emsg", "email")
@@ -126,6 +143,27 @@ public class ValidatorTest {
       ;
     }
   
+    @Override
+    protected void doValidateForUpdate(final VldtnBuilder<TestEntity> vldtn) {
+      doValidate(vldtn);
+    }
+  
+    @Override
+    protected boolean hasAnyUpdatableFields(TestEntity e) {
+      return 
+        isNotBlank(e.getName()) && 
+        isNotBlank(e.getEmail()) && 
+        isNotBlank(e.getUsername()) && 
+        isNotBlank(e.getStatus()) && 
+        isNotNull(e.getNEntity())
+        ;
+    }
+
+    @Override
+    protected String getVmkForNoUpdateFieldsPresent() {
+      return "test.noupdatefields.emsg";
+    }
+
     static boolean nameValid(final String name) {
       return isNotBlank(name) && lenchk(name, 64) && namePattern.matcher(name).matches();
     }
@@ -141,7 +179,30 @@ public class ValidatorTest {
   } // TestValidator
 
   @Test
-  public void test() {
+  public void testAtLeastFieldOneForUpdate() {
+    
+    TestEntity e = new TestEntity(null, "  ", null, null, null);
+    
+    TestValidator validator = new TestValidator();
+    VldtnResult vresult = validator.validateForUpdate(e);
+    Set<VldtnErr> verrs = vresult.getErrors();
+    verify(vresult, false, 1);
+
+    Iterator<VldtnErr> veitr = verrs.iterator();
+    
+    VldtnErr verr = veitr.next();
+    log.info(verr);
+    
+    assertNotNull(verr);
+    assertEquals("TestEntity", verr.getParentType());
+    assertEquals("", verr.getFieldName());
+    assertEquals("", verr.getFieldPath());
+    assertEquals("No Test entity update fields provided.", verr.getVldtnErrMsg());
+
+  }
+
+  @Test
+  public void testValidate() {
     
     String name = "wwwwname-)000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$432";
     String email = "testentity@myfrigginmail.com";
@@ -158,20 +219,23 @@ public class ValidatorTest {
     Iterator<VldtnErr> veitr = verrs.iterator();
     
     VldtnErr verr = veitr.next();
+    log.info(verr);
+    
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("name", verr.getFieldName());
     assertEquals("name", verr.getFieldPath());
-    assertEquals("Invalid test Name.", verr.getVldtnErrMsg());
+    assertEquals("Invalid Test entity Name.", verr.getVldtnErrMsg());
 
     verr = veitr.next();
+    log.info(verr);
+    
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("nprop", verr.getFieldName());
     assertEquals("nentity.nprop", verr.getFieldPath());
     assertEquals("Invalid nested entity property value.", verr.getVldtnErrMsg());
 
-    log.info(verr);
   }
 
 }
