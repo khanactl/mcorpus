@@ -53,12 +53,12 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
   @Override
   protected boolean hasAnyUpdatableFields(MemberAddress e) {
     return 
-      isNotBlank(e.getAttn()) && 
-      isNotBlank(e.getStreet1()) && 
-      isNotBlank(e.getStreet2()) && 
-      isNotBlank(e.getCity()) && 
-      isNotNull(e.getState()) && 
-      isNotNull(e.getPostalCode()) && 
+      isNotBlank(e.getAttn()) || 
+      isNotBlank(e.getStreet1()) || 
+      isNotBlank(e.getStreet2()) || 
+      isNotBlank(e.getCity()) || 
+      isNotNull(e.getState()) || 
+      isNotNull(e.getPostalCode()) || 
       isNotNull(e.getCountry()) 
       ;
   }

@@ -74,19 +74,19 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   protected boolean hasAnyUpdatableFields(Member e) {
     return 
       // member
-      isNotBlank(e.getEmpId()) && 
-      isNotBlank(e.getLocation()) && 
-      isNotBlank(e.getNameFirst()) && 
-      isNotBlank(e.getNameMiddle()) && 
-      isNotBlank(e.getNameLast()) && 
+      isNotBlank(e.getEmpId()) ||
+      isNotBlank(e.getLocation()) ||
+      isNotBlank(e.getNameFirst()) || 
+      isNotBlank(e.getNameMiddle()) || 
+      isNotBlank(e.getNameLast()) ||
       // mauth
-      isNotNull(e.getDob()) && 
-      isNotBlank(e.getSsn()) && 
-      isNotBlank(e.getPersonalEmail()) && 
-      isNotBlank(e.getWorkEmail()) && 
-      isNotBlank(e.getMobilePhone()) && 
-      isNotBlank(e.getHomePhone()) && 
-      isNotBlank(e.getWorkPhone()) && 
+      isNotNull(e.getDob()) || 
+      isNotBlank(e.getSsn()) || 
+      isNotBlank(e.getPersonalEmail()) ||
+      isNotBlank(e.getWorkEmail()) || 
+      isNotBlank(e.getMobilePhone()) || 
+      isNotBlank(e.getHomePhone()) || 
+      isNotBlank(e.getWorkPhone()) || 
       isNotBlank(e.getUsername()) 
       ;
   }

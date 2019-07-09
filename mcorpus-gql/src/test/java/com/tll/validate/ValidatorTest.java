@@ -8,6 +8,7 @@ import static com.tll.validate.VldtnCore.lenchk;
 import static com.tll.validate.VldtnCore.namePattern;
 import static com.tll.validate.VldtnTestHelper.verify;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Date;
@@ -55,7 +56,7 @@ public class ValidatorTest {
     private final String email;
     private final String username;
     private final String status;
-    private final NestedEntity nentity;
+    public NestedEntity nentity;
 
     public TestEntity(String name, String email, String username, String status, String nprop) {
       this.pk = IKey.uuid("TestEntity", UUID.randomUUID());
@@ -128,13 +129,12 @@ public class ValidatorTest {
     @Override
     protected void doValidate(final VldtnBuilder<TestEntity> vldtn) {
       vldtn
-        .vtok(TestValidator::nameValid, TestEntity::getName, "test.name.emsg", "name")
+        .vrqd(TestValidator::nameValid, TestEntity::getName, "test.name.emsg", "name")
         .vrqd(VldtnCore::emailValid, TestEntity::getEmail, "test.email.emsg", "email")
         .vrqd(VldtnCore::usernameValid, TestEntity::getUsername, "test.username.emsg", "username")
         .vrqd(TestValidator::statusValid, TestEntity::getStatus, "test.status.emsg", "status")
         .vrqd(TestEntity::getNEntity, "test.nentity.notPresent.emsg", "nested")
-        
-        // nested entity validation example
+        // nested entity validation
         .vnested(
           TestEntity::getNEntity,
           "nentity", 
@@ -151,10 +151,10 @@ public class ValidatorTest {
     @Override
     protected boolean hasAnyUpdatableFields(TestEntity e) {
       return 
-        isNotBlank(e.getName()) && 
-        isNotBlank(e.getEmail()) && 
-        isNotBlank(e.getUsername()) && 
-        isNotBlank(e.getStatus()) && 
+        isNotBlank(e.getName()) || 
+        isNotBlank(e.getEmail()) || 
+        isNotBlank(e.getUsername()) || 
+        isNotBlank(e.getStatus()) || 
         isNotNull(e.getNEntity())
         ;
     }
@@ -179,9 +179,26 @@ public class ValidatorTest {
   } // TestValidator
 
   @Test
-  public void testAtLeastFieldOneForUpdate() {
+  public void testAtLeastOneFieldForUpdatePass() {
+    
+    TestEntity e = new TestEntity(null, "email@schmail.com", null, null, null);
+    e.nentity = null;
+    
+    TestValidator validator = new TestValidator();
+    VldtnResult vresult = validator.validateForUpdate(e);
+    Set<VldtnErr> verrs = vresult.getErrors();
+    for(VldtnErr ve : verrs) {
+      assertNotEquals("", ve.getFieldPath());
+      assertNotEquals("No Test entity update fields provided.", ve.getVldtnErrMsg());
+    }
+    verify(vresult, false, 4); // i.e. the 4 null test entity fields
+  }
+
+  @Test
+  public void testAtLeastFieldOneForUpdateFail() {
     
     TestEntity e = new TestEntity(null, "  ", null, null, null);
+    e.nentity = null;
     
     TestValidator validator = new TestValidator();
     VldtnResult vresult = validator.validateForUpdate(e);

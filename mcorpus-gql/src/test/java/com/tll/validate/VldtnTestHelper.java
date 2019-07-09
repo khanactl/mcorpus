@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 public class VldtnTestHelper {
 
-  public static void verify(VldtnResult vresult, boolean expectValid, int expectSize) {
+  public static void verify(VldtnResult vresult, boolean expectValid, int expectErrSize) {
     assertEquals(expectValid, vresult.isValid());
-    assertEquals(expectSize, vresult.getErrors().size());
+    assertEquals(expectErrSize, vresult.getErrors().size());
   }
 }

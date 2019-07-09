@@ -44,9 +44,9 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
   @Override
   protected boolean hasAnyUpdatableFields(Mcuser e) {
     return 
-      isNotBlank(e.getName()) && 
-      isNotBlank(e.getEmail()) && 
-      isNotBlank(e.getUsername()) && 
+      isNotBlank(e.getName()) || 
+      isNotBlank(e.getEmail()) || 
+      isNotBlank(e.getUsername()) || 
       isNotNull(e.getStatus()) 
       ;
   }
