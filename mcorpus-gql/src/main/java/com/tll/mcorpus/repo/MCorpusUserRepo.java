@@ -1,5 +1,6 @@
 package com.tll.mcorpus.repo;
 
+import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.nflatten;
 import static com.tll.mcorpus.db.Tables.MCUSER;
@@ -21,6 +22,8 @@ import javax.sql.DataSource;
 
 import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
+import com.tll.mcorpus.db.enums.McuserRole;
+import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor2;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
@@ -36,6 +39,7 @@ import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
 import org.jooq.Record4;
+import org.jooq.Record9;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
@@ -260,14 +264,26 @@ public class MCorpusUserRepo implements Closeable {
     String emsg;
     try {
       final Mcuser mcuser = dsl
-              .select(MCUSER.UID, MCUSER.CREATED, MCUSER.MODIFIED, MCUSER.NAME, MCUSER.EMAIL, MCUSER.USERNAME, DSL.val((String) null), MCUSER.STATUS, MCUSER.ROLES)
+              .select(
+                MCUSER.UID, 
+                MCUSER.CREATED, 
+                MCUSER.MODIFIED, 
+                MCUSER.NAME, 
+                MCUSER.EMAIL, 
+                MCUSER.USERNAME, 
+                DSL.val((String) null), 
+                MCUSER.STATUS, 
+                MCUSER.ROLES
+              )
               .from(MCUSER)
               .where(MCUSER.UID.eq(uid))
-              .fetchOne().into(Mcuser.class);
+              .fetchOneInto(Mcuser.class);
 
-      return mcuser != null ? 
-        new FetchResult<>(mcuser, null) 
-      : new FetchResult<>(null, String.format("No mcuser found with uid: '%s'.", uid));
+      if(isNotNull(mcuser)) {
+        return new FetchResult<>(mcuser, null);
+      } else {
+        return new FetchResult<>(null, String.format("No mcuser found with uid %s.", uid));
+      }
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -354,15 +370,30 @@ public class MCorpusUserRepo implements Closeable {
         final DSLContext trans = DSL.using(configuration);
 
         // update mcuser
-        final Mcuser mcuserUpdated = trans
+        final Record9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> 
+        mcuserUpatedRec = trans
           .update(MCUSER)
           .set(fmap)
           .where(MCUSER.UID.eq(mcuserToUpdate.getUid()))
-          .returningResult(MCUSER.UID, MCUSER.CREATED, MCUSER.MODIFIED, MCUSER.NAME, MCUSER.EMAIL, MCUSER.USERNAME, DSL.val((String) null), MCUSER.STATUS, MCUSER.ROLES)
-          .fetchOne().into(Mcuser.class);
-        rlist.add(mcuserUpdated);
+          .returningResult(
+            MCUSER.UID, 
+            MCUSER.CREATED, 
+            MCUSER.MODIFIED, 
+            MCUSER.NAME, 
+            MCUSER.EMAIL, 
+            MCUSER.USERNAME, 
+            DSL.val((String) null), 
+            MCUSER.STATUS, 
+            MCUSER.ROLES
+          ).fetchOne();
 
-        // successful update at this point
+        if(isNotNull(mcuserUpatedRec)) {
+          // successful update at this point
+          final Mcuser mcuserUpdated = mcuserUpatedRec.into(Mcuser.class);
+          rlist.add(mcuserUpdated);
+        } else {
+          emsgs.add("No mcuser found to update.");
+        }
         // implicit commit happens now
       });
     }

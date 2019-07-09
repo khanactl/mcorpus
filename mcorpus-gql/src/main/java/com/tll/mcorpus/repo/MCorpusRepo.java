@@ -1,7 +1,7 @@
 package com.tll.mcorpus.repo;
 
+import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNull;
-import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.nflatten;
 import static com.tll.core.Util.not;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
@@ -12,6 +12,7 @@ import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 
 import java.io.Closeable;
+import java.sql.Date;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -34,6 +35,8 @@ import com.tll.mcorpus.db.routines.MemberPswd;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.db.tables.pojos.Mauth;
 import com.tll.mcorpus.db.tables.pojos.Member;
+import com.tll.mcorpus.db.tables.records.MaddressRecord;
+import com.tll.mcorpus.db.tables.records.MauthRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
@@ -41,6 +44,8 @@ import com.tll.mcorpus.dmodel.MemberSearch;
 import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
+import org.jooq.Record3;
+import org.jooq.Record8;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
 import org.jooq.conf.RenderNameStyle;
@@ -194,12 +199,20 @@ public class MCorpusRepo implements Closeable {
     if(mid == null) return new FetchResult<>(null, "No member id provided.");
     String emsg;
     try {
-      final Mref mref = dsl
+      final Record3<UUID, String, Location> mrefRec = dsl
         .select(MEMBER.MID, MEMBER.EMP_ID, MEMBER.LOCATION)
         .from(MEMBER)
         .where(MEMBER.MID.eq(mid))
-        .fetchOne().into(Mref.class);
-      return new FetchResult<>(mref, null);
+        .fetchOne();
+      
+      if(isNotNull(mrefRec)) {
+        // success
+        final Mref mref = mrefRec.into(Mref.class);
+        return new FetchResult<>(mref);
+      } else {
+        // in error
+        emsg = "No mref found with provided mid.";
+      }
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -225,12 +238,20 @@ public class MCorpusRepo implements Closeable {
     String emsg;
     if(empId != null && loc != null) {
       try {
-        Mref mref = dsl
+        Record3<UUID, String, Location> mrefRec = dsl
           .select(MEMBER.MID, MEMBER.EMP_ID, MEMBER.LOCATION)
           .from(MEMBER)
           .where(MEMBER.EMP_ID.eq(empId).and(MEMBER.LOCATION.eq(loc)))
-          .fetchOne().into(Mref.class);
-        return new FetchResult<>(mref, null);
+          .fetchOne();
+
+        if(isNotNull(mrefRec)) {
+          // success
+          final Mref mref = mrefRec.into(Mref.class);
+          return new FetchResult<>(mref);
+        } else {
+          // in error
+          emsg = "No mref found with provided empId and location.";
+        }
       }
       catch(DataAccessException dae) {
         log.error(dae.getMessage());
@@ -516,25 +537,38 @@ public class MCorpusRepo implements Closeable {
           fputWhenNotNull(MAUTH.HOME_PHONE, memberToUpdate.dbMauth.getHomePhone(), fmapMauth);
           fputWhenNotNull(MAUTH.WORK_PHONE, memberToUpdate.dbMauth.getWorkPhone(), fmapMauth);
           fputWhenNotNull(MAUTH.USERNAME, memberToUpdate.dbMauth.getUsername(), fmapMauth);
-          mmap = trans
+          
+          MauthRecord mauthRec = trans
                     .update(MAUTH)
                     .set(fmapMauth)
                     .where(MAUTH.MID.eq(mid))
                     .returning(MAUTH.MID, MAUTH.MODIFIED, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME) // :o
-                    .fetchOne().intoMap();
+                    .fetchOne();
+
+          if(isNull(mauthRec)) {
+            // mauth insert failed (rollback)
+            emsgs.add("No member found with provided id.");
+            throw new DataAccessException(String.format("Member with mid '%s' not found.", mid));
+          }
+
+          mmap = mauthRec.intoMap();
         } else {
           // otherwise select to get current snapshot
-          mmap = trans
+          Record8<Date, String, String, String, String, String, String, String> mauthRecFetch = trans
                     .select(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
                     .from(MAUTH)
                     .where(MAUTH.MID.eq(mid))
-                    .fetchOne().intoMap();
+                    .fetchOne();
+
+          if(isNull(mauthRecFetch)) {
+            // mauth select failed (rollback)
+            emsgs.add("No member found with provided id.");
+            throw new DataAccessException(String.format("Member with mid '%s' not found.", mid));
+          }
+
+          mmap = mauthRecFetch.intoMap();
         }
-        
-        if (isNullOrEmpty(mmap)) {
-          // mauth insert failed (rollback)
-          throw new DataAccessException("No post-update mauth record returned.");
-        }
+
 
         // update member record (always to maintain modified integrity)
         final Map<String, Object> fmapMember = new HashMap<>();
@@ -713,19 +747,24 @@ public class MCorpusRepo implements Closeable {
       fputWhenNotNull(MADDRESS.POSTAL_CODE, maddressToUpdate.getPostalCode(), fmap);
       fputWhenNotNull(MADDRESS.COUNTRY, maddressToUpdate.getCountry(), fmap);
 
-      final Maddress maddress =
+      final MaddressRecord maddressRec =
         dsl
           .update(MADDRESS)
           .set(fmap)
           .where(MADDRESS.MID.eq(mid)).and(MADDRESS.ADDRESS_NAME.eq(addressname))
           .returning() // :o
-          .fetchOne().into(Maddress.class);
-
-      if(isNull(maddress))
-        throw new DataAccessException("Bad member address update return value.");
-
-      // success
-      return new FetchResult<>(maddress, null);
+          .fetchOne();
+      
+      if(isNotNull(maddressRec)) {
+        // success
+        final Maddress maddress = maddressRec.into(Maddress.class);
+        return new FetchResult<>(maddress, null);
+      } else {
+        // in error
+        final String emsg = String.format("No %s member address found to update.", addressname.getLiteral());
+        log.error(emsg);
+        emsgs.add(emsg);
+      }
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
