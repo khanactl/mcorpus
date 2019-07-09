@@ -6,12 +6,14 @@ import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
+import static com.tll.core.Util.upper;
 import static com.tll.validate.VldtnCore.lenchk;
 import static com.tll.validate.VldtnCore.namePattern;
 
 import java.util.regex.Pattern;
 
 import com.tll.mcorpus.db.enums.Location;
+import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.validate.VldtnBuilder;
 import com.tll.validate.VldtnCore;
@@ -31,6 +33,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
       .vtok(MemberValidator::nameMiddleValid, Member::getNameMiddle, "member.nameMiddle.emsg", "nameMiddle")
       .vrqd(MemberValidator::nameLastValid, Member::getNameLast, "member.nameLast.emsg", "nameLast")
       .vtok(MemberValidator::displayNameValid, Member::getDisplayName, "member.displayName.emsg", "displayName")
+      .vrqd(MemberValidator::statusValid, Member::getStatus, "member.status.emsg", "status")
       // mauth
       .vrqd(VldtnCore::dobValid, Member::getDob, "member.dob.emsg", "dob")
       .vrqd(VldtnCore::ssnValid, Member::getSsn, "member.ssn.emsg", "ssn")
@@ -57,6 +60,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
       .vtok(MemberValidator::nameMiddleValid, Member::getNameMiddle, "member.nameMiddle.emsg", "nameMiddle")
       .vtok(MemberValidator::nameLastValid, Member::getNameLast, "member.nameLast.emsg", "nameLast")
       .vtok(MemberValidator::displayNameValid, Member::getDisplayName, "member.displayName.emsg", "displayName")
+      .vtok(MemberValidator::statusValid, Member::getStatus, "member.status.emsg", "status")
       // mauth
       .vopt(VldtnCore::dobValid, Member::getDob, "member.dob.emsg", "dob")
       .vtok(VldtnCore::ssnValid, Member::getSsn, "member.ssn.emsg", "ssn")
@@ -79,6 +83,8 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
       isNotBlank(e.getNameFirst()) || 
       isNotBlank(e.getNameMiddle()) || 
       isNotBlank(e.getNameLast()) ||
+      isNotBlank(e.getDisplayName()) ||
+      isNotBlank(e.getStatus()) || 
       // mauth
       isNotNull(e.getDob()) || 
       isNotBlank(e.getSsn()) || 
@@ -145,6 +151,10 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
     return isNullOrEmpty(name) || not(isBlank(name)) && lenchk(name, 64) && namePattern.matcher(name).matches();
   }
 
+  public static boolean statusValid(final String status) {
+    return isNotNull(statusFromString(status));
+  }
+  
   private static Location locationFromString(final String location) {
     if(location != null) {
       final String clocation = clean(location);
@@ -155,5 +165,17 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
     }
     // default
     return null;
-  }  
+  }
+
+  private static MemberStatus statusFromString(final String status) {
+    if(status != null) {
+      final String cstatus = upper(clean(status));
+      for(final MemberStatus enmStatus : MemberStatus.values()) {
+        if(enmStatus.getLiteral().equals(cstatus)) return enmStatus;
+      }
+    }
+    // default
+    return null;
+  }
+
 }

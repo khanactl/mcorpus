@@ -13,6 +13,7 @@ import static com.tll.transform.TransformUtil.uuidFromToken;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   }
 
   public static Set<String> mcuserRolesArrayToStringSet(final McuserRole[] roles) {
-    return isNullOrEmpty(roles) ? null : Arrays.stream(roles)
+    return isNullOrEmpty(roles) ? Collections.emptySet() : Arrays.stream(roles)
         .map(role -> mcuserRoleToString(role))
         .filter(mr -> isNotNull(mr))
         .collect(Collectors.toSet())
@@ -66,7 +67,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   }
 
   public static Set<String> rolesListToSet(final List<String> rlist) {
-    return isNull(rlist) ? null : new HashSet<>(rlist);
+    return isNull(rlist) ? Collections.emptySet() : new HashSet<>(rlist);
   }
   
   @Override
