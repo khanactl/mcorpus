@@ -71,7 +71,10 @@ public class VldtnResult {
    * @return A presentation-worthy validation summary message.
    */
   public String getSummaryMsg() {
-    return String.format("%d validation errors.", getNumErrors());
+    return String.format("%d validation error%s.", 
+      getNumErrors(), 
+      getNumErrors() == 1 ? "" : "s"
+    );
   }
 
   /**
