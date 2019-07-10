@@ -37,7 +37,8 @@ public interface IValidator<T> {
   /**
    * Validate an entity or supporting object type 
    * for a backend fetch/query operation 
-   * or as a way to validate a required input argument for a backend operation.
+   * or, more generally, as a way to validate a required input argument 
+   * for a backend operation.
    * 
    * @return newly created {@link VldtnResult} holding any found validation errors.
    */
