@@ -3,7 +3,6 @@ package com.tll.mcorpus.validate;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.isNotNull;
-import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.upper;
 import static com.tll.validate.VldtnCore.lenchk;
 import static com.tll.validate.VldtnCore.namePattern;
@@ -54,7 +53,7 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
       isNotBlank(e.getEmail()) || 
       isNotBlank(e.getUsername()) || 
       isNotNull(e.getStatus()) ||
-      isNotNullOrEmpty(e.getRoles())
+      isNotNull(e.getRoles())
       ;
   }
 
@@ -76,7 +75,7 @@ public class McuserValidator extends BaseMcorpusValidator<Mcuser> {
   }
 
   public static boolean mcuserRolesValid(final Collection<String> roles) {
-    return isNotNullOrEmpty(roles) ? 
+    return isNotNull(roles) ? 
       roles.stream().allMatch( srole -> isNotNull(mcuserRoleFromString(srole))) :
       true
     ;
