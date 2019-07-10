@@ -3,7 +3,6 @@ package com.tll.mcorpus.transform;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNull;
-import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
 import static com.tll.transform.TransformUtil.fval;
@@ -13,7 +12,6 @@ import static com.tll.transform.TransformUtil.uuidFromToken;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +49,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   }
 
   public static McuserRole[] mcuserRolesArrayFromStringCollection(final Collection<String> sroles) {
-    return isNullOrEmpty(sroles) ? new McuserRole[0] : sroles.stream()
+    return isNull(sroles) ? null : sroles.stream()
         .map(srole -> mcuserRoleFromString(srole))
         .filter(mr -> isNotNull(mr))
         .collect(Collectors.toSet())
@@ -59,7 +57,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   }
 
   public static Set<String> mcuserRolesArrayToStringSet(final McuserRole[] roles) {
-    return isNullOrEmpty(roles) ? Collections.emptySet() : Arrays.stream(roles)
+    return isNull(roles) ? null : Arrays.stream(roles)
         .map(role -> mcuserRoleToString(role))
         .filter(mr -> isNotNull(mr))
         .collect(Collectors.toSet())
@@ -67,7 +65,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   }
 
   public static Set<String> rolesListToSet(final List<String> rlist) {
-    return isNull(rlist) ? Collections.emptySet() : new HashSet<>(rlist);
+    return isNull(rlist) ? null : new HashSet<>(rlist);
   }
   
   @Override
