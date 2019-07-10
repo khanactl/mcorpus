@@ -201,8 +201,11 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
   @Override
   public String toString() {
     return String.format(
-      "Http-Request Id: %s", 
-      requestId 
+      "Http-Request[%s] %s|%s %s", 
+      requestId, 
+      remoteAddressHost, 
+      xForwardedFor,
+      httpHost 
     );
   }
 }
