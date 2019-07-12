@@ -28,7 +28,6 @@ import com.tll.mcorpus.db.enums.MemberStatus;
  */
 public class MemberFilter {
 
-  @FunctionalInterface
   static interface IFieldPredicate { boolean isSet(); }
 
   public static class StringPredicate implements IFieldPredicate {
@@ -238,8 +237,13 @@ public class MemberFilter {
     public String toString() { return String.format("OrderBy['%s' %s]", token, asc() ? "asc" : "desc"); }
   }
   
-  private int offset;
-  private int limit;
+  /**
+   * The value used for the limit property when it is not explicitly specified.
+   */
+  public static final int DEFAULT_LIMIT = 10;
+  
+  private int offset = 0;
+  private int limit = DEFAULT_LIMIT;
   private DatePredicate created;
   private DatePredicate modified;
   private StringPredicate empId;
@@ -263,7 +267,7 @@ public class MemberFilter {
 
   public void setOffset(int offset) { this.offset = offset; }
 
-  public int getLimit() { return limit; }
+  public int getLimit() { return limit == 0 ? DEFAULT_LIMIT : limit; }
   
   public void setLimit(int limit) { this.limit = limit; }
   
