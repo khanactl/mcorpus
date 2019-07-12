@@ -354,8 +354,8 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     MemberFilter mf = null;
     if(isNotNullOrEmpty(gqlMap)) {
       mf = new MemberFilter();
-      int offset = 0;
-      int limit = 10;
+      int offset = 0; // default if not specified
+      int limit = 10; // default if not specified
       StringPredicate sp = null;
       LocationPredicate lp = null;
       DatePredicate dp = null;
@@ -367,11 +367,11 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
           Map<String, Object> submap;
           switch(key) {
             case "offset":
-              offset = isNull(entry.getValue()) ? 0 : ((Integer)entry.getValue()).intValue();
+              offset = isNull(entry.getValue()) ? offset : ((Integer)entry.getValue()).intValue();
               mf.setOffset(offset);
               break;
             case "limit":
-              limit = isNull(entry.getValue()) ? 0 : ((Integer)entry.getValue()).intValue();
+              limit = isNull(entry.getValue()) ? limit : ((Integer)entry.getValue()).intValue();
               mf.setLimit(limit);
               break;
             case "created":
