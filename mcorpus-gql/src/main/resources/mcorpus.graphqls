@@ -237,9 +237,9 @@ input LocationPredicate {
 
 # the member filter type
 input MemberFilter {
-  # backend repo cursor offset (default is 0 if not specified)
+  # the backend search result record offset (defaults to 0)
   offset: Int
-  # max number of members to fetch (default is 10 if not specified)
+  # the maximum number of search result records to fetch (defaults to 10)
   limit: Int
 
   # member created date predicate
@@ -275,7 +275,7 @@ input MemberFilter {
   orderBy: String
 }
 
-# required properties for adding a new member to the system
+# required properties for adding a new member to mcorpus
 input MemberToAdd {
 
   # member employee id (required, format: XX-XXXXXXX digits)
