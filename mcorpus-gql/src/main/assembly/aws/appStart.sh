@@ -25,7 +25,7 @@ JAVA_OPTS=(
   '-Djava.net.preferIPv4Stack=true'
   '-Dlog4j.configurationFile=log4j2-aws.xml'
   '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector'
-  '-cp log4j-api-2.11.2.jar:log4j-core-2.11.2.jar:log4j-slf4j-impl-2.11.2.jar:disruptor-3.4.2.jar'
+  '-cp log4j-api-2.12.0.jar:log4j-core-2.12.0.jar:log4j-slf4j-impl-2.12.0.jar:disruptor-3.4.2.jar'
 )
 
 cd /home/ec2-user/webapp
