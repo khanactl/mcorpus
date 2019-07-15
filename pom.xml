@@ -37,7 +37,7 @@
     <jackson.version>2.9.9</jackson.version>
     
     <netty.version>4.1.37.Final</netty.version>
-    <ratpack.version>1.6.1</ratpack.version>
+    <ratpack.version>1.7.0</ratpack.version>
     
     <graphql-java.version>13.0</graphql-java.version>
 
