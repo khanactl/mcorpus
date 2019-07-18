@@ -17,7 +17,7 @@ export class VpcStack extends cdk.Stack {
     super(scope, id, props);
 
     this.vpc = new ec2.Vpc(this, 'VPC', {
-      maxAZs: 2,
+      maxAzs: 2,
       natGateways: 1,
       cidr: '10.0.0.0/23', // 512
       enableDnsHostnames: true,
