@@ -1,5 +1,8 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +45,11 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
       ctx.getResponse().send("Bad Client");
       break;
     }
-    log.error("Client error {} response sent for request: {}.", statusCode, ctx.getRequest().getPath());
+    log.error("Client error {} response sent for request: {} - {}.", 
+      statusCode, 
+      ctx.getRequest().getPath(), 
+      RequestUtil.getOrCreateRequestSnapshot(ctx)
+    );
   }
 
   /**
@@ -54,9 +61,13 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
   @Override
   public void error(Context ctx, Throwable error) throws Exception {
     ctx.getResponse().send("Server error (500)");
-    log.error("Server error: {} for {} request.", 
-        error == null ? "-" : error.getMessage(),
-        ctx.getRequest().getPath());
+    final String emsg = isNull(error) ? "UNKNOWN" : 
+      (isNullOrEmpty(error.getMessage()) ? "UNKNOWN" : error.getMessage());
+    log.error("Server error '{}' for request: {} - {}.", 
+        emsg,
+        ctx.getRequest().getPath(), 
+        RequestUtil.getOrCreateRequestSnapshot(ctx)
+    );
   }
 
 }
