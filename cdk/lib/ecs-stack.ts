@@ -55,7 +55,8 @@ export class ECSStack extends cdk.Stack {
     const taskDef = new ecs.FargateTaskDefinition(this, 'mcorpus-gql', {
       cpu: 256,
       memoryLimitMiB: 1024,
-      taskRole: props.ecsTaskExecutionRole,
+      taskRole: props.ecsTaskExecutionRole, 
+      executionRole: props.ecsTaskExecutionRole, 
     });
 
     const containerDef = taskDef.addContainer('mcorpus-fargate-container', {
