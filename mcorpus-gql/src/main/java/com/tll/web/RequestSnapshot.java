@@ -3,6 +3,8 @@ package com.tll.web;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 import static com.tll.core.Util.not;
+import static com.tll.transform.TransformUtil.uuidFromToken;
+import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
 
@@ -202,7 +204,7 @@ public class RequestSnapshot /*implements IJwtHttpRequestProvider*/ {
   public String toString() {
     return String.format(
       "Http-Request[%s] %s|%s %s", 
-      requestId, 
+      uuidToToken(uuidFromToken(requestId)), 
       remoteAddressHost, 
       xForwardedFor,
       httpHost 
