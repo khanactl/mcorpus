@@ -33,13 +33,19 @@ export class VpcStack extends cdk.Stack {
           cidrMask: 26, // 64
           name: 'Private',
           subnetType: SubnetType.PRIVATE,
-        }
+        }, 
+        {
+          cidrMask: 28, // 16
+          name: 'codebuild',
+          subnetType: SubnetType.PRIVATE,
+        }, 
       ],
     });
 
     // add tag(s)
     this.vpc.node.applyAspect(new cdk.Tag('Name', "mcorpus-vpc"));
 
+    /*
     const subnetResourceOverrides = (key: number, subnet: ec2.ISubnet, cidrType: string[]) => {
       // This adds the az and CIDR Address
       const subnetSource = subnet.node.findChild('Subnet') as ec2.CfnSubnet;
@@ -47,6 +53,7 @@ export class VpcStack extends cdk.Stack {
       subnetSource.addPropertyOverride('AvailabilityZone', availabilityZones[key]);
       // TODO: override/set tag 'Name' as the defaults are bad: "CdkStack/VPC/PrivateSubnet2"
     };
+    */
     
     const publicSubnetIds: string[] = [];
     const privateSubnetIds: string[] = [];
@@ -54,13 +61,13 @@ export class VpcStack extends cdk.Stack {
     // Iterate the public subnets
     for (let [key, subnet] of this.vpc.publicSubnets.entries()) {
       publicSubnetIds.push(subnet.subnetId)
-      subnetResourceOverrides(key, subnet, publicCidrs);
+      // subnetResourceOverrides(key, subnet, publicCidrs);
     }
 
     // Iterate the private subnets
     for (let [key, subnet] of this.vpc.privateSubnets.entries()) {
       privateSubnetIds.push(subnet.subnetId);
-      subnetResourceOverrides(key, subnet, privateCidrs);
+      // subnetResourceOverrides(key, subnet, privateCidrs);
     }
 
     /* Outputs to be for App Stack.
