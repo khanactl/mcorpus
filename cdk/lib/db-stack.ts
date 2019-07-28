@@ -4,6 +4,7 @@ import rds = require('@aws-cdk/aws-rds');
 import logs = require('@aws-cdk/aws-logs');
 import cloudwatch = require('@aws-cdk/aws-cloudwatch');
 import { DatabaseInstance } from '@aws-cdk/aws-rds'
+import { SubnetType, IConnectable } from '@aws-cdk/aws-ec2';
 
 /**
  * Db Stack config properties.
@@ -19,13 +20,14 @@ export interface IDbProps extends cdk.StackProps {
  * Db Stack.
  */
 export class DbStack extends cdk.Stack {
+
+  public readonly connections: ec2.Connections;
   
   constructor(scope: cdk.Construct, id: string, props: IDbProps) {
     super(scope, id, props);
 
-    const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
-
-    const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
+    // const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
+    // const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
 
     const instance = new DatabaseInstance(this, 'McorpusDbInstance', {
       vpc: props.vpc, 
@@ -34,13 +36,14 @@ export class DbStack extends cdk.Stack {
         ec2.InstanceClass.T2,  
         ec2.InstanceSize.SMALL
       ),
-      parameterGroup: parameterGroup, 
-      optionGroup: optionGroup, 
+      // parameterGroup: parameterGroup, 
+      // optionGroup: optionGroup, 
       masterUsername: 'mcadmin', 
       databaseName: 'mcorpus', 
       enablePerformanceInsights: false, 
-      multiAz: true, 
+      multiAz: false, 
       autoMinorVersionUpgrade: true, 
+      /*
       cloudwatchLogsExports: [
         'trace',
         'audit',
@@ -48,10 +51,16 @@ export class DbStack extends cdk.Stack {
         'listener'
       ], 
       cloudwatchLogsRetention: logs.RetentionDays.ONE_WEEK, 
-      monitoringInterval: cdk.Duration.seconds(60), 
+      */
+      monitoringInterval: cdk.Duration.seconds(60), // default is 1 min
       storageEncrypted: true, 
       backupRetention: cdk.Duration.days(0), // i.e. do not do backups
+      vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
+      deletionProtection: false, 
+      instanceIdentifier: 'mcorpus-db', 
     });
+    
+    this.connections = instance.connections;
 
     // Rotate the master user password every 30 days
     instance.addRotationSingleUser('Rotation');

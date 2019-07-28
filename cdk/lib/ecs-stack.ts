@@ -3,14 +3,11 @@ import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
-// import ecs_patterns = require("@aws-cdk/aws-ecs-patterns");
+import { SecurityGroup } from '@aws-cdk/aws-ec2';
+import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
+import { ApplicationProtocol, SslPolicy, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { Duration } from '@aws-cdk/core';
-import { FargatePlatformVersion } from '@aws-cdk/aws-ecs';
-import { FargateService } from '@aws-cdk/aws-ecs';
-import { SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
-import { IApplicationLoadBalancerTarget, ApplicationProtocol, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
 import path = require('path');
-import { ISecurityGroup } from '@aws-cdk/aws-ec2';
 
 /**
  * ECS Stack config properties.
@@ -21,10 +18,6 @@ export interface IECSProps extends cdk.StackProps {
    */
   readonly vpc: ec2.IVpc;
   /**
-   * The IAM role for ECS execution and task.
-   */
-  readonly ecsTaskExecutionRole: iam.IRole;
-  /**
    * SSL Certificate Arn
    */
   readonly sslCertArn: string;
@@ -33,30 +26,62 @@ export interface IECSProps extends cdk.StackProps {
    * from the load balancer to the ecs/fargate service.
    */
   readonly lbToEcsPort: number;
+
+  readonly ssmKmsArn: string;
+  
+  readonly ssmMcorpusDbUrlArn: string;
+  
+  readonly ssmJwtSaltArn: string;
+
+  readonly dbCnct: ec2.IConnectable;
 }
 
 /**
  * ECS Stack.
  */
 export class ECSStack extends cdk.Stack {
-  
-  // private readonly vpc: ec2.IVpc;
 
+  public readonly ecsTaskExecutionRole: iam.Role;
+  
   public readonly fargateSvc: FargateService;
 
-  public readonly ecsContainerSecGrp: ISecurityGroup;
+  // public readonly ecsContainerSecGrp: SecurityGroup;
+  public readonly connections: ec2.Connections;;
   
   constructor(scope: cdk.Construct, id: string, props: IECSProps) {
     super(scope, id, props);
 
-    // this.vpc = props.vpc;
-
+    // ECS/Fargate task execution role
+    const ssmAccess = new iam.PolicyStatement({
+      actions: [ 
+        'kms:Decript', 
+        'kms:DescribeKey',
+        'kms:DescribeParamters',
+        'kms:GetParamters',
+        'ssm:GetParameter',
+        'ssm:GetParameters'
+      ],
+      resources: [
+        props.ssmMcorpusDbUrlArn,
+        props.ssmJwtSaltArn, 
+        props.ssmKmsArn
+      ],
+    });
+    this.ecsTaskExecutionRole = new iam.Role(this, 'ecsTaskExecutionRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
+    });
+    this.ecsTaskExecutionRole.addManagedPolicy({
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+    });
+    ssmAccess.effect = iam.Effect.ALLOW;
+    this.ecsTaskExecutionRole.addToPolicy(ssmAccess);
+    
     // task def
     const taskDef = new ecs.FargateTaskDefinition(this, 'mcorpus-gql', {
       cpu: 256,
       memoryLimitMiB: 1024,
-      taskRole: props.ecsTaskExecutionRole, 
-      executionRole: props.ecsTaskExecutionRole, 
+      taskRole: this.ecsTaskExecutionRole, 
+      executionRole: this.ecsTaskExecutionRole, 
     });
 
     const containerDef = taskDef.addContainer('mcorpus-fargate-container', {
@@ -98,7 +123,7 @@ export class ECSStack extends cdk.Stack {
       clusterName: 'mcorpus-ecs-cluster', 
     });
 
-    this.ecsContainerSecGrp = new ec2.SecurityGroup(this, 'ecs-container-seg-grp', {
+    const ecsContainerSecGrp = new ec2.SecurityGroup(this, 'ecs-container-seg-grp', {
       vpc: props.vpc, 
       securityGroupName: 'ecs-container-seg-grp', 
       description: 'Security Group for mcorpus ECS container',
@@ -116,7 +141,7 @@ export class ECSStack extends cdk.Stack {
       },
       serviceName: 'mcorpus-fargate-service',
       platformVersion: FargatePlatformVersion.LATEST, 
-      securityGroup: this.ecsContainerSecGrp
+      securityGroup: ecsContainerSecGrp
     });
 
     // ****************************
@@ -174,6 +199,9 @@ export class ECSStack extends cdk.Stack {
     
     // only allow traffic to flow from the load balancer to ecs service
     this.fargateSvc.connections.addSecurityGroup(sgAppLoadBalancer);
+
+    // db - container connectivity
+    props.dbCnct.connections.allowDefaultPortFrom(ecsContainerSecGrp);
 
   }
 }
