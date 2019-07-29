@@ -34,11 +34,6 @@ export class VpcStack extends cdk.Stack {
           name: 'Private',
           subnetType: SubnetType.PRIVATE,
         }, 
-        {
-          cidrMask: 28, // 16
-          name: 'codebuild',
-          subnetType: SubnetType.PRIVATE,
-        }, 
       ],
     });
 
