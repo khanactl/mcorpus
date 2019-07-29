@@ -90,7 +90,7 @@ export class ECSStack extends cdk.Stack {
         // '../mcorpus-gql/target'
       ), 
       healthCheck: {
-        command: [`CMD-SHELL curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
+        command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
         interval: Duration.seconds(120), 
         timeout: Duration.seconds(5), 
         startPeriod: Duration.seconds(15), 
