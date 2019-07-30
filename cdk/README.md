@@ -1,7 +1,3 @@
-# Useful commands
+# mcorpus aws infrastructure definition
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+Houses the [CDK](https://docs.aws.amazon.com/cdk/api/latest/) stacks defining the infrastructure used to run the mcorpus graphql server in aws.
