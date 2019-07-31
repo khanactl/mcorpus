@@ -2,12 +2,14 @@ import cdk = require('@aws-cdk/core');
 import ec2 = require('@aws-cdk/aws-ec2');
 import { SubnetType } from '@aws-cdk/aws-ec2';
 
+/*
 const region = 'us-west-2';
 const azA = `${region}a`;
 const azB = `${region}b`;
 const availabilityZones = [azA, azB];
 const publicCidrs = ['10.0.0.0/26', '10.0.0.64/26'];
 const privateCidrs = ['10.0.1.0/26', '10.0.1.64/26'];
+*/
 
 export class VpcStack extends cdk.Stack {
   
