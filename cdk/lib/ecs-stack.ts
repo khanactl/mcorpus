@@ -3,7 +3,7 @@ import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
-import { SecurityGroup } from '@aws-cdk/aws-ec2';
+import { ISecurityGroup } from '@aws-cdk/aws-ec2';
 import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationProtocol, SslPolicy, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { Duration } from '@aws-cdk/core';
@@ -33,7 +33,7 @@ export interface IECSProps extends cdk.StackProps {
   
   readonly ssmJwtSaltArn: string;
 
-  readonly dbCnct: ec2.IConnectable;
+  readonly ecsContainerSecGrp: ISecurityGroup;
 }
 
 /**
@@ -123,13 +123,6 @@ export class ECSStack extends cdk.Stack {
       clusterName: 'mcorpus-ecs-cluster', 
     });
 
-    const ecsContainerSecGrp = new ec2.SecurityGroup(this, 'ecs-container-seg-grp', {
-      vpc: props.vpc, 
-      securityGroupName: 'ecs-container-seg-grp', 
-      description: 'Security Group for mcorpus ECS container',
-      allowAllOutbound: true, 
-    });
-
     this.fargateSvc = new ecs.FargateService(this, 'mcorpus-fargate-service', {
       cluster: cluster,
       taskDefinition: taskDef, 
@@ -141,7 +134,7 @@ export class ECSStack extends cdk.Stack {
       },
       serviceName: 'mcorpus-fargate-service',
       platformVersion: FargatePlatformVersion.LATEST, 
-      securityGroup: ecsContainerSecGrp
+      securityGroup: props.ecsContainerSecGrp
     });
 
     // ****************************
@@ -199,9 +192,6 @@ export class ECSStack extends cdk.Stack {
     
     // only allow traffic to flow from the load balancer to ecs service
     this.fargateSvc.connections.addSecurityGroup(sgAppLoadBalancer);
-
-    // db - container connectivity
-    props.dbCnct.connections.allowDefaultPortFrom(ecsContainerSecGrp);
 
   }
 }

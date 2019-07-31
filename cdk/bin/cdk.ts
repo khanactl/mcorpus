@@ -26,14 +26,5 @@ const ecsStack = new ECSStack(app, 'ECSStack', {
   ssmKmsArn: secretsStack.kmsArn, 
   ssmMcorpusDbUrlArn: secretsStack.mcorpusDbUrlArn, 
   ssmJwtSaltArn: secretsStack.jwtSaltArn, 
-  dbCnct: dbStack.connections, 
+  ecsContainerSecGrp: dbStack.ecsContainerSecGrp, 
 });
-/*
-const lbStack = new LbStack(app, 'LbStack', {
-  vpc: vpcStack.vpc,
-  innerPort: 5150,
-  listenerPort: 443,
-  sslCertId: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a', 
-  lbTarget: ecsStack.fargateSvc
-});
-*/

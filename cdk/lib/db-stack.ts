@@ -21,10 +21,19 @@ export interface IDbProps extends cdk.StackProps {
  */
 export class DbStack extends cdk.Stack {
 
-  public readonly connections: ec2.Connections;
+  // public readonly connections: ec2.Connections;
+  public readonly ecsContainerSecGrp: ec2.SecurityGroup;
   
   constructor(scope: cdk.Construct, id: string, props: IDbProps) {
     super(scope, id, props);
+
+    // we declare ecs sec grp here to avoid DbStack dependening on ECSStack
+    this.ecsContainerSecGrp = new ec2.SecurityGroup(this, 'ecs-container-seg-grp', {
+      vpc: props.vpc, 
+      securityGroupName: 'ecs-container-seg-grp', 
+      description: 'Security Group for mcorpus ECS container',
+      allowAllOutbound: true, 
+    });
 
     // const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
     // const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
@@ -60,7 +69,7 @@ export class DbStack extends cdk.Stack {
       instanceIdentifier: 'mcorpus-db', 
     });
     
-    this.connections = instance.connections;
+    // this.connections = instance.connections;
 
     // Rotate the master user password every 30 days
     instance.addRotationSingleUser('Rotation');
