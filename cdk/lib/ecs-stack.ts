@@ -33,7 +33,9 @@ export interface IECSProps extends cdk.StackProps {
   
   readonly ssmJwtSaltArn: string;
 
-  readonly ecsContainerSecGrp: ISecurityGroup;
+  readonly lbSecGrp: ISecurityGroup;
+
+  readonly ecsSecGrp: ISecurityGroup;
 }
 
 /**
@@ -45,7 +47,6 @@ export class ECSStack extends cdk.Stack {
   
   public readonly fargateSvc: FargateService;
 
-  // public readonly ecsContainerSecGrp: SecurityGroup;
   public readonly connections: ec2.Connections;;
   
   constructor(scope: cdk.Construct, id: string, props: IECSProps) {
@@ -134,25 +135,18 @@ export class ECSStack extends cdk.Stack {
       },
       serviceName: 'mcorpus-fargate-service',
       platformVersion: FargatePlatformVersion.LATEST, 
-      securityGroup: props.ecsContainerSecGrp
+      securityGroup: props.ecsSecGrp
     });
 
     // ****************************
     // *** inline load balancer ***
     // ****************************
-    // load balancer security group
-    const sgAppLoadBalancer = new ec2.SecurityGroup(this, 'sg-alb', {
-      vpc: props.vpc,
-      description: 'Application Load balancer security group.',
-      allowAllOutbound: true   // Can be set to false
-    });
-    sgAppLoadBalancer.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'TLS/443 access from internet');
     
     // application load balancer
     const alb = new elb.ApplicationLoadBalancer(this, 'app-load-balancer', {
       vpc: props.vpc,
       internetFacing: true,
-      securityGroup: sgAppLoadBalancer,
+      securityGroup: props.lbSecGrp, 
     });
 
     const listener = alb.addListener('alb-tls-listener', {
@@ -189,9 +183,5 @@ export class ECSStack extends cdk.Stack {
     
     // bind load balancing target to lb group
     this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
-    
-    // only allow traffic to flow from the load balancer to ecs service
-    this.fargateSvc.connections.addSecurityGroup(sgAppLoadBalancer);
-
   }
 }
