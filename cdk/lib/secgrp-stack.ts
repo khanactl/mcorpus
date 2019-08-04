@@ -3,7 +3,7 @@ import ec2 = require('@aws-cdk/aws-ec2');
 import { SubnetType, IConnectable } from '@aws-cdk/aws-ec2';
 
 /**
- * Db Stack config properties.
+ * Security Group config properties.
  */
 export interface ISecGrpProps extends cdk.StackProps {
   /**
@@ -15,7 +15,7 @@ export interface ISecGrpProps extends cdk.StackProps {
 }
 
 /**
- * Db Stack.
+ * Security Group Stack.
  */
 export class SecGrpStack extends cdk.Stack {
 
