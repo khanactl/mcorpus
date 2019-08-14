@@ -6,6 +6,7 @@ import { VpcStack } from '../lib/vpc-stack';
 import { DbStack } from '../lib/db-stack';
 import { ECSStack } from '../lib/ecs-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
+import { CicdStack } from '../lib/cicd-stack';
 
 const app = new cdk.App();
 
@@ -24,8 +25,12 @@ const ecsStack = new ECSStack(app, 'ECSStack', {
   lbToEcsPort: 5150, 
   sslCertArn: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a', 
   ssmKmsArn: secretsStack.kmsArn, 
-  ssmMcorpusDbUrlArn: secretsStack.mcorpusDbUrlArn, 
-  ssmJwtSaltArn: secretsStack.jwtSaltArn, 
+  ssmMcorpusDbUrl: dbStack.dbJdbcUrl, 
   ecsSecGrp: secGrpStack.ecsSecGrp, 
   lbSecGrp: secGrpStack.lbSecGrp
+});
+const cicdStack = new CicdStack(app, 'CICDStack', {
+  vpc: vpcStack.vpc, 
+  codebuildSecGrp: secGrpStack.codebuildSecGrp, 
+  fargateSvc: ecsStack.fargateSvc, 
 });

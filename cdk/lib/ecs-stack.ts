@@ -3,6 +3,8 @@ import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
+import ssm = require('@aws-cdk/aws-ssm');
+import secrets = require('@aws-cdk/aws-secretsmanager');
 import { ISecurityGroup } from '@aws-cdk/aws-ec2';
 import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationProtocol, SslPolicy, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
@@ -29,10 +31,8 @@ export interface IECSProps extends cdk.StackProps {
 
   readonly ssmKmsArn: string;
   
-  readonly ssmMcorpusDbUrlArn: string;
+  readonly ssmMcorpusDbUrl: ssm.IParameter;
   
-  readonly ssmJwtSaltArn: string;
-
   readonly lbSecGrp: ISecurityGroup;
 
   readonly ecsSecGrp: ISecurityGroup;
@@ -47,10 +47,12 @@ export class ECSStack extends cdk.Stack {
   
   public readonly fargateSvc: FargateService;
 
-  public readonly connections: ec2.Connections;;
-  
   constructor(scope: cdk.Construct, id: string, props: IECSProps) {
     super(scope, id, props);
+
+     const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, 'jwtSalt', {
+       stringValue: 'TODO'
+     });
 
     // ECS/Fargate task execution role
     const ssmAccess = new iam.PolicyStatement({
@@ -60,11 +62,12 @@ export class ECSStack extends cdk.Stack {
         'kms:DescribeParamters',
         'kms:GetParamters',
         'ssm:GetParameter',
-        'ssm:GetParameters'
+        'ssm:GetParameters',
+        // TODO add for secrets manager
       ],
       resources: [
-        props.ssmMcorpusDbUrlArn,
-        props.ssmJwtSaltArn, 
+        props.ssmMcorpusDbUrl.parameterArn,
+        jwtSalt.parameterArn, 
         props.ssmKmsArn
       ],
     });
@@ -110,8 +113,10 @@ export class ECSStack extends cdk.Stack {
         'MCORPUS_SERVER__DEVELOPMENT' : 'false', 
         'MCORPUS_SERVER__PORT' : `${props.lbToEcsPort}`, 
         'MCORPUS_SERVER__PUBLIC_ADDRESS' : 'https://www.mcorpus-aws.net', 
-        'MCORPUS_DB_URL' : 'arn:aws:ssm:us-west-2:524006177124:parameter/mcorpusDbUrl', 
-        'MCORPUS_JWT_SALT' : 'arn:aws:ssm:us-west-2:524006177124:parameter/jwtSalt', 
+      }, 
+      secrets: {
+        'MCORPUS_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmMcorpusDbUrl),  
+        'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt), 
       }
     });
     containerDef.addPortMappings({ 
@@ -141,7 +146,6 @@ export class ECSStack extends cdk.Stack {
     // ****************************
     // *** inline load balancer ***
     // ****************************
-    
     // application load balancer
     const alb = new elb.ApplicationLoadBalancer(this, 'app-load-balancer', {
       vpc: props.vpc,
@@ -183,5 +187,8 @@ export class ECSStack extends cdk.Stack {
     
     // bind load balancing target to lb group
     this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
+
+    // stack output
+    // TODO
   }
 }

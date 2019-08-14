@@ -1,10 +1,12 @@
 import cdk = require('@aws-cdk/core');
 import ec2 = require('@aws-cdk/aws-ec2');
 import rds = require('@aws-cdk/aws-rds');
-import logs = require('@aws-cdk/aws-logs');
+import secrets = require('@aws-cdk/aws-secretsmanager');
+import ssm = require('@aws-cdk/aws-ssm');
 import cloudwatch = require('@aws-cdk/aws-cloudwatch');
 import { DatabaseInstance } from '@aws-cdk/aws-rds'
-import { SubnetType, IConnectable } from '@aws-cdk/aws-ec2';
+import { SubnetType } from '@aws-cdk/aws-ec2';
+import { SSMParameterContextQuery } from '@aws-cdk/cx-api';
 
 /**
  * Db Stack config properties.
@@ -22,6 +24,16 @@ export interface IDbProps extends cdk.StackProps {
  * Db Stack.
  */
 export class DbStack extends cdk.Stack {
+
+  /**
+   * The master db instance json db instance secret.
+   */
+  public readonly dbInstanceJsonSecret: secrets.ISecret;
+
+  public readonly dbJdbcUrl: ssm.IParameter;
+
+  // public readonly jdbcUrl: secrets.ISecret;
+  // public readonly jdbcTestUrl: secrets.ISecret;
 
   constructor(scope: cdk.Construct, id: string, props: IDbProps) {
     super(scope, id, props);
@@ -67,10 +79,10 @@ export class DbStack extends cdk.Stack {
     );
 
     // Rotate the master user password every 30 days
-    instance.addRotationSingleUser('Rotation');
+    const rdsSecretRotation = instance.addRotationSingleUser('Rotation');
 
     // Add alarm for high CPU
-    new cloudwatch.Alarm(this, 'HighCPU', {
+    const cloudWatchAlarm = new cloudwatch.Alarm(this, 'HighCPU', {
       metric: instance.metricCPUUtilization(),
       threshold: 90,
       evaluationPeriods: 1
@@ -93,5 +105,26 @@ export class DbStack extends cdk.Stack {
     });
     */
 
+    this.dbInstanceJsonSecret = instance.secret!;
+
+    // create the jdbc url and test url secrets
+    // TODO make custom resource here
+    this.dbJdbcUrl = new ssm.StringParameter(this, 'dbJdbcUrl', {
+      stringValue: 'TODO'
+    });
+
+    // stack output
+    new cdk.CfnOutput(this, 'dbEndpoint', { value: 
+      instance.dbInstanceEndpointAddress + ':' + instance.dbInstanceEndpointPort
+    });
+    new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: 
+      this.dbInstanceJsonSecret!.secretArn
+    });
+    new cdk.CfnOutput(this, 'dbJdbcUrlArn', { value: 
+      this.dbJdbcUrl.parameterArn
+    });
+    new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value: 
+      cloudWatchAlarm.alarmArn
+    });
   }
 }
