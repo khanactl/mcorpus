@@ -29,8 +29,8 @@ import javax.sql.DataSource;
 import com.tll.mcorpus.db.enums.Addressname;
 import com.tll.mcorpus.db.enums.Location;
 import com.tll.mcorpus.db.routines.InsertMember;
-import com.tll.mcorpus.db.routines.MemberLogin2;
-import com.tll.mcorpus.db.routines.MemberLogout2;
+import com.tll.mcorpus.db.routines.MemberLogin;
+import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.routines.MemberPswd;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.db.tables.pojos.Mauth;
@@ -138,7 +138,7 @@ public class MCorpusRepo implements Closeable {
    */
   public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final String clientOrigin) {
     try {
-      final MemberLogin2 mlogin = new MemberLogin2();
+      final MemberLogin mlogin = new MemberLogin();
       mlogin.setMemberUsername(username);
       mlogin.setMemberPassword(pswd);
       mlogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
@@ -171,7 +171,7 @@ public class MCorpusRepo implements Closeable {
    */
   public FetchResult<UUID> memberLogout(final UUID mid, final Instant requestInstant, final String clientOrigin) {
     try {
-      final MemberLogout2 mlogout = new MemberLogout2();
+      final MemberLogout mlogout = new MemberLogout();
       mlogout.setMid(mid);
       mlogout.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mlogout.setInRequestOrigin(clientOrigin);

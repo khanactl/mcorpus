@@ -24,12 +24,12 @@ import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
-import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor2;
+import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.InsertMcuser;
-import com.tll.mcorpus.db.routines.McuserLogin2;
-import com.tll.mcorpus.db.routines.McuserLogout2;
+import com.tll.mcorpus.db.routines.McuserLogin;
+import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain;
@@ -195,7 +195,7 @@ public class MCorpusUserRepo implements Closeable {
    */
   public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, Instant jwtExpiration, Instant requestInstant, final String clientOriginToken) {
     try {
-      final McuserLogin2 mcuserLogin = new McuserLogin2();
+      final McuserLogin mcuserLogin = new McuserLogin();
       mcuserLogin.setMcuserUsername(username);
       mcuserLogin.setMcuserPassword(pswd);
       mcuserLogin.setInJwtId(pendingJwtId);
@@ -233,7 +233,7 @@ public class MCorpusUserRepo implements Closeable {
    */
   public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, Instant requestInstant, final String clientOriginToken) {
     try {
-      final McuserLogout2 mcuserLogout = new McuserLogout2();
+      final McuserLogout mcuserLogout = new McuserLogout();
       mcuserLogout.setMcuserUid(mcuserId);
       mcuserLogout.setJwtId(jwtId);
       mcuserLogout.setRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
@@ -479,7 +479,7 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<Boolean> invalidateJwtsFor(final UUID uid, final Instant requestInstant, final String clientOrigin) {
     String emsg = null;
     try {
-      final BlacklistJwtIdsFor2 sp = new BlacklistJwtIdsFor2();
+      final BlacklistJwtIdsFor sp = new BlacklistJwtIdsFor();
       sp.setInUid(uid);
       sp.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       sp.setInRequestOrigin(clientOrigin);

@@ -18,16 +18,16 @@
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-    <log4j2.version>2.12.0</log4j2.version>
-    <slf4j-api.version>1.7.26</slf4j-api.version>
+    <log4j2.version>2.12.1</log4j2.version>
+    <slf4j-api.version>1.7.28</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
     <postgres-jdbc.version>42.2.6</postgres-jdbc.version>
 
-    <jooq.version>3.11.12</jooq.version>
+    <jooq.version>3.12.1</jooq.version>
     <hikari-cp.version>3.3.1</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>7.7</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>7.8</nimbus-jose-jwt.version>
 
     <guava.version>28.0-jre</guava.version>
     <guice.version>4.2.2</guice.version>
@@ -118,11 +118,11 @@
       </dependency>
 
       <!-- netty -->
-			<dependency>
-			  <groupId>io.netty</groupId>
-			  <artifactId>netty-handler</artifactId>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-handler</artifactId>
         <version>${netty.version}</version>
-			</dependency>
+      </dependency>
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-codec-http</artifactId>
@@ -163,18 +163,18 @@
       </dependency>
       -->
 
-			<!-- nimbus jwt -->
-	    <dependency>
-	      <groupId>com.nimbusds</groupId>
-	      <artifactId>nimbus-jose-jwt</artifactId>
-	      <version>${nimbus-jose-jwt.version}</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>com.github.stephenc.jcip</groupId>
-	      <artifactId>jcip-annotations</artifactId>
-	      <version>1.0-1</version>
-	    </dependency>
-			
+      <!-- nimbus jwt -->
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>${nimbus-jose-jwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.stephenc.jcip</groupId>
+        <artifactId>jcip-annotations</artifactId>
+        <version>1.0-1</version>
+      </dependency>
+      
       <dependency><!-- (Ratpack logs via SLF4J API) -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -256,11 +256,11 @@
             </execution>
           </executions>
         </plugin>
-	      <plugin>
-	        <groupId>org.jooq</groupId>
-	        <artifactId>jooq-codegen-maven</artifactId>
-	        <version>${jooq.version}</version>
-	      </plugin>
+        <plugin>
+          <groupId>org.jooq</groupId>
+          <artifactId>jooq-codegen-maven</artifactId>
+          <version>${jooq.version}</version>
+        </plugin>
         <!-- 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -280,7 +280,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.1.1</version>
           <!--
           <executions>
             <execution>
@@ -298,8 +298,8 @@
           <version>3.1.0</version>
           <configuration>
             <nonFilteredFileExtensions>
-	            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
-	          </nonFilteredFileExtensions>
+              <nonFilteredFileExtension>ico</nonFilteredFileExtension>
+            </nonFilteredFileExtensions>
           </configuration>
         </plugin>
         <plugin>
@@ -334,7 +334,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.7.1</version>
+          <version>3.8.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -344,7 +344,7 @@
         <plugin>
           <groupId>pl.project13.maven</groupId>
           <artifactId>git-commit-id-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.0.1</version>
         </plugin>
         <plugin>
           <groupId>com.github.spotbugs</groupId>
