@@ -38,7 +38,7 @@ artifacts:
     - mcorpus-gql/target/log4j2-aws.xml
     - mcorpus-gql/target/mcorpus-gql-server.jar
     - mcorpus-gql/target/disruptor-3.4.2.jar
-    - mcorpus-gql/target/log4j-api-2.12.0.jar
-    - mcorpus-gql/target/log4j-core-2.12.0.jar
-    - mcorpus-gql/target/log4j-slf4j-impl-2.12.0.jar
+    - mcorpus-gql/target/log4j-api-2.12.1.jar
+    - mcorpus-gql/target/log4j-core-2.12.1.jar
+    - mcorpus-gql/target/log4j-slf4j-impl-2.12.1.jar
   discard-paths: yes
