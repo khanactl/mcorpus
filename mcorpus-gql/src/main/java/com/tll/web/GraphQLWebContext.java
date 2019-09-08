@@ -56,10 +56,15 @@ public class GraphQLWebContext {
   private static final Pattern gqlFirstMethodName = 
     Pattern.compile("^(mutation|query)*.*?\\{\\s?(\\w+).*\\}");
 
-  private static final Pattern regxWSBR = Pattern.compile("\\s+");
+  /**
+   * All whitespace chars.
+   */
+  private static final Pattern regxWS = Pattern.compile("\\s+");
   
-  private static final Pattern regxNLMU = Pattern.compile("\\\\n");
-  
+  /*
+   * All NON-ASCII chars.
+   */
+  private static final Pattern regxNA = Pattern.compile("[^\\x00-\\x7F]");  
   
   protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -80,22 +85,21 @@ public class GraphQLWebContext {
     super();
     
     // clean query: 
-    //   trim, 
-    //   replace all literal '\n' with space 
-    //   then replace all whitespace blocks with single space
-    String queryCleaned = 
-      // clean(query).replaceAll("\\\\n", " ").replaceAll("\\s+", " ");
-      regxWSBR.matcher( regxNLMU.matcher(clean(query)).replaceAll(" ") ).replaceAll(" ");
+    //   null -> ""
+    //   trim
+    //   remove all non-ascii chars
+    final String queryCleaned = regxNA.matcher( clean(query) ).replaceAll("");
+    final String queryCleanedOneline = regxWS.matcher(queryCleaned).replaceAll(" ");
 
     Matcher matcher;
     
-    matcher = gqlType.matcher(queryCleaned);
+    matcher = gqlType.matcher(queryCleanedOneline);
     this.qtype = matcher.matches() ? matcher.group(1) : "";
     
-    matcher = gqlOperationName.matcher(queryCleaned);
+    matcher = gqlOperationName.matcher(queryCleanedOneline);
     this.opName = matcher.matches() ? matcher.group(2) : "";
     
-    matcher = gqlFirstMethodName.matcher(queryCleaned);
+    matcher = gqlFirstMethodName.matcher(queryCleanedOneline);
     this.firstMethodName = matcher.matches() ? matcher.group(2) : "";
 
     this.query = queryCleaned;
@@ -180,12 +184,12 @@ public class GraphQLWebContext {
 
   @Override
   public String toString() {
-    // FORMAT: type [opName] firstMethodName (id)
-    return regxWSBR.matcher(String.format("%s %s %s (%s)", 
+    // FORMAT: id (type [opName] firstMethodName)
+    return String.format("%s (%s %s %s)", 
+      executionId, 
       isNotNullOrEmpty(qtype) ? qtype : "query", 
-      isNotNullOrEmpty(opName) ? opName : "", 
-      firstMethodName,
-      executionId
-    )).replaceAll(" ");
+      isNotNullOrEmpty(opName) ? opName : "-", 
+      firstMethodName 
+    );
   }
 }
