@@ -4,12 +4,13 @@ import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ssm = require('@aws-cdk/aws-ssm');
-import secrets = require('@aws-cdk/aws-secretsmanager');
-import { ISecurityGroup } from '@aws-cdk/aws-ec2';
+import { ISecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
+import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationProtocol, SslPolicy, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { Duration } from '@aws-cdk/core';
 import path = require('path');
+import * as crypto from 'crypto';
 
 /**
  * ECS Stack config properties.
@@ -31,7 +32,9 @@ export interface IECSProps extends cdk.StackProps {
 
   readonly ssmKmsArn: string;
   
-  readonly ssmMcorpusDbUrl: ssm.IParameter;
+  readonly ssmJdbcUrl: IStringParameter;
+
+  readonly ssmJdbcTestUrl: IStringParameter;
   
   readonly lbSecGrp: ISecurityGroup;
 
@@ -50,9 +53,11 @@ export class ECSStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: IECSProps) {
     super(scope, id, props);
 
-     const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, 'jwtSalt', {
-       stringValue: 'TODO'
-     });
+    // generate JWT salt ssm param
+    const rhs = crypto.randomBytes(32).toString('hex');
+    const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, 'jwtSalt', {
+      stringValue: rhs, 
+    });
 
     // ECS/Fargate task execution role
     const ssmAccess = new iam.PolicyStatement({
@@ -66,9 +71,10 @@ export class ECSStack extends cdk.Stack {
         // TODO add for secrets manager
       ],
       resources: [
-        props.ssmMcorpusDbUrl.parameterArn,
+        props.ssmJdbcUrl.parameterArn,
+        props.ssmJdbcTestUrl.parameterArn,
         jwtSalt.parameterArn, 
-        props.ssmKmsArn
+        props.ssmKmsArn, 
       ],
     });
     this.ecsTaskExecutionRole = new iam.Role(this, 'ecsTaskExecutionRole', {
@@ -115,7 +121,8 @@ export class ECSStack extends cdk.Stack {
         'MCORPUS_SERVER__PUBLIC_ADDRESS' : 'https://www.mcorpus-aws.net', 
       }, 
       secrets: {
-        'MCORPUS_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmMcorpusDbUrl),  
+        'MCORPUS_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcUrl), 
+        'MCORPUS_TEST_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcTestUrl), 
         'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt), 
       }
     });
@@ -135,9 +142,7 @@ export class ECSStack extends cdk.Stack {
       desiredCount: 1,
       assignPublicIp: false,
       healthCheckGracePeriod: Duration.seconds(15),
-      vpcSubnets: {
-        subnetName: 'Private'
-      },
+      vpcSubnets: { subnetType: SubnetType.PRIVATE },
       serviceName: 'mcorpus-fargate-service',
       platformVersion: FargatePlatformVersion.LATEST, 
       securityGroup: props.ecsSecGrp
@@ -189,6 +194,9 @@ export class ECSStack extends cdk.Stack {
     this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
 
     // stack output
-    // TODO
+    new cdk.CfnOutput(this, 'fargateSvcArn', { value: 
+      this.fargateSvc.serviceArn
+    });
+    
   }
 }

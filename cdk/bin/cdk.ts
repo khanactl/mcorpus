@@ -1,36 +1,55 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
+import { devConfig } from './mcorpus-cdk-config'
 import cdk = require('@aws-cdk/core');
-import { SecretsStack } from '../lib/secrets-stack';
 import { VpcStack } from '../lib/vpc-stack';
-import { DbStack } from '../lib/db-stack';
-import { ECSStack } from '../lib/ecs-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
-import { CicdStack } from '../lib/cicd-stack';
+import { DbStack } from '../lib/db-stack';
+import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
+import { ECSStack } from '../lib/ecs-stack';
+import { CICDStack } from '../lib/cicd-stack';
 
 const app = new cdk.App();
 
-const secretsStack = new SecretsStack(app, 'SecretsStack');
-const vpcStack = new VpcStack(app, 'VpcStack');
-const secGrpStack = new SecGrpStack(app, 'SecGrpStack', {
-  vpc: vpcStack.vpc, 
-  lbTrafficPort: 5150, 
-});
-const dbStack = new DbStack(app, 'DbStack', {
- vpc: vpcStack.vpc, 
- ecsSecGrp: secGrpStack.ecsSecGrp, 
-});
-const ecsStack = new ECSStack(app, 'ECSStack', {
-  vpc: vpcStack.vpc, 
-  lbToEcsPort: 5150, 
-  sslCertArn: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a', 
-  ssmKmsArn: secretsStack.kmsArn, 
-  ssmMcorpusDbUrl: dbStack.dbJdbcUrl, 
-  ecsSecGrp: secGrpStack.ecsSecGrp, 
-  lbSecGrp: secGrpStack.lbSecGrp
-});
-const cicdStack = new CicdStack(app, 'CICDStack', {
-  vpc: vpcStack.vpc, 
-  codebuildSecGrp: secGrpStack.codebuildSecGrp, 
-  fargateSvc: ecsStack.fargateSvc, 
+DbBootstrapStack.generateLambdaZipFile(() => {
+  // console.debug("Generating stacks..")
+  const vpcStack = new VpcStack(app, 'VpcStack', {
+    tags: devConfig.instanceAttrs, 
+  });
+  const secGrpStack = new SecGrpStack(app, 'SecGrpStack', {
+    tags: devConfig.instanceAttrs, 
+    vpc: vpcStack.vpc, 
+    lbTrafficPort: devConfig.lbToAppPort, 
+  });
+  const dbStack = new DbStack(app, 'DbStack', {
+    tags: devConfig.instanceAttrs, 
+    vpc: vpcStack.vpc, 
+    dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
+    ecsSecGrp: secGrpStack.ecsSecGrp, 
+  });
+  const dbBootstrapStack = new DbBootstrapStack(app, 'DbBootstrapStack', {
+    tags: devConfig.instanceAttrs, 
+    vpc: vpcStack.vpc, 
+    dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
+    dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
+    targetRegion: devConfig.awsRegion, 
+  });
+  const ecsStack = new ECSStack(app, 'ECSStack', {
+    tags: devConfig.instanceAttrs, 
+    vpc: vpcStack.vpc, 
+    lbToEcsPort: devConfig.lbToAppPort, 
+    sslCertArn: devConfig.tlsCertArn, 
+    ssmKmsArn: devConfig.ssmKmsArn, 
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl, 
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl, 
+    ecsSecGrp: secGrpStack.ecsSecGrp, 
+    lbSecGrp: secGrpStack.lbSecGrp
+  });
+  const cicdStack = new CICDStack(app, 'CICDStack', {
+    tags: devConfig.instanceAttrs, 
+    vpc: vpcStack.vpc, 
+    codebuildSecGrp: secGrpStack.codebuildSecGrp, 
+    fargateSvc: ecsStack.fargateSvc, 
+  });
+  // console.debug("Stacks generated.")
 });

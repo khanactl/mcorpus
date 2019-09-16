@@ -2,11 +2,9 @@ import cdk = require('@aws-cdk/core');
 import ec2 = require('@aws-cdk/aws-ec2');
 import rds = require('@aws-cdk/aws-rds');
 import secrets = require('@aws-cdk/aws-secretsmanager');
-import ssm = require('@aws-cdk/aws-ssm');
 import cloudwatch = require('@aws-cdk/aws-cloudwatch');
 import { DatabaseInstance } from '@aws-cdk/aws-rds'
-import { SubnetType } from '@aws-cdk/aws-ec2';
-import { SSMParameterContextQuery } from '@aws-cdk/cx-api';
+import { SubnetType, IVpc, ISecurityGroup } from '@aws-cdk/aws-ec2';
 
 /**
  * Db Stack config properties.
@@ -15,9 +13,11 @@ export interface IDbProps extends cdk.StackProps {
   /**
    * The VPC ref
    */
-  readonly vpc: ec2.IVpc;
+  readonly vpc: IVpc;
 
-  readonly ecsSecGrp: ec2.ISecurityGroup;
+  readonly dbBootstrapSecGrp: ISecurityGroup;
+
+  readonly ecsSecGrp: ISecurityGroup;
 }
 
 /**
@@ -29,11 +29,6 @@ export class DbStack extends cdk.Stack {
    * The master db instance json db instance secret.
    */
   public readonly dbInstanceJsonSecret: secrets.ISecret;
-
-  public readonly dbJdbcUrl: ssm.IParameter;
-
-  // public readonly jdbcUrl: secrets.ISecret;
-  // public readonly jdbcTestUrl: secrets.ISecret;
 
   constructor(scope: cdk.Construct, id: string, props: IDbProps) {
     super(scope, id, props);
@@ -71,6 +66,12 @@ export class DbStack extends cdk.Stack {
       vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
       deletionProtection: false, 
     });
+
+    // allow db bootstrap lambda fn to connect to db
+    instance.connections.allowDefaultPortFrom(
+      props.dbBootstrapSecGrp, 
+      'from db bootstrap', 
+    );
     
     // allow ecs container traffic to db
     instance.connections.allowDefaultPortFrom(
@@ -107,12 +108,6 @@ export class DbStack extends cdk.Stack {
 
     this.dbInstanceJsonSecret = instance.secret!;
 
-    // create the jdbc url and test url secrets
-    // TODO make custom resource here
-    this.dbJdbcUrl = new ssm.StringParameter(this, 'dbJdbcUrl', {
-      stringValue: 'TODO'
-    });
-
     // stack output
     new cdk.CfnOutput(this, 'dbEndpoint', { value: 
       instance.dbInstanceEndpointAddress + ':' + instance.dbInstanceEndpointPort
@@ -120,11 +115,9 @@ export class DbStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: 
       this.dbInstanceJsonSecret!.secretArn
     });
-    new cdk.CfnOutput(this, 'dbJdbcUrlArn', { value: 
-      this.dbJdbcUrl.parameterArn
-    });
     new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value: 
       cloudWatchAlarm.alarmArn
     });
+
   }
 }

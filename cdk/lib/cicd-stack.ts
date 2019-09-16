@@ -6,25 +6,35 @@ import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
 import ecs = require('@aws-cdk/aws-ecs');
 import { EcsDeployAction } from '@aws-cdk/aws-codepipeline-actions';
 
-export interface ICicdProps extends cdk.StackProps {
+/**
+ * CICD stack config properties.
+ */
+export interface ICICDProps extends cdk.StackProps {
   /**
    * The VPC ref
    */
   readonly vpc: ec2.IVpc;
-
+  /**
+   * The aws codebuild security group ref.
+   */
   readonly codebuildSecGrp: ec2.ISecurityGroup;
-
+  /**
+   * The aws ecs fargate service ref.
+   */
   readonly fargateSvc: ecs.FargateService;
 }
 
 /**
- * Cicd Stack.
+ * CICD Stack.
  */
-export class CicdStack extends cdk.Stack {
+export class CICDStack extends cdk.Stack {
 
-  constructor(scope: cdk.Construct, id: string, props: ICicdProps) {
+  constructor(scope: cdk.Construct, id: string, props: ICICDProps) {
     super(scope, id, props);
 
+    // TODO finish
 
+    // stack output
+    // TODO
   }
 }
