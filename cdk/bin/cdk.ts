@@ -6,6 +6,7 @@ import { VpcStack } from '../lib/vpc-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
 import { DbStack } from '../lib/db-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
+import { DbDataStack } from '../lib/db-data-stack';
 import { ECSStack } from '../lib/ecs-stack';
 import { CICDStack } from '../lib/cicd-stack';
 
@@ -42,6 +43,12 @@ function createStacks() {
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
     targetRegion: devConfig.awsRegion, 
+  });
+  const dbDataStack = new DbDataStack(app, 'DbDataStack', {
+    tags: devConfig.instanceAttrs, 
+    vpc: vpcStack.vpc, 
+    dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
+    dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
   });
   const ecsStack = new ECSStack(app, 'ECSStack', {
     tags: devConfig.instanceAttrs, 
