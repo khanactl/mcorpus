@@ -84,8 +84,8 @@ def main(event, context):
           
             # run the db user roles file
             cursor.execute(open("mcorpus-roles.ddl", "r").read()
-              .replace("\{mcweb\}", mcweb)
-              .replace("\{mcwebtest\}", mcwebtest)
+              .replace("{mcweb}", mcweb)
+              .replace("{mcwebtest}", mcwebtest)
             )
             log.info('db user roles SQL file executed.')
 
