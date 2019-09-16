@@ -40,14 +40,14 @@ SET row_security = off;
 
 -- functions, stored procedure support
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+-- COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language'; (AWS complains so comment out)
 
 -- UUID support
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- CRYPTO and uuid support (https://www.postgresql.org/docs/9.6/static/pgcrypto.html)
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public VERSION "1.3";
-COMMENT ON EXTENSION pgcrypto IS 'pgcrypto v1.3';
+-- COMMENT ON EXTENSION pgcrypto IS 'pgcrypto v1.3'; (AWS complains so comment out)
 
 SET search_path = public, pg_catalog;
 

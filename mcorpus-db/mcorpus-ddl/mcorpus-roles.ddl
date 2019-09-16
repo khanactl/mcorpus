@@ -14,9 +14,9 @@
 --       as well as api login and logout.
 create role mcweb with 
   login 
-  encrypted password 'mcweb' 
+  encrypted password '{mcweb}' 
   connection limit 500 
-  valid until '2020-01-01';
+  valid until '2021-01-01';
 grant connect on database mcorpus to mcweb;
 -- mcorpus related
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcweb;
@@ -31,18 +31,20 @@ grant insert on mcuser_audit to mcweb;
 --			  beyond mcweb in order to accommodate db cleanup in audit tables.
 create role mcwebtest with 
   login 
-  encrypted password 'mcwebtest' 
-  connection limit 100 
-  valid until '2020-01-01';
+  encrypted password '{mcwebtest}' 
+  connection limit 5 
+  valid until '2021-01-01';
 grant connect on database mcorpus to mcwebtest;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcwebtest;
 grant select, insert, update, delete on mcuser, mcuser_audit, member_audit to mcwebtest;
 
 -- Role: mcadmin
 -- Desc: mcorpus db architect privileges - ddl create/drop
+/*
 create role mcadmin with 
   login 
-  encrypted password 'mcadmin' 
+  encrypted password '{mcadmin}' 
   connection limit 1 
-  valid until '2020-01-01';
+  valid until '2021-01-01';
 grant connect on database mcorpus to mcadmin;
+*/
