@@ -11,7 +11,16 @@ import { CICDStack } from '../lib/cicd-stack';
 
 const app = new cdk.App();
 
+// TODO check for existence of db stack in aws and if 
+//      present then do not generate db bootstrap lambda fn zip
+/*
 DbBootstrapStack.generateLambdaZipFile(() => {
+  createStacks();
+});
+*/
+createStacks();
+
+function createStacks() {
   // console.debug("Generating stacks..")
   const vpcStack = new VpcStack(app, 'VpcStack', {
     tags: devConfig.instanceAttrs, 
@@ -52,4 +61,4 @@ DbBootstrapStack.generateLambdaZipFile(() => {
     fargateSvc: ecsStack.fargateSvc, 
   });
   // console.debug("Stacks generated.")
-});
+}
