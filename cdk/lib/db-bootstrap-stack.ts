@@ -86,6 +86,9 @@ export class DbBootstrapStack extends cdk.Stack {
       })
       .file(path.join(__dirname, "../../mcorpus-db/mcorpus-ddl/mcorpus-roles.ddl"), {
         name: 'mcorpus-roles.ddl'
+      })
+      .file(path.join(__dirname, "../../mcorpus-db/mcorpus-ddl/mcorpus-mcuser.sql"), {
+        name: 'mcorpus-mcuser.sql'
       });
     
     // console.debug('generateLambdaZipFile() - END');

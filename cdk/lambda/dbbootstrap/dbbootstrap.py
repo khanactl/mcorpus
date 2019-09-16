@@ -89,6 +89,10 @@ def main(event, context):
             )
             log.info('db user roles SQL file executed.')
 
+            # run the db mcuser default records file
+            cursor.execute(open("mcorpus-mcuser.sql", "r").read())
+            log.info('db mcuser SQL file executed.')
+
             # commit
             conn.commit()
             log.info('db mutations committed.')
@@ -158,24 +162,27 @@ def main(event, context):
       responseData['SsmVersionJdbcUrl'] = ssmJdbcUrlVersion
       responseData['SsmVersionJdbcTestUrl'] = ssmJdbcTestUrlVersion
 
-      responseData['Message'] = 'Db bootstrapped ok.'
+      responseData['Message'] = 'Db bootstrap completed.'
+      log.info('Db bootstrap completed.')
 
-      log.info('Db bootstrapping complete.')
-      
       # CREATE success
       cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, physical_id)
+    
     # UPDATE
     elif event['RequestType'] == 'Update':
       log.info('UPDATE request')
       cfnresponse.send(event, context, cfnresponse.SUCCESS, {
         "Message": "Update is a no-op."
       }, physical_id)
+    
     # DELETE
     elif event['RequestType'] == 'Delete':
       log.info('DELETE request')
       cfnresponse.send(event, context, cfnresponse.SUCCESS, {
         "Message": "Delete is a no-op."
       }, physical_id)
+    
+    # default
     else:
       msg = "Unrecognized request type: {reqType}.".format(reqType = event['RequestType'])
       log.info("FAIL - {msg}".format(msg = msg))
