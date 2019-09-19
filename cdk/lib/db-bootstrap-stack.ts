@@ -135,16 +135,13 @@ export class DbBootstrapStack extends cdk.Stack {
     }));
     // END db bootstrap role
 
-    const uuidv4 = require('uuid/v4');
-    const crpId = uuidv4();
-
     const lambdaProvider = new lambda.SingletonFunction(this, 'DbBootstrapLambda', {
       vpc: props.vpc, 
       vpcSubnets: { subnetType: SubnetType.PRIVATE }, 
       securityGroup: props.dbBootstrapSecGrp, 
-      uuid: crpId, 
+      uuid: 'f8dfc6d4-d864-4f4f-8d65-63c2ea54f2ac', // one-time globaly unique 
       runtime: lambda.Runtime.PYTHON_3_7, 
-      functionName: 'DbBootstrapLambda', 
+      // functionName: 'DbBootstrapLambda', 
       memorySize: 128, 
       timeout: cdk.Duration.seconds(60), 
       code: lambda.Code.fromAsset(
