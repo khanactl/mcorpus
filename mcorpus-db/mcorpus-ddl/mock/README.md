@@ -2,6 +2,8 @@
 Herein are the genmock groovy scripts that generate mock member data csv records
 and the *baseline mock member csv data* files zipped in the mock-mcorpus-data.zip file.
 
+The [mock-mcorpus-data.zip](https://mcorpus-db-data-bucket.s3-us-west-2.amazonaws.com/mock-mcorpus-data.zip) was removed from SCM and now lives in an AWS S3 bucket.
+
 ## mock-mcorpus-data.zip contents
 There are three csv files that together comprise mock member data.  
 
