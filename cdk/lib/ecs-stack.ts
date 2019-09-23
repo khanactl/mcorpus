@@ -30,7 +30,7 @@ export interface IECSProps extends cdk.StackProps {
    */
   readonly lbToEcsPort: number;
 
-  readonly ssmKmsArn: string;
+  // readonly ssmKmsArn: string;
   
   readonly ssmJdbcUrl: IStringParameter;
 
@@ -39,6 +39,12 @@ export interface IECSProps extends cdk.StackProps {
   readonly lbSecGrp: ISecurityGroup;
 
   readonly ecsSecGrp: ISecurityGroup;
+
+  readonly webAppUrl: string;
+  /**
+   * The JAVA_OPTS docker container env var value to use.
+   */
+  readonly javaOpts: string;
 }
 
 /**
@@ -56,25 +62,26 @@ export class ECSStack extends cdk.Stack {
     // generate JWT salt ssm param
     const rhs = crypto.randomBytes(32).toString('hex');
     const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, 'jwtSalt', {
+      parameterName: '/jwtSalt', 
       stringValue: rhs, 
     });
 
     // ECS/Fargate task execution role
     const ssmAccess = new iam.PolicyStatement({
       actions: [ 
-        'kms:Decript', 
+        /*
+        'kms:Decrypt', 
         'kms:DescribeKey',
         'kms:DescribeParamters',
         'kms:GetParamters',
+        */
         'ssm:GetParameter',
-        'ssm:GetParameters',
-        // TODO add for secrets manager
       ],
       resources: [
         props.ssmJdbcUrl.parameterArn,
         props.ssmJdbcTestUrl.parameterArn,
         jwtSalt.parameterArn, 
-        props.ssmKmsArn, 
+        // props.ssmKmsArn, // TODO fix
       ],
     });
     this.ecsTaskExecutionRole = new iam.Role(this, 'ecsTaskExecutionRole', {
@@ -83,7 +90,6 @@ export class ECSStack extends cdk.Stack {
     this.ecsTaskExecutionRole.addManagedPolicy({
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
     });
-    ssmAccess.effect = iam.Effect.ALLOW;
     this.ecsTaskExecutionRole.addToPolicy(ssmAccess);
     
     // task def
@@ -96,8 +102,7 @@ export class ECSStack extends cdk.Stack {
 
     const containerDef = taskDef.addContainer('mcorpus-fargate-container', {
       image: ecs.ContainerImage.fromAsset(
-        path.join(__dirname, "..", "..", "mcorpus-gql", "target")
-        // '../mcorpus-gql/target'
+        path.join(__dirname, "../../mcorpus-gql/target")
       ), 
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
@@ -107,10 +112,10 @@ export class ECSStack extends cdk.Stack {
         retries: 3, 
       },
       memoryLimitMiB: 900,  
-      memoryReservationMiB: 800, 
+      memoryReservationMiB: 500, 
       essential: true, 
       environment: { 
-        'JAVA_OPTS' : '-server -Xms100M -Xmx1000M -Djava.net.preferIPv4Stack=true -Dlog4j.configurationFile=log4j2-aws.xml -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -cp log4j-api-2.11.2.jar:log4j-core-2.11.2.jar:log4j-slf4j-impl-2.11.2.jar:disruptor-3.4.2.jar', 
+        'JAVA_OPTS' : props.javaOpts, 
         'MCORPUS_COOKIE_SECURE' : 'true', 
         'MCORPUS_DB_DATA_SOURCE_CLASS_NAME' : 'org.postgresql.ds.PGSimpleDataSource', 
         'MCORPUS_JWT_STATUS_CACHE_MAX_SIZE' : '60', 
@@ -118,13 +123,14 @@ export class ECSStack extends cdk.Stack {
         'MCORPUS_JWT_TTL_IN_SECONDS' : '172800', 
         'MCORPUS_SERVER__DEVELOPMENT' : 'false', 
         'MCORPUS_SERVER__PORT' : `${props.lbToEcsPort}`, 
-        'MCORPUS_SERVER__PUBLIC_ADDRESS' : 'https://www.mcorpus-aws.net', 
+        'MCORPUS_SERVER__PUBLIC_ADDRESS' : props.webAppUrl, 
       }, 
       secrets: {
         'MCORPUS_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcUrl), 
         'MCORPUS_TEST_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcTestUrl), 
         'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt), 
-      }
+      }, 
+      logging: new ecs.AwsLogDriver({ streamPrefix: 'mcorpus-fargate-webapp' }), 
     });
     containerDef.addPortMappings({ 
       containerPort: props.lbToEcsPort, 
@@ -194,8 +200,17 @@ export class ECSStack extends cdk.Stack {
     this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
 
     // stack output
-    new cdk.CfnOutput(this, 'fargateSvcArn', { value: 
-      this.fargateSvc.serviceArn
+    new cdk.CfnOutput(this, 'loadBalancerDnsName', { value: 
+      alb.loadBalancerDnsName
+    });
+    new cdk.CfnOutput(this, 'fargateTaskExecRoleName', { value: 
+      this.ecsTaskExecutionRole.roleName
+    });
+    new cdk.CfnOutput(this, 'fargateTaskDefArn', { value: 
+      taskDef.taskDefinitionArn
+    });
+    new cdk.CfnOutput(this, 'fargateServiceName', { value: 
+      this.fargateSvc.serviceName
     });
     
   }

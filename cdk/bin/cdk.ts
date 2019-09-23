@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import { devConfig } from './mcorpus-cdk-config'
+
 import cdk = require('@aws-cdk/core');
+
 import { VpcStack } from '../lib/vpc-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
 import { DbStack } from '../lib/db-stack';
@@ -10,62 +11,63 @@ import { DbDataStack } from '../lib/db-data-stack';
 import { ECSStack } from '../lib/ecs-stack';
 import { CICDStack } from '../lib/cicd-stack';
 
+import { appConfig } from './mcorpus-cdk-config';
+
 const app = new cdk.App();
 
-// TODO check for existence of db stack in aws and if 
-//      present then do not generate db bootstrap lambda fn zip
-/*
-DbBootstrapStack.generateLambdaZipFile(() => {
-  createStacks();
-});
-*/
 createStacks();
 
 function createStacks() {
   // console.debug("Generating stacks..")
   const vpcStack = new VpcStack(app, 'VpcStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
   });
   const secGrpStack = new SecGrpStack(app, 'SecGrpStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
-    lbTrafficPort: devConfig.lbToAppPort, 
+    lbTrafficPort: appConfig.lbToAppPort, 
   });
   const dbStack = new DbStack(app, 'DbStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
     ecsSecGrp: secGrpStack.ecsSecGrp, 
   });
   const dbBootstrapStack = new DbBootstrapStack(app, 'DbBootstrapStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
-    targetRegion: devConfig.awsRegion, 
+    targetRegion: appConfig.awsRegion, 
   });
   const dbDataStack = new DbDataStack(app, 'DbDataStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
-    dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
+    dbDataSecGrp: secGrpStack.dbBootstrapSecGrp, 
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
+    // s3KmsEncKeyArn: appConfig.ssmKmsArn
   });
   const ecsStack = new ECSStack(app, 'ECSStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
-    lbToEcsPort: devConfig.lbToAppPort, 
-    sslCertArn: devConfig.tlsCertArn, 
-    ssmKmsArn: devConfig.ssmKmsArn, 
+    lbToEcsPort: appConfig.lbToAppPort, 
+    sslCertArn: appConfig.tlsCertArn, 
+    // ssmKmsArn: appConfig.ssmKmsArn, 
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl, 
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl, 
     ecsSecGrp: secGrpStack.ecsSecGrp, 
-    lbSecGrp: secGrpStack.lbSecGrp
+    lbSecGrp: secGrpStack.lbSecGrp, 
+    webAppUrl: appConfig.webAppUrl, 
+    javaOpts: appConfig.javaOpts, 
   });
+  /*
   const cicdStack = new CICDStack(app, 'CICDStack', {
-    tags: devConfig.instanceAttrs, 
+    tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
     codebuildSecGrp: secGrpStack.codebuildSecGrp, 
     fargateSvc: ecsStack.fargateSvc, 
+    cicdDeployApprovalEmails: appConfig.cicdDeployApprovalEmails, 
   });
+  */
   // console.debug("Stacks generated.")
 }

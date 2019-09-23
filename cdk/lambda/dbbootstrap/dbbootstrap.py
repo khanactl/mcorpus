@@ -80,22 +80,23 @@ def main(event, context):
 
             # run the schema DDL file
             cursor.execute(open("mcorpus-schema.ddl", "r").read())
-            log.info('db schema DDL file executed.')
+            log.info('db schema DDL file executed')
           
             # run the db user roles file
             cursor.execute(open("mcorpus-roles.ddl", "r").read()
               .replace("{mcweb}", mcweb)
               .replace("{mcwebtest}", mcwebtest)
             )
-            log.info('db user roles SQL file executed.')
+            log.info('db user roles SQL file executed')
 
-            # run the db mcuser default records file
-            cursor.execute(open("mcorpus-mcuser.sql", "r").read())
-            log.info('db mcuser SQL file executed.')
+            # insert the default mcuser records
+            with open("mcorpus-mcuser.csv", 'r') as f:
+              cursor.copy_expert("COPY mcuser from STDIN CSV HEADER NULL '\\N';", f)
+            log.info('default mcuser records inserted')
 
             # commit
             conn.commit()
-            log.info('db mutations committed.')
+            log.info('db mutations committed')
 
           except Exception as e:
             log.error(e)
@@ -128,8 +129,8 @@ def main(event, context):
             region_name = region_name
           )
 
-          ssmNameJdbcUrl = 'mcorpusDbUrl'
-          ssmNameJdbcTestUrl = 'mcorpusTestDbUrl'
+          ssmNameJdbcUrl = '/mcorpusDbUrl'  # NOTE: must use '/pname' (not 'pname') format!
+          ssmNameJdbcTestUrl = '/mcorpusTestDbUrl'
 
           # generate ssm jdbc url
           ssmResponseJdbcUrl = ssmClient.put_parameter(

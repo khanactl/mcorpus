@@ -41,60 +41,6 @@ export interface IDbBootstrapProps extends cdk.StackProps {
  */
 export class DbBootstrapStack extends cdk.Stack {
 
-  public static async generateLambdaZipFile(onZipCompleteFn: Function): Promise<void> {
-    // console.debug('generateLambdaZipFile() - START');
-    // generate lambda zip file
-    const zipFilePath = path.join(__dirname, "../cdk.out/dbbootstrap.zip");
-    const output = fs.createWriteStream(zipFilePath);
-    const archive = archiver('zip', {
-      zlib: { level: 9 } // Sets the compression level.
-    });
-    output.on('close', function() {
-      console.log(
-        'Db bootstrap lambda fn zip file created (%d total bytes): %s', 
-        archive.pointer(), zipFilePath
-      );
-      // here and only here may we proceed as we now know the zip file exists on disk
-      onZipCompleteFn();
-    });
-    /*
-    output.on('end', function() {
-      console.log('Data has been drained');
-    });
-    */
-    archive
-      .on('warning', function(err) {
-        if (err.code === 'ENOENT') {
-          // log warning
-          console.log(err);
-        } else {
-          // throw error
-          throw err;
-        }
-      })
-      .on('error', function(err) {
-        throw err;
-      })
-      .pipe(output);
-
-    archive
-      // add main dbbootstrap lambda dir
-      .directory(path.join(__dirname, "../lambda/dbbootstrap"), false)
-      // add db schema and db roles files
-      .file(path.join(__dirname, "../../mcorpus-db/mcorpus-ddl/mcorpus-schema.ddl"), {
-        name: 'mcorpus-schema.ddl'
-      })
-      .file(path.join(__dirname, "../../mcorpus-db/mcorpus-ddl/mcorpus-roles.ddl"), {
-        name: 'mcorpus-roles.ddl'
-      })
-      .file(path.join(__dirname, "../../mcorpus-db/mcorpus-ddl/mcorpus-mcuser.sql"), {
-        name: 'mcorpus-mcuser.sql'
-      });
-    
-    // console.debug('generateLambdaZipFile() - END');
-    return archive.finalize();
-  }
-
   public readonly dbBootstrapRole: iam.Role;
   
   public readonly ssmNameJdbcUrl: string;
@@ -145,7 +91,7 @@ export class DbBootstrapStack extends cdk.Stack {
       memorySize: 128, 
       timeout: cdk.Duration.seconds(60), 
       code: lambda.Code.fromAsset(
-        path.join(__dirname, "../cdk.out/dbbootstrap.zip")
+        path.join(__dirname, "../lambda/dbbootstrap") // dir ref
       ), 
       handler: 'dbbootstrap.main', 
       role: this.dbBootstrapRole, 

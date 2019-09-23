@@ -9,6 +9,10 @@ There are three csv files that together comprise mock member data.
 
 *All csv files are comma-delimited and each value may or may not be quoted with a double-quote character.*  
 
+*NULL values are denoted by '\N' in the csv files.*  
+
+*timestamp values may be denoted by 'now'*  
+
 1. **member.csv**  
    Contains header row:  
    `mid,created,modified,emp_id,location,name_first,name_middle,name_last,display_name,status`
