@@ -149,13 +149,6 @@
                     <include>dockerbuild.sh</include>
                   </includes>
                 </resource>
-                <resource>
-                  <directory>src/main/assembly/aws</directory>
-                  <filtering>false</filtering>
-                  <includes>
-                    <include>*.sh</include>
-                  </includes>
-                </resource>
               </resources>
             </configuration>
           </execution>
@@ -235,29 +228,6 @@
         </executions>
       </plugin>
       
-      <!-- aws zip assembly -->
-      <!--
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <appendAssemblyId>true</appendAssemblyId>
-              <attach>false</attach>
-              <descriptors>
-                <descriptor>src/main/assembly/aws/aws-zip.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      -->
-
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
