@@ -1,0 +1,6 @@
+uid,created,modified,name,email,username,pswd,status,roles
+5fa4626a-6bcf-4975-b134-0a89190b6d80,now,\N,JPK,jpucop@gmail.com,jp,$2a$06$1JocFFXBmVabkaya8wd3e.NiYxH92kjNj/eQ1DvCC.ZD9yaDa9NKq,ACTIVE,{ADMIN}
+3bb05a05-44f4-4cb8-b396-ba69465f8c5a,now,\N,MEMBER,member@mcorpus.edu,member,$2a$06$eIiyv36hv8pFkzyD3dhPlODmcJNsOoHZebqkxtbiLeXukv2LGCKd6,ACTIVE,{MEMBER}
+0ee2b7ba-1491-4b73-9409-363071185460,now,\N,MCORPUS,mcorpus@mcorpus.edu,mcorpus,$2a$06$nwnhMiGj3rCoH6FiOuCZHejtxaEQsrDulBLyZ2jcGFI7rD.M4Cmey,ACTIVE,{MCORPUS}
+ddea0485-0448-4e8c-b2d6-b04c209d8a48,now,\N,AWS Demo user,admin@mcorpus.edu,demo,$2a$06$y1BiZvE3h/v5WxrUgTNik.gYQYea2uUcd4tGKKiuxd3KifZFSxCLS,ACTIVE,"{MCORPUS,MPII}"
+46865820-0c86-4d95-986c-13de02d9f778,now,\N,Load test,admin@mcorpus.edu,loadtest,$2a$06$XcOXny1RDifiFGQbV0NnkOCZaCaOJSwO/ieozj8LWt8Ot1vOesHDO,ACTIVE,"{MCORPUS,MPII}"
