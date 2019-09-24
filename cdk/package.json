@@ -27,7 +27,7 @@
     "@aws-cdk/core": "^1.9.0",
     "@types/archiver": "^3.0.0",
     "archiver": "^3.1.1",
-    "aws-sdk": "^2.533.0",
+    "aws-sdk": "^2.534.0",
     "npm-check-updates": "^3.1.23",
     "source-map-support": "^0.5.13",
     "uuid": "^3.3.3"
