@@ -59,15 +59,19 @@ function createStacks() {
     lbSecGrp: secGrpStack.lbSecGrp, 
     webAppUrl: appConfig.webAppUrl, 
     javaOpts: appConfig.javaOpts, 
+    publicDomainName: appConfig.publicDomainName, 
   });
-  /*
   const cicdStack = new CICDStack(app, 'CICDStack', {
+    githubOwner: appConfig.githubOwner, 
+    githubRepo: appConfig.githubRepo, 
+    githubOauthTokenSecretName: appConfig.githubOauthTokenSecretName, 
     tags: appConfig.instanceAttrs, 
     vpc: vpcStack.vpc, 
     codebuildSecGrp: secGrpStack.codebuildSecGrp, 
     fargateSvc: ecsStack.fargateSvc, 
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl, 
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl, 
     cicdDeployApprovalEmails: appConfig.cicdDeployApprovalEmails, 
   });
-  */
   // console.debug("Stacks generated.")
 }

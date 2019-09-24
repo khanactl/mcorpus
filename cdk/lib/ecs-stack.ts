@@ -4,6 +4,7 @@ import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ssm = require('@aws-cdk/aws-ssm');
+import r53 = require('@aws-cdk/aws-route53');
 import { ISecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { FargatePlatformVersion, FargateService, EcrImage } from '@aws-cdk/aws-ecs';
@@ -13,6 +14,7 @@ import path = require('path');
 import ecr = require('@aws-cdk/aws-ecr');
 import * as crypto from 'crypto';
 import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
+import alias = require('@aws-cdk/aws-route53-targets')
 
 /**
  * ECS Stack config properties.
@@ -33,20 +35,41 @@ export interface IECSProps extends cdk.StackProps {
   readonly lbToEcsPort: number;
 
   // readonly ssmKmsArn: string;
-  
+  /**
+   * The SSM secure param of the web app jdbc url to the backend db.
+   */
   readonly ssmJdbcUrl: IStringParameter;
-
+  /**
+   * The SSM secure param of the web app jdbc url to the backend db.
+   */
   readonly ssmJdbcTestUrl: IStringParameter;
-  
+  /**
+   * The load balancer security group ref.
+   */  
   readonly lbSecGrp: ISecurityGroup;
-
+  /**
+   * The ECS/Fargate container security group ref.
+   */  
   readonly ecsSecGrp: ISecurityGroup;
-
+  /**
+   * The web app domain name URL used for server-issued http 302 redirects 
+   * and cookie/jwt verifications.
+   */
   readonly webAppUrl: string;
   /**
    * The JAVA_OPTS docker container env var value to use.
    */
   readonly javaOpts: string;
+  /**
+   * The domain name registered in AWS Route53 and the one used for this web app.
+   * 
+   * This will connect the public to this app!
+   */
+  readonly publicDomainName?: string;
+  /**
+   * The AWS Route53 Hosted Zone Id.
+   */
+  readonly awsHostedZoneId?: string;
 }
 
 /**
@@ -98,7 +121,7 @@ export class ECSStack extends cdk.Stack {
     // ecr repo
     const dockerAsset = new DockerImageAsset(this, 'mcorpus-docker-asset', {
       directory: path.join(__dirname, "../../mcorpus-gql/target"), 
-      repositoryName: 'mcorpus', 
+      repositoryName: 'mcorpus-gql', 
     });
     this.ecrRepo = dockerAsset.repository;
 
@@ -111,11 +134,6 @@ export class ECSStack extends cdk.Stack {
     });
 
     const containerDef = taskDef.addContainer('mcorpus-fargate-container', {
-      /*
-      image: ecs.ContainerImage.fromAsset(
-        path.join(__dirname, "../../mcorpus-gql/target")
-      ),
-      */
      image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo), 
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
@@ -186,29 +204,6 @@ export class ECSStack extends cdk.Stack {
       // defaultTargetGroups: []
     });
 
-    /*
-    const albTargetGroup = new elb.ApplicationTargetGroup(this, 'alb-target-group', {
-      vpc: props.vpc,
-      healthCheck: {
-        // port: String(props.innerPort),
-        protocol: elb.Protocol.HTTP,
-        path: '/health',
-        port: 'traffic-port',
-        healthyThresholdCount: 5,
-        unhealthyThresholdCount: 2,
-        timeout: Duration.seconds(20),
-        interval: Duration.seconds(120),
-      },
-      port: props.lbToEcsPort,
-      protocol: ApplicationProtocol.HTTP,
-      targetType: TargetType.IP
-    });
-    */
-    /*
-    listener.addTargetGroups('app-lb-tgtrp', {
-      targetGroups: [ albTargetGroup ], 
-    });
-    */
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
     const albTargetGroup = listener.addTargets('mcorpus-fargate-target', {
@@ -232,11 +227,30 @@ export class ECSStack extends cdk.Stack {
     // ****************************
     // *** END inline load balancer ***
     // ****************************
+
+    // DNS bind load balancer to domain name record
+    if(props.awsHostedZoneId && props.publicDomainName) {
+      console.log('Binding load balancer DNS in Route53..');
+      const hostedZone = r53.HostedZone.fromHostedZoneId(
+        this, 
+        'mcorpus-hostedzone', 
+        props.awsHostedZoneId, 
+      );
+      const arecord = new r53.ARecord(this, 'arecord', {
+        recordName: props.publicDomainName, 
+        zone: hostedZone, 
+        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(alb)), 
+      });
+      // dns specific stack output
+      new cdk.CfnOutput(this, 'HostedZone', { value: 
+        hostedZone.hostedZoneId
+      });
+      new cdk.CfnOutput(this, 'ARecord', { value: 
+        arecord.domainName
+      });
+    }
     
     // stack output
-    new cdk.CfnOutput(this, 'loadBalancerDnsName', { value: 
-      alb.loadBalancerDnsName
-    });
     new cdk.CfnOutput(this, 'fargateTaskExecRoleName', { value: 
       this.ecsTaskExecutionRole.roleName
     });
@@ -245,6 +259,9 @@ export class ECSStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, 'fargateServiceName', { value: 
       this.fargateSvc.serviceName
+    });
+    new cdk.CfnOutput(this, 'loadBalancerDnsName', { value: 
+      alb.loadBalancerDnsName
     });
     
   }

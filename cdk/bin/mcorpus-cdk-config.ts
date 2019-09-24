@@ -8,6 +8,12 @@
  * @author jpk
  */
 export interface IMcorpusCdkAppConfig {
+  readonly githubOwner: string;
+  readonly githubRepo: string;
+  /**
+   * The name of the SecretsManager entry holding the GitHub OAuth access token.
+   */
+  readonly githubOauthTokenSecretName: string;
   /**
    * The AWS account in which to create the app CDK stacks.
    */
@@ -41,6 +47,18 @@ export interface IMcorpusCdkAppConfig {
    */
   readonly javaOpts: string;
   /**
+   * DNS domain name (optional).
+   * 
+   * Connect the load balancer to an AWS Route53 hosted zone registered domain name.
+   * 
+   * This is for inbound public web app traffic.
+   */
+  readonly publicDomainName?: string;
+  /**
+   * The AWS Route53 Hosted Zone Id (optional).
+   */
+  readonly awsHostedZoneId?: string;
+  /**
    * The KMS ARN to use for generating SSM secure parameters.
    */
   // readonly ssmKmsArn: string;
@@ -55,6 +73,9 @@ export interface IMcorpusCdkAppConfig {
  * ==================================
  */
 export const appConfig: IMcorpusCdkAppConfig = {
+  githubOwner: 'khanactl', 
+  githubRepo: 'mcorpus', 
+  githubOauthTokenSecretName: 'mcorpus-github-oauth-token', 
   awsAccountId: '524006177124', 
   awsRegion: 'us-west-2', 
   instanceAttrs: {
@@ -65,6 +86,8 @@ export const appConfig: IMcorpusCdkAppConfig = {
   tlsCertArn: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a', 
   webAppUrl: 'https://www.mcorpus-aws.net', 
   javaOpts: '-server -Xms100M -Xmx1000M -Djava.net.preferIPv4Stack=true -Dlog4j.configurationFile=log4j2-aws.xml -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -cp log4j-api-2.12.1.jar:log4j-core-2.12.1.jar:log4j-slf4j-impl-2.12.1.jar:disruptor-3.4.2.jar', 
+  publicDomainName: 'mcorpus-aws.net', 
+  awsHostedZoneId: 'Z1FUM5HD37QRP1', 
   cicdDeployApprovalEmails: [
     'jpucop@gmail.com', 
   ]
