@@ -6,11 +6,13 @@ import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ssm = require('@aws-cdk/aws-ssm');
 import { ISecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
-import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
+import { FargatePlatformVersion, FargateService, EcrImage } from '@aws-cdk/aws-ecs';
 import { ApplicationProtocol, SslPolicy, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { Duration } from '@aws-cdk/core';
 import path = require('path');
+import ecr = require('@aws-cdk/aws-ecr');
 import * as crypto from 'crypto';
+import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
 
 /**
  * ECS Stack config properties.
@@ -52,6 +54,8 @@ export interface IECSProps extends cdk.StackProps {
  */
 export class ECSStack extends cdk.Stack {
 
+  public readonly ecrRepo: ecr.IRepository;
+
   public readonly ecsTaskExecutionRole: iam.Role;
   
   public readonly fargateSvc: FargateService;
@@ -67,7 +71,13 @@ export class ECSStack extends cdk.Stack {
     });
 
     // ECS/Fargate task execution role
-    const ssmAccess = new iam.PolicyStatement({
+    this.ecsTaskExecutionRole = new iam.Role(this, 'ecsTaskExecutionRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
+    });
+    this.ecsTaskExecutionRole.addManagedPolicy({
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+    });
+    this.ecsTaskExecutionRole.addToPolicy(new iam.PolicyStatement({
       actions: [ 
         /*
         'kms:Decrypt', 
@@ -83,15 +93,15 @@ export class ECSStack extends cdk.Stack {
         jwtSalt.parameterArn, 
         // props.ssmKmsArn, // TODO fix
       ],
+    }));
+
+    // ecr repo
+    const dockerAsset = new DockerImageAsset(this, 'mcorpus-docker-asset', {
+      directory: path.join(__dirname, "../../mcorpus-gql/target"), 
+      repositoryName: 'mcorpus', 
     });
-    this.ecsTaskExecutionRole = new iam.Role(this, 'ecsTaskExecutionRole', {
-      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
-    });
-    this.ecsTaskExecutionRole.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-    });
-    this.ecsTaskExecutionRole.addToPolicy(ssmAccess);
-    
+    this.ecrRepo = dockerAsset.repository;
+
     // task def
     const taskDef = new ecs.FargateTaskDefinition(this, 'mcorpus-gql', {
       cpu: 256,
@@ -101,9 +111,12 @@ export class ECSStack extends cdk.Stack {
     });
 
     const containerDef = taskDef.addContainer('mcorpus-fargate-container', {
+      /*
       image: ecs.ContainerImage.fromAsset(
         path.join(__dirname, "../../mcorpus-gql/target")
-      ), 
+      ),
+      */
+     image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo), 
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
         interval: Duration.seconds(120), 
@@ -149,9 +162,10 @@ export class ECSStack extends cdk.Stack {
       assignPublicIp: false,
       healthCheckGracePeriod: Duration.seconds(15),
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
-      serviceName: 'mcorpus-fargate-service',
+      // serviceName: 'mcorpus-fargate-service',
       platformVersion: FargatePlatformVersion.LATEST, 
-      securityGroup: props.ecsSecGrp
+      securityGroup: props.ecsSecGrp, 
+      
     });
 
     // ****************************
@@ -172,6 +186,7 @@ export class ECSStack extends cdk.Stack {
       // defaultTargetGroups: []
     });
 
+    /*
     const albTargetGroup = new elb.ApplicationTargetGroup(this, 'alb-target-group', {
       vpc: props.vpc,
       healthCheck: {
@@ -188,17 +203,36 @@ export class ECSStack extends cdk.Stack {
       protocol: ApplicationProtocol.HTTP,
       targetType: TargetType.IP
     });
-
+    */
+    /*
     listener.addTargetGroups('app-lb-tgtrp', {
-      targetGroups: [ albTargetGroup ]
+      targetGroups: [ albTargetGroup ], 
+    });
+    */
+    // bind load balancing target to lb group
+    // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
+    const albTargetGroup = listener.addTargets('mcorpus-fargate-target', {
+      // targetGroupName: '', 
+      port: props.lbToEcsPort, 
+      targets: [
+        this.fargateSvc, 
+      ], 
+      healthCheck: {
+        // port: String(props.innerPort),
+        protocol: elb.Protocol.HTTP,
+        path: '/health',
+        port: 'traffic-port',
+        healthyThresholdCount: 5,
+        unhealthyThresholdCount: 2,
+        timeout: Duration.seconds(20),
+        interval: Duration.seconds(120),
+      },
+      protocol: ApplicationProtocol.HTTP, 
     });
     // ****************************
     // *** END inline load balancer ***
     // ****************************
     
-    // bind load balancing target to lb group
-    this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
-
     // stack output
     new cdk.CfnOutput(this, 'loadBalancerDnsName', { value: 
       alb.loadBalancerDnsName
