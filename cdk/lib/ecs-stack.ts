@@ -230,14 +230,16 @@ export class ECSStack extends cdk.Stack {
 
     // DNS bind load balancer to domain name record
     if(props.awsHostedZoneId && props.publicDomainName) {
-      console.log('Binding load balancer DNS in Route53..');
-      const hostedZone = r53.HostedZone.fromHostedZoneId(
-        this, 
-        'mcorpus-hostedzone', 
-        props.awsHostedZoneId, 
+      console.log('Load balancer DNS will be bound in Route53.');
+      const hostedZone = r53.HostedZone.fromHostedZoneAttributes(
+        this, 'mcorpus-hostedzone', {
+          hostedZoneId: props.awsHostedZoneId, 
+          zoneName: props.publicDomainName, 
+        }
       );
+      // NOTE: arecord creation will fail if it already exists
       const arecord = new r53.ARecord(this, 'arecord', {
-        recordName: props.publicDomainName, 
+        recordName: 'www.' + props.publicDomainName, 
         zone: hostedZone, 
         target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(alb)), 
       });

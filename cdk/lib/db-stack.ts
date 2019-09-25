@@ -14,16 +14,29 @@ export interface IDbProps extends cdk.StackProps {
    * The VPC ref
    */
   readonly vpc: IVpc;
-
+  /**
+   * The db bootstrap security group ref.
+   */
   readonly dbBootstrapSecGrp: ISecurityGroup;
-
+  /**
+   * The ECS/Fargate security group ref.
+   */
   readonly ecsSecGrp: ISecurityGroup;
+  /**
+   * The CICD codebuild security group ref.
+   */
+  readonly codebuildSecGrp: ISecurityGroup;
 }
 
 /**
  * Db Stack.
  */
 export class DbStack extends cdk.Stack {
+
+  /**
+   * The RDS db security group.
+   */
+  public readonly dbSecGrp: ec2.ISecurityGroup;
 
   /**
    * The master db instance json db instance secret.
@@ -77,6 +90,12 @@ export class DbStack extends cdk.Stack {
     instance.connections.allowDefaultPortFrom(
       props.ecsSecGrp, 
       'from ecs container', // NOTE: connections construct resolves to a db specific sec grp!
+    );
+
+    // allow codebuild traffic to db
+    instance.connections.allowDefaultPortFrom(
+      props.codebuildSecGrp, 
+      'from codebuild', 
     );
 
     // Rotate the master user password every 30 days

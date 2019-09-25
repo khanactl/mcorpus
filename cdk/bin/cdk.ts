@@ -32,6 +32,7 @@ function createStacks() {
     vpc: vpcStack.vpc, 
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
     ecsSecGrp: secGrpStack.ecsSecGrp, 
+    codebuildSecGrp: secGrpStack.codebuildSecGrp, 
   });
   const dbBootstrapStack = new DbBootstrapStack(app, 'DbBootstrapStack', {
     tags: appConfig.instanceAttrs, 
@@ -60,6 +61,7 @@ function createStacks() {
     webAppUrl: appConfig.webAppUrl, 
     javaOpts: appConfig.javaOpts, 
     publicDomainName: appConfig.publicDomainName, 
+    awsHostedZoneId: appConfig.awsHostedZoneId, 
   });
   const cicdStack = new CICDStack(app, 'CICDStack', {
     githubOwner: appConfig.githubOwner, 
