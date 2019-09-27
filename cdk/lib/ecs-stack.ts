@@ -126,14 +126,14 @@ export class ECSStack extends cdk.Stack {
     this.ecrRepo = dockerAsset.repository;
 
     // task def
-    const taskDef = new ecs.FargateTaskDefinition(this, 'mcorpus-gql', {
+    const taskDef = new ecs.FargateTaskDefinition(this, 'mcorpus-gql-taskdef', {
       cpu: 256,
       memoryLimitMiB: 1024,
       taskRole: this.ecsTaskExecutionRole, 
       executionRole: this.ecsTaskExecutionRole, 
     });
 
-    const containerDef = taskDef.addContainer('mcorpus-fargate-container', {
+    const containerDef = taskDef.addContainer('mcorpus-gql', {
      image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo), 
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],

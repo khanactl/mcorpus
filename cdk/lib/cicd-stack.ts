@@ -4,11 +4,13 @@ import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
 import ecs = require('@aws-cdk/aws-ecs');
+import s3 = require('@aws-cdk/aws-s3');
 import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
 import { SubnetType } from '@aws-cdk/aws-ec2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import iam = require('@aws-cdk/aws-iam');
 import sns = require('@aws-cdk/aws-sns');
+import { BlockPublicAccess } from '@aws-cdk/aws-s3';
 
 /**
  * CICD stack config properties.
@@ -84,7 +86,7 @@ export class CICDStack extends cdk.Stack {
     });
     
     // codebuild/pipeline ssm access
-    const ssmPolicyStatement = new iam.PolicyStatement({
+    codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "ssm:GetParameters",
         "ssm:GetParameter", 
@@ -93,9 +95,8 @@ export class CICDStack extends cdk.Stack {
         props.ssmJdbcUrl.parameterArn, 
         props.ssmJdbcTestUrl.parameterArn, 
       ], 
-    });
-    codebuildProject.addToRolePolicy(ssmPolicyStatement);
-    // codebuild/pipeline AmazonEC2ContainerRegistryPowerUser
+    }));
+    // AmazonEC2ContainerRegistryPowerUser managed role privs
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "ecr:GetAuthorizationToken",
@@ -115,20 +116,70 @@ export class CICDStack extends cdk.Stack {
         "*" // TODO limit scope!
       ], 
     }));
-    // codebuild list-secrets and get-secret-value privileges (for exec of jboss-db-enc.sh)
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
-        "secretsmanager:ListSecrets", 
-        "secretsmanager:GetSecretValue", 
+        "s3:PutObject",
+        "s3:GetObject",
+        "logs:CreateLogStream",
+        "s3:GetBucketAcl",
+        "s3:GetBucketLocation",
+        "logs:CreateLogGroup",
+        "logs:PutLogEvents",
+        "s3:GetObjectVersion"
       ], 
       resources: [
         "*" // TODO limit scope!
-      ]
+      ], 
+    }));
+    codebuildProject.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeDhcpOptions",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeVpcs", 
+        "ec2:CreateNetworkInterface",
+      ], 
+      resources: [
+        "*" // TODO limit scope!
+      ], 
+    }));
+    codebuildProject.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "ec2:CreateNetworkInterfacePermission"
+      ], 
+      resources: [
+        "arn:aws:ec2:us-west-2:524006177124:network-interface/*"
+      ],
+      /*
+      conditions: [
+        {
+          "StringEquals": {
+            "ec2:Subnet": [
+                "arn:aws:ec2:us-west-2:524006177124:subnet/*"
+            ],
+            "ec2:AuthorizedService": "codebuild.amazonaws.com"
+          }
+        }
+      ] 
+      */
+    }));
+    codebuildProject.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ], 
+      resources: [
+        "*" // TODO limit scope!
+      ], 
     }));
 
     const buildOutput = new codepipeline.Artifact();
     const buildAction = new codepipeline_actions.CodeBuildAction({
-      actionName: 'Build', 
+      actionName: 'Build-Test', 
       project: codebuildProject, 
       input: sourceOutput, 
       outputs: [ buildOutput ], 
@@ -149,6 +200,13 @@ export class CICDStack extends cdk.Stack {
       imageFile: buildOutput.atPath('imageDetail.json'), 
     });
 
+    // dedicated codepipeline artifact bucket
+    const pipelineArtifactBucket = new s3.Bucket(this, 'mcorpus-pipeline-bucket', {
+      bucketName: 'mcorpus-pipeline-bucket', 
+      encryption: s3.BucketEncryption.UNENCRYPTED, // TODO use encryption
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL, 
+    })
+
     const pipeline = new codepipeline.Pipeline(this, 'mcorpus-pipeline', {
       pipelineName: 'mcorpus-pipeline', 
       stages: [
@@ -168,8 +226,57 @@ export class CICDStack extends cdk.Stack {
           stageName: 'Deploy', 
           actions: [ deployAction ]
         }, 
-      ]
+      ], 
+      artifactBucket: pipelineArtifactBucket, 
     });
+    pipeline.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "iam:PassRole"
+      ], 
+      resources: [
+        "*" // TODO limit scope!
+      ], 
+    }));
+    pipeline.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "codedeploy:CreateDeployment",
+        "codedeploy:GetApplication",
+        "codedeploy:GetApplicationRevision",
+        "codedeploy:GetDeployment",
+        "codedeploy:GetDeploymentConfig",
+        "codedeploy:RegisterApplicationRevision", 
+      ], 
+      resources: [
+        "*" // TODO limit scope!
+      ], 
+    }));
+    pipeline.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "elasticbeanstalk:*",
+        "ec2:*",
+        "elasticloadbalancing:*",
+        "autoscaling:*",
+        "cloudwatch:*",
+        "s3:*",
+        "sns:*",
+        "cloudformation:*",
+        "rds:*",
+        "sqs:*",
+        "ecs:*"
+      ], 
+      resources: [
+        "*" // TODO limit scope!
+      ], 
+    }));
+    pipeline.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "lambda:InvokeFunction",
+        "lambda:ListFunctions", 
+      ], 
+      resources: [
+        "*" // TODO limit scope!
+      ], 
+    }));
 
     // stack output
     new cdk.CfnOutput(this, 'CICDPipelineName', { value: pipeline.pipelineName });
