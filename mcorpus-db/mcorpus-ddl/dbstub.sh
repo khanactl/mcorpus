@@ -14,6 +14,7 @@ echo 'creating mcorpus users (roles)..'
 psql mcorpus < mcorpus-roles.ddl 2>&1 >/dev/null
 
 echo 'adding default mcuser records..'
-psql mcorpus < mcorpus-mcuser.sql 2>&1 >/dev/null
+# psql mcorpus < mcorpus-mcuser.sql 2>&1 >/dev/null
+psql -c "COPY mcuser FROM '/tmp/mcorpus-mcuser.csv' CSV HEADER NULL '\N';"
 
 echo 'mcorpus db created successfully!'
