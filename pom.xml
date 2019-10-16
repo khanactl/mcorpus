@@ -27,7 +27,7 @@
     <jooq.version>3.12.1</jooq.version>
     <hikari-cp.version>3.4.1</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>7.8</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>8.1</nimbus-jose-jwt.version>
 
     <guava.version>28.0-jre</guava.version>
     <guice.version>4.2.2</guice.version>
