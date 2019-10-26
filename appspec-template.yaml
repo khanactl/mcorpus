@@ -1,0 +1,10 @@
+# for ECS deployents
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "${taskDefArn}"
+        LoadBalancerInfo:
+          ContainerName: "${containerName}"
+          ContainerPort: ${containerPort}

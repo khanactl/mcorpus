@@ -42,12 +42,22 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
+      
+      - TASKDEF_ARN=$(aws ecs list-task-definitions | jq -r '.taskDefinitionArns[-1]')
+      - CONTAINER_NAME=mcorpus-gql
+      - CONTAINER_PORT=5150
+      
+      # generate imageDetail.json file
       - echo Writing image detail file...
-      - printf '[{"name":"mcorpus-gql","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+
+      # generate appspec.yaml from template file
+      - echo Generating appspec.yaml file...
+      - cat ../../appspec-template.yaml | sed -e "s%\${taskDefArn}%$TASKDEF_ARN%" -e "s%\${containerName}%$CONTAINER_NAME%" -e "s%\${containerPort}%$CONTAINER_PORT%" > appspec.yaml
       
       - echo Build completed on `date`
 artifacts:
   files: 
-    - appspec.yaml
+    - mcorpus-gql/target/appspec.yaml
     - mcorpus-gql/target/imageDetail.json
   discard-paths: yes
