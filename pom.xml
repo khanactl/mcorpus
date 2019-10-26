@@ -24,10 +24,10 @@
 
     <postgres-jdbc.version>42.2.8</postgres-jdbc.version>
 
-    <jooq.version>3.12.1</jooq.version>
+    <jooq.version>3.12.2</jooq.version>
     <hikari-cp.version>3.4.1</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>8.1</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>8.2</nimbus-jose-jwt.version>
 
     <guava.version>28.0-jre</guava.version>
     <guice.version>4.2.2</guice.version>
@@ -36,8 +36,8 @@
     
     <jackson.version>2.10.0</jackson.version>
     
-    <netty.version>4.1.42.Final</netty.version>
-    <ratpack.version>1.7.4</ratpack.version>
+    <netty.version>4.1.43.Final</netty.version>
+    <ratpack.version>1.7.5</ratpack.version>
     
     <graphql-java.version>13.0</graphql-java.version>
 

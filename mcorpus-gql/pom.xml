@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.18-SNAPSHOT</version>
+  <version>0.9.19</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -22,7 +22,7 @@
 
   <properties>
     <mcorpus-build.mode>DEV</mcorpus-build.mode>
-    <mcorpus-db.version>1.4.7-SNAPSHOT</mcorpus-db.version>
+    <mcorpus-db.version>1.4.8</mcorpus-db.version>
   </properties>
 
   <profiles>
