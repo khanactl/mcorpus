@@ -99,6 +99,8 @@ export class CICDStack extends cdk.Stack {
     // AmazonEC2ContainerRegistryPowerUser managed role privs
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
+        "ecs:ListTaskDefinitions", 
+        
         "ecr:GetAuthorizationToken",
         "ecr:BatchCheckLayerAvailability",
         "ecr:GetDownloadUrlForLayer",
