@@ -10,7 +10,7 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@types/node": "12.12.0",
+    "@types/node": "12.12.3",
     "aws-cdk": "^1.15.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
@@ -27,7 +27,7 @@
     "@aws-cdk/core": "^1.15.0",
     "@types/archiver": "^3.0.0",
     "archiver": "^3.1.1",
-    "aws-sdk": "^2.559.0",
+    "aws-sdk": "^2.560.0",
     "npm-check-updates": "^3.1.26",
     "source-map-support": "^0.5.16",
     "uuid": "^3.3.3"
