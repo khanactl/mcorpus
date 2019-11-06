@@ -10,10 +10,10 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@types/node": "12.12.3",
+    "@types/node": "12.12.6",
     "aws-cdk": "^1.15.0",
     "ts-node": "^8.4.1",
-    "typescript": "^3.6.4"
+    "typescript": "^3.7.2"
   },
   "dependencies": {
     "@aws-cdk/aws-codepipeline": "^1.15.0",
@@ -27,8 +27,8 @@
     "@aws-cdk/core": "^1.15.0",
     "@types/archiver": "^3.0.0",
     "archiver": "^3.1.1",
-    "aws-sdk": "^2.560.0",
-    "npm-check-updates": "^3.1.26",
+    "aws-sdk": "^2.565.0",
+    "npm-check-updates": "^3.2.0",
     "source-map-support": "^0.5.16",
     "uuid": "^3.3.3"
   },
