@@ -117,10 +117,12 @@ export class DbBootstrapStack extends cdk.Stack {
     this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'mcorpusDbUrl', {
       parameterName: this.ssmNameJdbcUrl, 
       version: this.ssmVersionJdbcUrl, 
+      simpleName: false, 
     });  
     this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'mcorpusTestDbUrl', {
       parameterName: this.ssmNameJdbcTestUrl, 
       version: this.ssmVersionJdbcTestUrl, 
+      simpleName: false, 
     });
 
     // stack output
