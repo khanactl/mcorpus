@@ -85,7 +85,7 @@ export const appConfig: IMcorpusCdkAppConfig = {
   // ssmKmsArn: 'arn:aws:kms:us-west-2:524006177124:key/c66b3f26-8480-40f1-95a1-6abf58f2aedd', 
   tlsCertArn: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a', 
   webAppUrl: 'https://www.mcorpus-aws.net', 
-  javaOpts: '-server -Xms100M -Xmx1000M -Djava.net.preferIPv4Stack=true -Dlog4j.configurationFile=log4j2-aws.xml -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -cp log4j-api.jar:log4j-core.jar:log4j-slf4j-impl.jar:disruptor.jar', 
+  javaOpts: '-server -Xms100M -Xmx1000M -Djava.net.preferIPv4Stack=true -Dlog4j.configurationFile=log4j2-aws.xml -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -cp log4j-api-2.12.1.jar:log4j-core-2.12.1.jar:log4j-slf4j-impl-2.12.1.jar:disruptor-3.4.2.jar', 
   publicDomainName: 'mcorpus-aws.net', 
   awsHostedZoneId: 'Z1FUM5HD37QRP1', 
   cicdDeployApprovalEmails: [
