@@ -1,4 +1,5 @@
 import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack } from './cdk-native'
 import ec2 = require('@aws-cdk/aws-ec2');
 import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
@@ -15,21 +16,35 @@ import { BlockPublicAccess } from '@aws-cdk/aws-s3';
 /**
  * CICD stack config properties.
  */
-export interface ICICDProps extends cdk.StackProps {
-  readonly githubOwner: string;
-  readonly githubRepo: string;
+export interface ICICDProps extends IStackProps {
   /**
    * The VPC ref
    */
   readonly vpc: ec2.IVpc;
   /**
-   * The aws codebuild security group ref.
+   * The GitHub user of the target repo.
    */
-  readonly codebuildSecGrp: ec2.ISecurityGroup;
+  readonly githubOwner: string;
+  /**
+   * The GitHub repository name.
+   */
+  readonly githubRepo: string;
   /**
    * The name of the SecretsManager entry holding the GitHub OAuth access token.
    */
   readonly githubOauthTokenSecretName: string;
+  /**
+   * The Git branch name to associate to the CICD pipeline.
+   */
+  readonly gitBranchName: string;
+  /**
+   * The aws codebuild security group ref.
+   */
+  readonly codebuildSecGrp: ec2.ISecurityGroup;
+  /**
+   * The non-path name of the buildspec file to use in codebuild.
+   */
+  readonly buildspecFilename: string;
   /**
    * The aws ecs fargate service ref.
    */
@@ -51,35 +66,36 @@ export interface ICICDProps extends cdk.StackProps {
 /**
  * CICD Stack.
  */
-export class CICDStack extends cdk.Stack {
+export class CICDStack extends BaseStack {
 
   public readonly pipeline: codepipeline.Pipeline;
 
-  constructor(scope: cdk.Construct, id: string, props: ICICDProps) {
-    super(scope, id, props);
+  constructor(scope: cdk.Construct, props: ICICDProps) {
+    super(scope, 'CICD', props);
 
     // source (github)
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: 'GitHub_Source',
+      actionName: `GitHub-Source-${props.appConfig.appEnv}`,
       owner: props.githubOwner, 
       repo: props.githubRepo, 
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretName), 
-      branch: 'master', // default: 'master'
+      branch: props.gitBranchName, 
       trigger: codepipeline_actions.GitHubTrigger.WEBHOOK, 
       output: sourceOutput, 
     });
 
     // build and test action
-    const codebuildProject = new codebuild.PipelineProject(this, 'mcorpus-ecs-cdk', {
+    const codebuildInstNme = this.iname('ecs-cdk');
+    const codebuildProject = new codebuild.PipelineProject(this, codebuildInstNme, {
       vpc: props.vpc, 
-      projectName: 'mcorpus-ecs-cdk', 
+      projectName: codebuildInstNme, 
       environment: {
         computeType: ComputeType.SMALL, 
         privileged: true, // for Docker to run
         buildImage: LinuxBuildImage.STANDARD_2_0, 
       }, 
-      buildSpec: BuildSpec.fromSourceFilename('buildspec-ecs.yml'), 
+      buildSpec: BuildSpec.fromSourceFilename(props.buildspecFilename), 
       // role: codebuildServiceRole, 
       securityGroups: [ props.codebuildSecGrp ], 
       subnetSelection: { subnetType: SubnetType.PRIVATE }, 
@@ -179,9 +195,10 @@ export class CICDStack extends cdk.Stack {
       ], 
     }));
 
+    const buildActionInstNme = this.iname('build-test');
     const buildOutput = new codepipeline.Artifact();
     const buildAction = new codepipeline_actions.CodeBuildAction({
-      actionName: 'Build-Test', 
+      actionName: buildActionInstNme, 
       project: codebuildProject, 
       input: sourceOutput, 
       outputs: [ buildOutput ], 
@@ -189,43 +206,45 @@ export class CICDStack extends cdk.Stack {
 
     // manual approve [deployment] action
     const maa = new codepipeline_actions.ManualApprovalAction({
-      actionName: 'manual-approval', 
-      notificationTopic: new sns.Topic(this, 'confirm-deployment'), 
+      actionName: this.iname('manual-approval'), 
+      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment')), 
       notifyEmails: props.cicdDeployApprovalEmails, 
-      additionalInformation: 'Please confirm or reject this change for deployment.'
+      additionalInformation: `Please confirm or reject this change for ${props.appConfig.appEnv} deployment.`
     });
 
     // deploy action
     const deployAction = new codepipeline_actions.EcsDeployAction({
-      actionName: 'Deploy', 
+      actionName: this.iname('deploy'), 
       service: props.fargateSvc, 
       imageFile: buildOutput.atPath('imageDetail.json'), 
     });
 
     // dedicated codepipeline artifact bucket
-    const pipelineArtifactBucket = new s3.Bucket(this, 'mcorpus-pipeline-bucket', {
-      bucketName: 'mcorpus-pipeline-bucket', 
+    const pipelineArtifactBucketInstNme = this.iname('pipeline-bucket');
+    const pipelineArtifactBucket = new s3.Bucket(this, pipelineArtifactBucketInstNme, {
+      bucketName: pipelineArtifactBucketInstNme, 
       encryption: s3.BucketEncryption.UNENCRYPTED, // TODO use encryption
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL, 
     })
 
-    const pipeline = new codepipeline.Pipeline(this, 'mcorpus-pipeline', {
-      pipelineName: 'mcorpus-pipeline', 
+    const pipelineInstNme = this.iname('cicd-pipeline');
+    const pipeline = new codepipeline.Pipeline(this, pipelineInstNme, {
+      pipelineName: pipelineInstNme, 
       stages: [
         {
-          stageName: 'Source', 
+          stageName: this.iname('Source'), 
           actions: [ sourceAction ]
         }, 
         {
-          stageName: 'Build-Test', 
+          stageName: this.iname('Build-Test'), 
           actions: [ buildAction ]
         }, 
         {
-          stageName: 'confirm-deployment', 
+          stageName: this.iname('confirm-deployment'), 
           actions: [ maa ]
         }, 
         {
-          stageName: 'Deploy', 
+          stageName: this.iname('Deploy'), 
           actions: [ deployAction ]
         }, 
       ], 

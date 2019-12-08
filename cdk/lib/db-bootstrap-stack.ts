@@ -1,8 +1,9 @@
+import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack } from './cdk-native'
 import cfn = require('@aws-cdk/aws-cloudformation');
 import lambda = require('@aws-cdk/aws-lambda');
 import ssm = require('@aws-cdk/aws-ssm');
 import iam = require('@aws-cdk/aws-iam');
-import cdk = require('@aws-cdk/core');
 import path = require('path');
 import { IVpc, SubnetType, ISecurityGroup } from '@aws-cdk/aws-ec2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
@@ -10,7 +11,7 @@ import { PolicyStatement } from '@aws-cdk/aws-iam';
 import fs = require('fs');
 import archiver = require('archiver');
 
-export interface IDbBootstrapProps extends cdk.StackProps {
+export interface IDbBootstrapProps extends IStackProps {
   /**
    * The VPC ref.
    */
@@ -39,7 +40,7 @@ export interface IDbBootstrapProps extends cdk.StackProps {
  * 2. Creating the db roles/users
  * 3. Creating the needed SSM db/jdbc secure param secrets for downstream use
  */
-export class DbBootstrapStack extends cdk.Stack {
+export class DbBootstrapStack extends BaseStack {
 
   public readonly dbBootstrapRole: iam.Role;
   
@@ -54,11 +55,12 @@ export class DbBootstrapStack extends cdk.Stack {
   public readonly ssmJdbcUrl: IStringParameter;
   public readonly ssmJdbcTestUrl: IStringParameter;
 
-  constructor(scope: cdk.Construct, id: string, props: IDbBootstrapProps) {
-    super(scope, id);
+  constructor(scope: cdk.Construct, props: IDbBootstrapProps) {
+    super(scope, 'DbBootstrap', props);
 
     // db dbootstrap role
-    this.dbBootstrapRole = new iam.Role(this, 'dbBootstrapRole', {
+    const dbBootstrapRoleInstNme = this.iname('db-bootstrap-role');
+    this.dbBootstrapRole = new iam.Role(this, dbBootstrapRoleInstNme, {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
     });
     this.dbBootstrapRole.addManagedPolicy({
@@ -81,7 +83,8 @@ export class DbBootstrapStack extends cdk.Stack {
     }));
     // END db bootstrap role
 
-    const lambdaProvider = new lambda.SingletonFunction(this, 'DbBootstrapLambda', {
+    const lambdaProviderInstNme = this.iname('db-bootstrap-lambda');
+    const lambdaProvider = new lambda.SingletonFunction(this, lambdaProviderInstNme, {
       vpc: props.vpc, 
       vpcSubnets: { subnetType: SubnetType.PRIVATE }, 
       securityGroup: props.dbBootstrapSecGrp, 
@@ -97,7 +100,8 @@ export class DbBootstrapStack extends cdk.Stack {
       role: this.dbBootstrapRole, 
     });
   
-    const resource = new cfn.CustomResource(this, 'DbBootstrap', {
+    const resourceInstNme = this.iname('db-bootstrap');
+    const resource = new cfn.CustomResource(this, resourceInstNme, {
       provider: cfn.CustomResourceProvider.lambda(lambdaProvider),
       properties: {
         'DbJsonSecretArn': props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
@@ -114,12 +118,14 @@ export class DbBootstrapStack extends cdk.Stack {
     this.responseMessage = resource.getAtt('Message').toString();
 
     // obtain the just generated SSM jdbc url param refs
-    this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'mcorpusDbUrl', {
+    const ssmJdbcUrlInstNme = this.iname('db-url');
+    this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcUrlInstNme, {
       parameterName: this.ssmNameJdbcUrl, 
       version: this.ssmVersionJdbcUrl, 
       simpleName: false, 
-    });  
-    this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'mcorpusTestDbUrl', {
+    });
+    const ssmJdbcTestUrlInstNme = this.iname('test-db-url');
+    this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcTestUrlInstNme, {
       parameterName: this.ssmNameJdbcTestUrl, 
       version: this.ssmVersionJdbcTestUrl, 
       simpleName: false, 

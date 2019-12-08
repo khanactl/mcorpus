@@ -1,8 +1,9 @@
+import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack } from './cdk-native'
 import cfn = require('@aws-cdk/aws-cloudformation');
 import lambda = require('@aws-cdk/aws-lambda');
 import ssm = require('@aws-cdk/aws-ssm');
 import iam = require('@aws-cdk/aws-iam');
-import cdk = require('@aws-cdk/core');
 import path = require('path');
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
 import { PolicyStatement } from '@aws-cdk/aws-iam';
@@ -12,7 +13,7 @@ import s3 = require('@aws-cdk/aws-s3')
 import { IKey } from '@aws-cdk/aws-kms';
 import kms = require('@aws-cdk/aws-kms');
 
-export interface IDbDataProps extends cdk.StackProps {
+export interface IDbDataProps extends IStackProps {
   /**
    * The VPC ref.
    */
@@ -32,7 +33,7 @@ export interface IDbDataProps extends cdk.StackProps {
   // readonly s3KmsEncKeyArn: string;
 }
 
-export class DbDataStack extends cdk.Stack {
+export class DbDataStack extends BaseStack {
 
   public readonly dbDataBucket: s3.Bucket;
 
@@ -42,21 +43,23 @@ export class DbDataStack extends cdk.Stack {
 
   // public readonly s3KmsKey: IKey;
 
-  constructor(scope: cdk.Construct, id: string, props: IDbDataProps) {
-    super(scope, id);
+  constructor(scope: cdk.Construct, props: IDbDataProps) {
+    super(scope, 'DbData', props);
 
     // const s3KmsKey: IKey = kms.Key.fromKeyArn(this, 's3-kms-key', props.s3KmsEncKeyArn);
 
     // create s3 bucket to hold db data
-    this.dbDataBucket = new s3.Bucket(this, 'db-data-bucket', {
-      bucketName: 'db-data-bucket', 
+    const dbDataBucketInstNme = this.iname('db-data-bucket');
+    this.dbDataBucket = new s3.Bucket(this, dbDataBucketInstNme, {
+      bucketName: dbDataBucketInstNme, 
       // encryption: BucketEncryption.KMS, // a key will be auto created
       encryption: BucketEncryption.UNENCRYPTED, 
       // encryptionKey: s3KmsKey, 
     });
 
     // create db data lambda fn exec role
-    this.dbDataRole = new iam.Role(this, 'db-data-role', {
+    const dbDataRoleInstNme = this.iname('db-data-role');
+    this.dbDataRole = new iam.Role(this, dbDataRoleInstNme, {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
     });
     this.dbDataRole.addManagedPolicy({
@@ -89,7 +92,8 @@ export class DbDataStack extends cdk.Stack {
     // END db data role
 
     // lambda fn
-    this.dbDataFn = new lambda.Function(this, 'db-data-fn', { 
+    const dbDataFnInstNme = this.iname('db-data-fn');
+    this.dbDataFn = new lambda.Function(this, dbDataFnInstNme, { 
       vpc: props.vpc, 
       vpcSubnets: { subnetType: SubnetType.PRIVATE }, 
       securityGroup: props.dbDataSecGrp, 

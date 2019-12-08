@@ -1,4 +1,5 @@
 import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack } from './cdk-native'
 import ec2 = require('@aws-cdk/aws-ec2');
 import rds = require('@aws-cdk/aws-rds');
 import secrets = require('@aws-cdk/aws-secretsmanager');
@@ -9,7 +10,7 @@ import { SubnetType, IVpc, ISecurityGroup } from '@aws-cdk/aws-ec2';
 /**
  * Db Stack config properties.
  */
-export interface IDbProps extends cdk.StackProps {
+export interface IDbProps extends IStackProps {
   /**
    * The VPC ref
    */
@@ -31,7 +32,7 @@ export interface IDbProps extends cdk.StackProps {
 /**
  * Db Stack.
  */
-export class DbStack extends cdk.Stack {
+export class DbStack extends BaseStack {
 
   /**
    * The RDS db security group.
@@ -43,15 +44,16 @@ export class DbStack extends cdk.Stack {
    */
   public readonly dbInstanceJsonSecret: secrets.ISecret;
 
-  constructor(scope: cdk.Construct, id: string, props: IDbProps) {
-    super(scope, id, props);
+  constructor(scope: cdk.Construct, props: IDbProps) {
+    super(scope, 'Db', props);
 
     // const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
     // const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
 
-    const instance = new DatabaseInstance(this, 'McorpusDbInstance', {
+    const dbInstNme = this.iname('db');
+    const instance = new DatabaseInstance(this, dbInstNme, {
       vpc: props.vpc, 
-      instanceIdentifier: 'mcorpus-db', 
+      instanceIdentifier: dbInstNme, 
       databaseName: 'mcorpus', 
       masterUsername: 'mcadmin', 
       engine: rds.DatabaseInstanceEngine.POSTGRES, 
@@ -102,7 +104,8 @@ export class DbStack extends cdk.Stack {
     const rdsSecretRotation = instance.addRotationSingleUser('Rotation');
 
     // Add alarm for high CPU
-    const cloudWatchAlarm = new cloudwatch.Alarm(this, 'HighCPU', {
+    const cloudWatchAlarmInstNme = this.iname('high-cpu');
+    const cloudWatchAlarm = new cloudwatch.Alarm(this, cloudWatchAlarmInstNme, {
       metric: instance.metricCPUUtilization(),
       threshold: 90,
       evaluationPeriods: 1

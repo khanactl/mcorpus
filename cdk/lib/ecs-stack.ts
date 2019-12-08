@@ -1,4 +1,5 @@
 import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack } from './cdk-native'
 import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
@@ -19,7 +20,7 @@ import alias = require('@aws-cdk/aws-route53-targets')
 /**
  * ECS Stack config properties.
  */
-export interface IECSProps extends cdk.StackProps {
+export interface IECSProps extends IStackProps {
   /**
    * The VPC ref
    */
@@ -75,7 +76,7 @@ export interface IECSProps extends cdk.StackProps {
 /**
  * ECS Stack.
  */
-export class ECSStack extends cdk.Stack {
+export class ECSStack extends BaseStack {
 
   public readonly ecrRepo: ecr.IRepository;
 
@@ -83,18 +84,20 @@ export class ECSStack extends cdk.Stack {
   
   public readonly fargateSvc: FargateService;
 
-  constructor(scope: cdk.Construct, id: string, props: IECSProps) {
-    super(scope, id, props);
+  constructor(scope: cdk.Construct, props: IECSProps) {
+    super(scope, 'ECS', props);
 
     // generate JWT salt ssm param
     const rhs = crypto.randomBytes(32).toString('hex');
-    const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, 'jwtSalt', {
-      parameterName: '/jwtSalt', 
+    const jwtSaltInstNme = this.iname('jwtSalt');
+    const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, jwtSaltInstNme, {
+      parameterName: `/${jwtSaltInstNme}`, 
       stringValue: rhs, 
     });
 
     // ECS/Fargate task execution role
-    this.ecsTaskExecutionRole = new iam.Role(this, 'ecsTaskExecutionRole', {
+    const escTskExecInstNme = this.iname('ecs-tsk-exec-role');
+    this.ecsTaskExecutionRole = new iam.Role(this, escTskExecInstNme, {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
     });
     this.ecsTaskExecutionRole.addManagedPolicy({
@@ -119,21 +122,24 @@ export class ECSStack extends cdk.Stack {
     }));
 
     // ecr repo
-    const dockerAsset = new DockerImageAsset(this, 'mcorpus-docker-asset', {
+    const dockerAssetInstNme = this.iname('docker-asset');
+    const dockerAsset = new DockerImageAsset(this, dockerAssetInstNme, {
       directory: path.join(__dirname, "../../mcorpus-gql/target"), 
       repositoryName: 'mcorpus-gql', 
     });
     this.ecrRepo = dockerAsset.repository;
 
     // task def
-    const taskDef = new ecs.FargateTaskDefinition(this, 'mcorpus-gql-taskdef', {
+    const taskDefInstNme = this.iname('fargate-taskdef');
+    const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
       cpu: 256,
       memoryLimitMiB: 1024,
       taskRole: this.ecsTaskExecutionRole, 
       executionRole: this.ecsTaskExecutionRole, 
     });
 
-    const containerDef = taskDef.addContainer('mcorpus-gql', {
+    const containerDefInstNme = this.iname('gql');
+    const containerDef = taskDef.addContainer(containerDefInstNme, {
      image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo), 
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
@@ -161,19 +167,21 @@ export class ECSStack extends cdk.Stack {
         'MCORPUS_TEST_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcTestUrl), 
         'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt), 
       }, 
-      logging: new ecs.AwsLogDriver({ streamPrefix: 'mcorpus-fargate-webapp' }), 
+      logging: new ecs.AwsLogDriver({ streamPrefix: this.iname('webapplogs') }), 
     });
     containerDef.addPortMappings({ 
       containerPort: props.lbToEcsPort, 
     });
 
     // cluster
-    const cluster = new ecs.Cluster(this, 'mcorpus-ecs-cluster', {
+    const ecsClusterInstNme = this.iname('ecs-cluster');
+    const cluster = new ecs.Cluster(this, ecsClusterInstNme, {
       vpc: props.vpc, 
-      clusterName: 'mcorpus-ecs-cluster', 
+      clusterName: ecsClusterInstNme, 
     });
 
-    this.fargateSvc = new ecs.FargateService(this, 'mcorpus-fargate-service', {
+    const fargateSvcInstNme = this.iname('fargate-svc');
+    this.fargateSvc = new ecs.FargateService(this, fargateSvcInstNme, {
       cluster: cluster,
       taskDefinition: taskDef, 
       desiredCount: 1,
@@ -190,13 +198,15 @@ export class ECSStack extends cdk.Stack {
     // *** inline load balancer ***
     // ****************************
     // application load balancer
-    const alb = new elb.ApplicationLoadBalancer(this, 'app-load-balancer', {
+    const albInstNme = this.iname('app-loadbalancer');
+    const alb = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.lbSecGrp, 
     });
 
-    const listener = alb.addListener('alb-tls-listener', {
+    const listenerInstNme = this.iname('alb-tls-listener');
+    const listener = alb.addListener(listenerInstNme, {
       protocol: ApplicationProtocol.HTTPS, 
       port: 443,
       certificateArns: [ props.sslCertArn ],
@@ -206,7 +216,8 @@ export class ECSStack extends cdk.Stack {
 
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
-    const albTargetGroup = listener.addTargets('mcorpus-fargate-target', {
+    const albTargetGroupInstNme = this.iname('fargate-target');
+    const albTargetGroup = listener.addTargets(albTargetGroupInstNme, {
       // targetGroupName: '', 
       port: props.lbToEcsPort, 
       targets: [
@@ -230,15 +241,16 @@ export class ECSStack extends cdk.Stack {
 
     // DNS bind load balancer to domain name record
     if(props.awsHostedZoneId && props.publicDomainName) {
-      console.log('Load balancer DNS will be bound in Route53.');
+      // console.log('Load balancer DNS will be bound in Route53.');
       const hostedZone = r53.HostedZone.fromHostedZoneAttributes(
-        this, 'mcorpus-hostedzone', {
+        this, this.iname('hostedzone'), {
           hostedZoneId: props.awsHostedZoneId, 
           zoneName: props.publicDomainName, 
         }
       );
       // NOTE: arecord creation will fail if it already exists
-      const arecord = new r53.ARecord(this, 'arecord', {
+      const arecordInstNme = this.iname('arecord');
+      const arecord = new r53.ARecord(this, arecordInstNme, {
         recordName: 'www.' + props.publicDomainName, 
         zone: hostedZone, 
         target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(alb)), 

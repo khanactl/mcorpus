@@ -1,11 +1,12 @@
 import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack } from './cdk-native'
 import ec2 = require('@aws-cdk/aws-ec2');
 import { SecurityGroup, Peer, Port } from '@aws-cdk/aws-ec2';
 
 /**
  * Security Group config properties.
  */
-export interface ISecGrpProps extends cdk.StackProps {
+export interface ISecGrpProps extends IStackProps {
   /**
    * The VPC ref
    */
@@ -19,7 +20,7 @@ export interface ISecGrpProps extends cdk.StackProps {
 /**
  * Security Group Stack.
  */
-export class SecGrpStack extends cdk.Stack {
+export class SecGrpStack extends BaseStack {
 
   public readonly dbBootstrapSecGrp: SecurityGroup;
   
@@ -29,23 +30,25 @@ export class SecGrpStack extends cdk.Stack {
 
   public readonly codebuildSecGrp: SecurityGroup;
 
-  constructor(scope: cdk.Construct, id: string, props: ISecGrpProps) {
-    super(scope, id, props);
+  constructor(scope: cdk.Construct, props: ISecGrpProps) {
+    super(scope, 'SecGrp', props);
 
     // db bootstrap security group
-    this.dbBootstrapSecGrp = new SecurityGroup(this, 'sg-dbbootstrap', {
+    const sgDbBootstrapInstNme = this.iname('dbbootstrap-sec-grp');
+    this.dbBootstrapSecGrp = new SecurityGroup(this, sgDbBootstrapInstNme, {
       vpc: props.vpc,
       description: 'Db bootstrap security group.',
       allowAllOutbound: true, 
-      securityGroupName: 'db-bootstrap-sec-grp', 
+      securityGroupName: sgDbBootstrapInstNme, 
     });
 
     // load balancer security group
-    this.lbSecGrp = new SecurityGroup(this, 'sg-alb', {
+    const sgLbInstNme = this.iname('lb-sec-grp');
+    this.lbSecGrp = new SecurityGroup(this, sgLbInstNme, {
       vpc: props.vpc,
       description: 'App load balancer security group.',
       allowAllOutbound: true, 
-      securityGroupName: 'load-balancer-sec-grp', 
+      securityGroupName: sgLbInstNme, 
     });
     // rule: outside internet access only by TLS on 443
     this.lbSecGrp.addIngressRule(
@@ -55,11 +58,12 @@ export class SecGrpStack extends cdk.Stack {
     );
     
     // ecs container security group
-    this.ecsSecGrp = new SecurityGroup(this, 'ecs-container-sec-grp', {
+    const sgEcsInstNme = this.iname('ecs-container-sec-grp');
+    this.ecsSecGrp = new SecurityGroup(this, sgEcsInstNme, {
       vpc: props.vpc, 
       description: 'ECS container security group',
       allowAllOutbound: true, 
-      securityGroupName: 'ecs-container-sec-grp', 
+      securityGroupName: sgEcsInstNme, 
     });
     // rule: lb to ecs container traffic
     this.ecsSecGrp.addIngressRule(
@@ -69,11 +73,12 @@ export class SecGrpStack extends cdk.Stack {
     );
 
     // codebuild security group
-    this.codebuildSecGrp = new SecurityGroup(this, 'codebuild-sec-grp', {
+    const sgCodebuildInstNme = this.iname('codebuild-sec-grp');
+    this.codebuildSecGrp = new SecurityGroup(this, sgCodebuildInstNme, {
       vpc: props.vpc, 
       description: 'Codebuild security group',
       allowAllOutbound: true, 
-      securityGroupName: 'codebuild-sec-grp', 
+      securityGroupName: sgCodebuildInstNme, 
     });
 
     // stack output
