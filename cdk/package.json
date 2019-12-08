@@ -12,8 +12,8 @@
   "devDependencies": {
     "@types/node": "12.12.14",
     "aws-cdk": "^1.18.0",
-    "ts-node": "^8.5.2",
-    "typescript": "^3.7.2"
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
   },
   "dependencies": {
     "@aws-cdk/aws-codepipeline": "^1.18.0",
@@ -27,7 +27,7 @@
     "@aws-cdk/core": "^1.18.0",
     "@types/archiver": "^3.0.0",
     "archiver": "^3.1.1",
-    "aws-sdk": "^2.579.0",
+    "aws-sdk": "^2.585.0",
     "npm-check-updates": "^3.2.2",
     "source-map-support": "^0.5.16",
     "uuid": "^3.3.3"
