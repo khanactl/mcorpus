@@ -7,7 +7,9 @@ export enum AppEnv {
   /** development (staging / non-production) */
   DEV = 'DEV', 
   /** production */
-  PRD = 'PRD' 
+  PRD = 'PRD', 
+  /** shared (used by both production and non-production) */
+  SHARED = 'SHARED', 
 }
 
 /**
@@ -47,6 +49,58 @@ export interface IDnsConfig {
 }
 
 /**
+ * Encapsulates the needed configuration for a container-ized web app 
+ * (Docker) running on the AWS ECS/Fargate platform.
+ */
+export interface IWebAppContainerConfig {
+  /**
+   * JAVA_OPTS to use for the web app docker container.
+   */
+  readonly javaOpts: string;
+  /**
+   * The 'traffic' port for the front-facing load balancer to the 
+   * web application container.
+   */
+  readonly lbToAppPort: number;
+  /**
+   * The public-facing web app url address.
+   */
+  readonly webAppUrl: string;
+  /**
+   * The ARN of the TLS certificate to use at the public-facing app load balancer 
+   * to suport https connections.
+   */
+  readonly tlsCertArn: string;
+  /**
+   * The app DNS configuration.
+   */
+  readonly dnsConfig: IDnsConfig;
+}
+
+/**
+ * Encapuslates the needed configuration for running a CICD pipeline
+ * in AWS using CodePipeline.
+ */
+export interface ICicdConfig {
+  /**
+   * The needed Git source control repository info.
+   */
+  readonly gitRepoRef: IGitHubRepoRef;
+  /**
+   * The branch name to associate with the CICD pipeline.
+   */
+  readonly gitBranchName: string;
+  /**
+   * The CodeBuild buildspec non-path file name.
+   */
+  readonly buildspecFilename: string;
+  /**
+   * The email addresses of the people that approve application deployments.
+   */
+  readonly appDeployApprovalEmails: string[];
+}
+
+/**
  * AWS CDK application configuration definition.
  * 
  * The application knobs for a specific application instance/deployment.
@@ -62,15 +116,6 @@ export interface ICdkAppConfig {
   readonly appEnv: AppEnv;
 
   /**
-   * The needed Git source control repository info.
-   */
-  readonly gitRepoRef: IGitHubRepoRef;
-  /**
-   * The branch name to associate with the CICD pipeline.
-   */
-  readonly gitBranchName: string;
-  
-  /**
    * The AWS account in which to create the app CDK stacks.
    */
   readonly awsAccountId: string;
@@ -84,41 +129,21 @@ export interface ICdkAppConfig {
    * Key/value pairs to globally ascribe to the CDK generated artifacts.
    * These attrs translate to adding stack-level tags.
    */
-  readonly instanceAttrs: { [key: string]: string };
+  // readonly instanceAttrs: { [key: string]: string };
 
   /**
-   * The 'traffic' port for the front-facing load balancer to the 
-   * web application container.
+   * The web app container (docker) configuration.
    */
-  readonly lbToAppPort: number;
+  readonly webAppContainerConfig?: IWebAppContainerConfig;
+
   /**
-   * The ARN of the TLS certificate to use at the public-facing app load balancer 
-   * to suport https connections.
+   * The CICD deployment pipeline configuration.
    */
-  readonly tlsCertArn: string;
-  /**
-   * The public-facing web app url address.
-   */
-  readonly webAppUrl: string;
-  /**
-   * JAVA_OPTS to use for the web app docker container.
-   */
-  readonly javaOpts: string;
+  readonly cicdConfig?: ICicdConfig;
+
   /**
    * The KMS ARN to use for generating SSM secure parameters.
    */
   // ssmKmsArn(): string;
-  /**
-   * The app DNS configuration.
-   */
-  readonly dnsConfig: IDnsConfig;
-  /**
-   * The CodeBuild buildspec non-path file name.
-   */
-  readonly buildspecFilename: string;
-  /**
-   * The email addresses of the people that approve application deployments.
-   */
-  readonly appDeployApprovalEmails: string[];
 }
 

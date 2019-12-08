@@ -85,6 +85,14 @@ export class CICDStack extends BaseStack {
       output: sourceOutput, 
     });
 
+    // manual approve [post-source] action
+    const maaPostSource = new codepipeline_actions.ManualApprovalAction({
+      actionName: this.iname('manual-approval-post-source'), 
+      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment-post-source')), 
+      notifyEmails: props.cicdDeployApprovalEmails, 
+      additionalInformation: `Please confirm or reject this change for ${props.appConfig.appEnv} build/test.`
+    });
+
     // build and test action
     const codebuildInstNme = this.iname('ecs-cdk');
     const codebuildProject = new codebuild.PipelineProject(this, codebuildInstNme, {
@@ -205,8 +213,8 @@ export class CICDStack extends BaseStack {
     });
 
     // manual approve [deployment] action
-    const maa = new codepipeline_actions.ManualApprovalAction({
-      actionName: this.iname('manual-approval'), 
+    const maaDeploy = new codepipeline_actions.ManualApprovalAction({
+      actionName: this.iname('manual-approval-deployment'), 
       notificationTopic: new sns.Topic(this, this.iname('confirm-deployment')), 
       notifyEmails: props.cicdDeployApprovalEmails, 
       additionalInformation: `Please confirm or reject this change for ${props.appConfig.appEnv} deployment.`
@@ -236,12 +244,16 @@ export class CICDStack extends BaseStack {
           actions: [ sourceAction ]
         }, 
         {
+          stageName: this.iname('confirm-post-source'), 
+          actions: [ maaPostSource ]
+        }, 
+        {
           stageName: this.iname('Build-Test'), 
           actions: [ buildAction ]
         }, 
         {
           stageName: this.iname('confirm-deployment'), 
-          actions: [ maa ]
+          actions: [ maaDeploy ]
         }, 
         {
           stageName: this.iname('Deploy'), 

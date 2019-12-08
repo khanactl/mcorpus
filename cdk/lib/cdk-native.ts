@@ -50,7 +50,10 @@ export abstract class BaseStack extends cdk.Stack {
         account: props.appConfig.awsAccountId, 
         region: props.appConfig.awsRegion, 
       }, 
-      tags: props.appConfig.instanceAttrs, 
+      tags: {
+        'AppName': props.appConfig.appName, 
+        'AppEnv': props.appConfig.appEnv, 
+      }, 
     });
     this.appConfig = props.appConfig;
     this.stackInstanceName = BaseStack.iname(props.appConfig, rootStackName);
