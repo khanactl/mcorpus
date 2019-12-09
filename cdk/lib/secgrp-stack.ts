@@ -41,6 +41,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true, 
       securityGroupName: sgDbBootstrapInstNme, 
     });
+    this.dbBootstrapSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbBootstrapInstNme));
 
     // load balancer security group
     const sgLbInstNme = this.iname('lb-sec-grp');
@@ -50,6 +51,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true, 
       securityGroupName: sgLbInstNme, 
     });
+    this.lbSecGrp.node.applyAspect(new cdk.Tag('Name', sgLbInstNme));
     // rule: outside internet access only by TLS on 443
     this.lbSecGrp.addIngressRule(
       Peer.anyIpv4(), 
@@ -65,6 +67,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true, 
       securityGroupName: sgEcsInstNme, 
     });
+    this.ecsSecGrp.node.applyAspect(new cdk.Tag('Name', sgEcsInstNme));
     // rule: lb to ecs container traffic
     this.ecsSecGrp.addIngressRule(
       this.lbSecGrp, 
@@ -80,6 +83,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true, 
       securityGroupName: sgCodebuildInstNme, 
     });
+    this.codebuildSecGrp.node.applyAspect(new cdk.Tag('Name', sgCodebuildInstNme));
 
     // stack output
     new cdk.CfnOutput(this, 'DbBootstrapSecurityGroup', { value: 
