@@ -28,6 +28,9 @@ def main(event, context):
       
       # input: db rds json secret
       db_secret_arn = event['ResourceProperties']['DbJsonSecretArn']
+
+      ssmNameJdbcUrl = event['ResourceProperties']['SsmNameJdbcUrl']
+      ssmNameJdbcTestUrl = event['ResourceProperties']['SsmNameJdbcTestUrl']
       
       session = boto3.session.Session()
 
@@ -128,9 +131,6 @@ def main(event, context):
             service_name = 'ssm',
             region_name = region_name
           )
-
-          ssmNameJdbcUrl = '/mcorpusDbUrl'  # NOTE: must use '/pname' (not 'pname') format!
-          ssmNameJdbcTestUrl = '/mcorpusTestDbUrl'
 
           # generate ssm jdbc url
           ssmResponseJdbcUrl = ssmClient.put_parameter(

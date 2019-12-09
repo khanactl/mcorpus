@@ -49,6 +49,20 @@ export interface IDnsConfig {
 }
 
 /**
+ * Db configuration for an AWS RDS instance.
+ */
+export interface IDbConfig {
+  /**
+   * The database name.
+   */
+  readonly dbName: string;
+  /**
+   * The database master username.
+   */
+  readonly dbMasterUsername: string;
+}
+
+/**
  * Encapsulates the needed configuration for a container-ized web app 
  * (Docker) running on the AWS ECS/Fargate platform.
  */
@@ -123,6 +137,11 @@ export interface ICdkAppConfig {
    * The primary AWS Region to which the CDK stacks are deployed.
    */
   readonly awsRegion: string;
+
+  /**
+   * The database configuration.
+   */
+  readonly dbConfig?: IDbConfig;
 
   /**
    * Instance attributes.

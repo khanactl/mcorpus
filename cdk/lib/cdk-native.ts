@@ -57,6 +57,7 @@ export abstract class BaseStack extends cdk.Stack {
     });
     this.appConfig = props.appConfig;
     this.stackInstanceName = BaseStack.iname(props.appConfig, rootStackName);
+    // console.log(`stackInstanceName: ${this.stackInstanceName}, stackId: ${this.stackId}`);
   }
 
   /**

@@ -17,13 +17,17 @@ export const sharedConfig: ICdkAppConfig = {
   appEnv: AppEnv.SHARED, 
   awsAccountId: AWS_ACCOUNT_ID, 
   awsRegion: AWS_PRIMARY_REGION, 
+  dbConfig: {
+    dbName: APP_NAME, 
+    dbMasterUsername: 'mcadmin', 
+  }, 
 }
 
 export const devConfig: ICdkAppConfig = {
   appName: APP_NAME, 
   appEnv: AppEnv.DEV, 
   awsAccountId: AWS_ACCOUNT_ID, 
-  awsRegion: AWS_PRIMARY_REGION,  
+  awsRegion: AWS_PRIMARY_REGION, 
   webAppContainerConfig: {
     javaOpts: '-server -Xms100M -Xmx1000M -Djava.net.preferIPv4Stack=true -Dlog4j.configurationFile=log4j2-aws.xml -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -cp log4j-api-2.12.1.jar:log4j-core-2.12.1.jar:log4j-slf4j-impl-2.12.1.jar:disruptor-3.4.2.jar', 
     lbToAppPort: 5150, 

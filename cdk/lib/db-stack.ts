@@ -27,6 +27,14 @@ export interface IDbProps extends IStackProps {
    * The CICD codebuild security group ref.
    */
   readonly codebuildSecGrp: ISecurityGroup;
+  /**
+   * The database name to use.
+   */
+  readonly dbName: string;
+  /**
+   * The database master username to use.
+   */
+  readonly dbMasterUsername: string;
 }
 
 /**
@@ -54,8 +62,8 @@ export class DbStack extends BaseStack {
     const instance = new DatabaseInstance(this, dbInstNme, {
       vpc: props.vpc, 
       instanceIdentifier: dbInstNme, 
-      databaseName: 'mcorpus', 
-      masterUsername: 'mcadmin', 
+      databaseName: props.dbName, 
+      masterUsername: props.dbMasterUsername, 
       engine: rds.DatabaseInstanceEngine.POSTGRES, 
       instanceClass: ec2.InstanceType.of(
         ec2.InstanceClass.T2,  

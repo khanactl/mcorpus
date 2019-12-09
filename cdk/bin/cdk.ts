@@ -34,6 +34,8 @@ const dbStack = new DbStack(app, {
   dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
   ecsSecGrp: secGrpStack.ecsSecGrp, 
   codebuildSecGrp: secGrpStack.codebuildSecGrp, 
+  dbName: sharedConfig.dbConfig!.dbName, 
+  dbMasterUsername: sharedConfig.dbConfig!.dbMasterUsername, 
 });
 const dbBootstrapStack = new DbBootstrapStack(app, {
   appConfig: sharedConfig, 
