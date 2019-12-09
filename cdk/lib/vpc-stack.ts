@@ -20,7 +20,7 @@ export class VpcStack extends BaseStack {
   constructor(scope: cdk.Construct, props: IVpcProps) {
     super(scope, 'VPC', props);
 
-    this.vpc = new ec2.Vpc(this, this.stackInstanceName, {
+    this.vpc = new ec2.Vpc(this, 'VPC', {
       maxAzs: 2,
       natGateways: 1,
       cidr: '10.0.0.0/23', // 512
@@ -39,9 +39,6 @@ export class VpcStack extends BaseStack {
         }, 
       ],
     });
-
-    // add VPC Name tag
-    this.vpc.node.applyAspect(new cdk.Tag('Name', this.stackInstanceName));
 
     const publicSubnetIds: string[] = [];
     const privateSubnetIds: string[] = [];
