@@ -4,7 +4,6 @@ import 'source-map-support/register';
 import cdk = require('@aws-cdk/core');
 
 import { ICdkAppConfig } from '../lib/cdk-config-def';
-import { sharedConfig, devConfig, prdConfig } from './mcorpus-cdk-config'
 
 import { VpcStack } from '../lib/vpc-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
@@ -13,6 +12,8 @@ import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbDataStack } from '../lib/db-data-stack';
 import { ECSStack } from '../lib/ecs-stack';
 import { CICDStack } from '../lib/cicd-stack';
+
+import { sharedConfig, devConfig, prdConfig } from './mcorpus-cdk-config'
 
 const app = new cdk.App();
 
