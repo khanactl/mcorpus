@@ -59,7 +59,7 @@ export const prdConfig: ICdkAppConfig = {
     webAppUrl: 'https://www.mcorpus-aws.net', 
     tlsCertArn: 'arn:aws:acm:us-west-2:524006177124:certificate/8c7ea4bb-f2fd-4cdb-b85c-184d2a864b0a', 
     dnsConfig: {
-      awsHostedZoneId: 'Z18ZXNXBFMQKMU', 
+      awsHostedZoneId: 'Z1FUM5HD37QRP1', 
       publicDomainName: 'mcorpus-aws.net', 
     }, 
   }, 
