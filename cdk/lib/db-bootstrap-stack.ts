@@ -106,8 +106,8 @@ export class DbBootstrapStack extends BaseStack {
       properties: {
         'DbJsonSecretArn': props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
         'TargetRegion': props.targetRegion, 
-        'SsmNameJdbcUrl': `/mcorpusDbUrl/${props.appConfig.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
-        'SsmNameJdbcTestUrl': `/mcorpusTestDbUrl/${props.appConfig.appEnv}`, 
+        'SsmNameJdbcUrl': `/mcorpusDbUrl/${this.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
+        'SsmNameJdbcTestUrl': `/mcorpusTestDbUrl/${this.appEnv}`, 
       }
     });
   

@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 
 import cdk = require('@aws-cdk/core');
-import { ICdkAppConfig } from './cdk-config-def';
+import { AppEnv } from './app-env';
 
 /**
  * Native stack properties definition.
  */
-export interface IStackProps {
+export interface IStackProps extends cdk.StackProps {
   /**
-   * The native CDK application configuration reference.
+   * The application name.
    */
-  readonly appConfig: ICdkAppConfig;
+  readonly appName: string;
+  /**
+   * The ascribed application environment.
+   */
+  readonly appEnv: AppEnv;
 }
 
 /**
@@ -23,14 +27,18 @@ export abstract class BaseStack extends cdk.Stack {
    * 
    * FORMAT: "{lower(appName)}-{rootName}-{lower(appEnv)}".
    * 
-   * @param appConfig
+   * @param appName
    * @param rootName 
+   * @param AppEnv
    */
-  public static iname(appConfig: ICdkAppConfig, rootName: string): string {
-    return `${appConfig.appName.toLowerCase()}-${rootName}-${appConfig.appEnv.toLowerCase()}`;
+  public static iname(appName: string, rootName: string, appEnv: AppEnv): string {
+    return `${appName.toLowerCase()}-${rootName}-${appEnv.toLowerCase()}`;
   }
 
-  protected readonly appConfig: ICdkAppConfig;
+  protected readonly appEnv: AppEnv;
+
+  // protected readonly appConfig: IAppConfig;
+  protected readonly appName: string;
 
   protected readonly stackInstanceName: string;
 
@@ -42,21 +50,11 @@ export abstract class BaseStack extends cdk.Stack {
    * @param props the stack properties
    */
   constructor(scope: cdk.Construct, rootStackName: string, props: IStackProps) {
-    super(scope, `${props.appConfig.appName}-${rootStackName}-${props.appConfig.appEnv}`, {
-      // NOTE: stackName is not necessary since we specify the id in super.constructor
-      // TODO verify this
-      // stackName: BaseStack.stackName(props.appConfig, rootStackName), 
-      env: {
-        account: props.appConfig.awsAccountId, 
-        region: props.appConfig.awsRegion, 
-      }, 
-      tags: {
-        'AppName': props.appConfig.appName, 
-        'AppEnv': props.appConfig.appEnv, 
-      }, 
-    });
-    this.appConfig = props.appConfig;
-    this.stackInstanceName = BaseStack.iname(props.appConfig, rootStackName);
+    super(scope, `${props.appName}-${rootStackName}-${props.appEnv}`, props);
+    this.appEnv = props.appEnv;
+    this.appName = props.appName;
+    // this.appConfig = props.appConfig;
+    this.stackInstanceName = BaseStack.iname(this.appName, rootStackName, this.appEnv);
     // console.log(`stackInstanceName: ${this.stackInstanceName}, stackId: ${this.stackId}`);
   }
 
@@ -69,7 +67,7 @@ export abstract class BaseStack extends cdk.Stack {
    * @param rootName the root name
    */
   public iname(rootName: string): string {
-    return BaseStack.iname(this.appConfig, rootName);
+    return BaseStack.iname(this.appName, rootName, this.appEnv);
   }
 
 } // BaseStack class

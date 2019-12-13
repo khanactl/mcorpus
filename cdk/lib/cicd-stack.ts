@@ -76,7 +76,7 @@ export class CICDStack extends BaseStack {
     // source (github)
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: `GitHub-Source-${props.appConfig.appEnv}`,
+      actionName: `GitHub-Source-${this.appEnv}`,
       owner: props.githubOwner, 
       repo: props.githubRepo, 
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretName), 
@@ -90,7 +90,7 @@ export class CICDStack extends BaseStack {
       actionName: this.iname('manual-approval-post-source'), 
       notificationTopic: new sns.Topic(this, this.iname('confirm-deployment-post-source')), 
       notifyEmails: props.cicdDeployApprovalEmails, 
-      additionalInformation: `Please confirm or reject this change for ${props.appConfig.appEnv} build/test.`
+      additionalInformation: `Please confirm or reject this change for ${this.appEnv} build/test.`
     });
 
     // build and test action
@@ -217,7 +217,7 @@ export class CICDStack extends BaseStack {
       actionName: this.iname('manual-approval-deployment'), 
       notificationTopic: new sns.Topic(this, this.iname('confirm-deployment')), 
       notifyEmails: props.cicdDeployApprovalEmails, 
-      additionalInformation: `Please confirm or reject this change for ${props.appConfig.appEnv} deployment.`
+      additionalInformation: `Please confirm or reject this change for ${this.appEnv} deployment.`
     });
 
     // deploy action
