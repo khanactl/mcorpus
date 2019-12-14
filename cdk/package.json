@@ -27,7 +27,7 @@
     "@aws-cdk/core": "^1.18.0",
     "@types/archiver": "^3.0.0",
     "archiver": "^3.1.1",
-    "aws-sdk": "^2.589.0",
+    "aws-sdk": "^2.590.0",
     "git-branch": "^2.0.1",
     "npm-check-updates": "^4.0.1",
     "source-map-support": "^0.5.16",
