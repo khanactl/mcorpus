@@ -37,10 +37,7 @@ export abstract class BaseStack extends cdk.Stack {
 
   protected readonly appEnv: AppEnv;
 
-  // protected readonly appConfig: IAppConfig;
   protected readonly appName: string;
-
-  protected readonly stackInstanceName: string;
 
   /**
    * Constructor.
@@ -53,9 +50,6 @@ export abstract class BaseStack extends cdk.Stack {
     super(scope, `${props.appName}-${rootStackName}-${props.appEnv}`, props);
     this.appEnv = props.appEnv;
     this.appName = props.appName;
-    // this.appConfig = props.appConfig;
-    this.stackInstanceName = BaseStack.iname(this.appName, rootStackName, this.appEnv);
-    // console.log(`stackInstanceName: ${this.stackInstanceName}, stackId: ${this.stackId}`);
   }
 
   /**
