@@ -58,6 +58,8 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     "AppEnv": appEnv,
   }
 
+  const gitRepoRef = appConfig.sharedConfig.gitRepoRef;
+
   const ecsStack = new ECSStack(app, {
     appEnv: appEnv,
     appName: appConfig.appName,
@@ -81,13 +83,16 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_appInstance,
-    githubOwner: appConfig.sharedConfig.gitRepoRef.githubOwner,
-    githubRepo: appConfig.sharedConfig.gitRepoRef.githubRepo,
-    githubOauthTokenSecretName: appConfig.sharedConfig.gitRepoRef.githubOauthTokenSecretName,
-    gitBranchName: appConfig.prdConfig.cicdConfig.gitBranchName,
+    githubOwner: gitRepoRef.githubOwner,
+    githubRepo: gitRepoRef.githubRepo,
+    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
+    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    gitBranchName: cicdConfig.gitBranchName,
     vpc: vpcStack.vpc,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
-    buildspecFilename: cicdConfig.buildspecFilename,
+    // buildspecFilename: cicdConfig.buildspecFilename,
+    ecsTaskDefContainerName: ecsStack.containerName,
+    lbToEcsPort: webAppContainerConfig.lbToAppPort,
     ecrRepo: ecsStack.ecrRepo,
     fargateSvc: ecsStack.fargateSvc,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
