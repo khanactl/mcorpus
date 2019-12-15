@@ -1,20 +1,20 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack } from './cdk-native'
+import { ISecurityGroup, Port, SubnetType } from '@aws-cdk/aws-ec2';
+import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
+import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
+import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { Duration } from '@aws-cdk/core';
+import { randomBytes } from 'crypto';
+import { BaseStack, IStackProps } from './cdk-native';
 import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ssm = require('@aws-cdk/aws-ssm');
 import r53 = require('@aws-cdk/aws-route53');
-import { ISecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
-import { IStringParameter } from '@aws-cdk/aws-ssm';
-import { FargatePlatformVersion, FargateService, EcrImage } from '@aws-cdk/aws-ecs';
-import { ApplicationProtocol, SslPolicy, TargetType } from '@aws-cdk/aws-elasticloadbalancingv2';
-import { Duration } from '@aws-cdk/core';
 import path = require('path');
 import ecr = require('@aws-cdk/aws-ecr');
-import * as crypto from 'crypto';
-import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
 import alias = require('@aws-cdk/aws-route53-targets')
 
 /**
@@ -88,7 +88,7 @@ export class ECSStack extends BaseStack {
     super(scope, 'ECS', props);
 
     // generate JWT salt ssm param
-    const rhs = crypto.randomBytes(32).toString('hex');
+    const rhs = randomBytes(32).toString('hex');
     const jwtSaltInstNme = this.iname('jwtSalt');
     const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, jwtSaltInstNme, {
       parameterName: `/${jwtSaltInstNme}`, 
@@ -180,6 +180,13 @@ export class ECSStack extends BaseStack {
       clusterName: ecsClusterInstNme, 
     });
 
+    // sec grp rule: lb to ecs container traffic
+    props.ecsSecGrp.addIngressRule(
+      props.lbSecGrp, 
+      Port.tcp(props.lbToEcsPort), 
+      'lb to ecs container traffic'
+    );
+
     const fargateSvcInstNme = this.iname('fargate-svc');
     this.fargateSvc = new ecs.FargateService(this, fargateSvcInstNme, {
       cluster: cluster,
@@ -191,7 +198,6 @@ export class ECSStack extends BaseStack {
       // serviceName: 'mcorpus-fargate-service',
       platformVersion: FargatePlatformVersion.LATEST, 
       securityGroup: props.ecsSecGrp, 
-      
     });
 
     // ****************************

@@ -11,10 +11,6 @@ export interface ISecGrpProps extends IStackProps {
    * The VPC ref
    */
   readonly vpc: ec2.IVpc;
-  /**
-   * The load balancer to app ecs container (traffic) port.
-   */
-  readonly lbTrafficPort: number;
 }
 
 /**
@@ -68,12 +64,6 @@ export class SecGrpStack extends BaseStack {
       securityGroupName: sgEcsInstNme, 
     });
     this.ecsSecGrp.node.applyAspect(new cdk.Tag('Name', sgEcsInstNme));
-    // rule: lb to ecs container traffic
-    this.ecsSecGrp.addIngressRule(
-      this.lbSecGrp, 
-      Port.tcp(props.lbTrafficPort), 
-      'lb to ecs container traffic'
-    );
 
     // codebuild security group
     const sgCodebuildInstNme = this.iname('codebuild-sec-grp');
