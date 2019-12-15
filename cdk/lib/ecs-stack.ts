@@ -87,6 +87,11 @@ export class ECSStack extends BaseStack {
 
   public readonly webContainerLogGrp: logs.LogGroup;
 
+  /**
+   * The container name to use in CICD when referencing the container in the buidlspec.
+   */
+  public readonly containerName: string;
+
   constructor(scope: cdk.Construct, props: IECSProps) {
     super(scope, 'ECS', props);
 
@@ -148,8 +153,8 @@ export class ECSStack extends BaseStack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const containerDefInstNme = this.iname('gql');
-    const containerDef = taskDef.addContainer(containerDefInstNme, {
+    this.containerName = this.iname('gql');
+    const containerDef = taskDef.addContainer(this.containerName, {
      image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo),
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
@@ -295,6 +300,9 @@ export class ECSStack extends BaseStack {
     });
     new cdk.CfnOutput(this, 'webAppLogGroupName', { value:
       this.webContainerLogGrp.logGroupName
+    });
+    new cdk.CfnOutput(this, 'containerName', { value:
+      this.containerName
     });
     new cdk.CfnOutput(this, 'loadBalancerDnsName', { value:
       alb.loadBalancerDnsName
