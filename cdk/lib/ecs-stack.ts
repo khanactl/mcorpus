@@ -1,7 +1,7 @@
 import cdk = require('@aws-cdk/core');
 import { ISecurityGroup, Port, SubnetType } from '@aws-cdk/aws-ec2';
 import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
-import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
+import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
 import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { Duration } from '@aws-cdk/core';
@@ -15,7 +15,8 @@ import ssm = require('@aws-cdk/aws-ssm');
 import r53 = require('@aws-cdk/aws-route53');
 import path = require('path');
 import ecr = require('@aws-cdk/aws-ecr');
-import alias = require('@aws-cdk/aws-route53-targets')
+import alias = require('@aws-cdk/aws-route53-targets');
+import logs = require('@aws-cdk/aws-logs');
 
 /**
  * ECS Stack config properties.
@@ -84,6 +85,8 @@ export class ECSStack extends BaseStack {
 
   public readonly fargateSvc: FargateService;
 
+  public readonly webContainerLogGrp: logs.LogGroup;
+
   constructor(scope: cdk.Construct, props: IECSProps) {
     super(scope, 'ECS', props);
 
@@ -138,6 +141,13 @@ export class ECSStack extends BaseStack {
       executionRole: this.ecsTaskExecutionRole,
     });
 
+    // web app container log group
+    this.webContainerLogGrp = new logs.LogGroup(this, this.iname("webapp"), {
+      retention: logs.RetentionDays.ONE_WEEK,
+      logGroupName: `webapp-${this.appEnv}`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
     const containerDefInstNme = this.iname('gql');
     const containerDef = taskDef.addContainer(containerDefInstNme, {
      image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo),
@@ -167,7 +177,10 @@ export class ECSStack extends BaseStack {
         'MCORPUS_TEST_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcTestUrl),
         'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt),
       },
-      logging: new ecs.AwsLogDriver({ streamPrefix: this.iname('webapplogs') }),
+      logging: new ecs.AwsLogDriver({
+        streamPrefix: this.iname('webapplogs'),
+        logGroup: this.webContainerLogGrp,
+      }),
     });
     containerDef.addPortMappings({
       containerPort: props.lbToEcsPort,
@@ -279,6 +292,9 @@ export class ECSStack extends BaseStack {
     });
     new cdk.CfnOutput(this, 'fargateServiceName', { value:
       this.fargateSvc.serviceName
+    });
+    new cdk.CfnOutput(this, 'webAppLogGroupName', { value:
+      this.webContainerLogGrp.logGroupName
     });
     new cdk.CfnOutput(this, 'loadBalancerDnsName', { value:
       alb.loadBalancerDnsName
