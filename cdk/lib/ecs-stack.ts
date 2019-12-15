@@ -30,7 +30,7 @@ export interface IECSProps extends IStackProps {
    */
   readonly sslCertArn: string;
   /**
-   * The inner or traffic port used to send traffic 
+   * The inner or traffic port used to send traffic
    * from the load balancer to the ecs/fargate service.
    */
   readonly lbToEcsPort: number;
@@ -46,14 +46,14 @@ export interface IECSProps extends IStackProps {
   readonly ssmJdbcTestUrl: IStringParameter;
   /**
    * The load balancer security group ref.
-   */  
+   */
   readonly lbSecGrp: ISecurityGroup;
   /**
    * The ECS/Fargate container security group ref.
-   */  
+   */
   readonly ecsSecGrp: ISecurityGroup;
   /**
-   * The web app domain name URL used for server-issued http 302 redirects 
+   * The web app domain name URL used for server-issued http 302 redirects
    * and cookie/jwt verifications.
    */
   readonly webAppUrl: string;
@@ -63,7 +63,7 @@ export interface IECSProps extends IStackProps {
   readonly javaOpts: string;
   /**
    * The domain name registered in AWS Route53 and the one used for this web app.
-   * 
+   *
    * This will connect the public to this app!
    */
   readonly publicDomainName?: string;
@@ -81,7 +81,7 @@ export class ECSStack extends BaseStack {
   public readonly ecrRepo: ecr.IRepository;
 
   public readonly ecsTaskExecutionRole: iam.Role;
-  
+
   public readonly fargateSvc: FargateService;
 
   constructor(scope: cdk.Construct, props: IECSProps) {
@@ -91,8 +91,8 @@ export class ECSStack extends BaseStack {
     const rhs = randomBytes(32).toString('hex');
     const jwtSaltInstNme = this.iname('jwtSalt');
     const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, jwtSaltInstNme, {
-      parameterName: `/${jwtSaltInstNme}`, 
-      stringValue: rhs, 
+      parameterName: `/${jwtSaltInstNme}`,
+      stringValue: rhs,
     });
 
     // ECS/Fargate task execution role
@@ -104,9 +104,9 @@ export class ECSStack extends BaseStack {
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
     });
     this.ecsTaskExecutionRole.addToPolicy(new iam.PolicyStatement({
-      actions: [ 
+      actions: [
         /*
-        'kms:Decrypt', 
+        'kms:Decrypt',
         'kms:DescribeKey',
         'kms:DescribeParamters',
         'kms:GetParamters',
@@ -116,7 +116,7 @@ export class ECSStack extends BaseStack {
       resources: [
         props.ssmJdbcUrl.parameterArn,
         props.ssmJdbcTestUrl.parameterArn,
-        jwtSalt.parameterArn, 
+        jwtSalt.parameterArn,
         // props.ssmKmsArn, // TODO fix
       ],
     }));
@@ -124,8 +124,8 @@ export class ECSStack extends BaseStack {
     // ecr repo
     const dockerAssetInstNme = this.iname('docker-asset');
     const dockerAsset = new DockerImageAsset(this, dockerAssetInstNme, {
-      directory: path.join(__dirname, "../../mcorpus-gql/target"), 
-      repositoryName: 'mcorpus-gql', 
+      directory: path.join(__dirname, "../../mcorpus-gql/target"),
+      repositoryName: 'mcorpus-gql',
     });
     this.ecrRepo = dockerAsset.repository;
 
@@ -134,70 +134,70 @@ export class ECSStack extends BaseStack {
     const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
       cpu: 256,
       memoryLimitMiB: 1024,
-      taskRole: this.ecsTaskExecutionRole, 
-      executionRole: this.ecsTaskExecutionRole, 
+      taskRole: this.ecsTaskExecutionRole,
+      executionRole: this.ecsTaskExecutionRole,
     });
 
     const containerDefInstNme = this.iname('gql');
     const containerDef = taskDef.addContainer(containerDefInstNme, {
-     image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo), 
+     image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo),
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
-        interval: Duration.seconds(120), 
-        timeout: Duration.seconds(5), 
-        startPeriod: Duration.seconds(15), 
-        retries: 3, 
+        interval: Duration.seconds(120),
+        timeout: Duration.seconds(5),
+        startPeriod: Duration.seconds(15),
+        retries: 3,
       },
-      memoryLimitMiB: 900,  
-      memoryReservationMiB: 500, 
-      essential: true, 
-      environment: { 
-        'JAVA_OPTS' : props.javaOpts, 
-        'MCORPUS_COOKIE_SECURE' : 'true', 
-        'MCORPUS_DB_DATA_SOURCE_CLASS_NAME' : 'org.postgresql.ds.PGSimpleDataSource', 
-        'MCORPUS_JWT_STATUS_CACHE_MAX_SIZE' : '60', 
-        'MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES' : '10', 
-        'MCORPUS_JWT_TTL_IN_SECONDS' : '172800', 
-        'MCORPUS_SERVER__DEVELOPMENT' : 'false', 
-        'MCORPUS_SERVER__PORT' : `${props.lbToEcsPort}`, 
-        'MCORPUS_SERVER__PUBLIC_ADDRESS' : props.webAppUrl, 
-      }, 
+      memoryLimitMiB: 900,
+      memoryReservationMiB: 500,
+      essential: true,
+      environment: {
+        'JAVA_OPTS' : props.javaOpts,
+        'MCORPUS_COOKIE_SECURE' : 'true',
+        'MCORPUS_DB_DATA_SOURCE_CLASS_NAME' : 'org.postgresql.ds.PGSimpleDataSource',
+        'MCORPUS_JWT_STATUS_CACHE_MAX_SIZE' : '60',
+        'MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES' : '10',
+        'MCORPUS_JWT_TTL_IN_SECONDS' : '172800',
+        'MCORPUS_SERVER__DEVELOPMENT' : 'false',
+        'MCORPUS_SERVER__PORT' : `${props.lbToEcsPort}`,
+        'MCORPUS_SERVER__PUBLIC_ADDRESS' : props.webAppUrl,
+      },
       secrets: {
-        'MCORPUS_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcUrl), 
-        'MCORPUS_TEST_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcTestUrl), 
-        'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt), 
-      }, 
-      logging: new ecs.AwsLogDriver({ streamPrefix: this.iname('webapplogs') }), 
+        'MCORPUS_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcUrl),
+        'MCORPUS_TEST_DB_URL' : ecs.Secret.fromSsmParameter(props.ssmJdbcTestUrl),
+        'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt),
+      },
+      logging: new ecs.AwsLogDriver({ streamPrefix: this.iname('webapplogs') }),
     });
-    containerDef.addPortMappings({ 
-      containerPort: props.lbToEcsPort, 
+    containerDef.addPortMappings({
+      containerPort: props.lbToEcsPort,
     });
 
     // cluster
     const ecsClusterInstNme = this.iname('ecs-cluster');
     const cluster = new ecs.Cluster(this, ecsClusterInstNme, {
-      vpc: props.vpc, 
-      clusterName: ecsClusterInstNme, 
+      vpc: props.vpc,
+      clusterName: ecsClusterInstNme,
     });
 
     // sec grp rule: lb to ecs container traffic
     props.ecsSecGrp.addIngressRule(
-      props.lbSecGrp, 
-      Port.tcp(props.lbToEcsPort), 
+      props.lbSecGrp,
+      Port.tcp(props.lbToEcsPort),
       'lb to ecs container traffic'
     );
 
     const fargateSvcInstNme = this.iname('fargate-svc');
     this.fargateSvc = new ecs.FargateService(this, fargateSvcInstNme, {
       cluster: cluster,
-      taskDefinition: taskDef, 
+      taskDefinition: taskDef,
       desiredCount: 1,
       assignPublicIp: false,
       healthCheckGracePeriod: Duration.seconds(15),
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       // serviceName: 'mcorpus-fargate-service',
-      platformVersion: FargatePlatformVersion.LATEST, 
-      securityGroup: props.ecsSecGrp, 
+      platformVersion: FargatePlatformVersion.LATEST,
+      securityGroup: props.ecsSecGrp,
     });
 
     // ****************************
@@ -208,12 +208,12 @@ export class ECSStack extends BaseStack {
     const alb = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
       internetFacing: true,
-      securityGroup: props.lbSecGrp, 
+      securityGroup: props.lbSecGrp,
     });
 
     const listenerInstNme = this.iname('alb-tls-listener');
     const listener = alb.addListener(listenerInstNme, {
-      protocol: ApplicationProtocol.HTTPS, 
+      protocol: ApplicationProtocol.HTTPS,
       port: 443,
       certificateArns: [ props.sslCertArn ],
       sslPolicy: SslPolicy.RECOMMENDED,
@@ -224,11 +224,11 @@ export class ECSStack extends BaseStack {
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
     const albTargetGroupInstNme = this.iname('fargate-target');
     const albTargetGroup = listener.addTargets(albTargetGroupInstNme, {
-      // targetGroupName: '', 
-      port: props.lbToEcsPort, 
+      // targetGroupName: '',
+      port: props.lbToEcsPort,
       targets: [
-        this.fargateSvc, 
-      ], 
+        this.fargateSvc,
+      ],
       healthCheck: {
         // port: String(props.innerPort),
         protocol: elb.Protocol.HTTP,
@@ -239,7 +239,7 @@ export class ECSStack extends BaseStack {
         timeout: Duration.seconds(20),
         interval: Duration.seconds(120),
       },
-      protocol: ApplicationProtocol.HTTP, 
+      protocol: ApplicationProtocol.HTTP,
     });
     // ****************************
     // *** END inline load balancer ***
@@ -250,39 +250,39 @@ export class ECSStack extends BaseStack {
       // console.log('Load balancer DNS will be bound in Route53.');
       const hostedZone = r53.HostedZone.fromHostedZoneAttributes(
         this, this.iname('hostedzone'), {
-          hostedZoneId: props.awsHostedZoneId, 
-          zoneName: props.publicDomainName, 
+          hostedZoneId: props.awsHostedZoneId,
+          zoneName: props.publicDomainName,
         }
       );
       // NOTE: arecord creation will fail if it already exists
       const arecordInstNme = this.iname('arecord');
       const arecord = new r53.ARecord(this, arecordInstNme, {
-        recordName: 'www.' + props.publicDomainName, 
-        zone: hostedZone, 
-        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(alb)), 
+        recordName: props.publicDomainName,
+        zone: hostedZone,
+        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(alb)),
       });
       // dns specific stack output
-      new cdk.CfnOutput(this, 'HostedZone', { value: 
+      new cdk.CfnOutput(this, 'HostedZone', { value:
         hostedZone.hostedZoneId
       });
-      new cdk.CfnOutput(this, 'ARecord', { value: 
+      new cdk.CfnOutput(this, 'ARecord', { value:
         arecord.domainName
       });
     }
-    
+
     // stack output
-    new cdk.CfnOutput(this, 'fargateTaskExecRoleName', { value: 
+    new cdk.CfnOutput(this, 'fargateTaskExecRoleName', { value:
       this.ecsTaskExecutionRole.roleName
     });
-    new cdk.CfnOutput(this, 'fargateTaskDefArn', { value: 
+    new cdk.CfnOutput(this, 'fargateTaskDefArn', { value:
       taskDef.taskDefinitionArn
     });
-    new cdk.CfnOutput(this, 'fargateServiceName', { value: 
+    new cdk.CfnOutput(this, 'fargateServiceName', { value:
       this.fargateSvc.serviceName
     });
-    new cdk.CfnOutput(this, 'loadBalancerDnsName', { value: 
+    new cdk.CfnOutput(this, 'loadBalancerDnsName', { value:
       alb.loadBalancerDnsName
     });
-    
+
   }
 }
