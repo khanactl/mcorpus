@@ -45,8 +45,8 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
       break;
     }
     case AppEnv.DEV: {
-      webAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
-      cicdConfig = appConfig.prdConfig.cicdConfig;
+      webAppContainerConfig = appConfig.devConfig.webAppContainerConfig;
+      cicdConfig = appConfig.devConfig.cicdConfig;
       break;
     }
     default:
@@ -54,44 +54,45 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
   }
 
   const awsStackTags_appInstance = {
-    "AppName": config.appName,
-    "AppEnv": appEnv,   
+    "AppName": appConfig.appName,
+    "AppEnv": appEnv,
   }
-  
+
   const ecsStack = new ECSStack(app, {
-    appEnv: appEnv, 
-    appName: appConfig.appName, 
-    env: awsEnv, 
-    tags: awsStackTags_appInstance, 
-    vpc: vpcStack.vpc, 
-    lbToEcsPort: webAppContainerConfig.lbToAppPort, 
-    sslCertArn: webAppContainerConfig.tlsCertArn, 
-    // ssmKmsArn: appappConfig.ssmKmsArn, 
-    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl, 
-    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl, 
-    ecsSecGrp: secGrpStack.ecsSecGrp, 
-    lbSecGrp: secGrpStack.lbSecGrp, 
-    webAppUrl: webAppContainerConfig.webAppUrl, 
-    javaOpts: webAppContainerConfig.javaOpts, 
-    publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName, 
-    awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId, 
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    vpc: vpcStack.vpc,
+    lbToEcsPort: webAppContainerConfig.lbToAppPort,
+    sslCertArn: webAppContainerConfig.tlsCertArn,
+    // ssmKmsArn: appappConfig.ssmKmsArn,
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
+    ecsSecGrp: secGrpStack.ecsSecGrp,
+    lbSecGrp: secGrpStack.lbSecGrp,
+    webAppUrl: webAppContainerConfig.webAppUrl,
+    javaOpts: webAppContainerConfig.javaOpts,
+    publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
+    awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
   const cicdStack = new CICDStack(app, {
-    appEnv: appEnv, 
-    appName: appConfig.appName, 
-    env: awsEnv, 
-    tags: awsStackTags_appInstance, 
-    githubOwner: appConfig.sharedConfig.gitRepoRef.githubOwner, 
-    githubRepo: appConfig.sharedConfig.gitRepoRef.githubRepo, 
-    githubOauthTokenSecretName: appConfig.sharedConfig.gitRepoRef.githubOauthTokenSecretName, 
-    gitBranchName: appConfig.prdConfig.cicdConfig.gitBranchName, 
-    vpc: vpcStack.vpc, 
-    codebuildSecGrp: secGrpStack.codebuildSecGrp, 
-    buildspecFilename: cicdConfig.buildspecFilename, 
-    fargateSvc: ecsStack.fargateSvc, 
-    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl, 
-    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl, 
-    cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails, 
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    githubOwner: appConfig.sharedConfig.gitRepoRef.githubOwner,
+    githubRepo: appConfig.sharedConfig.gitRepoRef.githubRepo,
+    githubOauthTokenSecretName: appConfig.sharedConfig.gitRepoRef.githubOauthTokenSecretName,
+    gitBranchName: appConfig.prdConfig.cicdConfig.gitBranchName,
+    vpc: vpcStack.vpc,
+    codebuildSecGrp: secGrpStack.codebuildSecGrp,
+    buildspecFilename: cicdConfig.buildspecFilename,
+    ecrRepo: ecsStack.ecrRepo,
+    fargateSvc: ecsStack.fargateSvc,
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
+    cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
   });
 }
 
@@ -106,60 +107,60 @@ const app = new cdk.App();
 
 const awsEnv: cdk.Environment = {
   account: config.sharedConfig.awsAccountId,
-  region: config.sharedConfig.awsRegion, 
+  region: config.sharedConfig.awsRegion,
 };
 
 const awsStackTags_Shared = {
   "AppName": config.appName,
-  "AppEnv": AppEnv.SHARED, 
+  "AppEnv": AppEnv.SHARED,
 };
 
-// common VPC 
+// common VPC
 const vpcStack = new VpcStack(app, {
-  appEnv: AppEnv.SHARED, 
-  appName: config.appName, 
-  env: awsEnv, 
-  tags: awsStackTags_Shared, 
+  appEnv: AppEnv.SHARED,
+  appName: config.appName,
+  env: awsEnv,
+  tags: awsStackTags_Shared,
 });
 const secGrpStack = new SecGrpStack(app, {
-  appEnv: AppEnv.SHARED, 
-  appName: config.appName, 
-  env: awsEnv, 
-  tags: awsStackTags_Shared, 
-  vpc: vpcStack.vpc, 
+  appEnv: AppEnv.SHARED,
+  appName: config.appName,
+  env: awsEnv,
+  tags: awsStackTags_Shared,
+  vpc: vpcStack.vpc,
 });
 
 // common RDS instance
 const dbStack = new DbStack(app, {
-  appEnv: AppEnv.SHARED, 
-  appName: config.appName, 
-  env: awsEnv, 
-  tags: awsStackTags_Shared, 
-  vpc: vpcStack.vpc, 
-  dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
-  ecsSecGrp: secGrpStack.ecsSecGrp, 
-  codebuildSecGrp: secGrpStack.codebuildSecGrp, 
-  dbName: config.sharedConfig.dbConfig.dbName, 
-  dbMasterUsername: config.sharedConfig.dbConfig.dbMasterUsername, 
+  appEnv: AppEnv.SHARED,
+  appName: config.appName,
+  env: awsEnv,
+  tags: awsStackTags_Shared,
+  vpc: vpcStack.vpc,
+  dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
+  ecsSecGrp: secGrpStack.ecsSecGrp,
+  codebuildSecGrp: secGrpStack.codebuildSecGrp,
+  dbName: config.sharedConfig.dbConfig.dbName,
+  dbMasterUsername: config.sharedConfig.dbConfig.dbMasterUsername,
 });
 const dbBootstrapStack = new DbBootstrapStack(app, {
-  appEnv: AppEnv.SHARED, 
-  appName: config.appName, 
-  env: awsEnv, 
-  tags: awsStackTags_Shared, 
-  vpc: vpcStack.vpc, 
-  dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp, 
-  dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
-  targetRegion: config.sharedConfig.awsRegion, 
+  appEnv: AppEnv.SHARED,
+  appName: config.appName,
+  env: awsEnv,
+  tags: awsStackTags_Shared,
+  vpc: vpcStack.vpc,
+  dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
+  dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
+  targetRegion: config.sharedConfig.awsRegion,
 });
 const dbDataStack = new DbDataStack(app, {
-  appEnv: AppEnv.SHARED, 
-  appName: config.appName, 
-  env: awsEnv, 
-  tags: awsStackTags_Shared, 
-  vpc: vpcStack.vpc, 
-  dbDataSecGrp: secGrpStack.dbBootstrapSecGrp, 
-  dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn, 
+  appEnv: AppEnv.SHARED,
+  appName: config.appName,
+  env: awsEnv,
+  tags: awsStackTags_Shared,
+  vpc: vpcStack.vpc,
+  dbDataSecGrp: secGrpStack.dbBootstrapSecGrp,
+  dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
   // s3KmsEncKeyArn: appConfig.ssmKmsArn
 });
 
