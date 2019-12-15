@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 
+import fs = require('fs');
+import os = require('os');
+
 import cdk = require('@aws-cdk/core');
 
 import { AppEnv } from '../lib/app-env';
@@ -96,7 +99,8 @@ const currentGitBranch = resolveCurrentGitBranch();
 const currentAppEnv = resolveAppEnv(currentGitBranch);
 // console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
 
-const config = require("../app.config.json");
+const appConfigFilename = 'mcorpus-cdk-app-config.json';
+const config = JSON.parse(fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8'));
 
 const app = new cdk.App();
 
