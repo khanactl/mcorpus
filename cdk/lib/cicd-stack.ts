@@ -134,8 +134,8 @@ export class CICDStack extends BaseStack {
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
         env: {
-          parameterStore: {
-            MCORPUS_DB_URL: props.ssmJdbcTestUrl.parameterName,
+          "parameter-store": {
+            MCORPUS_DB_URL: props.ssmJdbcUrl.parameterName,
             MCORPUS_TEST_DB_URL: props.ssmJdbcTestUrl.parameterName,
           }
         },
@@ -156,7 +156,7 @@ export class CICDStack extends BaseStack {
               "docker --version",
               "mvn --version",
 
-              "env", // output the env vars
+              "echo $(env)", // output the env vars
 
               "mvn clean test",
 
@@ -244,8 +244,11 @@ export class CICDStack extends BaseStack {
         "ecs:ListTaskDefinitions",
       ],
       resources: [
+        /* does not work
         props.ecrRepo.repositoryArn,
         props.fargateSvc.serviceArn,
+        */
+       "*"
       ],
     }));
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
@@ -297,7 +300,6 @@ export class CICDStack extends BaseStack {
       ]
       */
     }));
-    /*
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "logs:CreateLogGroup",
@@ -308,7 +310,6 @@ export class CICDStack extends BaseStack {
         "*" // TODO limit scope!
       ],
     }));
-    */
 
     const buildActionInstNme = this.iname('build-test');
     const buildOutput = new codepipeline.Artifact();
