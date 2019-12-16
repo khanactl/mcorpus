@@ -1,17 +1,18 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack } from './cdk-native'
+import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
+import { SubnetType } from '@aws-cdk/aws-ec2';
+import { BlockPublicAccess } from '@aws-cdk/aws-s3';
+import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { BaseStack, IStackProps } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
 import ecs = require('@aws-cdk/aws-ecs');
 import s3 = require('@aws-cdk/aws-s3');
-import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
-import { SubnetType } from '@aws-cdk/aws-ec2';
-import { IStringParameter } from '@aws-cdk/aws-ssm';
 import iam = require('@aws-cdk/aws-iam');
 import sns = require('@aws-cdk/aws-sns');
-import { BlockPublicAccess } from '@aws-cdk/aws-s3';
+import ecr = require('@aws-cdk/aws-ecr');
 
 /**
  * CICD stack config properties.
@@ -30,9 +31,10 @@ export interface ICICDProps extends IStackProps {
    */
   readonly githubRepo: string;
   /**
-   * The name of the SecretsManager entry holding the GitHub OAuth access token.
+   * The ARN of the SecretsManager entry holding the GitHub OAuth access token.
    */
-  readonly githubOauthTokenSecretName: string;
+  readonly githubOauthTokenSecretArn: string;
+  readonly githubOauthTokenSecretJsonFieldName: string;
   /**
    * The Git branch name to associate to the CICD pipeline.
    */
@@ -44,7 +46,20 @@ export interface ICICDProps extends IStackProps {
   /**
    * The non-path name of the buildspec file to use in codebuild.
    */
-  readonly buildspecFilename: string;
+  // readonly buildspecFilename: string;
+  /**
+   * The container name used in the buildspec.
+   */
+  readonly ecsTaskDefContainerName: string;
+  /**
+   * The inner or traffic port used to send traffic
+   * from the load balancer to the ecs/fargate service.
+   */
+  readonly lbToEcsPort: number;
+  /**
+   * The ECR repository ref holding the generated web app docker images.
+   */
+  readonly ecrRepo: ecr.IRepository;
   /**
    * The aws ecs fargate service ref.
    */
@@ -70,61 +85,149 @@ export class CICDStack extends BaseStack {
 
   public readonly pipeline: codepipeline.Pipeline;
 
+  public readonly pipelineArtifactBucket: s3.Bucket;
+
   constructor(scope: cdk.Construct, props: ICICDProps) {
     super(scope, 'CICD', props);
+
+    // dedicated codepipeline artifact bucket
+    const pipelineArtifactBucketInstNme = this.iname('pipeline-bucket');
+    this.pipelineArtifactBucket = new s3.Bucket(this, pipelineArtifactBucketInstNme, {
+      bucketName: pipelineArtifactBucketInstNme,
+      encryption: s3.BucketEncryption.UNENCRYPTED, // TODO use encryption
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+    })
 
     // source (github)
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
       actionName: `GitHub-Source-${this.appEnv}`,
-      owner: props.githubOwner, 
-      repo: props.githubRepo, 
-      oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretName), 
-      branch: props.gitBranchName, 
-      trigger: codepipeline_actions.GitHubTrigger.WEBHOOK, 
-      output: sourceOutput, 
+      owner: props.githubOwner,
+      repo: props.githubRepo,
+      oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
+        jsonField: props.githubOauthTokenSecretJsonFieldName,
+      }),
+      branch: props.gitBranchName,
+      trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
+      output: sourceOutput,
     });
 
     // manual approve [post-source] action
     const maaPostSource = new codepipeline_actions.ManualApprovalAction({
-      actionName: this.iname('manual-approval-post-source'), 
-      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment-post-source')), 
-      notifyEmails: props.cicdDeployApprovalEmails, 
+      actionName: this.iname('manual-approval-post-source'),
+      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment-post-source')),
+      notifyEmails: props.cicdDeployApprovalEmails,
       additionalInformation: `Please confirm or reject this change for ${this.appEnv} build/test.`
     });
 
     // build and test action
     const codebuildInstNme = this.iname('ecs-cdk');
     const codebuildProject = new codebuild.PipelineProject(this, codebuildInstNme, {
-      vpc: props.vpc, 
-      projectName: codebuildInstNme, 
+      vpc: props.vpc,
+      projectName: codebuildInstNme,
       environment: {
-        computeType: ComputeType.SMALL, 
+        computeType: ComputeType.SMALL,
         privileged: true, // for Docker to run
-        buildImage: LinuxBuildImage.STANDARD_2_0, 
-      }, 
-      buildSpec: BuildSpec.fromSourceFilename(props.buildspecFilename), 
-      // role: codebuildServiceRole, 
-      securityGroups: [ props.codebuildSecGrp ], 
-      subnetSelection: { subnetType: SubnetType.PRIVATE }, 
+        buildImage: LinuxBuildImage.STANDARD_2_0,
+      },
+      // buildSpec: BuildSpec.fromSourceFilename(props.buildspecFilename),
+      buildSpec: BuildSpec.fromObject({
+        version: "0.2",
+        env: {
+          parameterStore: {
+            MCORPUS_DB_URL: props.ssmJdbcTestUrl.parameterName,
+            MCORPUS_TEST_DB_URL: props.ssmJdbcTestUrl.parameterName,
+          }
+        },
+        phases: {
+          install: {
+            "runtime-versions": {
+              java: "openjdk8",
+              docker: 18
+            },
+            commands: [
+              "pip install --upgrade awscli"
+            ],
+          },
+          pre_build: {
+            commands: [
+              "echo Test started on `date`",
+              "aws --version",
+              "docker --version",
+              "mvn --version",
+
+              "env", // output the env vars
+
+              "mvn clean test",
+
+              "echo Logging in to Amazon ECR...",
+              "echo $AWS_DEFAULT_REGION",
+              "$(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)",
+              // `REPOSITORY_URI=${props.env!.account}.dkr.ecr.${props.env!.region}.amazonaws.com/${props.ecrRepo.repositoryName}`,
+              `REPOSITORY_URI=${props.ecrRepo.repositoryUri}`,
+              "COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)",
+              "IMAGE_TAG=${COMMIT_HASH:=latest}",
+            ]
+          },
+          build: {
+            commands: [
+              "echo Build started on `date`",
+              "mvn -DskipTests package",
+
+              "echo Building the Docker image...",
+              "cd mcorpus-gql/target",
+              "docker build -t $REPOSITORY_URI:latest .",
+              "docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG",
+            ]
+          },
+          post_build: {
+            commands: [
+              "echo Pushing the Docker images...",
+              "docker push $REPOSITORY_URI:latest",
+              "docker push $REPOSITORY_URI:$IMAGE_TAG",
+
+              "TASKDEF_ARN=$(aws ecs list-task-definitions | jq -r '.taskDefinitionArns[-1]')",
+              `CONTAINER_NAME=${props.ecsTaskDefContainerName}`,
+              `CONTAINER_PORT=${props.lbToEcsPort}`,
+
+              "echo Writing image detail file...",
+              "printf '[{\"name\":\"%s\",\"imageUri\":\"%s\"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json",
+
+              "echo Generating appspec.yaml file...",
+              "cat ../../appspec-template.yaml | sed -e \"s%\${taskDefArn}%$TASKDEF_ARN%\" -e \"s%\${containerName}%$CONTAINER_NAME%\" -e \"s%\${containerPort}%$CONTAINER_PORT%\" > appspec.yaml",
+
+              "echo Build completed on `date`"
+            ]
+          }
+        },
+        artifacts: {
+          files: [
+            "mcorpus-gql/target/appspec.yaml",
+            "mcorpus-gql/target/imageDetail.json",
+          ],
+          "discard-paths": "yes"
+        },
+      }),
+      // role: codebuildServiceRole,
+      securityGroups: [ props.codebuildSecGrp ],
+      subnetSelection: { subnetType: SubnetType.PRIVATE },
     });
-    
+
     // codebuild/pipeline ssm access
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "ssm:GetParameters",
-        "ssm:GetParameter", 
-      ], 
+        "ssm:GetParameter",
+      ],
       resources: [
-        props.ssmJdbcUrl.parameterArn, 
-        props.ssmJdbcTestUrl.parameterArn, 
-      ], 
+        props.ssmJdbcUrl.parameterArn,
+        props.ssmJdbcTestUrl.parameterArn,
+      ],
     }));
     // AmazonEC2ContainerRegistryPowerUser managed role privs
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
-        "ecs:ListTaskDefinitions", 
-        
+        // ECR
         "ecr:GetAuthorizationToken",
         "ecr:BatchCheckLayerAvailability",
         "ecr:GetDownloadUrlForLayer",
@@ -136,26 +239,29 @@ export class CICDStack extends BaseStack {
         "ecr:InitiateLayerUpload",
         "ecr:UploadLayerPart",
         "ecr:CompleteLayerUpload",
-        "ecr:PutImage", 
-      ], 
+        "ecr:PutImage",
+        // ECS
+        "ecs:ListTaskDefinitions",
+      ],
       resources: [
-        "*" // TODO limit scope!
-      ], 
+        props.ecrRepo.repositoryArn,
+        props.fargateSvc.serviceArn,
+      ],
     }));
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
-        "s3:PutObject",
-        "s3:GetObject",
-        "logs:CreateLogStream",
         "s3:GetBucketAcl",
         "s3:GetBucketLocation",
+        "s3:GetObjectVersion",
+        "s3:GetObject",
+        "s3:PutObject",
+        "logs:CreateLogStream",
         "logs:CreateLogGroup",
         "logs:PutLogEvents",
-        "s3:GetObjectVersion"
-      ], 
+      ],
       resources: [
-        "*" // TODO limit scope!
-      ], 
+        this.pipelineArtifactBucket.bucketArn,
+      ],
     }));
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
@@ -165,19 +271,18 @@ export class CICDStack extends BaseStack {
         "ec2:DeleteNetworkInterface",
         "ec2:DescribeSubnets",
         "ec2:DescribeSecurityGroups",
-        "ec2:DescribeVpcs", 
-        "ec2:CreateNetworkInterface",
-      ], 
+        "ec2:DescribeVpcs",
+      ],
       resources: [
         "*" // TODO limit scope!
-      ], 
+      ],
     }));
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "ec2:CreateNetworkInterfacePermission"
-      ], 
+      ],
       resources: [
-        "arn:aws:ec2:us-west-2:524006177124:network-interface/*"
+        `arn:aws:ec2:${props.env!.region}:${props.env!.account}:network-interface/*`,
       ],
       /*
       conditions: [
@@ -189,101 +294,95 @@ export class CICDStack extends BaseStack {
             "ec2:AuthorizedService": "codebuild.amazonaws.com"
           }
         }
-      ] 
+      ]
       */
     }));
+    /*
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
-      ], 
+      ],
       resources: [
         "*" // TODO limit scope!
-      ], 
+      ],
     }));
+    */
 
     const buildActionInstNme = this.iname('build-test');
     const buildOutput = new codepipeline.Artifact();
     const buildAction = new codepipeline_actions.CodeBuildAction({
-      actionName: buildActionInstNme, 
-      project: codebuildProject, 
-      input: sourceOutput, 
-      outputs: [ buildOutput ], 
+      actionName: buildActionInstNme,
+      project: codebuildProject,
+      input: sourceOutput,
+      outputs: [ buildOutput ],
     });
 
     // manual approve [deployment] action
     const maaDeploy = new codepipeline_actions.ManualApprovalAction({
-      actionName: this.iname('manual-approval-deployment'), 
-      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment')), 
-      notifyEmails: props.cicdDeployApprovalEmails, 
+      actionName: this.iname('manual-approval-deployment'),
+      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment')),
+      notifyEmails: props.cicdDeployApprovalEmails,
       additionalInformation: `Please confirm or reject this change for ${this.appEnv} deployment.`
     });
 
     // deploy action
     const deployAction = new codepipeline_actions.EcsDeployAction({
-      actionName: this.iname('deploy'), 
-      service: props.fargateSvc, 
-      imageFile: buildOutput.atPath('imageDetail.json'), 
+      actionName: this.iname('deploy'),
+      service: props.fargateSvc,
+      imageFile: buildOutput.atPath('imageDetail.json'),
     });
-
-    // dedicated codepipeline artifact bucket
-    const pipelineArtifactBucketInstNme = this.iname('pipeline-bucket');
-    const pipelineArtifactBucket = new s3.Bucket(this, pipelineArtifactBucketInstNme, {
-      bucketName: pipelineArtifactBucketInstNme, 
-      encryption: s3.BucketEncryption.UNENCRYPTED, // TODO use encryption
-      blockPublicAccess: BlockPublicAccess.BLOCK_ALL, 
-    })
 
     const pipelineInstNme = this.iname('cicd-pipeline');
-    const pipeline = new codepipeline.Pipeline(this, pipelineInstNme, {
-      pipelineName: pipelineInstNme, 
+    this.pipeline = new codepipeline.Pipeline(this, pipelineInstNme, {
+      pipelineName: pipelineInstNme,
       stages: [
         {
-          stageName: this.iname('Source'), 
+          stageName: `Source-${this.appEnv}`,
           actions: [ sourceAction ]
-        }, 
+        },
         {
-          stageName: this.iname('confirm-post-source'), 
+          stageName: `Confirm-Build-${this.appEnv}`,
           actions: [ maaPostSource ]
-        }, 
+        },
         {
-          stageName: this.iname('Build-Test'), 
+          stageName: `Build-Test-${this.appEnv}`,
           actions: [ buildAction ]
-        }, 
+        },
         {
-          stageName: this.iname('confirm-deployment'), 
+          stageName: `Confirm-Deployment-${this.appEnv}`,
           actions: [ maaDeploy ]
-        }, 
+        },
         {
-          stageName: this.iname('Deploy'), 
+          stageName: `Deploy-${this.appEnv}`,
           actions: [ deployAction ]
-        }, 
-      ], 
-      artifactBucket: pipelineArtifactBucket, 
+        },
+      ],
+      artifactBucket: this.pipelineArtifactBucket,
     });
-    pipeline.addToRolePolicy(new iam.PolicyStatement({
+    this.pipeline.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "iam:PassRole"
-      ], 
+      ],
       resources: [
-        "*" // TODO limit scope!
-      ], 
+        codebuildProject.role!.roleArn,
+      ],
     }));
-    pipeline.addToRolePolicy(new iam.PolicyStatement({
+    this.pipeline.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "codedeploy:CreateDeployment",
         "codedeploy:GetApplication",
         "codedeploy:GetApplicationRevision",
         "codedeploy:GetDeployment",
         "codedeploy:GetDeploymentConfig",
-        "codedeploy:RegisterApplicationRevision", 
-      ], 
+        "codedeploy:RegisterApplicationRevision",
+      ],
       resources: [
         "*" // TODO limit scope!
-      ], 
+      ],
     }));
-    pipeline.addToRolePolicy(new iam.PolicyStatement({
+    this.pipeline.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "elasticbeanstalk:*",
         "ec2:*",
@@ -296,24 +395,25 @@ export class CICDStack extends BaseStack {
         "rds:*",
         "sqs:*",
         "ecs:*"
-      ], 
+      ],
       resources: [
         "*" // TODO limit scope!
-      ], 
+      ],
     }));
-    pipeline.addToRolePolicy(new iam.PolicyStatement({
+    this.pipeline.addToRolePolicy(new iam.PolicyStatement({
       actions: [
         "lambda:InvokeFunction",
-        "lambda:ListFunctions", 
-      ], 
+        "lambda:ListFunctions",
+      ],
       resources: [
         "*" // TODO limit scope!
-      ], 
+      ],
     }));
 
     // stack output
-    new cdk.CfnOutput(this, 'CICDPipelineName', { value: pipeline.pipelineName });
-    new cdk.CfnOutput(this, 'codebuildRoleName', { value: codebuildProject.role!.roleName });
-
+    new cdk.CfnOutput(this, 'CICDPipelineName', { value: this.pipeline.pipelineName });
+    new cdk.CfnOutput(this, 'CICDCodePipelineRoleName', { value: this.pipeline.role!.roleName });
+    new cdk.CfnOutput(this, 'CICDPipelineArtifactBucketName', { value: this.pipelineArtifactBucket.bucketName });
+    new cdk.CfnOutput(this, 'CICDCodeBuildRoleName', { value: codebuildProject.role!.roleName });
   }
 }
