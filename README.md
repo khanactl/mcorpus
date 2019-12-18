@@ -19,7 +19,7 @@ Checkout the [wiki](https://github.com/khanactl/mcorpus/wiki) pages for design d
 - JWT (signed and encrypted) via secure, http-only cookies upon successful user login.
 - Per-request sync token verification for all inbound GraphQL requests to mitigate CSRF attacks.
 - GraphiQL - the 'schema discovery' UI intended for developers to introspect the schema and issue GraphQL requests from a web UI.
-- Slim, lean and performant Java 8 code in a fully asynchronous paradigm realized by best-of-breed stack:
+- Lean and performant Java 8 code in a fully asynchronous paradigm realized by best-of-breed stack:
   - [Postgres](https://www.postgresql.org/)
   - [JooQ](https://www.jooq.org/)
   - [graphql-java](https://github.com/graphql-java/graphql-java)
@@ -27,7 +27,7 @@ Checkout the [wiki](https://github.com/khanactl/mcorpus/wiki) pages for design d
 
 ## Demo on AWS
 
-Check out a working demo on [AWS](https://www.mcorpus-aws.net).
+Check out a working demo on [AWS](https://mcorpusgql-dev.net).
 ![GraphiQL-demo](mcorpus-doc/graphiql.png "mcorpus GraphiQL interface")
 
 - First click Login then use username = 'demo' and password = 'password23'. You will then be logged in based on a JWT cookie for 2 days.
