@@ -194,7 +194,7 @@ export class CICDStack extends BaseStack {
               "printf '[{\"name\":\"%s\",\"imageUri\":\"%s\"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json",
 
               "echo Generating appspec.yaml file...",
-              "cat ../../appspec-template.yaml | sed -e \"s%\${taskDefArn}%$TASKDEF_ARN%\" -e \"s%\${containerName}%$CONTAINER_NAME%\" -e \"s%\${containerPort}%$CONTAINER_PORT%\" > appspec.yaml",
+              "cat ../../appspec-template.yaml | sed -e \"s%\\\${taskDefArn}%$TASKDEF_ARN%\" -e \"s%\\\${containerName}%$CONTAINER_NAME%\" -e \"s%\\\${containerPort}%$CONTAINER_PORT%\" > appspec.yaml",
 
               "echo Build completed on `date`"
             ]
