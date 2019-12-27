@@ -10,10 +10,10 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@types/node": "12.12.21",
+    "@types/node": "13.1.1",
     "aws-cdk": "^1.19.0",
     "ts-node": "^8.5.4",
-    "typescript": "^3.7.3"
+    "typescript": "^3.7.4"
   },
   "dependencies": {
     "@aws-cdk/aws-codepipeline": "^1.19.0",
@@ -24,11 +24,13 @@
     "@aws-cdk/aws-lambda-event-sources": "^1.19.0",
     "@aws-cdk/aws-rds": "^1.19.0",
     "@aws-cdk/aws-ssm": "^1.19.0",
+    "@aws-cdk/aws-wafregional": "^1.19.0",
     "@aws-cdk/core": "^1.19.0",
     "@types/archiver": "^3.0.0",
     "@types/source-map-support": "^0.5.0",
     "archiver": "^3.1.1",
-    "aws-sdk": "^2.593.0",
+    "aws-sdk": "^2.596.0",
+    "camelcase": "^5.3.1",
     "git-branch": "^2.0.1",
     "npm-check-updates": "^4.0.1",
     "source-map-support": "^0.5.16",
