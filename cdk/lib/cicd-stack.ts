@@ -94,8 +94,9 @@ export class CICDStack extends BaseStack {
     const pipelineArtifactBucketInstNme = this.iname('pipeline-bucket');
     this.pipelineArtifactBucket = new s3.Bucket(this, pipelineArtifactBucketInstNme, {
       bucketName: pipelineArtifactBucketInstNme,
-      encryption: s3.BucketEncryption.UNENCRYPTED, // TODO use encryption
+      encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // source (github)
@@ -114,10 +115,10 @@ export class CICDStack extends BaseStack {
 
     // manual approve [post-source] action
     const maaPostSource = new codepipeline_actions.ManualApprovalAction({
-      actionName: this.iname('manual-approval-post-source'),
-      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment-post-source')),
+      actionName: this.iname('manual-approval-build'),
+      notificationTopic: new sns.Topic(this, this.iname('confirm-build')),
       notifyEmails: props.cicdDeployApprovalEmails,
-      additionalInformation: `Please confirm or reject this change for ${this.appEnv} build/test.`
+      additionalInformation: `Confirm or reject this ${this.appEnv} build?`
     });
 
     // build and test action
