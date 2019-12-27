@@ -15,6 +15,7 @@ import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbDataStack } from '../lib/db-data-stack';
 import { ECSStack } from '../lib/ecs-stack';
 import { CICDStack } from '../lib/cicd-stack';
+import { WafStack } from '../lib/waf-stack';
 
 function resolveCurrentGitBranch(): string {
   // are we in codebuild env (there is no .git dir there)?
@@ -98,6 +99,13 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
+  });
+  const wafStack = new WafStack(app, {
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    appLoadBalancerRef: ecsStack.appLoadBalancer,
   });
 }
 

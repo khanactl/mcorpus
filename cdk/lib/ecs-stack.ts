@@ -87,6 +87,8 @@ export class ECSStack extends BaseStack {
 
   public readonly webContainerLogGrp: logs.LogGroup;
 
+  public readonly appLoadBalancer: elb.ApplicationLoadBalancer;
+
   /**
    * The container name to use in CICD when referencing the container in the buidlspec.
    */
@@ -223,14 +225,14 @@ export class ECSStack extends BaseStack {
     // ****************************
     // application load balancer
     const albInstNme = this.iname('app-loadbalancer');
-    const alb = new elb.ApplicationLoadBalancer(this, albInstNme, {
+    this.appLoadBalancer = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.lbSecGrp,
     });
 
     const listenerInstNme = this.iname('alb-tls-listener');
-    const listener = alb.addListener(listenerInstNme, {
+    const listener = this.appLoadBalancer.addListener(listenerInstNme, {
       protocol: ApplicationProtocol.HTTPS,
       port: 443,
       certificateArns: [ props.sslCertArn ],
@@ -277,7 +279,7 @@ export class ECSStack extends BaseStack {
       const arecord = new r53.ARecord(this, arecordInstNme, {
         recordName: props.publicDomainName,
         zone: hostedZone,
-        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(alb)),
+        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(this.appLoadBalancer)),
       });
       // dns specific stack output
       new cdk.CfnOutput(this, 'HostedZone', { value:
@@ -305,7 +307,7 @@ export class ECSStack extends BaseStack {
       this.containerName
     });
     new cdk.CfnOutput(this, 'loadBalancerDnsName', { value:
-      alb.loadBalancerDnsName
+      this.appLoadBalancer.loadBalancerDnsName
     });
 
   }
