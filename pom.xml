@@ -18,27 +18,27 @@
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-    <log4j2.version>2.12.1</log4j2.version>
-    <slf4j-api.version>1.7.28</slf4j-api.version>
+    <log4j2.version>2.13.0</log4j2.version>
+    <slf4j-api.version>1.7.30</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
-    <postgres-jdbc.version>42.2.8</postgres-jdbc.version>
+    <postgres-jdbc.version>42.2.9</postgres-jdbc.version>
 
-    <jooq.version>3.12.2</jooq.version>
+    <jooq.version>3.12.3</jooq.version>
     <hikari-cp.version>3.4.1</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>8.2</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>8.4</nimbus-jose-jwt.version>
 
-    <guava.version>28.0-jre</guava.version>
+    <guava.version>28.2-jre</guava.version>
     <guice.version>4.2.2</guice.version>
-    
+
     <caffeine.version>2.8.0</caffeine.version>
-    
-    <jackson.version>2.10.0</jackson.version>
-    
-    <netty.version>4.1.43.Final</netty.version>
+
+    <jackson.version>2.10.1</jackson.version>
+
+    <netty.version>4.1.44.Final</netty.version>
     <ratpack.version>1.7.5</ratpack.version>
-    
+
     <graphql-java.version>13.0</graphql-java.version>
 
     <junit.version>4.12</junit.version>
@@ -128,7 +128,7 @@
         <artifactId>netty-codec-http</artifactId>
         <version>${netty.version}</version>
       </dependency>
-      
+
       <!-- ratpack -->
       <dependency>
         <groupId>io.ratpack</groupId>
@@ -150,7 +150,7 @@
         <artifactId>ratpack-hikari</artifactId>
         <version>${ratpack.version}</version>
       </dependency>
-      <!-- 
+      <!--
       <dependency>
         <groupId>io.ratpack</groupId>
         <artifactId>ratpack-session</artifactId>
@@ -174,7 +174,7 @@
         <artifactId>jcip-annotations</artifactId>
         <version>1.0-1</version>
       </dependency>
-      
+
       <dependency><!-- (Ratpack logs via SLF4J API) -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -228,7 +228,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -238,7 +238,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.0.0-M2</version>
+          <version>3.0.0-M3</version>
           <executions>
             <execution>
               <id>enforce-maven</id>
@@ -261,7 +261,7 @@
           <artifactId>jooq-codegen-maven</artifactId>
           <version>${jooq.version}</version>
         </plugin>
-        <!-- 
+        <!--
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
@@ -314,12 +314,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.2.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>3.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -329,7 +329,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M3</version>
+          <version>3.0.0-M4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -344,12 +344,12 @@
         <plugin>
           <groupId>pl.project13.maven</groupId>
           <artifactId>git-commit-id-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>4.0.0</version>
         </plugin>
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>3.1.12</version>
+          <version>3.1.12.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

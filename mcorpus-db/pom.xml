@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-db</artifactId>
-  <version>1.4.8</version>
+  <version>1.4.9</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-db</name>
@@ -80,7 +80,7 @@
           <jdbc>
             <driver>org.postgresql.Driver</driver>
             <url>${env.MCORPUS_DB_URL}</url>
-            <!-- 
+            <!--
             <user>${dbUsername}</user>
             <password>${dbPassword}</password>
             <url>jdbc:postgresql://${dbServerName}:${dbPortNumber}/${dbName}</url>

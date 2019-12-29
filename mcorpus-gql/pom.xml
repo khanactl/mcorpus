@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.20-SNAPSHOT</version>
+  <version>0.9.21-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -22,7 +22,7 @@
 
   <properties>
     <mcorpus-build.mode>DEV</mcorpus-build.mode>
-    <mcorpus-db.version>1.4.8</mcorpus-db.version>
+    <mcorpus-db.version>1.4.9</mcorpus-db.version>
   </properties>
 
   <profiles>
@@ -177,7 +177,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <!-- gql-server uber-jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -227,7 +227,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -324,7 +324,7 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
@@ -371,7 +371,7 @@
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-hikari</artifactId>
     </dependency>
-    <!-- 
+    <!--
     <dependency>
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-dropwizard-metrics</artifactId>
