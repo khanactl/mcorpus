@@ -11,10 +11,11 @@
   </Appenders>
   <Loggers>
     <Logger name="org.jooq" level="info" />
+    <Logger name="org.jooq.tools.LoggerListener" level="debug" />
     <Logger name="com.zaxxer.hikari" level="info" />
     <Logger name="io.netty" level="info" />
     <Logger name="graphql" level="info" />
-    
+
     <Root level="DEBUG">
       <AppenderRef ref="Console"/>
       <AppenderRef ref="File"/>
