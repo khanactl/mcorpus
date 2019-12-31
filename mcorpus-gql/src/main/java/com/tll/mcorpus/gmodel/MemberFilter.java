@@ -21,40 +21,64 @@ import com.tll.mcorpus.db.enums.MemberStatus;
 /**
  * Member search filter GraphQL entity type.
  * <p>
- * Encapsulates member search criteria backing the types 
+ * Encapsulates member search criteria backing the types
  * defined in the associated GraphQL schema.
- * 
+ *
  * @author jpk
  */
 public class MemberFilter {
 
-  static interface IFieldPredicate { boolean isSet(); }
+  static interface IFieldPredicate {
+    /**
+     * @return true if a field value has been set,
+     *         false otherwise.
+     */
+    boolean isSet();
+  }
 
-  public static class StringPredicate implements IFieldPredicate {
+  static interface INullableFieldPredicate extends IFieldPredicate {
+    /**
+     * @return true if the operation is a null or non-null check,
+     *         false otherwise.
+     */
+    boolean isNullCheck();
+  }
+
+  public static class StringPredicate implements INullableFieldPredicate {
 
     public static enum Operation {
+      IS_NULL,
+      IS_NOT_NULL,
       EQUALS,
-      LIKE
-    }
-  
-    private final String value;
-    private final boolean ignoreCase;
-    private final Operation operation;
-  
-    public StringPredicate(String value, boolean ignoreCase, Operation operation) {
-      this.value = value;
-      this.ignoreCase = ignoreCase;
-      this.operation = operation;
+      LIKE,
     }
 
-    public boolean isSet() { return isNotNull(value); }
-  
-    public String getValue() { return value; }
-  
-    public boolean isIgnoreCase() { return ignoreCase; }
-  
+    private final Operation operation;
+    private final String value;
+    private final boolean ignoreCase;
+
+    public StringPredicate(Operation operation, String value, boolean ignoreCase) {
+      this.operation = operation;
+      this.value = value;
+      this.ignoreCase = ignoreCase;
+    }
+
+    @Override
+    public boolean isNullCheck() {
+      return operation == Operation.IS_NULL || operation == Operation.IS_NOT_NULL;
+    }
+
+    @Override
+    public boolean isSet() {
+      return isNullCheck() || isNotNull(value);
+    }
+
     public Operation getOperation() { return operation; }
-  
+
+    public String getValue() { return value; }
+
+    public boolean isIgnoreCase() { return ignoreCase; }
+
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -64,19 +88,21 @@ public class MemberFilter {
         Objects.equals(value, that.value) &&
         operation == that.operation;
     }
-  
+
     @Override
     public int hashCode() {
       return Objects.hash(value, ignoreCase, operation);
     }
-  
+
     @Override
     public String toString() { return String.format("StringPredicate [value: '%s', ignoreCase? %s, operation: %s]", value, ignoreCase, operation); }
   }
 
-  public static class DatePredicate implements IFieldPredicate {
+  public static class DatePredicate implements INullableFieldPredicate {
 
     public static enum DateOp {
+      IS_NULL,
+      IS_NOT_NULL,
       EQUAL_TO,
       NOT_EQUAL_TO,
       LESS_THAN,
@@ -90,11 +116,11 @@ public class MemberFilter {
       BETWEEN,
       NOT_BETWEEN;
     }
-  
+
     private final DateOp dateOp;
     private final Date a;
     private final Date b;
-  
+
     /**
      * Constructor.
      *
@@ -108,9 +134,18 @@ public class MemberFilter {
       this.b = copy(b);
     }
 
-    public boolean isSet() { 
+    @Override
+    public boolean isNullCheck() {
+      return dateOp == DateOp.IS_NULL || dateOp == DateOp.IS_NOT_NULL;
+    }
+
+    @Override
+    public boolean isSet() {
       if(isNotNull(dateOp)) {
         switch(dateOp) {
+        case IS_NULL:
+        case IS_NOT_NULL:
+          return true;
         case BETWEEN:
         case NOT_BETWEEN:
           return a != null && b != null;
@@ -120,15 +155,15 @@ public class MemberFilter {
       }
       return false;
     }
-  
+
     public DateOp getDateOp() {
       return dateOp;
     }
-  
+
     public Date getA() { return copy(a); }
-  
+
     public Date getB() { return copy(b); }
-  
+
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -138,12 +173,12 @@ public class MemberFilter {
         Objects.equals(a, that.a) &&
         Objects.equals(b, that.b);
     }
-  
+
     @Override
     public int hashCode() {
       return Objects.hash(dateOp, a, b);
     }
-  
+
     @Override
     public String toString() { return String.format("DatePredicate [Op: %s, argA: %s, argB: %s]", dateOp, a, b); }
   }
@@ -159,15 +194,15 @@ public class MemberFilter {
     }
 
     public boolean isSet() { return isNotNullOrEmpty(locations); }
-  
+
     public Set<String> getLocations() { return locations; }
-  
+
     /**
      * @return true when the held set of Locations is to be considered as "not in",
      *         false -> "in"
      */
     public boolean isNegate() { return negate; }
-  
+
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -176,30 +211,30 @@ public class MemberFilter {
       return negate == that.negate &&
         Objects.equals(locations, that.locations);
     }
-  
+
     @Override
     public int hashCode() {
       return Objects.hash(locations, negate);
     }
-  
+
     @Override
     public String toString() { return String.format("LocationPredicate[locations: %s, negate?: %s]", locations, negate); }
   }
-  
+
   public static class OrderBy implements IFieldPredicate {
 
     public static enum Dir { ASC, DESC; }
-  
+
     private final String token;
     private final Dir dir;
-  
+
     /**
      * Constructor - token only with default dir asc.
      */
-    public OrderBy(String token) { 
+    public OrderBy(String token) {
       this(token, Dir.ASC);
     }
-  
+
     /**
      * Constructor.
      *
@@ -212,13 +247,13 @@ public class MemberFilter {
     }
 
     public boolean isSet() { return isNotBlank(token); }
-  
+
     public String getToken() { return token; }
-  
+
     public Dir getDir() { return dir; }
-  
+
     public boolean asc() { return dir == Dir.ASC; }
-  
+
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
@@ -227,21 +262,21 @@ public class MemberFilter {
       return Objects.equals(token, orderBy.token) &&
         dir == orderBy.dir;
     }
-  
+
     @Override
     public int hashCode() {
       return Objects.hash(token, dir);
     }
-  
+
     @Override
     public String toString() { return String.format("OrderBy['%s' %s]", token, asc() ? "asc" : "desc"); }
   }
-  
+
   /**
    * The value used for the limit property when it is not explicitly specified.
    */
   public static final int DEFAULT_LIMIT = 10;
-  
+
   private int offset = 0;
   private int limit = DEFAULT_LIMIT;
   private DatePredicate created;
@@ -268,9 +303,9 @@ public class MemberFilter {
   public void setOffset(int offset) { this.offset = offset; }
 
   public int getLimit() { return limit == 0 ? DEFAULT_LIMIT : limit; }
-  
+
   public void setLimit(int limit) { this.limit = limit; }
-  
+
   public boolean hasCreated() { return isNotNull(created) && created.isSet(); }
 
   public DatePredicate getCreated() {
@@ -419,7 +454,7 @@ public class MemberFilter {
       Objects.equals(displayName, that.displayName) &&
       Objects.equals(status, that.status) &&
       Objects.equals(dob, that.dob) &&
-      Objects.equals(username, that.username) &&      
+      Objects.equals(username, that.username) &&
       Objects.equals(orderByList, that.orderByList)
       ;
   }

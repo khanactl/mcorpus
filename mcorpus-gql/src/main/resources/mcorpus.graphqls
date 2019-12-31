@@ -20,21 +20,21 @@ type Query {
   mrefsByEmpId(empId: String!): [MRef]!
 
   # member by member id
-  memberByMid(mid: ID!): Member @auth(role: "mcorpus") 
+  memberByMid(mid: ID!): Member @auth(role: "mcorpus")
 
   # member search - dynamic, filter-able, paginate-able query
-  members(filter: MemberFilter): [Member] @auth(role: "mcorpus") 
+  members(filter: MemberFilter): [Member] @auth(role: "mcorpus")
 }
 
 # the mcorpus mutation methods
 type Mutation {
 
-  # member login (MRef is returned upon member login success and null upon failure) 
+  # member login (MRef is returned upon member login success and null upon failure)
   mlogin(username: String!, pswd: String!): MRef @auth(role: "member")
-  
+
   # member logout (the member ID is returned upon success and null upon failure)
   mlogout(mid: ID!): Boolean @auth(role: "member")
-  
+
   # add a member into the corpus
   addMember(member: MemberToAdd!): Member @auth(role: "mcorpus")
 
@@ -46,7 +46,7 @@ type Mutation {
 
   # set/reset a member pswd by member id
   mpswd(mid: ID!, pswd: String!): Boolean @auth(role: "mcorpus")
-  
+
   # add a member address of a given address name (type)
   addMemberAddress(memberAddress: MemberAddressToAdd!): MemberAddress @auth(role: "mcorpus")
 
@@ -55,7 +55,7 @@ type Mutation {
 
   # delete a member address of the given address name (type) returning true when successful
   deleteMemberAddress(mid: ID!, addressName: AddressName!): Boolean @auth(role: "mcorpus")
-  
+
 }
 
 # member locations
@@ -191,14 +191,20 @@ type MemberAddress {
 
 # string value criterion
 input StringPredicate {
-  # the string value which may contain one or more wildcard characters (*).  E.g.: "*sh" or "sh*" or "sheb*ng"
-  value: String!
-  # ignore case?  Defaults to false
+  # is null (true) or is not null (false)?  When set, the value field is ignored
+  isNull: Boolean
+  # the string value which may contain wildcard characters ("*abc", "abc*", "ab*c" or "abc")
+  value: String
+  # ignore case?  Applies only when the value field is set.  Defaults to false
   ignoreCase: Boolean
 }
 
 # date op
 enum DateOp {
+  # is null
+  IS_NULL
+  # is not null
+  IS_NOT_NULL
   # equal to
   EQUAL_TO
   # not equal to
@@ -220,11 +226,11 @@ enum DateOp {
 # date criterion
 input DatePredicate {
   # the date operation
-  dateOp: DateOp!
-  # date comparison argument A
-  a: Date!
-  # date comparison argument B
-  b: Date
+  op: DateOp!
+  # date comparison argument A (needed when op is not a null-wise check)
+  argA: Date
+  # date comparison argument B (needed for between and not between date ops)
+  argB: Date
 }
 
 # member location criterion
@@ -258,7 +264,7 @@ input MemberFilter {
   nameMiddle: StringPredicate
   # member last name value predicate
   nameLast: StringPredicate
-  
+
   # member display name value predicate
   displayName: StringPredicate
 
