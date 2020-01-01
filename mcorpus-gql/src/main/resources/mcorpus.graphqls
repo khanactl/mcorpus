@@ -23,7 +23,7 @@ type Query {
   memberByMid(mid: ID!): Member @auth(role: "mcorpus")
 
   # member search - dynamic, filter-able, paginate-able query
-  members(filter: MemberFilter): [Member] @auth(role: "mcorpus")
+  members(filter: MemberFilter!): [Member] @auth(role: "mcorpus")
 }
 
 # the mcorpus mutation methods
@@ -115,7 +115,7 @@ type MRef {
 # the primary member type
 type Member {
   # member id
-  mid: ID!
+  mid: ID
 
   # member record created date
   created: Date!
@@ -166,7 +166,7 @@ type Member {
 # member address type
 type MemberAddress {
   # member id
-  mid: ID!
+  mid: ID
   # member address name
   addressName: AddressName!
 
@@ -193,7 +193,7 @@ type MemberAddress {
 input StringPredicate {
   # is null (true) or is not null (false)?  When set, the value field is ignored
   isNull: Boolean
-  # the string value which may contain wildcard characters ("*abc", "abc*", "ab*c" or "abc")
+  # the string value which may contain wildcard (*) characters
   value: String
   # ignore case?  Applies only when the value field is set.  Defaults to false
   ignoreCase: Boolean

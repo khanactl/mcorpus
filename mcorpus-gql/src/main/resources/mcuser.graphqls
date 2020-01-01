@@ -112,13 +112,13 @@ enum McuserRole {
 # mcuser JWT login status
 type Mcstatus {
   # the mcuser id
-  uid: ID!
+  uid: ID
   # when the bound mcuser logged in
-  since: Date!
+  since: Date
   # when the issued mcorpus JWT expires
-  expires: Date!
+  expires: Date
   # the total number of valid and non-expired JWTs presently issued to the bound mcuser
-  numActiveJWTs: Int!
+  numActiveJWTs: Int
 }
 
 # required properties for adding a new mcuser
