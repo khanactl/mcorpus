@@ -42,7 +42,9 @@ public class Main {
   /**
    * @return the global app logger.
    */
-  public static Logger glog() { return appLog; }
+  public static final Logger glog() { return appLog; }
+
+  private static final RequestLogger rlgr = RequestLogger.ncsa();
 
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
@@ -70,7 +72,7 @@ public class Main {
         ))
       ))
       .handlers(chain -> chain
-        .all(RequestLogger.ncsa()) // log all incoming requests
+        .all(rlgr) // log all incoming requests
 
         .all(CommonHttpHeaders.inst) // always add common http response headers for good security
 
