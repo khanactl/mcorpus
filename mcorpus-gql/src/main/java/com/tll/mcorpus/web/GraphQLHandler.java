@@ -1,6 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.not;
+import static com.tll.core.Util.isBlank;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import static ratpack.jackson.Jackson.fromJson;
 import static ratpack.jackson.Jackson.json;
@@ -28,7 +29,7 @@ import ratpack.handling.Handler;
 
 /**
  * Handles graphql query requests.
- * 
+ *
  * @author jkirton
  */
 public class GraphQLHandler implements Handler {
@@ -39,7 +40,7 @@ public class GraphQLHandler implements Handler {
 
   /**
    * Constructor.
-   * 
+   *
    * @param graphQL the app scoped {@link GraphQL} instance.
    */
   public GraphQLHandler( final GraphQL graphQL) {
@@ -48,40 +49,40 @@ public class GraphQLHandler implements Handler {
 
   @SuppressWarnings("serial")
   private static final TypeToken<Map<String, Object>> strObjMapTypeRef = new TypeToken<Map<String, Object>>() { };
-  
+
   @Override
   public void handle(Context ctx) throws Exception {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
-      
+
       final RequestSnapshot rsnap = getOrCreateRequestSnapshot(ctx);
       final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
-      
+
       // grab the http request info
       final String query = ((String) qmap.get("query"));
       log.debug("Received gql query:\n\n{}\n", query);
-      
+
       @SuppressWarnings("unchecked")
       final Map<String, Object> vmap = (Map<String, Object>) qmap.get("variables");
-      
+
       final JWTUserGraphQLWebContext gqlWebCtx = new JWTUserGraphQLWebContext(
-        query, 
-        vmap, 
-        MCorpusJwtRequestProvider.fromRequestSnapshot(rsnap), 
-        jwtRequestStatus, 
-        ctx.get(JWT.class), 
-        ctx.get(IJwtBackendHandler.class), 
-        MCorpusJwtHttpResponseAction.fromRatpackContext(ctx), 
+        query,
+        vmap,
+        MCorpusJwtRequestProvider.fromRequestSnapshot(rsnap),
+        jwtRequestStatus,
+        ctx.get(JWT.class),
+        ctx.get(IJwtBackendHandler.class),
+        MCorpusJwtHttpResponseAction.fromRatpackContext(ctx),
         "mclogin"
       );
       log.info("graphql query pending: {}.", gqlWebCtx);
-      
+
       // validate graphql query request
       if(not(gqlWebCtx.isValid())) {
         log.error("graphql query {} is INVALID.", gqlWebCtx.getExecutionId());
         ctx.clientError(403);
         return;
       }
-      
+
       switch(jwtRequestStatus.status()) {
       case NOT_PRESENT_IN_REQUEST:
       case EXPIRED:
@@ -96,11 +97,11 @@ public class GraphQLHandler implements Handler {
       case VALID:
         // mcuser logged in by jwt - you may proceed
         break;
-        
+
       case BLOCKED:
         ctx.clientError(401); // unauthorized
         return;
-      
+
       case ERROR:
         ctx.clientError(500); // server error
         return;
@@ -109,7 +110,7 @@ public class GraphQLHandler implements Handler {
         ctx.clientError(403); // forbidden
         return;
       }
-      
+
       // execute the query
       final ExecutionInput executionInput =
           ExecutionInput.newExecutionInput()
@@ -124,6 +125,7 @@ public class GraphQLHandler implements Handler {
           ctx.render(json(executionResult.toSpecification()));
           log.info("graphql request {} handled successfully.", gqlWebCtx.getExecutionId());
         } else {
+          log.error("graphql request {} execution error(s):\n\n{}\n", gqlWebCtx.getExecutionId(), executionResult.getErrors());
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
             if(err.getErrorType() == ErrorType.ValidationError) {
               return GraphqlErrorBuilder.newError()
@@ -139,8 +141,12 @@ public class GraphQLHandler implements Handler {
                 .message("Invalid query syntax.")
                 .build();
             }
-            // default
-            return err;
+            // default (sanitize!)
+            return GraphqlErrorBuilder.newError()
+              .errorType(err.getErrorType())
+              .locations(err.getLocations())
+              .message(isBlank(err.getMessage()) ? "An unspecified error happened." : err.getMessage())
+              .build();
           }).collect(Collectors.toList())));
           log.warn("graphql request {} handled with errors.", gqlWebCtx.getExecutionId());
         }
