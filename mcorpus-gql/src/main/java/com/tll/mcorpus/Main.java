@@ -36,13 +36,12 @@ public class Main {
    * <p>
    * Use this sole static logger to issue application level logging
    * when logging at class/global level (i.e. inside static methods).
-   */
-  private static final Logger appLog = LoggerFactory.getLogger("mcorpus-gql-server");
-
-  /**
+   *
    * @return the global app logger.
    */
   public static final Logger glog() { return appLog; }
+
+  private static final Logger appLog = LoggerFactory.getLogger("mcorpus-gql-server");
 
   private static final RequestLogger rlgr = RequestLogger.ncsa();
 
@@ -97,9 +96,7 @@ public class Main {
         )
 
         // mcorpus graphql api html landing page
-        .prefix("index", chainsub -> chainsub
-          .get(ctx -> ctx.render(ctx.file("templates/index.html")))
-        )
+        .get("index", ctx -> ctx.render(ctx.file("templates/index.html")))
 
         .get("favicon.ico", ctx -> ctx.render(ctx.file("favicon.ico")))
       )
