@@ -22,7 +22,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
 
   @Override
   public String getEntityTypeName() { return "Member"; }
-  
+
   @Override
   protected void doValidateForAdd(final VldtnBuilder<Member> vldtn) {
     vldtn
@@ -52,7 +52,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
     vldtn
       // require pk
       .vrqd(t -> t.isSet(), Member::getPk, "member.nopk.emsg", "pk")
-      
+
       // member
       .vtok(MemberValidator::empIdValid, Member::getEmpId, "member.empId.emsg", "empId")
       .vtok(MemberValidator::locationValid, Member::getLocation, "member.location.emsg", "location")
@@ -76,24 +76,24 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
 
   @Override
   protected boolean hasAnyUpdatableFields(Member e) {
-    return 
+    return
       // member
       isNotBlank(e.getEmpId()) ||
       isNotBlank(e.getLocation()) ||
-      isNotBlank(e.getNameFirst()) || 
-      isNotBlank(e.getNameMiddle()) || 
+      isNotBlank(e.getNameFirst()) ||
+      isNotNull(e.getNameMiddle()) ||
       isNotBlank(e.getNameLast()) ||
-      isNotBlank(e.getDisplayName()) ||
-      isNotBlank(e.getStatus()) || 
+      isNotNull(e.getDisplayName()) ||
+      isNotBlank(e.getStatus()) ||
       // mauth
-      isNotNull(e.getDob()) || 
-      isNotBlank(e.getSsn()) || 
-      isNotBlank(e.getPersonalEmail()) ||
-      isNotBlank(e.getWorkEmail()) || 
-      isNotBlank(e.getMobilePhone()) || 
-      isNotBlank(e.getHomePhone()) || 
-      isNotBlank(e.getWorkPhone()) || 
-      isNotBlank(e.getUsername()) 
+      isNotNull(e.getDob()) ||
+      isNotBlank(e.getSsn()) ||
+      isNotNull(e.getPersonalEmail()) ||
+      isNotNull(e.getWorkEmail()) ||
+      isNotNull(e.getMobilePhone()) ||
+      isNotNull(e.getHomePhone()) ||
+      isNotNull(e.getWorkPhone()) ||
+      isNotBlank(e.getUsername())
       ;
   }
 
@@ -101,7 +101,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   protected String getVmkForNoUpdateFieldsPresent() {
     return "member.noupdatefields.emsg";
   }
-  
+
   /**
    * empIdPattern: RegEx for strict enforcement of member emp id format:
    *               <code>dd-ddddddd</code> where d is 0-9.
@@ -134,7 +134,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   public static boolean locationValid(final String location) {
     return isNotNull(locationFromString(location));
   }
-  
+
   public static boolean nameFirstValid(final String name) {
     return not(isNullOrEmpty(name)) && not(isBlank(name)) && lenchk(name, 64) && namePattern.matcher(name).matches();
   }
@@ -154,7 +154,7 @@ public class MemberValidator extends BaseMcorpusValidator<Member> {
   public static boolean statusValid(final String status) {
     return isNotNull(statusFromString(status));
   }
-  
+
   private static Location locationFromString(final String location) {
     if(location != null) {
       final String clocation = clean(location);

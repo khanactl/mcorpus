@@ -1,12 +1,12 @@
 package com.tll.mcorpus.transform;
 
 import static com.tll.core.Util.clean;
+import static com.tll.core.Util.nclean;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.lower;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
 import static com.tll.transform.TransformUtil.fval;
-import static com.tll.transform.TransformUtil.odtFromDate;
 import static com.tll.transform.TransformUtil.odtToDate;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 
@@ -25,7 +25,7 @@ public class MemberAddressXfrm extends BaseMcorpusTransformer<MemberAddress, Mad
       return null;
     }
   }
-  
+
   public static String addressnameToString(final Addressname enm) {
     return isNull(enm) ? null : enm.getLiteral();
   }
@@ -34,21 +34,32 @@ public class MemberAddressXfrm extends BaseMcorpusTransformer<MemberAddress, Mad
   protected MemberAddress fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
     return new MemberAddress(
       uuidFromToken(fval("mid", gqlMap)),
-      fval("addressName", gqlMap),
-      fval("modified", gqlMap),
-      fval("attn", gqlMap),
-      fval("street1", gqlMap),
-      fval("street2", gqlMap),
-      fval("city", gqlMap),
-      fval("state", gqlMap),
-      fval("postalCode", gqlMap),
-      fval("country", gqlMap)
+      clean(fval("addressName", gqlMap)),
+      null,
+      nclean(fval("attn", gqlMap)),
+      clean(fval("street1", gqlMap)),
+      nclean(fval("street2", gqlMap)),
+      clean(fval("city", gqlMap)),
+      clean(fval("state", gqlMap)),
+      nclean(fval("postalCode", gqlMap)),
+      clean(fval("country", gqlMap))
     );
   }
 
   @Override
   public MemberAddress fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
-    return fromNotEmptyGraphQLMapForAdd(gqlMap);
+    return new MemberAddress(
+      uuidFromToken(fval("mid", gqlMap)),
+      clean(fval("addressName", gqlMap)),
+      null,
+      nclean(fval("attn", gqlMap)),
+      neclean(fval("street1", gqlMap)),
+      nclean(fval("street2", gqlMap)),
+      neclean(fval("city", gqlMap)),
+      neclean(fval("state", gqlMap)),
+      neclean(fval("postalCode", gqlMap)),
+      neclean(fval("country", gqlMap))
+    );
   }
 
   @Override
@@ -72,14 +83,14 @@ public class MemberAddressXfrm extends BaseMcorpusTransformer<MemberAddress, Mad
     return new Maddress(
       g.getMid(),
       addressnameFromString(g.getAddressName()),
-      odtFromDate(g.getModified()),
-      neclean(g.getAttn()),
-      neclean(g.getStreet1()),
-      neclean(g.getStreet2()),
-      neclean(g.getCity()),
-      neclean(g.getState()),
-      neclean(g.getPostalCode()),
-      neclean(g.getCountry())
+      null,
+      g.getAttn(),
+      g.getStreet1(),
+      g.getStreet2(),
+      g.getCity(),
+      g.getState(),
+      g.getPostalCode(),
+      g.getCountry()
     );
   }
 

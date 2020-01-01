@@ -16,8 +16,8 @@ public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHist
   public static List<McuserHistory.LoginEvent> backToFrontLogin(final List<McuserHistoryDomain.LoginEventDomain> blist) {
     return isNull(blist) ? null : blist.stream()
       .map(b -> new McuserHistory.LoginEvent(
-        b.jwtId, 
-        odtToDate(b.timestamp), 
+        b.jwtId,
+        odtToDate(b.timestamp),
         b.requestOrigin
       ))
       .collect(Collectors.toList())
@@ -26,7 +26,11 @@ public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHist
 
   public static List<McuserHistory.LogoutEvent> backToFrontLogout(final List<McuserHistoryDomain.LogoutEventDomain> blist) {
     return isNull(blist) ? null : blist.stream()
-      .map(b -> new McuserHistory.LogoutEvent(b.jwtId, odtToDate(b.timestamp), b.requestOrigin))
+      .map(b -> new McuserHistory.LogoutEvent(
+        b.jwtId,
+        odtToDate(b.timestamp),
+        b.requestOrigin
+      ))
       .collect(Collectors.toList())
     ;
   }
