@@ -19,13 +19,13 @@ import org.jooq.impl.DSL;
 import org.postgresql.ds.PGSimpleDataSource;
 
 public class MCorpusTestUtil {
-  
+
   public static final String testRequestOrigin = "localhost|localhost";
 
   public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
   private static DSLContext dslMcweb = null;
-  
+
   private static DSLContext dslMcwebtest = null;
 
   /**
@@ -34,20 +34,22 @@ public class MCorpusTestUtil {
    */
   public static DataSource ds_mcweb() {
     PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUrl(System.getenv("MCORPUS_DB_URL"));
+    final String jdbcUrl = System.getenv("MCORPUS_DB_URL");
+    ds.setUrl(jdbcUrl);
     return ds;
   }
-  
+
   /**
    * @return A newly created {@link DataSource} to the test database intended for
    *         testing.
    */
   public static DataSource ds_mcwebtest() {
     PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUrl(System.getenv("MCORPUS_TEST_DB_URL"));
+    final String jdbcUrl = System.getenv("MCORPUS_TEST_DB_URL");
+    ds.setUrl(jdbcUrl);
     return ds;
   }
-  
+
   /**
    * @return true if the internally managed test dsl context has been loaded.
    */
@@ -109,23 +111,23 @@ public class MCorpusTestUtil {
   }
 
   /**
-   * @return Newly created {@link IJwtHttpResponseAction} instance 
+   * @return Newly created {@link IJwtHttpResponseAction} instance
    *         whose implementation methods are no-ops (they do nothing).
    */
   public static IJwtHttpResponseAction testJwtResponseProvider() {
     return new IJwtHttpResponseAction(){
-    
+
       @Override
       public void setJwtClientside(String jwt, Duration jwtTimeToLive) {
         // testing no-op
       }
-    
+
       @Override
       public void expireJwtClientside() {
         // testing no-op
       }
     };
   }
-  
+
   private MCorpusTestUtil() {}
 }

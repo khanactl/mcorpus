@@ -16,6 +16,7 @@ import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.mcorpus.gmodel.MemberAddress;
+import com.tll.mcorpus.gmodel.MemberAndAddresses;
 import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
 import com.tll.mcorpus.gmodel.MemberIdAndPswdKey;
 import com.tll.mcorpus.gmodel.Mlogin;
@@ -33,6 +34,7 @@ import com.tll.mcorpus.transform.EmpIdAndLocationXfrm;
 import com.tll.mcorpus.transform.McuserHistoryXfrm;
 import com.tll.mcorpus.transform.McuserXfrm;
 import com.tll.mcorpus.transform.MemberAddressXfrm;
+import com.tll.mcorpus.transform.MemberAndAddressesXfrm;
 import com.tll.mcorpus.transform.MemberFilterXfrm;
 import com.tll.mcorpus.transform.MemberXfrm;
 import com.tll.mcorpus.transform.MidAndAddressNameXfrm;
@@ -54,7 +56,7 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 
 /**
  * The MCorpus GraphQL schema loader and data fetchers all in one class.
- * 
+ *
  * @author jpk
  */
 public class MCorpusGraphQL {
@@ -77,10 +79,11 @@ public class MCorpusGraphQL {
   private final EmpIdAndLocationXfrm xfrmEmpIdAndLocation;
   private final MrefXfrm xfrmMref;
   private final MemberXfrm xfrmMember;
+  private final MemberAndAddressesXfrm xfrmMemberAndAddress;
   private final MidAndAddressNameXfrm xfrmMidAndAddressName;
   private final MemberAddressXfrm xfrmMemberAddress;
   private final MemberFilterXfrm xfrmMemberFilter;
-  
+
   // backend repos
   private final MCorpusUserRepo mcuserRepo;
   private final MCorpusRepo mcorpusRepo;
@@ -103,16 +106,17 @@ public class MCorpusGraphQL {
 
     this.vldtnMcuser = new McuserValidator();
     this.xfrmMcuserHistory = new McuserHistoryXfrm();
-    
+
     this.vldtnEmpIdAndLocation = new EmpIdAndLocationValidator();
     this.vldtnMember = new MemberValidator();
     this.vldtnMemberAddress = new MemberAddressValidator();
-    
+
     this.xfrmMcuser = new McuserXfrm();
-    
+
     this.xfrmEmpIdAndLocation = new EmpIdAndLocationXfrm();
     this.xfrmMref = new MrefXfrm();
     this.xfrmMember = new MemberXfrm();
+    this.xfrmMemberAndAddress = new MemberAndAddressesXfrm();
     this.xfrmMidAndAddressName = new MidAndAddressNameXfrm();
     this.xfrmMemberAddress = new MemberAddressXfrm();
     this.xfrmMemberFilter = new MemberFilterXfrm();
@@ -151,7 +155,7 @@ public class MCorpusGraphQL {
       final TypeDefinitionRegistry typeRegistry = new TypeDefinitionRegistry();
       typeRegistry.merge(schemaParser.parse(rdrMcuser));
       typeRegistry.merge(schemaParser.parse(rdrMcorpus));
-      
+
       final RuntimeWiring wiring = buildRuntimeWiring();
       graphQLSchema = schemaGenerator.makeExecutableSchema(typeRegistry, wiring);
 
@@ -176,65 +180,77 @@ public class MCorpusGraphQL {
 
         // mcuser status
         .dataFetcher("mcstatus", env -> processor.process(
-          env, 
+          env,
           () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserStatus())
         )
 
         // mcuser history
         .dataFetcher("mchistory", env -> processor.fetch(
-          env, 
-          () -> uuidFromToken(env.getArgument("uid")), 
-          uid -> mcuserRepo.mcuserHistory(uid), 
+          env,
+          () -> uuidFromToken(env.getArgument("uid")),
+          uid -> mcuserRepo.mcuserHistory(uid),
           b -> xfrmMcuserHistory.fromBackend(b))
         )
 
         // fetch mcuser
         .dataFetcher("fetchMcuser", env -> processor.fetch(
-          env, 
-          () -> uuidFromToken(env.getArgument("uid")), 
-          uid -> mcuserRepo.fetchMcuser(uid), 
+          env,
+          () -> uuidFromToken(env.getArgument("uid")),
+          uid -> mcuserRepo.fetchMcuser(uid),
           b -> xfrmMcuser.fromBackend(b))
         )
 
         // mcorpus
 
         .dataFetcher("mrefByMid", env -> processor.fetch(
-          env, 
-          () -> uuidFromToken(env.getArgument("mid")), 
-          mid -> mcorpusRepo.fetchMRefByMid(mid), 
+          env,
+          () -> uuidFromToken(env.getArgument("mid")),
+          mid -> mcorpusRepo.fetchMRefByMid(mid),
           b -> xfrmMref.fromBackend(b))
         )
         .dataFetcher("mrefByEmpIdAndLoc", env -> processor.fetch(
-          env, 
+          env,
           () -> new EmpIdAndLocationKey(
-            clean(env.getArgument("empId")), 
+            clean(env.getArgument("empId")),
             clean(env.getArgument("location"))
-          ), 
-          key -> vldtnEmpIdAndLocation.validate(key), 
-          key2 -> xfrmEmpIdAndLocation.toBackend(key2), 
-          key3 -> mcorpusRepo.fetchMRefByEmpIdAndLoc(key3.empId(), key3.location()), 
+          ),
+          key -> vldtnEmpIdAndLocation.validate(key),
+          key2 -> xfrmEmpIdAndLocation.toBackend(key2),
+          key3 -> mcorpusRepo.fetchMRefByEmpIdAndLoc(key3.empId(), key3.location()),
           b -> xfrmMref.fromBackend(b))
         )
         .dataFetcher("mrefsByEmpId", env -> processor.fetch(
-          env, 
-          () -> clean(env.getArgument("empId")), 
-          empId -> mcorpusRepo.fetchMRefsByEmpId(empId), 
+          env,
+          () -> clean(env.getArgument("empId")),
+          empId -> mcorpusRepo.fetchMRefsByEmpId(empId),
           blist -> blist.stream()
                       .map(b -> xfrmMref.fromBackend(b))
                       .collect(Collectors.toList()))
         )
-        .dataFetcher("memberByMid", env -> processor.fetch(
-          env, 
-          () -> uuidFromToken(env.getArgument("mid")), 
-          mid -> mcorpusRepo.fetchMember(mid), 
-          b -> xfrmMember.fromBackend(b))
-        )
+        .dataFetcher("memberByMid", env -> {
+          // deal with N+1 problem by determining if we are fetching related addresses or not
+          if(env.getSelectionSet().contains("addresses")) {
+            // member and address fields case
+            return processor.fetch(
+              env,
+              () -> uuidFromToken(env.getArgument("mid")),
+              mid -> mcorpusRepo.fetchMemberAndAddresses(mid),
+              b -> xfrmMemberAndAddress.fromBackend(b));
+          } else {
+            // member only fields case
+            return processor.fetch(
+              env,
+              () -> uuidFromToken(env.getArgument("mid")),
+              mid -> mcorpusRepo.fetchMember(mid),
+              b -> xfrmMember.fromBackend(b));
+          }
+        })
         .dataFetcher("members", env -> processor.fetch(
-          env, 
-          () -> xfrmMemberFilter.fromGraphQLMap(env.getArgument("filter")), 
-          null, 
-          mfilter -> xfrmMemberFilter.toBackend(mfilter), 
-          msearch -> mcorpusRepo.memberSearch(msearch), 
+          env,
+          () -> xfrmMemberFilter.fromGraphQLMap(env.getArgument("filter")),
+          null,
+          mfilter -> xfrmMemberFilter.toBackend(mfilter),
+          msearch -> mcorpusRepo.memberSearch(msearch),
           blist -> blist.stream().map(b -> xfrmMember.fromBackend(b)).collect(Collectors.toList()))
         )
       )
@@ -246,26 +262,26 @@ public class MCorpusGraphQL {
 
         // mcuser login
         .dataFetcher("mclogin", env -> processor.handleSimpleMutation(
-          env, 
+          env,
           () -> new McusernameAndPswdKey(
-            clean(env.getArgument("username")), 
+            clean(env.getArgument("username")),
             clean(env.getArgument("pswd"))
-          ), 
-          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd()), 
+          ),
+          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd()),
           b -> b)
         )
 
         // mcuser logout
         .dataFetcher("mclogout", env -> processor.process(
-          env, 
+          env,
           () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogout())
         )
 
         // add mcuser
         .dataFetcher("addMcuser", env -> processor.handleMutation(
-          env, 
+          env,
           () -> xfrmMcuser.fromGraphQLMapForAdd(env.getArgument("mcuser")),
-          g -> vldtnMcuser.validateForAdd(g), 
+          g -> vldtnMcuser.validateForAdd(g),
           (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
           b -> mcuserRepo.addMcuser(b),
           bpost -> xfrmMcuser.fromBackend(bpost))
@@ -273,9 +289,9 @@ public class MCorpusGraphQL {
 
         // update mcuser
         .dataFetcher("updateMcuser", env -> processor.handleMutation(
-          env, 
+          env,
           () -> xfrmMcuser.fromGraphQLMapForUpdate(env.getArgument("mcuser")),
-          g -> vldtnMcuser.validateForUpdate(g), 
+          g -> vldtnMcuser.validateForUpdate(g),
           (Mcuser gvldtd) -> xfrmMcuser.toBackend(gvldtd),
           b -> mcuserRepo.updateMcuser(b),
           bpost -> xfrmMcuser.fromBackend(bpost))
@@ -283,134 +299,134 @@ public class MCorpusGraphQL {
 
         // delete mcuser
         .dataFetcher("deleteMcuser", env -> processor.handleDeletion(
-          env, 
-          () -> uuidFromToken(env.getArgument("uid")), 
-          key -> key, 
+          env,
+          () -> uuidFromToken(env.getArgument("uid")),
+          key -> key,
           b -> mcuserRepo.deleteMcuser(b))
         )
 
         // mcpswd
         .dataFetcher("mcpswd", env -> processor.handleSimpleMutation(
-          env, 
+          env,
           () -> new McuserIdAndPswdKey(
-            uuidFromToken(env.getArgument("uid")), 
+            uuidFromToken(env.getArgument("uid")),
             clean(env.getArgument("pswd"))
-          ), 
-          key -> mcuserRepo.setPswd(key.getUid(), key.getPswd()), 
-          fr -> fr.get()) 
+          ),
+          key -> mcuserRepo.setPswd(key.getUid(), key.getPswd()),
+          fr -> fr.get())
         )
-        
+
         // invalidateJwtsFor
         .dataFetcher("invalidateJwtsFor", env -> processor.handleSimpleMutation(
-          env, 
-          () -> uuidFromToken(env.getArgument("uid")), 
-          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key), 
+          env,
+          () -> uuidFromToken(env.getArgument("uid")),
+          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key),
           b -> b)
         )
-        
+
         // mcorpus
 
         // member login
         .dataFetcher("mlogin", env -> processor.handleMutation(
-          env, 
+          env,
           () -> new Mlogin(
-            clean(env.getArgument("username")), 
-            clean(env.getArgument("pswd")), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(), 
+            clean(env.getArgument("username")),
+            clean(env.getArgument("pswd")),
+            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(),
             ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getClientOrigin()
-          ), 
+          ),
           mclogin -> mcorpusRepo.memberLogin(
-            mclogin.getUsername(), 
-            mclogin.getPswd(), 
-            mclogin.getRequestInstant(), 
-            mclogin.getRequestOrigin() 
-          ), 
+            mclogin.getUsername(),
+            mclogin.getPswd(),
+            mclogin.getRequestInstant(),
+            mclogin.getRequestOrigin()
+          ),
           b -> xfrmMref.fromBackend(b))
         )
-        
+
         // member logout
         .dataFetcher("mlogout", env -> processor.handleMutation(
-          env, 
+          env,
           () -> new Mlogout(
-            uuidFromToken(env.getArgument("mid")), 
-            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(), 
+            uuidFromToken(env.getArgument("mid")),
+            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(),
             ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getClientOrigin()
-          ), 
+          ),
           mclogout -> mcorpusRepo.memberLogout(
-            mclogout.getMid(), 
-            mclogout.getRequestInstant(), 
-            mclogout.getRequestOrigin() 
-          ), 
+            mclogout.getMid(),
+            mclogout.getRequestInstant(),
+            mclogout.getRequestOrigin()
+          ),
           mid -> mid != null)
         )
-        
+
         // add member
         .dataFetcher("addMember", env -> processor.handleMutation(
-          env, 
-          () -> xfrmMember.fromGraphQLMapForAdd(env.getArgument("member")), 
-          (Member g) -> vldtnMember.validateForAdd(g), 
-          gvldtd -> xfrmMember.toBackend(gvldtd), 
-          (MemberAndMauth b) -> mcorpusRepo.addMember(b), 
+          env,
+          () -> xfrmMember.fromGraphQLMapForAdd(env.getArgument("member")),
+          (Member g) -> vldtnMember.validateForAdd(g),
+          gvldtd -> xfrmMember.toBackend(gvldtd),
+          (MemberAndMauth b) -> mcorpusRepo.addMember(b),
           bpost -> xfrmMember.fromBackend(bpost))
         )
 
         // update member
         .dataFetcher("updateMember", env -> processor.handleMutation(
-          env, 
-          () -> xfrmMember.fromGraphQLMapForUpdate(env.getArgument("member")), 
-          (Member g) -> vldtnMember.validateForUpdate(g), 
-          gvldtd -> xfrmMember.toBackend(gvldtd), 
-          (MemberAndMauth b) -> mcorpusRepo.updateMember(b), 
+          env,
+          () -> xfrmMember.fromGraphQLMapForUpdate(env.getArgument("member")),
+          (Member g) -> vldtnMember.validateForUpdate(g),
+          gvldtd -> xfrmMember.toBackend(gvldtd),
+          (MemberAndMauth b) -> mcorpusRepo.updateMember(b),
           bpost -> xfrmMember.fromBackend(bpost))
         )
 
         // delete member
         .dataFetcher("deleteMember", env -> processor.handleDeletion(
-          env, 
-          () -> uuidFromToken(env.getArgument("mid")), 
-          key -> key, 
+          env,
+          () -> uuidFromToken(env.getArgument("mid")),
+          key -> key,
           b -> mcorpusRepo.deleteMember(b))
         )
 
         // member pswd
         .dataFetcher("mpswd", env -> processor.handleSimpleMutation(
-          env, 
+          env,
           () -> new MemberIdAndPswdKey(
-            uuidFromToken(env.getArgument("mid")), 
+            uuidFromToken(env.getArgument("mid")),
             clean(env.getArgument("pswd"))
-          ), 
-          key -> mcorpusRepo.setMemberPswd(key.getMid(), key.getPswd()), 
-          fr -> fr.get()) 
+          ),
+          key -> mcorpusRepo.setMemberPswd(key.getMid(), key.getPswd()),
+          fr -> fr.get())
         )
 
         // add member address
         .dataFetcher("addMemberAddress", env -> processor.handleMutation(
-          env, 
-          () -> xfrmMemberAddress.fromGraphQLMapForAdd(env.getArgument("memberAddress")), 
-          (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g), 
-          gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
-          (Maddress b) -> mcorpusRepo.addMemberAddress(b), 
+          env,
+          () -> xfrmMemberAddress.fromGraphQLMapForAdd(env.getArgument("memberAddress")),
+          (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g),
+          gvldtd -> xfrmMemberAddress.toBackend(gvldtd),
+          (Maddress b) -> mcorpusRepo.addMemberAddress(b),
           bpost -> xfrmMemberAddress.fromBackend(bpost))
         )
 
         // update member address
         .dataFetcher("updateMemberAddress", env -> processor.handleMutation(
-          env, 
-          () -> xfrmMemberAddress.fromGraphQLMapForUpdate(env.getArgument("memberAddress")), 
-          (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g), 
-          gvldtd -> xfrmMemberAddress.toBackend(gvldtd), 
-          (Maddress b) -> mcorpusRepo.updateMemberAddress(b), 
+          env,
+          () -> xfrmMemberAddress.fromGraphQLMapForUpdate(env.getArgument("memberAddress")),
+          (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g),
+          gvldtd -> xfrmMemberAddress.toBackend(gvldtd),
+          (Maddress b) -> mcorpusRepo.updateMemberAddress(b),
           bpost -> xfrmMemberAddress.fromBackend(bpost))
         )
 
         // delete member address
         .dataFetcher("deleteMemberAddress", env -> processor.handleDeletion(
-          env, 
+          env,
           () -> new MidAndAddressNameKey(
-            uuidFromToken(env.getArgument("mid")), 
+            uuidFromToken(env.getArgument("mid")),
             clean(env.getArgument("addressName"))
           ),
-          keyg -> xfrmMidAndAddressName.toBackend(keyg), 
+          keyg -> xfrmMidAndAddressName.toBackend(keyg),
           key -> mcorpusRepo.deleteMemberAddress(key.getMid(), key.getAddressname())
         ))
       )
@@ -477,7 +493,7 @@ public class MCorpusGraphQL {
       .type("McuserHistory", typeWiring -> typeWiring
         .dataFetcher("uid", env -> {
           final McuserHistory mh = env.getSource();
-          return uuidToToken(mh.uid);
+          return uuidToToken(mh.getPk().getUUID());
         })
         .dataFetcher("logins", env -> {
           final McuserHistory mh = env.getSource();
@@ -527,7 +543,7 @@ public class MCorpusGraphQL {
       .type("MRef", typeWiring -> typeWiring
         .dataFetcher("mid", env -> {
           final Mref mref = env.getSource();
-          return uuidToToken(mref.mid);
+          return uuidToToken(mref.getPk().getUUID());
         })
         .dataFetcher("empId", env -> {
           final Mref mref = env.getSource();
@@ -614,12 +630,18 @@ public class MCorpusGraphQL {
           return m.getUsername();
         })
         .dataFetcher("addresses", env -> {
-          return processor.fetch(
-            env, 
-            () -> ((Member) env.getSource()).getMid(), 
-            mid -> mcorpusRepo.fetchMemberAddresses(mid), 
-            blist -> blist.stream().map(b -> xfrmMemberAddress.fromBackend(b)).collect(Collectors.toList())
-          );
+          final Object mo = env.getSource();
+          if(mo instanceof MemberAndAddresses) {
+            final MemberAndAddresses maa = (MemberAndAddresses) mo;
+            return maa.getAddresses();
+          } else {
+            return processor.fetch(
+              env,
+              () -> ((Member) mo).getMid(),
+              mid -> mcorpusRepo.fetchMemberAddresses(mid),
+              blist -> blist.stream().map(b -> xfrmMemberAddress.fromBackend(b)).collect(Collectors.toList())
+            );
+          }
         })
       )
 

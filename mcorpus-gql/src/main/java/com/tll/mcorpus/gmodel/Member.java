@@ -7,16 +7,16 @@ import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
 import com.tll.gmodel.IKey;
+import com.tll.gmodel.UUIDKey;
 
 /**
  * Member gql entity.
- * 
+ *
  * @author jpk
  */
 public class Member extends BaseEntity<Member, IKey> {
-  
-  private final IKey pk;
-  private final UUID mid;
+
+  private final UUIDKey pk;
 
   private final Date created;
   private final Date modified;
@@ -41,13 +41,12 @@ public class Member extends BaseEntity<Member, IKey> {
   private final String mobilePhone;
   private final String homePhone;
   private final String workPhone;
-  
+
   private final String username;
   private final String pswd;
 
   public Member(UUID mid, Date created, Date modified, String empId, String location, String nameFirst, String nameMiddle, String nameLast, String displayName, String status, Date dob, String ssn, String personalEmail, String workEmail, String mobilePhone, String homePhone, String workPhone, String username, String pswd) {
-    this.pk = IKey.uuid("Member", mid);
-    this.mid = mid;
+    this.pk = new UUIDKey(mid, "member");
     this.created = copy(created);
     this.modified = copy(modified);
     this.empId = empId;
@@ -69,10 +68,10 @@ public class Member extends BaseEntity<Member, IKey> {
   }
 
   @Override
-  public IKey getPk() { return pk; }
+  public UUIDKey getPk() { return pk; }
 
   public UUID getMid() {
-    return mid;
+    return pk.getUUID();
   }
 
   public Date getCreated() {

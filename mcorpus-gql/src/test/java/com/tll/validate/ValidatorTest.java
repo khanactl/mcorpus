@@ -19,6 +19,7 @@ import java.util.UUID;
 import com.tll.UnitTest;
 import com.tll.gmodel.BaseEntity;
 import com.tll.gmodel.IKey;
+import com.tll.gmodel.UUIDKey;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,11 +36,11 @@ public class ValidatorTest {
   }
 
   static class NestedEntity extends BaseEntity<TestEntity, IKey> {
-    private final IKey pk;
+    private final UUIDKey pk;
     private final String nprop;
 
     public NestedEntity(String nprop) {
-      this.pk = IKey.uuid("NestedEntity", UUID.randomUUID());
+      this.pk = new UUIDKey(UUID.randomUUID(), "NestedEntity");
       this.nprop = nprop;
     }
 
@@ -50,7 +51,7 @@ public class ValidatorTest {
   } // NestedEntity
   static class TestEntity extends BaseEntity<TestEntity, IKey> {
 
-    private final IKey pk;
+    private final UUIDKey pk;
     private final Date created;
     private final String name;
     private final String email;
@@ -59,7 +60,7 @@ public class ValidatorTest {
     public NestedEntity nentity;
 
     public TestEntity(String name, String email, String username, String status, String nprop) {
-      this.pk = IKey.uuid("TestEntity", UUID.randomUUID());
+      this.pk = new UUIDKey(UUID.randomUUID(), "TestEntity");
       this.created = new Date();
       this.name = name;
       this.email = email;
@@ -79,7 +80,7 @@ public class ValidatorTest {
   } // TestEntity
 
   static class NestedValidator extends BaseValidator<NestedEntity> {
-    
+
     @Override
     public String getEntityTypeName() {
       return "TestEntity";
@@ -113,7 +114,7 @@ public class ValidatorTest {
     }
 
   }
-  
+
   static class TestValidator extends BaseValidator<TestEntity> {
 
     @Override
@@ -137,24 +138,24 @@ public class ValidatorTest {
         // nested entity validation
         .vnested(
           TestEntity::getNEntity,
-          "nentity", 
+          "nentity",
           new NestedValidator()
         )
       ;
     }
-  
+
     @Override
     protected void doValidateForUpdate(final VldtnBuilder<TestEntity> vldtn) {
       doValidate(vldtn);
     }
-  
+
     @Override
     protected boolean hasAnyUpdatableFields(TestEntity e) {
-      return 
-        isNotBlank(e.getName()) || 
-        isNotBlank(e.getEmail()) || 
-        isNotBlank(e.getUsername()) || 
-        isNotBlank(e.getStatus()) || 
+      return
+        isNotBlank(e.getName()) ||
+        isNotBlank(e.getEmail()) ||
+        isNotBlank(e.getUsername()) ||
+        isNotBlank(e.getStatus()) ||
         isNotNull(e.getNEntity())
         ;
     }
@@ -167,7 +168,7 @@ public class ValidatorTest {
     static boolean nameValid(final String name) {
       return isNotBlank(name) && lenchk(name, 64) && namePattern.matcher(name).matches();
     }
-  
+
     static boolean statusValid(final String status) {
       try {
         return isNotNull(TestStatus.valueOf(upper(clean(status))));
@@ -180,10 +181,10 @@ public class ValidatorTest {
 
   @Test
   public void testAtLeastOneFieldForUpdatePass() {
-    
+
     TestEntity e = new TestEntity(null, "email@schmail.com", null, null, null);
     e.nentity = null;
-    
+
     TestValidator validator = new TestValidator();
     VldtnResult vresult = validator.validateForUpdate(e);
     Set<VldtnErr> verrs = vresult.getErrors();
@@ -196,20 +197,20 @@ public class ValidatorTest {
 
   @Test
   public void testAtLeastFieldOneForUpdateFail() {
-    
+
     TestEntity e = new TestEntity(null, "  ", null, null, null);
     e.nentity = null;
-    
+
     TestValidator validator = new TestValidator();
     VldtnResult vresult = validator.validateForUpdate(e);
     Set<VldtnErr> verrs = vresult.getErrors();
     verify(vresult, false, 1);
 
     Iterator<VldtnErr> veitr = verrs.iterator();
-    
+
     VldtnErr verr = veitr.next();
     log.info(verr);
-    
+
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("", verr.getFieldName());
@@ -220,24 +221,24 @@ public class ValidatorTest {
 
   @Test
   public void testValidate() {
-    
+
     String name = "wwwwname-)000$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$432";
     String email = "testentity@myfrigginmail.com";
     String username = "testuser";
     String status = "ACTIVE";
     String nprop = "1234";
     TestEntity e = new TestEntity(name, email, username, status, nprop);
-    
+
     TestValidator validator = new TestValidator();
     VldtnResult vresult = validator.validate(e);
     Set<VldtnErr> verrs = vresult.getErrors();
     verify(vresult, false, 2);
 
     Iterator<VldtnErr> veitr = verrs.iterator();
-    
+
     VldtnErr verr = veitr.next();
     log.info(verr);
-    
+
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("name", verr.getFieldName());
@@ -246,7 +247,7 @@ public class ValidatorTest {
 
     verr = veitr.next();
     log.info(verr);
-    
+
     assertNotNull(verr);
     assertEquals("TestEntity", verr.getParentType());
     assertEquals("nprop", verr.getFieldName());

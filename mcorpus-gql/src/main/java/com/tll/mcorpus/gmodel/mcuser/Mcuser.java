@@ -9,12 +9,12 @@ import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
 import com.tll.gmodel.IKey;
+import com.tll.gmodel.UUIDKey;
 import com.tll.jwt.IJwtUser;
 
 public class Mcuser extends BaseEntity<Mcuser, IKey> implements IJwtUser {
 
-  private final IKey         pk;
-  private final UUID         uid;
+  private final UUIDKey      pk;
   private final Date         created;
   private final Date         modified;
   private final String       name;
@@ -35,8 +35,7 @@ public class Mcuser extends BaseEntity<Mcuser, IKey> implements IJwtUser {
       String       status,
       Set<String>  roles
   ) {
-      this.pk = IKey.uuid("Mcuser", uid);
-      this.uid = uid;
+      this.pk = new UUIDKey(uid, "mcuser");
       this.created = copy(created);
       this.modified = copy(modified);
       this.name = name;
@@ -48,18 +47,18 @@ public class Mcuser extends BaseEntity<Mcuser, IKey> implements IJwtUser {
   }
 
   @Override
-  public UUID getJwtUserId() { return uid; }
+  public UUID getJwtUserId() { return pk.getUUID(); }
 
   @Override
   public String[] getJwtUserRoles() {
     return isNull(roles) ? new String[0] : roles.toArray(new String[0]);
   }
-  
+
   @Override
   public IKey getPk() { return pk; }
 
   public UUID getUid() {
-    return uid;
+    return pk.getUUID();
   }
 
   public Date getCreated() {
@@ -93,5 +92,5 @@ public class Mcuser extends BaseEntity<Mcuser, IKey> implements IJwtUser {
   public Set<String> getRoles() {
     return roles;
   }
-  
+
 }

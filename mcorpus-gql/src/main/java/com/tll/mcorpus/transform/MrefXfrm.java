@@ -27,6 +27,6 @@ public class MrefXfrm extends BaseTransformer<Mref, com.tll.mcorpus.db.udt.pojos
 
   @Override
   protected com.tll.mcorpus.db.udt.pojos.Mref toBackendFromNonNull(final Mref e) {
-    return new com.tll.mcorpus.db.udt.pojos.Mref(e.mid, e.empId, locationFromString(e.location));
+    return new com.tll.mcorpus.db.udt.pojos.Mref(e.memberPk.getUUID(), e.empId, locationFromString(e.location));
   }
 }
