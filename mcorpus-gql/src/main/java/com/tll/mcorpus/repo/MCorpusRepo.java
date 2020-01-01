@@ -8,7 +8,6 @@ import static com.tll.core.Util.not;
 import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
-import static com.tll.mcorpus.repo.MCorpusRepoUtil.fput;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 
@@ -47,7 +46,7 @@ import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
 import org.jooq.Record3;
-import org.jooq.Record8;
+import org.jooq.Record9;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderKeywordStyle;
 import org.jooq.conf.RenderNameStyle;
@@ -83,7 +82,7 @@ public class MCorpusRepo implements Closeable {
         ),
         new Mauth(
           fval(MEMBER.MID, mmap),
-          null,
+          fval(MAUTH.MODIFIED, mmap),
           fval(MAUTH.DOB, mmap),
           fval(MAUTH.SSN, mmap),
           fval(MAUTH.EMAIL_PERSONAL, mmap),
@@ -539,7 +538,7 @@ public class MCorpusRepo implements Closeable {
           ),
           new Mauth(
             im.getOutMid(),
-            null,
+            im.getOutModified(),
             im.getOutDob(),
             im.getOutSsn(),
             im.getOutEmailPersonal(),
@@ -609,23 +608,23 @@ public class MCorpusRepo implements Closeable {
 
           if(isNull(mauthRec)) {
             // mauth insert failed (rollback)
-            emsgs.add("No member found with provided id.");
-            throw new DataAccessException(String.format("Member with mid '%s' not found.", mid));
+            emsgs.add("No member found to update with provided id.");
+            throw new DataAccessException(String.format("Member with mid '%s' not found to update.", mid));
           }
 
           mmap = mauthRec.intoMap();
         } else {
-          // otherwise select to get current snapshot
-          Record8<Date, String, String, String, String, String, String, String> mauthRecFetch = trans
-                    .select(MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
+          // otherwise select mauth to get current snapshot
+          Record9<OffsetDateTime, Date, String, String, String, String, String, String, String> mauthRecFetch = trans
+                    .select(MAUTH.MODIFIED, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
                     .from(MAUTH)
                     .where(MAUTH.MID.eq(mid))
                     .fetchOne();
 
           if(isNull(mauthRecFetch)) {
             // mauth select failed (rollback)
-            emsgs.add("No member found with provided id.");
-            throw new DataAccessException(String.format("Member with mid '%s' not found.", mid));
+            emsgs.add("No member found to update with provided id.");
+            throw new DataAccessException(String.format("Member with mid '%s' not found for update.", mid));
           }
 
           mmap = mauthRecFetch.intoMap();
@@ -634,7 +633,7 @@ public class MCorpusRepo implements Closeable {
 
         // update member record (always to maintain modified integrity)
         final Map<String, Object> fmapMember = new HashMap<>();
-        fput(MEMBER.MODIFIED, OffsetDateTime.now(), fmapMember); // force
+        // fput(MEMBER.MODIFIED, OffsetDateTime.now(), fmapMember); // done in backend!
         fputWhenNotNull(MEMBER.EMP_ID, memberToUpdate.dbMember.getEmpId(), fmapMember);
         fputWhenNotNull(MEMBER.LOCATION, memberToUpdate.dbMember.getLocation(), fmapMember);
         fputWhenNotNull(MEMBER.NAME_FIRST, memberToUpdate.dbMember.getNameFirst(), fmapMember);
