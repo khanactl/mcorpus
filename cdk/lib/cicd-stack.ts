@@ -34,6 +34,9 @@ export interface ICICDProps extends IStackProps {
    * The ARN of the SecretsManager entry holding the GitHub OAuth access token.
    */
   readonly githubOauthTokenSecretArn: string;
+  /**
+   * The JSON field name holding the GitHub Oauth token in the {@link githubOauthTokenSecretArn} value.
+   */
   readonly githubOauthTokenSecretJsonFieldName: string;
   /**
    * The Git branch name to associate to the CICD pipeline.
@@ -43,10 +46,6 @@ export interface ICICDProps extends IStackProps {
    * The aws codebuild security group ref.
    */
   readonly codebuildSecGrp: ec2.ISecurityGroup;
-  /**
-   * The non-path name of the buildspec file to use in codebuild.
-   */
-  // readonly buildspecFilename: string;
   /**
    * The container name used in the buildspec.
    */

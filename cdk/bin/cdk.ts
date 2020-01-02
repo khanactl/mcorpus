@@ -14,8 +14,8 @@ import { DbStack } from '../lib/db-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbDataStack } from '../lib/db-data-stack';
 import { ECSStack } from '../lib/ecs-stack';
-import { CICDStack } from '../lib/cicd-stack';
 import { WafStack } from '../lib/waf-stack';
+import { CICDStack } from '../lib/cicd-stack';
 
 function resolveCurrentGitBranch(): string {
   // are we in codebuild env (there is no .git dir there)?
@@ -79,6 +79,13 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
     awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
+  const wafStack = new WafStack(app, {
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    appLoadBalancerRef: ecsStack.appLoadBalancer,
+  });
   const cicdStack = new CICDStack(app, {
     appEnv: appEnv,
     appName: appConfig.appName,
@@ -91,7 +98,6 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     gitBranchName: cicdConfig.gitBranchName,
     vpc: vpcStack.vpc,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
-    // buildspecFilename: cicdConfig.buildspecFilename,
     ecsTaskDefContainerName: ecsStack.containerName,
     lbToEcsPort: webAppContainerConfig.lbToAppPort,
     ecrRepo: ecsStack.ecrRepo,
@@ -100,13 +106,7 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
   });
-  const wafStack = new WafStack(app, {
-    appEnv: appEnv,
-    appName: appConfig.appName,
-    env: awsEnv,
-    tags: awsStackTags_appInstance,
-    appLoadBalancerRef: ecsStack.appLoadBalancer,
-  });
+  cicdStack.addDependency(wafStack, "CICD is always the last stack.");
 }
 
 const currentGitBranch = resolveCurrentGitBranch();
