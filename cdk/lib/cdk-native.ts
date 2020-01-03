@@ -72,7 +72,7 @@ export abstract class BaseStack extends cdk.Stack {
    * @param rootName the root name
    */
   public inameCml(rootName: string) {
-    return cml(rootName);
+    return cml(this.iname(rootName));
   }
 
 } // BaseStack class
