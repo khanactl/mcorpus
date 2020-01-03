@@ -20,13 +20,14 @@ import ratpack.server.ServerConfig;
 
 /**
  * Object bindings for the web layer.
- * 
+ *
  * @author jkirton
  */
 public class MCorpusWebModule extends AbstractModule {
-  
+
   @Override
   protected void configure() {
+    bind(JWTRequireAdminHandler.class);
     bind(JWTStatusHandler.class);
     bind(GraphQLIndexHandler.class);
     bind(CsrfGuardHandler.class);
@@ -48,11 +49,11 @@ public class MCorpusWebModule extends AbstractModule {
   @Singleton
   IJwtBackendHandler jwtBackendHandler(MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
     // the mcorpus server config determines whether we use a caching jwt handler or not
-    return config.jwtStatusCacheTimeoutInMinutes <= 0 ? 
-      new MCorpusJwtBackendHandler(mcuserRepo) : 
+    return config.jwtStatusCacheTimeoutInMinutes <= 0 ?
+      new MCorpusJwtBackendHandler(mcuserRepo) :
       new CachingJwtBackendHandler(
-        new MCorpusJwtBackendHandler(mcuserRepo), 
-        config.jwtStatusCacheTimeoutInMinutes, 
+        new MCorpusJwtBackendHandler(mcuserRepo),
+        config.jwtStatusCacheTimeoutInMinutes,
         config.jwtStatusCacheMaxSize)
     ;
   }
@@ -61,8 +62,8 @@ public class MCorpusWebModule extends AbstractModule {
   @Singleton
   JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config) {
     return new JWT(
-      Duration.ofSeconds(config.jwtTtlInSeconds), 
-      JWT.deserialize(config.jwtSalt), 
+      Duration.ofSeconds(config.jwtTtlInSeconds),
+      JWT.deserialize(config.jwtSalt),
       serverConfig.getPublicAddress().toString()
     );
   }

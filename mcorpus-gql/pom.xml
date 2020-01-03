@@ -228,6 +228,7 @@
         </executions>
       </plugin>
 
+      <!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -249,6 +250,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -371,12 +373,10 @@
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-hikari</artifactId>
     </dependency>
-    <!--
     <dependency>
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-dropwizard-metrics</artifactId>
     </dependency>
-    -->
 
     <dependency>
       <groupId>org.slf4j</groupId>
