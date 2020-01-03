@@ -8,6 +8,7 @@ import cdk = require('@aws-cdk/core');
 
 import { AppEnv } from '../lib/app-env';
 
+import { InfraPipelineStack } from '../lib/infra-pipeline-stack';
 import { VpcStack } from '../lib/vpc-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
 import { DbStack } from '../lib/db-stack';
@@ -16,6 +17,25 @@ import { DbDataStack } from '../lib/db-data-stack';
 import { ECSStack } from '../lib/ecs-stack';
 import { WafStack } from '../lib/waf-stack';
 import { CICDStack } from '../lib/cicd-stack';
+
+const currentGitBranch = resolveCurrentGitBranch();
+const currentAppEnv = resolveAppEnv(currentGitBranch);
+// console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
+
+const appConfigFilename = 'mcorpus-cdk-app-config.json';
+const config = JSON.parse(fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8'));
+
+const app = new cdk.App();
+
+const awsEnv: cdk.Environment = {
+  account: config.sharedConfig.awsAccountId,
+  region: config.sharedConfig.awsRegion,
+};
+
+const awsStackTags_Shared = {
+  "AppName": config.appName,
+  "AppEnv": AppEnv.SHARED,
+};
 
 function resolveCurrentGitBranch(): string {
   // are we in codebuild env (there is no .git dir there)?
@@ -60,6 +80,18 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
   }
 
   const gitRepoRef = appConfig.sharedConfig.gitRepoRef;
+
+  const infraPipelineStack = new InfraPipelineStack(app, {
+    appEnv: appEnv,
+    appName: config.appName,
+    env: awsEnv,
+    tags: awsStackTags_Shared,
+    githubOwner: gitRepoRef.githubOwner,
+    githubRepo: gitRepoRef.githubRepo,
+    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
+    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    gitBranchName: cicdConfig.gitBranchName,
+  });
 
   const ecsStack = new ECSStack(app, {
     appEnv: appEnv,
@@ -107,26 +139,7 @@ function createAppInstance(appEnv: AppEnv, appConfig: any): void {
     cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
   });
   cicdStack.addDependency(wafStack, "CICD is always the last stack.");
-}
-
-const currentGitBranch = resolveCurrentGitBranch();
-const currentAppEnv = resolveAppEnv(currentGitBranch);
-// console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
-
-const appConfigFilename = 'mcorpus-cdk-app-config.json';
-const config = JSON.parse(fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8'));
-
-const app = new cdk.App();
-
-const awsEnv: cdk.Environment = {
-  account: config.sharedConfig.awsAccountId,
-  region: config.sharedConfig.awsRegion,
-};
-
-const awsStackTags_Shared = {
-  "AppName": config.appName,
-  "AppEnv": AppEnv.SHARED,
-};
+} // createAppInstance
 
 // common VPC
 const vpcStack = new VpcStack(app, {
@@ -181,4 +194,4 @@ const dbDataStack = new DbDataStack(app, {
 // createAppInstance(currentAppEnv, config);
 
 createAppInstance(AppEnv.DEV, config);
-createAppInstance(AppEnv.PRD, config);
+// createAppInstance(AppEnv.PRD, config);
