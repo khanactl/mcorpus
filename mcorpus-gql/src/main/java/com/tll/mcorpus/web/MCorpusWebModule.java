@@ -29,10 +29,14 @@ public class MCorpusWebModule extends AbstractModule {
   protected void configure() {
     bind(JWTRequireAdminHandler.class);
     bind(JWTStatusHandler.class);
-    bind(GraphQLIndexHandler.class);
-    bind(CsrfGuardHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
+  }
+
+  @Provides
+  @Singleton
+  CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
+    return new CsrfGuardHandler(config.rstCookieTtlInSeconds);
   }
 
   @Provides

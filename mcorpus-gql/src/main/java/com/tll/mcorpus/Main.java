@@ -44,11 +44,12 @@ public class Main {
    *
    * @return the global app logger.
    */
-  public static final Logger glog() { return appLog; }
+  public static final Logger glog() { return glog; }
 
-  private static final Logger appLog = LoggerFactory.getLogger("mcorpus-gql-server");
+  private static final Logger glog = LoggerFactory.getLogger("mcorpus-gql");
 
-  private static final RequestLogger rlgr = RequestLogger.ncsa(appLog);
+  private static final Logger rlog = LoggerFactory.getLogger("mcorpus.request");
+  private static final RequestLogger rlgr = RequestLogger.ncsa(rlog);
 
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
@@ -82,7 +83,7 @@ public class Main {
 
         .all(CommonHttpHeaders.inst) // always add common http response headers for good security
 
-        .all(CsrfGuardHandler.class) // CSRF protection for all state changing requests
+        .all(CsrfGuardHandler.class) // CSRF protection
 
         // redirect to /index if coming in under /
         .path(redirect(301, "index"))
@@ -94,21 +95,18 @@ public class Main {
         .prefix("graphql", chainsub -> chainsub
 
           // the mcorpus GraphQL api (post only)
-          // .post(CsrfGuardHandler.class)
           .post(JWTStatusHandler.class)
           .post(GraphQLHandler.class)
 
           // the GraphiQL developer interface (get only)
-          // .get("index", GraphQLIndexHandler.class)
           .get("index", ctx -> ctx.render(html("graphql/index.html",
-            singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.rstTypeToken).rst),
+            singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst),
             true)
           ))
           .files(f -> f.dir("templates/graphql"))
         )
 
         .prefix("admin", chainsub -> chainsub
-          // .all(CsrfGuardHandler.class)
           .all(JWTStatusHandler.class)
           .all(JWTRequireAdminHandler.class)
           .get("metrics-report", new MetricsWebsocketBroadcastHandler())
