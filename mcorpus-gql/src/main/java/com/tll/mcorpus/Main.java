@@ -103,7 +103,7 @@ public class Main {
             singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst),
             true)
           ))
-          .files(f -> f.dir("templates/graphql"))
+          .files(f -> f.dir("public/graphql"))
         )
 
         .prefix("admin", chainsub -> chainsub
@@ -114,9 +114,9 @@ public class Main {
         )
 
         // mcorpus graphql api html landing page
-        .get("index", ctx -> ctx.render(ctx.file("templates/index.html")))
+        .get("index", ctx -> ctx.render(ctx.file("public/index.html")))
 
-        .get("favicon.ico", ctx -> ctx.render(ctx.file("templates/favicon.ico")))
+        .get("favicon.ico", ctx -> ctx.render(ctx.file("public/favicon.ico")))
       )
     );
   }

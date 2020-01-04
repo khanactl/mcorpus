@@ -1,6 +1,6 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.core.Util.asString;
+import static com.tll.core.Util.asStringAndClean;
 import static com.tll.core.Util.dflt;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNullOrEmpty;
@@ -30,12 +30,12 @@ import ratpack.render.Renderable;
  *
  */
 public class WebFileRenderer implements Renderable {
-  
+
   private static final String rootWebDir;
-  
+
   static {
     try {
-      rootWebDir = Thread.currentThread().getContextClassLoader().getResource("templates").toURI().toString();
+      rootWebDir = Thread.currentThread().getContextClassLoader().getResource("public").toURI().toString();
       if(rootWebDir == null) throw new Exception();
     } catch (Exception e) {
       throw new Error(e);
@@ -53,7 +53,7 @@ public class WebFileRenderer implements Renderable {
    *          <em>NOT</em> cache this response.
    * @return newly created {@link WebFileRenderer}
    */
-  public static WebFileRenderer html(String webFileTemplatePath, Map<String, Object> dataMap, boolean noCache) {    
+  public static WebFileRenderer html(String webFileTemplatePath, Map<String, Object> dataMap, boolean noCache) {
     return new WebFileRenderer(URI.create(rootWebDir + "/" + webFileTemplatePath), dataMap, "text/html", noCache);
   }
 
@@ -90,7 +90,7 @@ public class WebFileRenderer implements Renderable {
       if(isNotNull(dataMap) && not(dataMap.isEmpty())) {
         for(final Map.Entry<String, Object> pentry : dataMap.entrySet())
           if(not(isNullOrEmpty(pentry.getKey())))
-            fileStr = fileStr.replace(String.format("${%s}", pentry.getKey()), asString(pentry.getValue()).trim());
+            fileStr = fileStr.replace(String.format("${%s}", pentry.getKey()), asStringAndClean(pentry.getValue()));
       }
       if(noCache) {
         context.getResponse().getHeaders()
@@ -101,7 +101,7 @@ public class WebFileRenderer implements Renderable {
       context.getResponse().send(contentType, fileStr);
     });
   }
-  
+
   @Override
   public String toString() { return String.format("%s (%s)", webFileTemplatePath, contentType); }
 }
