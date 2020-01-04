@@ -3,13 +3,13 @@
 <Configuration status="WARN">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} [%t] [%X{requestId}] %-5level %msg%n"/>
+      <PatternLayout pattern="%d{ISO8601} [%T] [%X{requestId}] %-5level %msg%n"/>
     </Console>
   </Appenders>
   <Loggers>
     <Logger name="com.zaxxer.hikari" level="warn" />
     <Logger name="graphql" level="off" /><!-- do NOT output raw graphql queries in error or otherwise! -->
-    
+
     <Root level="INFO">
       <AppenderRef ref="Console"/>
     </Root>
