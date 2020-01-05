@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.0 r1840935">
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2.1">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="MCorpusLoadTest" enabled="true">
       <stringProp name="TestPlan.comments">Issues randomly selected graphql queries from a set of test-defined http request definitions. </stringProp>
@@ -16,52 +16,55 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="mcorpusHost" elementType="Argument">
             <stringProp name="Argument.name">mcorpusHost</stringProp>
-            <stringProp name="Argument.value">mcorpus.d2d</stringProp>
-            <stringProp name="Argument.desc">The target host of mcorpus-gql-server</stringProp>
+            <stringProp name="Argument.value">%%mcorpusHost%%</stringProp>
+            <stringProp name="Argument.desc">The target web app host of mcorpus-gql-server</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="mcorpusDbHost" elementType="Argument">
             <stringProp name="Argument.name">mcorpusDbHost</stringProp>
-            <stringProp name="Argument.value">localhost:5432</stringProp>
+            <stringProp name="Argument.value">%%mcorpusDbHost%%:5432</stringProp>
             <stringProp name="Argument.desc">Where the db is</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="mcorpusDbName" elementType="Argument">
             <stringProp name="Argument.name">mcorpusDbName</stringProp>
-            <stringProp name="Argument.value">mcorpus</stringProp>
+            <stringProp name="Argument.value">%%mcorpusDbHost%%</stringProp>
             <stringProp name="Argument.desc">The name of the mcorpus db (jdbc)</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="mcorpusDbUsername" elementType="Argument">
             <stringProp name="Argument.name">mcorpusDbUsername</stringProp>
-            <stringProp name="Argument.value">mcweb</stringProp>
+            <stringProp name="Argument.value">%%mcorpusDbUsername%%</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">The db username to use to connect</stringProp>
           </elementProp>
           <elementProp name="mcorpusDbPswd" elementType="Argument">
             <stringProp name="Argument.name">mcorpusDbPswd</stringProp>
-            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.value">%%mcorpusDbPswd%%</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">The db password of the specified db username</stringProp>
           </elementProp>
           <elementProp name="mcusername" elementType="Argument">
             <stringProp name="Argument.name">mcusername</stringProp>
-            <stringProp name="Argument.value">loadtest</stringProp>
-            <stringProp name="Argument.desc">The username of the mcuser for this jmeter teset</stringProp>
+            <stringProp name="Argument.value">%%mcusername%%</stringProp>
+            <stringProp name="Argument.desc">The username of the mcuser for this jmeter test</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="mcuserpswd" elementType="Argument">
             <stringProp name="Argument.name">mcuserpswd</stringProp>
-            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.value">%%mcuserpswd%%</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">The password of the specified mcuser</stringProp>
           </elementProp>
           <elementProp name="midCount" elementType="Argument">
             <stringProp name="Argument.name">midCount</stringProp>
-            <stringProp name="Argument.value">1</stringProp>
+            <stringProp name="Argument.value">%%midCount%%</stringProp>
             <stringProp name="Argument.desc">The number of user threads to create</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="rampUpSeconds" elementType="Argument">
             <stringProp name="Argument.name">rampUpSeconds</stringProp>
-            <stringProp name="Argument.value">1</stringProp>
+            <stringProp name="Argument.value">%%rampUpSeconds%%</stringProp>
             <stringProp name="Argument.desc">The test thread group ramp up time</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -83,6 +86,9 @@
         <stringProp name="transactionIsolation">DEFAULT</stringProp>
         <stringProp name="trimInterval">60000</stringProp>
         <stringProp name="username">${mcorpusDbUsername}</stringProp>
+        <boolProp name="preinit">false</boolProp>
+        <stringProp name="initQuery"></stringProp>
+        <stringProp name="connectionProperties"></stringProp>
       </JDBCDataSource>
       <hashTree/>
       <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
@@ -97,6 +103,7 @@
       <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
         <collectionProp name="CookieManager.cookies"/>
         <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
       </CookieManager>
       <hashTree/>
       <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
@@ -128,6 +135,7 @@
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <stringProp name="TestPlan.comments">Test initialization thread group</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </SetupThreadGroup>
       <hashTree>
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
@@ -158,6 +166,7 @@
           <stringProp name="resultSetHandler">Store as Object</stringProp>
           <stringProp name="resultVariable"></stringProp>
           <stringProp name="variableNames">mid, emp_id, location, username</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
         </JDBCSampler>
         <hashTree>
           <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="save test members" enabled="true">
@@ -306,6 +315,7 @@ for(int i = 0; i &lt; cm.getCookieCount(); i++) {
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <stringProp name="TestPlan.comments">Send out test requests against /graphql http endpoint</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
@@ -828,6 +838,7 @@ vars.put(&quot;stoken&quot;, 	stoken);
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <stringProp name="TestPlan.comments">Test teardown thread group</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </PostThreadGroup>
       <hashTree>
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
