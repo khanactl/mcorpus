@@ -28,7 +28,7 @@
           </elementProp>
           <elementProp name="mcorpusDbName" elementType="Argument">
             <stringProp name="Argument.name">mcorpusDbName</stringProp>
-            <stringProp name="Argument.value">%%mcorpusDbHost%%</stringProp>
+            <stringProp name="Argument.value">%%mcorpusDbName%%</stringProp>
             <stringProp name="Argument.desc">The name of the mcorpus db (jdbc)</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
