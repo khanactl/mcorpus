@@ -232,7 +232,7 @@ public class Util {
    * @return Never-null string
    */
   public static String flatten(final List<String> list, final String delim) {
-    return isNullOrEmpty(list) ? "" : list.stream().map(s -> clean(s)).collect(Collectors.joining(delim)).toString();
+    return isNullOrEmpty(list) ? "" : list.stream().map(s -> clean(s)).collect(Collectors.joining(delim));
   }
 
   /**

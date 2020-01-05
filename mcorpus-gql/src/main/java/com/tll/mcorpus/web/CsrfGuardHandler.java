@@ -30,7 +30,7 @@ import ratpack.handling.Handler;
  * @author jpk
  */
 public class CsrfGuardHandler implements Handler {
-  public final class RST {
+  public static final class RST {
     public final String rst;
     public RST(final String rst) { this.rst = rst; }
   }
@@ -72,18 +72,8 @@ public class CsrfGuardHandler implements Handler {
 
     if(verifyRst(ctx)) {
       final RequestSnapshot requestSnapshot = getOrCreateRequestSnapshot(ctx);
-      final UUID cookieRst;
-      final UUID headerRst;
-      try {
-        cookieRst = requestSnapshot.hasRstCookie() ?
-            uuidFromToken(requestSnapshot.getRstCookie()) : null;
-        headerRst = requestSnapshot.hasRstHeader() ?
-            uuidFromToken(requestSnapshot.getRstHeader()) : null;
-      } catch(Exception e) {
-        log.error("Bad rst token(s).");
-        ctx.clientError(400); // bad request
-        return;
-      }
+      final UUID cookieRst = requestSnapshot.hasRstCookie() ? uuidFromToken(requestSnapshot.getRstCookie()) : null;
+      final UUID headerRst = requestSnapshot.hasRstHeader() ? uuidFromToken(requestSnapshot.getRstHeader()) : null;
 
       // send a no content response if *both* the cookie and header rst are not present
       // this serves as a way for the clients to sync up and issue a valid subsequent request
