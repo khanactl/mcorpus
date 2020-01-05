@@ -27,6 +27,7 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(WebFileRenderer.class);
     bind(JWTRequireAdminHandler.class);
     bind(JWTStatusHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);

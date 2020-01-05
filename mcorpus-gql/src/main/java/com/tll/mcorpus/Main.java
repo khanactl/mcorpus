@@ -1,6 +1,6 @@
 package com.tll.mcorpus;
 
-import static com.tll.mcorpus.web.WebFileRenderer.html;
+import static com.tll.mcorpus.web.WebFileRenderer.TRefAndData.htmlNoCache;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 import static java.util.Collections.singletonMap;
@@ -48,8 +48,7 @@ public class Main {
 
   private static final Logger glog = LoggerFactory.getLogger("mcorpus-gql");
 
-  private static final Logger rlog = LoggerFactory.getLogger("mcorpus.request");
-  private static final RequestLogger rlgr = RequestLogger.ncsa(rlog);
+  private static final RequestLogger rlgr = RequestLogger.ncsa(glog);
 
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
@@ -99,9 +98,9 @@ public class Main {
           .post(GraphQLHandler.class)
 
           // the GraphiQL developer interface (get only)
-          .get("index", ctx -> ctx.render(html("graphql/index.html",
-            singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst),
-            true)
+          .get("index", ctx -> ctx.render(htmlNoCache(
+            ctx.file("public/graphql/index.html"),
+            singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst))
           ))
           .files(f -> f.dir("public/graphql"))
         )
