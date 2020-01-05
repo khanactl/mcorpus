@@ -12,7 +12,7 @@ import ratpack.handling.Context;
 
 /**
  * The global error handler for the mcorpus web app.
- * 
+ *
  * @author jkirton
  */
 public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
@@ -26,7 +26,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
   public void error(Context ctx, int statusCode) throws Exception {
     ctx.getResponse().status(statusCode);
     switch(statusCode) {
-    case 205: // reset content 
+    case 205: // reset content
       ctx.getResponse().send("Reset Content (205)");
       break;
     case 400: // bad request
@@ -45,9 +45,9 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
       ctx.getResponse().send("Bad Client");
       break;
     }
-    log.error("Client error {} response sent for request: {} - {}.", 
-      statusCode, 
-      ctx.getRequest().getPath(), 
+    log.error("Client error {} response sent for request: {} - {}.",
+      statusCode,
+      ctx.getRequest().getPath(),
       RequestUtil.getOrCreateRequestSnapshot(ctx)
     );
   }
@@ -61,13 +61,16 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
   @Override
   public void error(Context ctx, Throwable error) throws Exception {
     ctx.getResponse().send("Server error (500)");
-    final String emsg = isNull(error) ? "UNKNOWN" : 
+    final String emsg = isNull(error) ? "UNKNOWN" :
       (isNullOrEmpty(error.getMessage()) ? "UNKNOWN" : error.getMessage());
-    log.error("Server error '{}' for request: {} - {}.", 
+    log.error("Server error '{}' for request: {} - {}.",
         emsg,
-        ctx.getRequest().getPath(), 
+        ctx.getRequest().getPath(),
         RequestUtil.getOrCreateRequestSnapshot(ctx)
     );
+    if(ctx.getServerConfig().isDevelopment()) {
+      log.error("StackTrace:\n\n{}\n", error);
+    }
   }
 
 }
