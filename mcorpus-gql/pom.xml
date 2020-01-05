@@ -21,7 +21,6 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-build.mode>DEV</mcorpus-build.mode>
     <mcorpus-db.version>1.4.9</mcorpus-db.version>
   </properties>
 
@@ -35,7 +34,6 @@
     <profile>
       <id>prod</id>
       <properties>
-        <mcorpus-build.mode>PROD</mcorpus-build.mode>
       </properties>
     </profile>
   </profiles>
@@ -92,7 +90,6 @@
               <Main-Class>com.tll.mcorpus.Main</Main-Class>
               <Build-Number>${project.version}</Build-Number>
               <Build-Timestamp>${timestamp}</Build-Timestamp>
-              <Build-Mode>${mcorpus-build.mode}</Build-Mode>
             </manifestEntries>
           </archive>
         </configuration>
@@ -219,7 +216,6 @@
                     <Main-Class>com.tll.mcorpus.Main</Main-Class>
                     <Build-Number>${project.version}</Build-Number>
                     <Build-Timestamp>${timestamp}</Build-Timestamp>
-                    <Build-Mode>${mcorpus-build.mode}</Build-Mode>
                   </manifestEntries>
                 </transformer>
               </transformers>
