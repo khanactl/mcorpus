@@ -1,5 +1,5 @@
 testoutput
 MCorpusLoadTest.jmx
-MCorpusLoadTest-localdev.jmx
-MCorpusLoadTest-aws.jmx
+MCorpusLoadTest-local*.jmx
+MCorpusLoadTest-aws*.jmx
 
