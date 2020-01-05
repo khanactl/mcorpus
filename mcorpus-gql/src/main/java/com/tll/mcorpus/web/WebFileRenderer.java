@@ -43,6 +43,17 @@ public class WebFileRenderer extends RendererSupport<WebFileRenderer.TRefAndData
   public static class TRefAndData {
 
     /**
+     * Input for rendering a web template file with NO template data parameters.
+     * No-caching headers are added to the http response.
+     *
+     * @param tref the web temlate file path
+     * @return Newly created {@link TRefAndData} instance
+     */
+    public static TRefAndData htmlNoCache(final Path tref) {
+      return htmlNoCache(tref, null);
+    }
+
+    /**
      * Input for rendering a web template file with a map of data key/values.
      * No-caching headers are added to the http response.
      *
