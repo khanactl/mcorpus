@@ -84,12 +84,13 @@ public class MCorpusGraphQLTest {
         Instant.now(),
         "127.0.0.1",
         "localhost",
+        "path",
         "origin",
         "https://mcorpus.d2d",
         "forwarded",
         "X-Forwarded-For",
+        "X-Forwarded-Host",
         "X-Forwarded-Proto",
-        "X-Forwarded-Port",
         null, // jwt cookie
         null, // rst cookie
         null, // rst header

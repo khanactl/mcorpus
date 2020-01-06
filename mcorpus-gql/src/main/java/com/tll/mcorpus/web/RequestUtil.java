@@ -48,7 +48,9 @@ public class RequestUtil {
     catch(NotInRegistryException e) {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
-      glog().info("Request snapshot taken: {}", rs.toString());
+      glog().info("Request snapshot taken: {}",
+        ctx.getServerConfig().isDevelopment() ? rs.toString() : rs.refToken()
+      );
       return rs;
     }
   }
@@ -120,13 +122,14 @@ public class RequestUtil {
     return new RequestSnapshot(
         req.getTimestamp(),
         req.getRemoteAddress().getHost(),
+        req.getPath(),
         req.getHeaders().get("Host"),
         req.getHeaders().get("Origin"),
         req.getHeaders().get("Referer"),
         req.getHeaders().get("Forwarded"),
         req.getHeaders().get("X-Forwarded-For"),
+        req.getHeaders().get("X-Forwarded-Host"),
         req.getHeaders().get("X-Forwarded-Proto"),
-        req.getHeaders().get("X-Forwarded-Port"),
         req.oneCookie("jwt"),
         req.oneCookie("rst"),
         req.getHeaders().get("rst"),
