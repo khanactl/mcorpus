@@ -18,11 +18,11 @@ public class MCorpusServerConfig {
   public String dbUrl;
 
   /**
-   * The Request Sync Token (anti-CSRF) cookie time to live in seconds.
+   * The Request Sync Token (anti-CSRF) time to live in seconds.
    * <p>
    * Default is 30 minutes (1800 seconds).
    */
-  public long rstCookieTtlInSeconds = 1800L;
+  public long rstTtlInSeconds = 1800L;
 
   /**
    * The JWT salt value.

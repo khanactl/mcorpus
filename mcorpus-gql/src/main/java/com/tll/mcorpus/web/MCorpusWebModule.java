@@ -37,7 +37,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
-    return new CsrfGuardHandler(config.rstCookieTtlInSeconds);
+    return new CsrfGuardHandler(config.rstTtlInSeconds);
   }
 
   @Provides

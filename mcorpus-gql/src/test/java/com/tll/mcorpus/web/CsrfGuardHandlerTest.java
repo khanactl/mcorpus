@@ -16,21 +16,21 @@ public class CsrfGuardHandlerTest {
 
   @Test
   public void testNoRstPattern() {
-    assertFalse(CsrfGuardHandler.ptrnNoRst.matcher("index.html").matches());
-    assertFalse(CsrfGuardHandler.ptrnNoRst.matcher("index").matches());
-    assertFalse(CsrfGuardHandler.ptrnNoRst.matcher("index.").matches());
-    assertFalse(CsrfGuardHandler.ptrnNoRst.matcher("index.j").matches());
+    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index.html").matches());
+    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index").matches());
+    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index.").matches());
+    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index.j").matches());
 
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.js").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.css").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.ico").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.png").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.jpg").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.jpeg").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.mpeg").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.js").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.css").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.ico").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.png").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.jpg").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.jpeg").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.mpeg").matches());
 
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.JS").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.CSS").matches());
-    assertTrue(CsrfGuardHandler.ptrnNoRst.matcher("index.ICO").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.JS").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.CSS").matches());
+    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.ICO").matches());
   }
 }
