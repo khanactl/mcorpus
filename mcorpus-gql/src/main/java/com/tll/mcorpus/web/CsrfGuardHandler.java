@@ -39,6 +39,7 @@ import ratpack.handling.Handler;
  * @author jpk
  */
 public class CsrfGuardHandler implements Handler {
+
   public static final class RST {
     public final String rst;
     public RST(final String rst) { this.rst = rst; }
@@ -52,14 +53,13 @@ public class CsrfGuardHandler implements Handler {
   static final Pattern PTRN_NO_RST = Pattern.compile("^.*\\.(js|css|png|gif|jpg|jpeg|mpeg|ico)$", Pattern.CASE_INSENSITIVE);
 
   private static final SecretKey SKEY;
-  private static final SecureRandom RND = new SecureRandom();
   private static final byte[] MSG_PREFIX;
 
   static {
     try {
       SKEY = KeyGenerator.getInstance("AES").generateKey();
       MSG_PREFIX = new byte[32];
-      RND.nextBytes(MSG_PREFIX);
+      new SecureRandom().nextBytes(MSG_PREFIX);
     }
     catch(Exception e) {
       throw new Error();
@@ -77,7 +77,7 @@ public class CsrfGuardHandler implements Handler {
   /**
    * Generate an RST.
    * <p>
-   * FORMAT: <code>"HMAC({MSG_PREFIX} + {timestamp}){timstamp}"</code>
+   * FORMAT: <code>"HMAC({MSG_PREFIX} + {timestamp})|{timstamp}"</code>
    *
    * @param ts timestamp
    *
@@ -111,12 +111,6 @@ public class CsrfGuardHandler implements Handler {
       return null;
     }
   }
-
-  /*
-  static boolean verifyRst(final Context ctx) {
-
-  }
-  */
 
   private final Logger log = LoggerFactory.getLogger(CsrfGuardHandler.class);
 
