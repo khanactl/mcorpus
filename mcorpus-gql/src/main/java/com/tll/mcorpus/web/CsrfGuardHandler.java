@@ -50,7 +50,17 @@ public class CsrfGuardHandler implements Handler {
   @SuppressWarnings("serial")
   public static final TypeToken<RST> RST_TYPE = new TypeToken<RST>() {};
 
-  static final Pattern PTRN_GEN_RST = Pattern.compile("^.*(graphql/index|graphql)\\/?$", Pattern.CASE_INSENSITIVE);
+  /**
+   * Whitelist request paths subject to either checking (request)
+   * or issuing (response) an RST.  Case-sensitive.
+   * <p>
+   * I.e. the pages subject to CSRF gurading.
+   * <p>
+   * For mcorpus app, we guard
+   * <code>graphql[/]</code> and <code>graphql/index[/]</code>
+   * request paths only.
+   */
+  static final Pattern PTRN_GEN_RST = Pattern.compile("^(graphql\\/index|graphql)\\/?$");
 
   private static final SecretKey SKEY;
   private static final byte[] MSG_PREFIX;
