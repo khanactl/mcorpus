@@ -8,15 +8,13 @@ import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
 
-import com.tll.core.IHasRefToken;
-
 /**
  * Immutable snapshot of the key 'auditable' attributes of an incoming http
  * request.
  *
  * @author jkirton
  */
-public class RequestSnapshot implements IHasRefToken {
+public class RequestSnapshot {
 
   private static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
@@ -223,17 +221,6 @@ public class RequestSnapshot implements IHasRefToken {
    */
   public String getShortRequestId() {
     return uuidToToken(uuidFromToken(requestId));
-  }
-
-  @Override
-  public String refToken() {
-    return String.format(
-      "Http-Request[%s] %s|%s %s",
-      getPath(),
-      remoteAddressHost,
-      xForwardedFor,
-      httpHost
-    );
   }
 
   @Override

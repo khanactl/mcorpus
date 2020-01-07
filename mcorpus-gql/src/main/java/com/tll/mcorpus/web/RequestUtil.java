@@ -48,9 +48,7 @@ public class RequestUtil {
     catch(NotInRegistryException e) {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
-      glog().info("Request snapshot taken: {}",
-        ctx.getServerConfig().isDevelopment() ? rs.toString() : rs.refToken()
-      );
+      glog().info("Request snapshot taken: {}", rs);
       return rs;
     }
   }
