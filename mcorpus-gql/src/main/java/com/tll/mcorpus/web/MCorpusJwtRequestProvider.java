@@ -2,9 +2,7 @@ package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNull;
-import static com.tll.core.Util.isNullOrEmpty;
-import static com.tll.core.Util.lower;
-import static com.tll.core.Util.not;
+import static com.tll.core.Util.isNotNullOrEmpty;
 
 import java.time.Instant;
 import java.util.regex.Matcher;
@@ -22,18 +20,10 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
     return new MCorpusJwtRequestProvider(
       rs,
       String.format("%s|%s",
-        nullwiseClean(rs.getRemoteAddressHost()),
-        nullwiseClean(rs.getXForwardedFor())
+        clean(rs.getRemoteAddressHost()),
+        clean(rs.getXForwardedFor())
       )
     );
-  }
-
-  private static boolean isNullwiseOrEmpty(final String s) {
-    return isNullOrEmpty(s) || "null".equals(lower(s));
-  }
-
-  private static String nullwiseClean(final String s) {
-    return isNullwiseOrEmpty(s) ? "" : clean(s);
   }
 
   /**
@@ -48,7 +38,7 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
    * @see #getClientOrigin() for the expected client origin format
    */
   private static String[] parseClientOriginToken(final String clientOrigin) {
-    if(not(isNullOrEmpty(clientOrigin)) && clientOrigin.indexOf('|') >= 0) {
+    if(isNotNullOrEmpty(clientOrigin) && clientOrigin.indexOf('|') >= 0) {
       final Matcher matcher = clientOriginExtractor.matcher(clientOrigin);
       if(matcher.matches()) {
         return new String[] { matcher.group(1), matcher.group(2) };
