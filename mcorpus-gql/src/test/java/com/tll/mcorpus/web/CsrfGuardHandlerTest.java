@@ -16,21 +16,16 @@ public class CsrfGuardHandlerTest {
 
   @Test
   public void testNoRstPattern() {
-    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index.html").matches());
-    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index").matches());
-    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index.").matches());
-    assertFalse(CsrfGuardHandler.PTRN_NO_RST.matcher("index.j").matches());
+    assertTrue(CsrfGuardHandler.PTRN_GEN_RST.matcher("graphql").matches());
+    assertTrue(CsrfGuardHandler.PTRN_GEN_RST.matcher("graphql/").matches());
+    assertTrue(CsrfGuardHandler.PTRN_GEN_RST.matcher("graphql/index").matches());
+    assertTrue(CsrfGuardHandler.PTRN_GEN_RST.matcher("graphql/index/").matches());
+    assertTrue(CsrfGuardHandler.PTRN_GEN_RST.matcher("sub/graphql/index").matches());
+    assertTrue(CsrfGuardHandler.PTRN_GEN_RST.matcher("sub/graphql/index/").matches());
 
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.js").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.css").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.ico").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.png").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.jpg").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.jpeg").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.mpeg").matches());
-
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.JS").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.CSS").matches());
-    assertTrue(CsrfGuardHandler.PTRN_NO_RST.matcher("index.ICO").matches());
+    assertFalse(CsrfGuardHandler.PTRN_GEN_RST.matcher("index.html").matches());
+    assertFalse(CsrfGuardHandler.PTRN_GEN_RST.matcher("index.js").matches());
+    assertFalse(CsrfGuardHandler.PTRN_GEN_RST.matcher("index.css").matches());
+    assertFalse(CsrfGuardHandler.PTRN_GEN_RST.matcher("favicon.ico").matches());
   }
 }

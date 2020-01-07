@@ -50,7 +50,7 @@ public class CsrfGuardHandler implements Handler {
   @SuppressWarnings("serial")
   public static final TypeToken<RST> RST_TYPE = new TypeToken<RST>() {};
 
-  static final Pattern PTRN_NO_RST = Pattern.compile("^.*\\.(js|css|png|gif|jpg|jpeg|mpeg|ico)$", Pattern.CASE_INSENSITIVE);
+  static final Pattern PTRN_GEN_RST = Pattern.compile("^.*(graphql/index|graphql)\\/?$", Pattern.CASE_INSENSITIVE);
 
   private static final SecretKey SKEY;
   private static final byte[] MSG_PREFIX;
@@ -71,7 +71,7 @@ public class CsrfGuardHandler implements Handler {
   }
 
   static boolean doNextRst(final Context ctx) {
-    return not(PTRN_NO_RST.matcher(emptyIfNull(ctx.getRequest().getPath())).matches());
+    return PTRN_GEN_RST.matcher(emptyIfNull(ctx.getRequest().getPath())).matches();
   }
 
   /**
