@@ -60,56 +60,56 @@ export class DbStack extends BaseStack {
 
     const dbInstNme = this.iname('db');
     const instance = new DatabaseInstance(this, dbInstNme, {
-      vpc: props.vpc, 
-      instanceIdentifier: dbInstNme, 
-      databaseName: props.dbName, 
-      masterUsername: props.dbMasterUsername, 
-      engine: rds.DatabaseInstanceEngine.POSTGRES, 
+      vpc: props.vpc,
+      instanceIdentifier: dbInstNme,
+      databaseName: props.dbName,
+      masterUsername: props.dbMasterUsername,
+      engine: rds.DatabaseInstanceEngine.POSTGRES,
       instanceClass: ec2.InstanceType.of(
-        ec2.InstanceClass.T2,  
+        ec2.InstanceClass.T2,
         ec2.InstanceSize.SMALL
       ),
-      // parameterGroup: parameterGroup, 
-      // optionGroup: optionGroup, 
-      enablePerformanceInsights: false, 
-      multiAz: false, 
-      autoMinorVersionUpgrade: true, 
+      // parameterGroup: parameterGroup,
+      // optionGroup: optionGroup,
+      enablePerformanceInsights: false,
+      multiAz: false,
+      autoMinorVersionUpgrade: true,
       /*
       cloudwatchLogsExports: [
         'trace',
         'audit',
         'alert',
         'listener'
-      ], 
-      cloudwatchLogsRetention: logs.RetentionDays.ONE_WEEK, 
+      ],
+      cloudwatchLogsRetention: logs.RetentionDays.ONE_WEEK,
       */
       monitoringInterval: cdk.Duration.seconds(60), // default is 1 min
-      storageEncrypted: true, 
+      storageEncrypted: true,
       backupRetention: cdk.Duration.days(0), // i.e. do not do backups
       vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
-      deletionProtection: false, 
+      deletionProtection: false,
     });
 
     // allow db bootstrap lambda fn to connect to db
     instance.connections.allowDefaultPortFrom(
-      props.dbBootstrapSecGrp, 
-      'from db bootstrap', 
+      props.dbBootstrapSecGrp,
+      'from db bootstrap',
     );
-    
+
     // allow ecs container traffic to db
     instance.connections.allowDefaultPortFrom(
-      props.ecsSecGrp, 
+      props.ecsSecGrp,
       'from ecs container', // NOTE: connections construct resolves to a db specific sec grp!
     );
 
     // allow codebuild traffic to db
     instance.connections.allowDefaultPortFrom(
-      props.codebuildSecGrp, 
-      'from codebuild', 
+      props.codebuildSecGrp,
+      'from codebuild',
     );
 
     // Rotate the master user password every 30 days
-    const rdsSecretRotation = instance.addRotationSingleUser('Rotation');
+    const rdsSecretRotation = instance.addRotationSingleUser(cdk.Duration.days(30));
 
     // Add alarm for high CPU
     const cloudWatchAlarmInstNme = this.iname('high-cpu');
@@ -139,13 +139,13 @@ export class DbStack extends BaseStack {
     this.dbInstanceJsonSecret = instance.secret!;
 
     // stack output
-    new cdk.CfnOutput(this, 'dbEndpoint', { value: 
+    new cdk.CfnOutput(this, 'dbEndpoint', { value:
       instance.dbInstanceEndpointAddress + ':' + instance.dbInstanceEndpointPort
     });
-    new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: 
+    new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value:
       this.dbInstanceJsonSecret!.secretArn
     });
-    new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value: 
+    new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value:
       cloudWatchAlarm.alarmArn
     });
 
