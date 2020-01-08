@@ -27,6 +27,7 @@ export class WafStack extends BaseStack {
     // *** firewall rules ***
 
     // rule: rate limiter
+    /*
     const ruleRateLimit = new waf.CfnRateBasedRule(this, "rateLimitByIP", {
       name: "rateLimitByIP",
       metricName: "myRateLimitByIP",
@@ -40,6 +41,7 @@ export class WafStack extends BaseStack {
         },
       ],
     });
+    */
 
     // *** END firewall rules ***
 
@@ -49,6 +51,7 @@ export class WafStack extends BaseStack {
       name: webAclName,
       metricName: `${webAclName}Metrics`,
       defaultAction: { type: "ALLOW" },
+      /*
       rules: [
         {
           action: { type: "BLOCK" },
@@ -57,6 +60,7 @@ export class WafStack extends BaseStack {
           ruleId: ruleRateLimit.ref,
         },
       ],
+      */
     });
 
     // bind waf to alb
@@ -66,7 +70,7 @@ export class WafStack extends BaseStack {
     });
 
     // stack output
-    new cdk.CfnOutput(this, "WebAclName", { value: webAclName });
+    new cdk.CfnOutput(this, "WebAclName", { value: this.webAcl.name });
 
   }
 }
