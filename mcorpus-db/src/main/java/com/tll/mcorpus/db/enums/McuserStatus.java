@@ -28,9 +28,7 @@ public enum McuserStatus implements EnumType {
 
     ACTIVE("ACTIVE"),
 
-    INACTIVE("INACTIVE"),
-
-    INVALIDATED("INVALIDATED");
+    INACTIVE("INACTIVE");
 
     private final String literal;
 

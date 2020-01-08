@@ -51,7 +51,7 @@ public class MCorpusUserRepoTest {
       // delete mcuser_audit recs if any
       log.info("Num mcuser_audit records deleted after test: {}.",
           testDslMcwebTest().delete(MCUSER_AUDIT).where(MCUSER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
-      
+
       // delete test mcuser recs if any
       log.info("Num mcuser records deleted after test: {}.",
           testDslMcwebTest().delete(MCUSER).where(MCUSER.USERNAME.eq(TEST_MCUSER_USERNAME)).execute());
@@ -74,25 +74,25 @@ public class MCorpusUserRepoTest {
   static final String TEST_MCUSER_PSWD = "pswd33*7yuI";
 
   static final String TEST_MCUSER_BAD_PSWD = "bunko";
-  
+
   static final McuserStatus TEST_MCUSER_STATUS = McuserStatus.ACTIVE;
-  
+
   static final McuserRole[] TEST_MCUSER_ROLES = new McuserRole[] { McuserRole.MCORPUS, McuserRole.MPII };
 
   /**
-   * @return Newly created {@link McuserAndRoles} instance 
-   *         suitable for insert into mcuser table 
+   * @return Newly created {@link McuserAndRoles} instance
+   *         suitable for insert into mcuser table
    *         temporarily for testing.
    */
   static Mcuser testNewMcuserAndRoles() {
     final Mcuser mcuser = new Mcuser(
-      null, 
-      null, 
-      null, 
-      TEST_MCUSER_NAME, 
-      TEST_MCUSER_EMAIL, 
-      TEST_MCUSER_USERNAME, 
-      TEST_MCUSER_PSWD, 
+      null,
+      null,
+      null,
+      TEST_MCUSER_NAME,
+      TEST_MCUSER_EMAIL,
+      TEST_MCUSER_USERNAME,
+      TEST_MCUSER_PSWD,
       TEST_MCUSER_STATUS,
       TEST_MCUSER_ROLES
     );
@@ -123,10 +123,10 @@ public class MCorpusUserRepoTest {
       if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
     }
   }
-  
+
   static void deleteTestMcuser(final UUID uid) {
     try {
-     log.info("Num mcuser records deleted for uid {}: {}.", 
+     log.info("Num mcuser records deleted for uid {}: {}.",
          uid,
          testDslMcwebTest().delete(MCUSER).where(MCUSER.UID.eq(uid)).execute());
     }
@@ -137,10 +137,10 @@ public class MCorpusUserRepoTest {
       if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
     }
   }
-  
+
   /**
    * Add a test mcuser_audit record.
-   * 
+   *
    * @return Newly created McuserAudit pojo corresponding to the added
    *         MCUSER_AUDIT test record.
    * @throws Exception upon test record insert failure
@@ -159,10 +159,10 @@ public class MCorpusUserRepoTest {
         expiry.atOffset(zo),
         UUID.randomUUID(),
         JwtIdStatus.OK);
-    
+
     final int numInserted = testDslMcweb().insertInto(MCUSER_AUDIT,
         MCUSER_AUDIT.TYPE,
-        MCUSER_AUDIT.JWT_ID, 
+        MCUSER_AUDIT.JWT_ID,
         MCUSER_AUDIT.JWT_ID_STATUS,
         MCUSER_AUDIT.UID,
         MCUSER_AUDIT.REQUEST_TIMESTAMP,
@@ -177,9 +177,9 @@ public class MCorpusUserRepoTest {
           e.getRequestOrigin(),
           e.getLoginExpiration()
       ).execute();
-    
+
     if(numInserted != 1) throw new Exception("Num inserted MCUSER_AUDIT records: " + numInserted);
-    
+
     return e;
   }
 
@@ -195,7 +195,7 @@ public class MCorpusUserRepoTest {
       null,
       "nameUPDATED",
       mcuser.getEmail(),
-      McuserStatus.INVALIDATED,
+      McuserStatus.INACTIVE,
       new McuserRole[0] // i.e. nix roles
     );
   }
@@ -204,11 +204,11 @@ public class MCorpusUserRepoTest {
     final Instant lnow = Instant.now();
     final Instant expiry = lnow.plus(Duration.ofMinutes(30));
     FetchResult<Mcuser> fr = repo.login(
-      username, 
-      pswd, 
-      UUID.randomUUID(), 
-      expiry, 
-      lnow, 
+      username,
+      pswd,
+      UUID.randomUUID(),
+      expiry,
+      lnow,
       testRequestOrigin
     );
     return fr;
@@ -217,9 +217,9 @@ public class MCorpusUserRepoTest {
   static FetchResult<Boolean> mcuserLogout(MCorpusUserRepo repo, UUID mcuserId, UUID jwtId) {
     final Instant lnow = Instant.now();
     FetchResult<Boolean> fr = repo.logout(
-      mcuserId, 
-      jwtId, 
-      lnow, 
+      mcuserId,
+      jwtId,
+      lnow,
       testRequestOrigin
     );
     return fr;
@@ -236,21 +236,21 @@ public class MCorpusUserRepoTest {
       final Mcuser mar = insertTestMcuser();
       uid = mar.getUid();
       repo = mcuserRepo();
-      
+
       FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_PSWD);
       log.info("mcorpus LOGIN WITH AUTH SUCCESS TEST result: {}", loginResult);
-      
+
       Mcuser mcuser = loginResult.get();
       log.info("mcuser and roles: {}", mcuser);
-      
+
       assertNotNull(loginResult);
       assertNull(loginResult.getErrorMsg());
       assertFalse(loginResult.hasErrorMsg());
-      
+
       assertNotNull(mcuser);
       assertNotNull(mcuser.getUsername());
       assertNull(mcuser.getPswd());
-      
+
       assertNotNull(mcuser.getRoles());
     }
     catch(Exception e) {
@@ -278,7 +278,7 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
       FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_BAD_PSWD);
       log.info("mcorpus LOGIN WITH BAD PASSWORD TEST result: {}", loginResult);
-      
+
       assertNotNull(loginResult);
       assertNotNull(loginResult.getErrorMsg());
       assertTrue(loginResult.hasErrorMsg());
@@ -293,7 +293,7 @@ public class MCorpusUserRepoTest {
       if(repo != null) repo.close();
     }
   }
-  
+
   /**
    * Test {MCorpusUserRepo#login} with a username not currently in the backend
    * system.
@@ -308,7 +308,7 @@ public class MCorpusUserRepoTest {
       repo = mcuserRepo();
       FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME_UNKNOWN, TEST_MCUSER_BAD_PSWD);
       log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
-      
+
       assertNotNull(loginResult);
       assertFalse(loginResult.isSuccess());
       assertTrue(loginResult.hasErrorMsg());
@@ -323,7 +323,7 @@ public class MCorpusUserRepoTest {
       if(repo != null) repo.close();
     }
   }
-  
+
   /**
    * Test {MCorpusUserRepo#logout} when an mcuser is currently logged in.
    * <p>
@@ -338,11 +338,11 @@ public class MCorpusUserRepoTest {
       final Mcuser mar = insertTestMcuser();
       uid = mar.getUid();
       McuserAudit mcuserAudit = addTestMcuserAuditRecord(uid);
-      
+
       repo = mcuserRepo();
       FetchResult<Boolean> logoutResult = mcuserLogout(repo, uid, mcuserAudit.getJwtId());
       log.info("mcorpus LOGOUT WITH VALID LOGIN TEST result: {}", logoutResult);
-      
+
       assertNotNull(logoutResult);
       assertTrue(logoutResult.isSuccess());
       assertTrue(logoutResult.get());
@@ -374,13 +374,13 @@ public class MCorpusUserRepoTest {
     try {
       final Mcuser mar = insertTestMcuser();
       uid = mar.getUid();
-      
+
       repo = mcuserRepo();
       // create a logout input instance where the jwt id is not in the backend system
       // this is expected to fail the logout on the backend
       FetchResult<Boolean> logoutResult = mcuserLogout(repo, uid, UUID.randomUUID());
       log.info("mcorpus LOGOUT WITH INVALID LOGIN TEST result: {}", logoutResult);
-      
+
       assertNotNull(logoutResult);
       assertNotNull(logoutResult.getErrorMsg());
       assertTrue(logoutResult.hasErrorMsg());
@@ -435,11 +435,11 @@ public class MCorpusUserRepoTest {
     UUID uid = null;
     try {
       repo = mcuserRepo();
-      
+
       final Mcuser testMcuser = testNewMcuserAndRoles();
       final FetchResult<Mcuser> fr = repo.addMcuser(testMcuser);
       try { uid = fr.get().getUid(); } catch(Exception e) {}
-      
+
       assertNotNull(fr);
       assertTrue("mcuser add test failed", fr.isSuccess());
       assertNotNull("mcuser add test - no mcuser", fr.get());
@@ -553,10 +553,10 @@ public class MCorpusUserRepoTest {
     UUID uid = null;
     try {
       repo = mcuserRepo();
-      
+
       Mcuser testMcuser = insertTestMcuser();
       uid = testMcuser.getUid();
-      
+
       Instant requestInstant = Instant.now();
       String clientOrigin = testRequestOrigin;
 

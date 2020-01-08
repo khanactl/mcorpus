@@ -34,7 +34,7 @@ public enum JwtStatus implements EnumType {
 
     EXPIRED("EXPIRED"),
 
-    MCUSER_INACTIVE("MCUSER_INACTIVE"),
+    MCUSER_NOTACTIVE("MCUSER_NOTACTIVE"),
 
     VALID("VALID");
 

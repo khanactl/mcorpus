@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Dedicated mcorpus JWT backend handler.
- * 
+ *
  * @author jpk
  */
 public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
@@ -29,7 +29,7 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
       return JwtBackendStatus.BLACKLISTED;
     case EXPIRED:
       return JwtBackendStatus.EXPIRED;
-    case MCUSER_INACTIVE:
+    case MCUSER_NOTACTIVE:
       return JwtBackendStatus.BAD_USER;
     case NOT_PRESENT:
       return JwtBackendStatus.NOT_PRESENT;

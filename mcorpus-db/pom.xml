@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-db</artifactId>
-  <version>1.4.9</version>
+  <version>1.4.10</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-db</name>
