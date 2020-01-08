@@ -15,13 +15,6 @@
 -- bash> 'psql mcorpus < mcorpus-roles.ddl'
 -- bash> 'psql mcorpus < mcorpus-data.ddl'
 
--- psql>
---   COPY mcuser TO '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-mcuser.ddl';
-
---   COPY (select * from member order by mid limit 2000) TO '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-member-2000.ddl';
---   COPY (select * from mauth order by mid limit 2000) to '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-mauth-2000.ddl';
---   COPY (select * from maddress where mid in (select mid from member order by mid limit 2000)) TO '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mcorpus-maddress-2000.ddl';
-
 --   UPDATE ... SET pswhash = crypt('new password', gen_salt('bf'));
 --   SELECT (pswhash = crypt('entered password', pswhash)) AS pswmatch FROM ... ;
 
