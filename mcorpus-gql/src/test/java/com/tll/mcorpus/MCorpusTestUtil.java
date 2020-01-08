@@ -1,14 +1,18 @@
 package com.tll.mcorpus;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
 import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.IJwtHttpResponseAction;
+import com.tll.jwt.IJwtUser;
 import com.tll.jwt.JWT;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.MCorpusJwtBackendHandler;
+import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -94,13 +98,63 @@ public class MCorpusTestUtil {
     return dslMcwebtest;
   }
 
+  public static IJwtUser mockJwtUser() {
+    return new IJwtUser() {
+
+      @Override
+      public String[] getJwtUserRoles() {
+        return new String[] { "ADMIN" };
+      }
+
+      @Override
+      public UUID getJwtUserId() {
+        return UUID.randomUUID();
+      }
+    };
+  }
+
+  public static IJwtBackendHandler mockJwtBackendHandler() {
+    return new IJwtBackendHandler() {
+
+      final IJwtUser jwtUser = mockJwtUser();
+
+      @Override
+      public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken,
+          Instant requestInstant) {
+        return new FetchResult<>(Boolean.TRUE);
+      }
+
+      @Override
+      public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
+          Instant requestInstant) {
+          return new FetchResult<>(Boolean.TRUE);
+      }
+
+      @Override
+      public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
+          String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
+        return new FetchResult<>(jwtUser);
+      }
+
+      @Override
+      public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
+        return new FetchResult<>(2);
+      }
+
+      @Override
+      public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
+        return new FetchResult<>(JwtBackendStatus.NOT_PRESENT);
+      }
+    };
+  }
+
   /**
    * @return Newly created {@link JWT} instance suitable for testing.
    */
   public static JWT jwt() {
     byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
     Duration jwtTtl = Duration.ofDays(2);
-    return new JWT(jwtTtl, jwtSharedSecret, testServerPublicAddress);
+    return new JWT(mockJwtBackendHandler(), jwtTtl, jwtSharedSecret, testServerPublicAddress);
   }
 
   /**

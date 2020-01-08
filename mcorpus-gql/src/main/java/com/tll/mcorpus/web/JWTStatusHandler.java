@@ -2,7 +2,6 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 
-import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.RequestSnapshot;
@@ -25,19 +24,18 @@ import ratpack.handling.Handler;
  * <p>
  * A {@link RequestSnapshot} instance is created as a pre-requisite in
  * determining the JWT status if one is not alredy cached in the request.
- * 
+ *
  * @author jkirton
  */
 public class JWTStatusHandler implements Handler {
 
   private final Logger log = LoggerFactory.getLogger(JWTStatusHandler.class);
-  
+
   @Override
   public void handle(Context ctx) throws Exception {
-    Blocking.get(() -> 
+    Blocking.get(() ->
       ctx.get(JWT.class).jwtHttpRequestStatus(
-        MCorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx)), 
-        ctx.get(IJwtBackendHandler.class)
+        MCorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx))
       )
     ).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);

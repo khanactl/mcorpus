@@ -119,8 +119,10 @@ public class RequestUtil {
   private static RequestSnapshot takeRequestSnapshot(final Request req) {
     return new RequestSnapshot(
         req.getTimestamp(),
-        req.getRemoteAddress().getHost(),
+        req.getRemoteAddress().toString(),
         req.getPath(),
+        req.getMethod().getName(),
+        req.isAjaxRequest(),
         req.getHeaders().get("Host"),
         req.getHeaders().get("Origin"),
         req.getHeaders().get("Referer"),

@@ -16,27 +16,26 @@ public interface IJwtHttpRequestProvider {
   Instant getRequestInstant();
 
   /**
-   * @return the client origin token which is a constructed token
-   *         from http header values of an incoming http request.
-   *         <p>
-   *         Recommended client origin token:<br>
-   *         <code>{remoteAddressHost}|{X-Forwarded-For}</code>.
+   * @return the client origin of the sourcing http request.
    */
   String getClientOrigin();
 
   /**
-   * @return the JWT value of the incoming http request.
+   * @return the JWT value held in the sourcing http request.
    */
   String getJwt();
 
   /**
-   * Verify the given client origin token against the held client origin in this instance.
+   * Verify the client origin of the sourcing http request against the
+   * extracted JWT audience claim gotten from the JWT held in the same http request.
    * <p>
-   * This allows for the client origin definition to be defined and maintained outside
-   * the scope of JWT processing.
+   * This allows for the client origin definition to be owned and maintained in
+   * {@link IJwtHttpRequestProvider} instances rather than in the JWT business/processing object.
    *
-   * @param jwtAudience the JWT audience claim extracted from the incoming JWT
-   * @return true if the given client origin was successfully verified
+   * @param jwtAudience the JWT audience claim extracted from the JWT held in the
+   *                    sourcing http request
+   * @return true if the given JWT audience claim is verified against the
+   *         client origin of the sourcing http request.  False otherwise.
    */
   boolean verifyClientOrigin(final String jwtAudience);
 }

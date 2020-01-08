@@ -48,8 +48,6 @@ public class Main {
 
   private static final Logger glog = LoggerFactory.getLogger("mcorpus-gql");
 
-  private static final RequestLogger rlgr = RequestLogger.ncsa(glog);
-
   public static void main(final String... args) throws Exception {
     RatpackServer.start(serverSpec -> serverSpec
       .serverConfig(config -> config
@@ -78,7 +76,7 @@ public class Main {
         ))
       ))
       .handlers(chain -> chain
-        .all(rlgr) // log all incoming requests
+        .all(RequestLogger.ncsa(glog)) // log all incoming requests
 
         .all(CommonHttpHeaders.inst) // always add common http response headers for good security
 

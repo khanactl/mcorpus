@@ -29,6 +29,8 @@ public class RequestSnapshot {
   private final String remoteAddressHost;
 
   private final String path;
+  private final String method;
+  private final boolean ajaxRequest;
 
   private final String httpHost;
   private final String httpOrigin;
@@ -50,8 +52,12 @@ public class RequestSnapshot {
    * Constructor.
    *
    * @param requestInstant the instant the request hit the server
-   * @param remoteAddressHost the tcp datagram remote ip address
-   * @param path the path of the request
+   * @param remoteAddressHost the address of the client that initiated the request.
+   *                          if we are behind a proxy server this value is expected to be the
+   *                          ip address of said proxy server
+   * @param path the request URI w/o query string and leading forward slash
+   * @param method the http method (GET, POST,..)
+   * @param ajaxRequest is this an Ajax/Xhr request?
    * @param httpHost the http Host header value
    * @param httpOrigin the http Origin header value
    * @param httpReferer the http Referer header value
@@ -59,15 +65,17 @@ public class RequestSnapshot {
    * @param xForwardedFor the X-Forwarded-For http header value
    * @param xForwardedHost the X-Forwarded-Host http header value
    * @param xForwardedProto the X-Forwarded-Proto http header value
-   * @param jwtCookie the http JWT token cookie value
+   * @param jwtCookie the http JWT cookie value
    * @param rstCookie the http request sync token cookie value
    * @param rstHeader the http request sync token http header value
-   * @param requestId the http request id gotten from web layer impl
+   * @param requestId the server generated unique request id for tracking purposes
    */
   public RequestSnapshot(
       Instant requestInstant,
       String remoteAddressHost,
       String path,
+      String method,
+      boolean ajaxRequest,
       String httpHost,
       String httpOrigin,
       String httpReferer,
@@ -84,6 +92,8 @@ public class RequestSnapshot {
     this.requestInstant = requestInstant;
     this.remoteAddressHost = nullif(remoteAddressHost);
     this.path = nullif(path);
+    this.method = nullif(method);
+    this.ajaxRequest = ajaxRequest;
 
     this.httpHost = nullif(httpHost);
     this.httpOrigin = nullif(httpOrigin);
@@ -120,6 +130,20 @@ public class RequestSnapshot {
    */
   public String getPath() {
     return path;
+  }
+
+  /**
+   * @return the http method
+   */
+  public String getMethod() {
+    return method;
+  }
+
+  /**
+   * @return is this an Ajax/Xhr request?
+   */
+  public boolean isAjaxRequest() {
+    return ajaxRequest;
   }
 
   /**
@@ -239,7 +263,8 @@ public class RequestSnapshot {
         "\trstHeader: %s\n" +
         "\thasJwtCookie: %b\n",
       getShortRequestId(), getPath(),
-      getRemoteAddressHost(), getHttpHost(), getHttpOrigin(), getHttpReferer(), getHttpForwarded(),
+      getRemoteAddressHost(),
+      getHttpHost(), getHttpOrigin(), getHttpReferer(), getHttpForwarded(),
       getXForwardedFor(), getXForwardedHost(), getXForwardedProto(),
       getRstCookie(), getRstHeader(),
       hasJwtCookie()
