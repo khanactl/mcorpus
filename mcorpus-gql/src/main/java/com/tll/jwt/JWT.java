@@ -42,15 +42,15 @@ import org.slf4j.LoggerFactory;
  * <p>
  * JWTs are used as a means to authenticate users over http before granting
  * access to server-based service(s).
-  * 
+  *
  * @author jkirton
  */
 public class JWT {
 
   /**
-   * Generate a new JWT shared secret for use server-side to both encrypt 
+   * Generate a new JWT shared secret for use server-side to both encrypt
    * newly created JWTs and decrypt incoming JWTs.
-   * 
+   *
    * @return Cryptographically strong random 32-byte (256 bits) array to serve as
    *         a JWT salt (shared secret).
    */
@@ -63,7 +63,7 @@ public class JWT {
 
   /**
    * Generate a hex-wise string from an arbitrary byte array.
-   * 
+   *
    * @param bytes the bytes array
    * @return newly created string that represents the given byte array as a
    *         hex-based string
@@ -71,38 +71,46 @@ public class JWT {
   public static String serialize(final byte[] bytes) {
     return DatatypeConverter.printHexBinary(bytes);
   }
-  
+
   /**
    * De-serialize a random hex-based string.
-   * 
+   *
    * @param hexToken
    * @return the de-serialized hex token as a byte array
    */
   public static byte[] deserialize(final String hexToken) {
     return DatatypeConverter.parseHexBinary(hexToken);
   }
-  
+
   private final Logger log = LoggerFactory.getLogger(JWT.class);
-  
+
+  private final IJwtBackendHandler backendHandler;
   private final Duration jwtTimeToLive;
   private final SecretKey jkey;
-  private final String serverIssuer; 
+  private final String serverIssuer;
 
   /**
    * Constructor.
-   * 
+   *
+   * @param backendHandler the jwt backend handler
    * @param jwtTimeToLive the amount of time a JWT shall live clientside
    * @param jwtSharedSecret the cryptographically strong secret to be used for
    *                        signing and verifying JWTs
    * @param serverIssuer the expected JWT issuer used to verify received JWTs
    */
-  public JWT(Duration jwtTimeToLive, byte[] jwtSharedSecret, String serverIssuer) {
+  public JWT(IJwtBackendHandler backendHandler, Duration jwtTimeToLive, byte[] jwtSharedSecret, String serverIssuer) {
     super();
+    this.backendHandler = backendHandler;
     this.jwtTimeToLive = jwtTimeToLive;
     this.jkey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = serverIssuer;
     log.info("JWT configured with Time-to-live: {} hours, Issuer: {}.", jwtTimeToLive.toHours(), serverIssuer);
   }
+
+  /**
+   * @return the jwt backend handler ref.
+   */
+  public IJwtBackendHandler getBackendHandler() { return backendHandler; }
 
   /**
    * @return the configured amount of time a JWT is considered valid.
@@ -111,7 +119,7 @@ public class JWT {
 
   /**
    * Generate an encrypted and signed JWT.
-   * 
+   *
    * @param jwtId the unique and strongly random jwtid to use in generating the JWT
    * @param userId id of the associated user to use in generating the JWT
    * @param roles the optional roles of the <code>userId</code>
@@ -119,15 +127,15 @@ public class JWT {
    * @return newly created, never null encrypted and signed JWT.
    * @throws Exception upon any unexpected error generating the JWT
    */
-  public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq) 
+  public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq)
       throws Exception {
-    final Instant requestInstant = httpreq.getRequestInstant();
-    final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
-    final String audience = httpreq.getClientOrigin();
+        final Instant requestInstant = httpreq.getRequestInstant();
+        final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
+        final String audience = httpreq.getClientOrigin();
 
     // create signed jwt object
     final SignedJWT signedJWT = new SignedJWT(
-        new JWSHeader(JWSAlgorithm.HS256), 
+        new JWSHeader(JWSAlgorithm.HS256),
         new JWTClaimsSet.Builder()
         .issuer(this.serverIssuer)
         .audience(audience)
@@ -137,7 +145,7 @@ public class JWT {
         .expirationTime(Date.from(loginExpiration))
         .claim("roles", roles)
         .build());
-    
+
     try {
       // sign
       signedJWT.sign(new MACSigner(jkey.getEncoded()));
@@ -167,17 +175,16 @@ public class JWT {
    * <li>the JWT ISSUER and AUDIENCE claims are verified
    * <li>the JWT has not expired based on the extracted expires claim
    * </ul>
-   * 
+   *
    * @param httpreq the http request data provider needed for JWT processing
-   * @param jbsp the JWT backend status provider
    * @return Never-null {@link JWTHttpRequestStatus}.
    */
-  public JWTHttpRequestStatus jwtHttpRequestStatus(final IJwtHttpRequestProvider httpreq, IJwtBackendHandler jbsp) {
-    
+  public JWTHttpRequestStatus jwtHttpRequestStatus(final IJwtHttpRequestProvider httpreq) {
+
     // present?
-    if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwt())) 
+    if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwt()))
       return JWTHttpRequestStatus.create(JWTStatus.NOT_PRESENT_IN_REQUEST);
-    
+
     // decrypt JWT
     final JWEObject jweObject;
     try {
@@ -187,7 +194,7 @@ public class JWT {
       log.error("JWT decrypt error: {}.", e.getMessage());
       return JWTHttpRequestStatus.create(JWTStatus.BAD_TOKEN);
     }
-    
+
     // parse to object
     final SignedJWT sjwt;
     try {
@@ -197,18 +204,18 @@ public class JWT {
       log.error("JWT un-signing error: {}.", e.getMessage());
       return JWTHttpRequestStatus.create(JWTStatus.BAD_TOKEN);
     }
-    
+
     // verify signature
     try {
-      if(not(sjwt.verify(new MACVerifier(jkey.getEncoded())))) 
+      if(not(sjwt.verify(new MACVerifier(jkey.getEncoded()))))
         throw new Exception();
     } catch (Exception e) {
       log.error("JWT verify signature error: {}.", e.getMessage());
       return JWTHttpRequestStatus.create(JWTStatus.BAD_SIGNATURE);
     }
-    
+
     // extract and verify the held JWT claims
-    // NOTE: we bake the user roles into the jwt token 
+    // NOTE: we bake the user roles into the jwt token
     //       with the assumption the jwt security and cryptography
     //       will keep this secret and unaltered.
     final UUID jwtId;
@@ -220,7 +227,7 @@ public class JWT {
     final String roles; // bound to the user
     try {
       final JWTClaimsSet claims = sjwt.getJWTClaimsSet();
-      
+
       jwtId = UUID.fromString(claims.getJWTID());
       userId = UUID.fromString(claims.getSubject());
       issued = isNull(claims.getIssueTime()) ? null : claims.getIssueTime().toInstant();
@@ -231,7 +238,7 @@ public class JWT {
 
       if(
         isNull(jwtId)
-        || isNull(userId) 
+        || isNull(userId)
         || isNull(issued)
         || isNull(expires)
         || isNullOrEmpty(issuer)
@@ -240,50 +247,50 @@ public class JWT {
       ) {
         throw new Exception(String.format("JWT one or more missing required claims."));
       }
-      
+
       log.debug("JWT id: {}, issuer: {}, audience: {}.", jwtId, issuer, jwtAudience);
     }
     catch (Exception e) {
       log.error("JWT bad claims: {}.'", e.getMessage());
       return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
     }
-    
+
     // verify issuer (this server's public host name)
     if(not(issuer.equals(serverIssuer))) {
       log.error("JWT {} bad issuer: {} (expected: {}).", jwtId, issuer, serverIssuer);
       return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
     }
-    
+
     // verify audience (client origin)
     if(not(httpreq.verifyClientOrigin(jwtAudience))) {
       log.error(
-        "JWT {} client origin mis-match (JwtAudience: {} (current request: {}).", 
+        "JWT {} client origin mis-match (JwtAudience: {} (current request: {}).",
         jwtId, jwtAudience, httpreq.getClientOrigin()
       );
       return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
     }
     log.info("JWT audience {} verified against http request client origin {}.", jwtAudience, httpreq.getClientOrigin());
-    
+
     // expired? (check for exp. time in the past)
     if(Instant.now().isAfter(expires)) {
       log.info("JWT {} expired.", jwtId);
       return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
     }
-    
+
     // Backend verification:
     // 1) the jwt id is *known* and *not blacklisted*
     // 2) the associated user has a valid status
 
     // NOTE: if no backend status provider is provided, we default to NOT_PRESENT backend status!
-    //       This is a questionable provision for the case when we wish to opt-out of backend 
+    //       This is a questionable provision for the case when we wish to opt-out of backend
     //       jwt status checking.
-    
-    final FetchResult<JwtBackendStatus> fr = isNull(jbsp) ? 
-      new FetchResult<>(JwtBackendStatus.NOT_PRESENT, null) : 
-      jbsp.getBackendJwtStatus(jwtId);
+
+    final FetchResult<JwtBackendStatus> fr = isNull(backendHandler) ?
+      new FetchResult<>(JwtBackendStatus.NOT_PRESENT, null) :
+      backendHandler.getBackendJwtStatus(jwtId);
     if(isNull(fr) || isNull(fr.get())) {
-      log.error("JWT {} fetch backend status error: {}.", 
-        jwtId, 
+      log.error("JWT {} fetch backend status error: {}.",
+        jwtId,
         isNull(fr) ? "UNKNOWN" : fr.getErrorMsg()
       );
       return JWTHttpRequestStatus.create(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
@@ -291,7 +298,7 @@ public class JWT {
     final JwtBackendStatus jwtBackendStatus = fr.get();
     final JWTStatus jwtRequestStatus;
 
-    // map backend jwt status -> jwt http request status 
+    // map backend jwt status -> jwt http request status
     switch(jwtBackendStatus) {
     case NOT_PRESENT:
       // jwt id not found in db - treat as blocked then

@@ -4,7 +4,6 @@ import static com.tll.TestUtil.cpr;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.jwt;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
-import static com.tll.mcorpus.MCorpusTestUtil.testJwtBackendHandler;
 import static com.tll.mcorpus.MCorpusTestUtil.testJwtResponseProvider;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static org.junit.Assert.assertTrue;
@@ -82,9 +81,11 @@ public class MCorpusGraphQLTest {
   static RequestSnapshot testRequestSnapshot() {
     return new RequestSnapshot(
         Instant.now(),
-        "127.0.0.1",
-        "localhost",
+        "127.0.0.1:500",
         "path",
+        "POST",
+        true,
+        "host",
         "origin",
         "https://mcorpus.d2d",
         "forwarded",
@@ -117,7 +118,6 @@ public class MCorpusGraphQLTest {
       MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot),
       jwtRequestStatus,
       jwt(),
-      testJwtBackendHandler(),
       testJwtResponseProvider(),
       "mclogin"
     );

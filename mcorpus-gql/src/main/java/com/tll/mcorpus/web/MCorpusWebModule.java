@@ -52,21 +52,17 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Provides
   @Singleton
-  IJwtBackendHandler jwtBackendHandler(MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
+  JWT jwt(MCorpusUserRepo mcuserRepo, ServerConfig serverConfig, MCorpusServerConfig config) {
     // the mcorpus server config determines whether we use a caching jwt handler or not
-    return config.jwtStatusCacheTimeoutInMinutes <= 0 ?
+    final IJwtBackendHandler backendHandler = config.jwtStatusCacheTimeoutInMinutes <= 0 ?
       new MCorpusJwtBackendHandler(mcuserRepo) :
       new CachingJwtBackendHandler(
         new MCorpusJwtBackendHandler(mcuserRepo),
         config.jwtStatusCacheTimeoutInMinutes,
-        config.jwtStatusCacheMaxSize)
-    ;
-  }
-
-  @Provides
-  @Singleton
-  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config) {
+        config.jwtStatusCacheMaxSize
+      );
     return new JWT(
+      backendHandler,
       Duration.ofSeconds(config.jwtTtlInSeconds),
       JWT.deserialize(config.jwtSalt),
       serverConfig.getPublicAddress().toString()

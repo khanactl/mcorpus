@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.reflect.TypeToken;
-import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.JWTUserGraphQLWebContext;
@@ -70,7 +69,6 @@ public class GraphQLHandler implements Handler {
         MCorpusJwtRequestProvider.fromRequestSnapshot(rsnap),
         jwtRequestStatus,
         ctx.get(JWT.class),
-        ctx.get(IJwtBackendHandler.class),
         MCorpusJwtHttpResponseAction.fromRatpackContext(ctx),
         "mclogin"
       );

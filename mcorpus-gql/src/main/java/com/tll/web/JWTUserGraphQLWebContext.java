@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.IJwtUser;
@@ -23,9 +22,9 @@ import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.repo.FetchResult;
 
 /**
- * JWT specific extension of {@link GraphQLWebContext} to facilitate 
+ * JWT specific extension of {@link GraphQLWebContext} to facilitate
  * JWT user login, logout and status methods.
- * 
+ *
  * @author jpk
  */
 public class JWTUserGraphQLWebContext extends GraphQLWebContext {
@@ -60,7 +59,6 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
   private final JWTHttpRequestStatus jwtStatus;
   private final JWT jwtbiz;
-  private final IJwtBackendHandler jwtBackend;
   private final IJwtHttpRequestProvider jwtRequest;
   private final IJwtHttpResponseAction jwtResponse;
   private final String jwtUserLoginQueryMethodName;
@@ -78,32 +76,29 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @param jwtUserLoginQueryMethodName the GraphQL schema method name purposed for JWT user logins
    */
   public JWTUserGraphQLWebContext(
-    String query, 
-    Map<String, Object> vmap, 
-    IJwtHttpRequestProvider jwtRequest, 
-    JWTHttpRequestStatus jwtStatus, 
-    JWT jwtbiz, 
-    IJwtBackendHandler jwtBackend, 
-    IJwtHttpResponseAction jwtResponse, 
+    String query,
+    Map<String, Object> vmap,
+    IJwtHttpRequestProvider jwtRequest,
+    JWTHttpRequestStatus jwtStatus,
+    JWT jwtbiz,
+    IJwtHttpResponseAction jwtResponse,
     String jwtUserLoginQueryMethodName
   ) {
     super(query, vmap);
     this.jwtStatus = jwtStatus;
     this.jwtbiz = jwtbiz;
-    this.jwtBackend = jwtBackend;
     this.jwtRequest = jwtRequest;
     this.jwtResponse = jwtResponse;
     this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
   }
-  
+
   @Override
-  public boolean isValid() { 
-    return super.isValid() && 
-      isNotNull(jwtStatus) && 
-      isNotNull(jwtbiz) && 
-      isNotNull(jwtBackend) && 
-      isNotNull(jwtRequest) && 
-      isNotNull(jwtResponse) && 
+  public boolean isValid() {
+    return super.isValid() &&
+      isNotNull(jwtStatus) &&
+      isNotNull(jwtbiz) &&
+      isNotNull(jwtRequest) &&
+      isNotNull(jwtResponse) &&
       isNotNullOrEmpty(jwtUserLoginQueryMethodName)
     ;
   }
@@ -112,7 +107,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @return the JWT request provider instance of the sourcing http request.
    */
   public IJwtHttpRequestProvider getJwtRequestProvider() { return jwtRequest; }
-  
+
   /**
    * @return the JWT status instance of the sourcing http request.
    */
@@ -129,7 +124,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @return true when this GraphQL query is either a JWT user login mutation query
    *         or an introspection query, false otherwise.
    */
-  public boolean isJwtUserLoginOrIntrospectionQuery() { 
+  public boolean isJwtUserLoginOrIntrospectionQuery() {
     return isJwtUserLoginQuery() || isIntrospectionQuery();
   }
 
@@ -137,7 +132,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * Get the JWT user login status.
    * <p>
    * Blocking - Db call is issued.
-   * 
+   *
    * @return Newly created {@link IJwtUserStatus} when the http client presents a valid and
    *         non-expired JWT -OR-<br>
    *         null when no JWT is present or is not valid.
@@ -147,20 +142,20 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final UUID jwtId = jwtRequestStatus.jwtId();
     if(jwtRequestStatus.status().isValid()) {
       final UUID jwtUserId = jwtRequestStatus.userId();
-      FetchResult<Integer> fr = jwtBackend.getNumActiveJwtLogins(jwtUserId);
+      FetchResult<Integer> fr = jwtbiz.getBackendHandler().getNumActiveJwtLogins(jwtUserId);
       if(fr.isSuccess()) {
         // success
         final JWTUserStatus jus = new JWTUserStatus(
-          jwtUserId, 
-          Date.from(jwtRequestStatus.issued()), 
-          Date.from(jwtRequestStatus.expires()), 
+          jwtUserId,
+          Date.from(jwtRequestStatus.issued()),
+          Date.from(jwtRequestStatus.expires()),
           fr.get().intValue()
         );
         return jus;
       } else {
         final String emsg = fr.getErrorMsg();
         log.error(
-          "Invalid JWT user login status fetch result (emsg: {}) for JWT {}.", 
+          "Invalid JWT user login status fetch result (emsg: {}) for JWT {}.",
           emsg, jwtId
         );
       }
@@ -176,13 +171,13 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * Log a JWT user in and issue a JWT back to client when the login op is successful.
    * <p>
    * Blocking - Db call is issued.
-   * 
+   *
    * @param username the posted JWT user username
    * @param pswd the posted JWT user password
    * @return true when the JWT user was successfully logged in, false otherwise
    */
   public boolean jwtUserLogin(final String username, final String pswd) {
-    
+
     // verify the JWT status is either not present or expired
     if(not(jwtStatus.isJWTStatusExpiredOrNotPresent())) {
       return false;
@@ -192,7 +187,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     if(isBlank(username) || isBlank(pswd)) {
       return false;
     }
-    
+
     final UUID pendingJwtID = UUID.randomUUID();
     final String clientOriginToken = jwtRequest.getClientOrigin();
     final Instant requestInstant = jwtRequest.getRequestInstant();
@@ -200,12 +195,12 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
     // call db login
     log.debug("Authenticating JWT user '{}'..", username);
-    final FetchResult<IJwtUser> loginResult = jwtBackend.jwtBackendLogin(
-      username, 
-      pswd, 
-      pendingJwtID, 
-      clientOriginToken, 
-      requestInstant, 
+    final FetchResult<IJwtUser> loginResult = jwtbiz.getBackendHandler().jwtBackendLogin(
+      username,
+      pswd,
+      pendingJwtID,
+      clientOriginToken,
+      requestInstant,
       loginExpiration
     );
     if(not(loginResult.isSuccess())) {
@@ -214,7 +209,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     }
     log.info("JWT user '{}' authenticated.", username);
     // at this point, we're authenticated
-    
+
     log.debug("Generating JWT for user '{}'..", username);
     final IJwtUser jwtUser = loginResult.get();
     try {
@@ -222,23 +217,23 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       // the user is now expected to provide this JWT for subsequent GraphQL api requests
       final String jwt = jwtbiz.jwtGenerate(
           pendingJwtID,
-          jwtUser.getJwtUserId(), 
-          isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" : 
+          jwtUser.getJwtUserId(),
+          isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
             Arrays.stream(jwtUser.getJwtUserRoles())
             .collect(Collectors.joining(",")),
             jwtRequest
       );
-      
+
       // jwt cookie
       jwtResponse.setJwtClientside(jwt, jwtbiz.jwtTimeToLive());
-      
+
       log.info("JWT user '{}' logged in.  JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
       return true;
     }
     catch(Exception e) {
       log.error("JWT user '{}' login error: '{}'.", jwtUser.getJwtUserId(), e.getMessage());
     }
-    
+
     // default
     return false;
   }
@@ -247,15 +242,15 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * Log a JWT user out.
    * <p>
    * Blocking - Db call is issued.
-   * 
+   *
    * @return true when the user bound to the presenting JWT in incoming request
    *         is successfully logged out, false otherwise.
    */
   public boolean jwtUserLogout() {
-    final FetchResult<Boolean> fetchResult = jwtBackend.jwtBackendLogout(
-      jwtStatus.userId(), 
-      jwtStatus.jwtId(), 
-      jwtRequest.getClientOrigin(), 
+    final FetchResult<Boolean> fetchResult = jwtbiz.getBackendHandler().jwtBackendLogout(
+      jwtStatus.userId(),
+      jwtStatus.jwtId(),
+      jwtRequest.getClientOrigin(),
       jwtRequest.getRequestInstant()
     );
     if(fetchResult.isSuccess()) {
@@ -273,16 +268,16 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   /**
    * Invalidate all active JWTs for the given jwt user.
    * <p>
-   * If the jwt user is the same as the one currently logged in, 
+   * If the jwt user is the same as the one currently logged in,
    * they will be logged out immediately.
-   * 
+   *
    * @param jwtUserId the id of the target jwt user
    * @return true if the operation was successful
    */
   public boolean jwtInvalidateAllForUser(final UUID jwtUserId) {
-    final FetchResult<Boolean> fr = jwtBackend.jwtInvalidateAllForUser(
-      jwtUserId, 
-      jwtRequest.getClientOrigin(), 
+    final FetchResult<Boolean> fr = jwtbiz.getBackendHandler().jwtInvalidateAllForUser(
+      jwtUserId,
+      jwtRequest.getClientOrigin(),
       jwtRequest.getRequestInstant()
     );
     if(fr.isSuccess()) {
