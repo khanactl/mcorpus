@@ -8,9 +8,10 @@ if [ -d "testoutput" ]; then
   mkdir -p $sdir
   mv testoutput $sdir
   mv *.log $sdir
-elif ls *.log > /dev/null 2>&1; then 
+elif ls *.log > /dev/null 2>&1; then
   rm *.log
 fi
 
 # run the jmeter script
-jmeter -n -t MCorpusLoadTest-localdev.jmx -e -o testoutput -l mcorpus-jmeter.log
+# TODO change 'loadtest-template' to instance specific (make sure not under source control!)
+jmeter -n -t loadtest-template.jmx -e -o testoutput -l loadtest-template.log

@@ -1,5 +1,10 @@
-testoutput
-MCorpusLoadTest.jmx
-MCorpusLoadTest-local*.jmx
-MCorpusLoadTest-aws*.jmx
+testoutput*
 
+*local*.jmx
+*aws*.jmx
+
+*local*.sh
+*aws*.sh
+
+*local*.bat
+*aws*.bat
