@@ -9,8 +9,6 @@ import ratpack.handling.Handler;
  */
 public class CommonHttpHeaders implements Handler {
 
-  public static final CommonHttpHeaders inst = new CommonHttpHeaders();
-
   @Override
   public void handle(Context ctx) throws Exception {
     ctx.getResponse().getHeaders()
@@ -22,6 +20,4 @@ public class CommonHttpHeaders implements Handler {
       ;
     ctx.next();
   }
-
-  private CommonHttpHeaders() {}
 }

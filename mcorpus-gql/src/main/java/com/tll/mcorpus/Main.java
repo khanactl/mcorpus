@@ -78,7 +78,7 @@ public class Main {
       .handlers(chain -> chain
         .all(RequestLogger.ncsa(glog)) // log all incoming requests
 
-        .all(CommonHttpHeaders.inst) // always add common http response headers for good security
+        .all(CommonHttpHeaders.class) // always add common http response headers for good security
 
         .all(CsrfGuardHandler.class) // CSRF protection
 
