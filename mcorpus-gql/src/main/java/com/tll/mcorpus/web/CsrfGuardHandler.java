@@ -137,7 +137,7 @@ public class CsrfGuardHandler implements Handler {
       setRstCookie(ctx, nextRst, "/", rstTtlInSeconds);
       ctx.getResponse().getHeaders().add(RST_TOKEN_NAME, nextRst);
       ctx.getRequest().add(RST_TYPE, new RST(nextRst)); // make next rst available downstream
-      log.info("Request sync token {} added to http response.", nextRst);
+      log.info("Request sync token added to http response.");
     }
 
     ctx.next();

@@ -239,7 +239,7 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-      "\nHttp-Request[%s] /%s\n" +
+      "\n\nHttp-Request[%s] /%s\n" +
         "\tremoteAddrHost: %s\n" +
         "\tmethod: %s\n" +
         "\thost: %s\n" +
