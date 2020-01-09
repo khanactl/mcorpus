@@ -45,7 +45,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
       ctx.getResponse().send("Bad Client");
       break;
     }
-    log.error("Client error {} response sent for request: {} - {}.",
+    log.error("Client error {} response sent for request: {} - {}",
       statusCode,
       ctx.getRequest().getPath(),
       RequestUtil.getOrCreateRequestSnapshot(ctx)
@@ -63,7 +63,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
     ctx.getResponse().send("Server error (500)");
     final String emsg = isNull(error) ? "UNKNOWN" :
       (isNullOrEmpty(error.getMessage()) ? "UNKNOWN" : error.getMessage());
-    log.error("Server error '{}' for request: {} - {}.",
+    log.error("Server error '{}' for request: {} - {}",
         emsg,
         ctx.getRequest().getPath(),
         RequestUtil.getOrCreateRequestSnapshot(ctx)

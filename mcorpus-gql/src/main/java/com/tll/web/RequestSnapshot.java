@@ -30,7 +30,6 @@ public class RequestSnapshot {
 
   private final String path;
   private final String method;
-  private final boolean ajaxRequest;
 
   private final String httpHost;
   private final String httpOrigin;
@@ -57,7 +56,6 @@ public class RequestSnapshot {
    *                          ip address of said proxy server
    * @param path the request URI w/o query string and leading forward slash
    * @param method the http method (GET, POST,..)
-   * @param ajaxRequest is this an Ajax/Xhr request?
    * @param httpHost the http Host header value
    * @param httpOrigin the http Origin header value
    * @param httpReferer the http Referer header value
@@ -75,7 +73,6 @@ public class RequestSnapshot {
       String remoteAddressHost,
       String path,
       String method,
-      boolean ajaxRequest,
       String httpHost,
       String httpOrigin,
       String httpReferer,
@@ -93,7 +90,6 @@ public class RequestSnapshot {
     this.remoteAddressHost = nullif(remoteAddressHost);
     this.path = nullif(path);
     this.method = nullif(method);
-    this.ajaxRequest = ajaxRequest;
 
     this.httpHost = nullif(httpHost);
     this.httpOrigin = nullif(httpOrigin);
@@ -119,7 +115,7 @@ public class RequestSnapshot {
   }
 
   /**
-   * @return the http tcp datagram remote IP address.
+   * @return the address of the client that initiated the request.
    */
   public String getRemoteAddressHost() {
     return remoteAddressHost;
@@ -137,13 +133,6 @@ public class RequestSnapshot {
    */
   public String getMethod() {
     return method;
-  }
-
-  /**
-   * @return is this an Ajax/Xhr request?
-   */
-  public boolean isAjaxRequest() {
-    return ajaxRequest;
   }
 
   /**
@@ -250,8 +239,9 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-      "\nHttp-Request[%s] %s\n" +
+      "\nHttp-Request[%s] /%s\n" +
         "\tremoteAddrHost: %s\n" +
+        "\tmethod: %s\n" +
         "\thost: %s\n" +
         "\torigin: %s\n" +
         "\treferer: %s\n" +
@@ -259,14 +249,14 @@ public class RequestSnapshot {
         "\tx-forwarded-for: %s\n" +
         "\tx-forwarded-host: %s\n" +
         "\tx-forwarded-proto: %s\n" +
-        "\trstCookie: %s\n"+
-        "\trstHeader: %s\n" +
+        "\thasRstCookie: %b\n"+
+        "\thasRstHeader: %b\n" +
         "\thasJwtCookie: %b\n",
       getShortRequestId(), getPath(),
-      getRemoteAddressHost(),
+      getRemoteAddressHost(), getMethod(),
       getHttpHost(), getHttpOrigin(), getHttpReferer(), getHttpForwarded(),
       getXForwardedFor(), getXForwardedHost(), getXForwardedProto(),
-      getRstCookie(), getRstHeader(),
+      hasRstCookie(), hasRstHeader(),
       hasJwtCookie()
     );
   }

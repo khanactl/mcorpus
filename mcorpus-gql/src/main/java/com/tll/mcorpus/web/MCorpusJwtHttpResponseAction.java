@@ -1,5 +1,9 @@
 package com.tll.mcorpus.web;
 
+import static com.tll.mcorpus.web.RequestUtil.expireJwtCookie;
+import static com.tll.mcorpus.web.RequestUtil.expireRstCookie;
+import static com.tll.mcorpus.web.RequestUtil.setJwtCookie;
+
 import java.time.Duration;
 
 import com.tll.jwt.IJwtHttpResponseAction;
@@ -30,13 +34,13 @@ public class MCorpusJwtHttpResponseAction implements IJwtHttpResponseAction {
 
   @Override
   public void expireJwtClientside() {
-    com.tll.mcorpus.web.RequestUtil.expireJwtCookie(ctx, "/");
-    com.tll.mcorpus.web.RequestUtil.expireRstCookie(ctx, "/");
+    expireJwtCookie(ctx, "/");
+    expireRstCookie(ctx, "/");
   }
 
   @Override
   public void setJwtClientside(String jwt, Duration jwtTimeToLive) {
-    com.tll.mcorpus.web.RequestUtil.setJwtCookie(ctx, jwt, jwtTimeToLive.getSeconds(), "/");
+    setJwtCookie(ctx, jwt, "/", jwtTimeToLive.getSeconds());
   }
 
 }

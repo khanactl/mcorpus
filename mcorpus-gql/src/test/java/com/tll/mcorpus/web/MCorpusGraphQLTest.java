@@ -81,10 +81,9 @@ public class MCorpusGraphQLTest {
   static RequestSnapshot testRequestSnapshot() {
     return new RequestSnapshot(
         Instant.now(),
-        "127.0.0.1:500",
+        "127.0.0.1",
         "path",
         "POST",
-        true,
         "host",
         "origin",
         "https://mcorpus.d2d",

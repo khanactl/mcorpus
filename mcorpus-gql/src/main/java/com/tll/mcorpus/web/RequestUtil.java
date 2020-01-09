@@ -7,7 +7,6 @@ import java.util.UUID;
 import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.web.RequestSnapshot;
 
-import io.netty.handler.codec.http.cookie.Cookie;
 import ratpack.handling.Context;
 import ratpack.handling.RequestId;
 import ratpack.http.Request;
@@ -21,8 +20,7 @@ import ratpack.registry.NotInRegistryException;
 public class RequestUtil {
 
   /**
-   * Get the configured server domain name (aka public address) underwhich the
-   * system is running.
+   * Get the configured server domain name under which the app is running.
    *
    * @param ctx the request context
    * @return the configured server domain name
@@ -59,18 +57,12 @@ public class RequestUtil {
    *
    * @param ctx the request context object
    * @param rst the rst value to use in the response cookie
-   * @param maxAge the cookie max age in seconds
    * @param path the path to use in the set cookie
+   * @param maxAge the cookie max age in seconds
    */
-  public static void setRstCookie(final Context ctx, final String rst, final long maxAge, final String path) {
-    final boolean secure = ctx.get(MCorpusServerConfig.class).cookieSecure;
-    final Cookie rstCookieRef = ctx.getResponse().cookie("rst", rst);
-    rstCookieRef.setSecure(secure);
-    rstCookieRef.setHttpOnly(true);
-    rstCookieRef.setDomain(getServerDomainName(ctx));
-    rstCookieRef.setPath(path);
-    rstCookieRef.setMaxAge(maxAge);
-    glog().debug("RST cookie set (maxAge: {}, path: {}).", maxAge, path);
+  public static void setRstCookie(final Context ctx, final String rst, final String path, final long maxAge) {
+    setCookie(ctx, "rst", rst, path, maxAge);
+    glog().debug("RST cookie set (path: {}, maxAge: {}).", path, maxAge);
   }
 
   /**
@@ -79,35 +71,41 @@ public class RequestUtil {
    *
    * @param ctx the request context object
    * @param jwt the JWT cookie value
-   * @param maxAge the cookie max age in seconds
    * @param path the path to use in the set cookie
+   * @param maxAge the cookie max age in seconds
    */
-  public static void setJwtCookie(final Context ctx, final String jwt, final long maxAge, final String path) {
-    final String cookieServerName = getServerDomainName(ctx);
-    final boolean secure = ctx.get(MCorpusServerConfig.class).cookieSecure;
-    final Cookie jwtCookieRef = ctx.getResponse().cookie("jwt", jwt);
-    jwtCookieRef.setDomain(cookieServerName);
-    jwtCookieRef.setMaxAge(maxAge);
-    jwtCookieRef.setHttpOnly(true); // HTTP ONLY please!
-    jwtCookieRef.setSecure(secure);
-    jwtCookieRef.setPath(path);
-    glog().debug("JWT cookie set (maxAge: {}, path: {}).", maxAge, path);
+  public static void setJwtCookie(final Context ctx, final String jwt, final String path, final long maxAge) {
+    setCookie(ctx, "jwt", jwt, path, maxAge);
+    glog().debug("JWT cookie set (path: {}, maxAge: {}).", path, maxAge);
   }
 
   public static void expireRstCookie(final Context ctx, final String path) {
-    final String cookieServerName = getServerDomainName(ctx);
-    final Cookie cookie = ctx.getResponse().expireCookie("rst");
-    cookie.setPath(path);
-    cookie.setDomain(cookieServerName);
+    setCookie(ctx, "rst", "", path, 0);
     glog().debug("RST cookie expired at path {}.", path);
   }
 
   public static void expireJwtCookie(final Context ctx, final String path) {
-    final String cookieServerName = getServerDomainName(ctx);
-    final Cookie cookie = ctx.getResponse().expireCookie("jwt");
-    cookie.setPath(path);
-    cookie.setDomain(cookieServerName);
+    setCookie(ctx, "jwt", "", path, 0);
     glog().debug("JWT cookie expired at path {}.", path);
+  }
+
+  private static void setCookie(
+    final Context ctx,
+    final String cookieName,
+    final String cookieValue,
+    final String path,
+    final long maxAge) {
+      ctx.getResponse().getHeaders().add(
+        "Set-Cookie",
+        String.format("%s=%s; Domain=%s; Path=%s; Max-Age=%d; %sHttpOnly; SameSite=Strict;",
+          cookieName,
+          cookieValue,
+          getServerDomainName(ctx),
+          path,
+          maxAge,
+          ctx.get(MCorpusServerConfig.class).cookieSecure ? "Secure; " : ""
+        )
+      );
   }
 
   /**
@@ -119,10 +117,9 @@ public class RequestUtil {
   private static RequestSnapshot takeRequestSnapshot(final Request req) {
     return new RequestSnapshot(
         req.getTimestamp(),
-        req.getRemoteAddress().toString(),
+        req.getRemoteAddress().getHost(),
         req.getPath(),
         req.getMethod().getName(),
-        req.isAjaxRequest(),
         req.getHeaders().get("Host"),
         req.getHeaders().get("Origin"),
         req.getHeaders().get("Referer"),
