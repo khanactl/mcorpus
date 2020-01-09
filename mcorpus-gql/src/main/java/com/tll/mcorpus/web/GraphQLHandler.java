@@ -1,11 +1,13 @@
 package com.tll.mcorpus.web;
 
-import static com.tll.core.Util.not;
 import static com.tll.core.Util.isBlank;
+import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import static ratpack.jackson.Jackson.fromJson;
 import static ratpack.jackson.Jackson.json;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -128,21 +130,21 @@ public class GraphQLHandler implements Handler {
             if(err.getErrorType() == ErrorType.ValidationError) {
               return GraphqlErrorBuilder.newError()
                 .errorType(err.getErrorType())
-                .locations(err.getLocations())
+                .locations(isNull(err.getLocations()) ? Collections.emptyList() : err.getLocations())
                 .message("Query validation error.  Check field name spelling, type-mismatching or missing fields.")
                 .build();
             }
             else if(err.getErrorType() == ErrorType.InvalidSyntax) {
               return GraphqlErrorBuilder.newError()
                 .errorType(err.getErrorType())
-                .locations(err.getLocations())
+                .locations(isNull(err.getLocations()) ? Collections.emptyList() : err.getLocations())
                 .message("Invalid query syntax.")
                 .build();
             }
             // default (sanitize!)
             return GraphqlErrorBuilder.newError()
               .errorType(err.getErrorType())
-              .locations(err.getLocations())
+              .locations(isNull(err.getLocations()) ? Collections.emptyList() : err.getLocations())
               .message(isBlank(err.getMessage()) ? "An unspecified error happened." : err.getMessage())
               .build();
           }).collect(Collectors.toList())));
