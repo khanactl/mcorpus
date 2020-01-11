@@ -85,6 +85,7 @@ public class CsrfGuardHandler implements Handler {
    */
   public CsrfGuardHandler(long rstTtlInSeconds) {
     this.rstTtlInSeconds = rstTtlInSeconds;
+    log.info("Request sync token configured with Time-to-live: {} seconds.", rstTtlInSeconds);
   }
 
   @Override
