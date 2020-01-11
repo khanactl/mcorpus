@@ -8,17 +8,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>mcorpus GraphiQL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link href="/favicon.ico" rel="shortcut icon" />
   <style>
-      body {
-        height: 100%;
-        margin: 0;
-        width: 100%;
-        overflow: hidden;
-      }
-      #graphiql {
-        height: 100vh;
-      }
-    </style>
+    body {
+      height: 100%;
+      margin: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+    #graphiql {
+      height: 100vh;
+    }
+  </style>
 
   <!--
     This GraphiQL example depends on Promise and fetch, which are available in
@@ -105,11 +108,11 @@
       body: JSON.stringify(graphQLParams),
       credentials: 'include',
     }).then(function (response) {
-    	  // grab the updated RST token
-    	  try {
-    		  rst = response.headers.get('rst');
-    	  } catch (error) { }
-    	  ///
+      // grab the updated RST token
+      try {
+        rst = response.headers.get('rst');
+      } catch (error) { }
+      ///
       return response.text();
     }).then(function (responseBody) {
       try {

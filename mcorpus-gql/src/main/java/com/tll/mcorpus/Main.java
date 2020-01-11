@@ -107,14 +107,14 @@ public class Main {
           .all(JWTStatusHandler.class)
           .all(JWTRequireAdminHandler.class)
           .get("metrics-report", new MetricsWebsocketBroadcastHandler())
-          .get("metrics", ctx -> ctx.render(htmlNoCache(ctx.file("public/metrics.html"))))
-          .files(f -> f.dir("public"))
+          .get("metrics", ctx -> ctx.render(htmlNoCache(ctx.file("public/admin/metrics/metrics.html"))))
+          .files(f -> f.dir("public/admin"))
         )
 
         // mcorpus graphql api html landing page
         .get("index", ctx -> ctx.render(ctx.file("public/index.html")))
 
-        .get("favicon.ico", ctx -> ctx.render(ctx.file("public/img/favicon.ico")))
+        .get("favicon.ico", ctx -> ctx.render(ctx.file("public/favicon.ico")))
       )
     );
   }
