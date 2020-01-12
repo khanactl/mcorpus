@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
@@ -92,18 +93,18 @@ public class JWT {
   /**
    * Constructor.
    *
-   * @param backendHandler the jwt backend handler
+   * @param backendHandler the jwt backend handler.  Required.
    * @param jwtTimeToLive the amount of time a JWT shall live clientside
    * @param jwtSharedSecret the cryptographically strong secret to be used for
-   *                        signing and verifying JWTs
-   * @param serverIssuer the expected JWT issuer used to verify received JWTs
+   *                        signing and verifying JWTs.  Required.
+   * @param serverIssuer the expected JWT issuer used to verify received JWTs.  Required.
    */
   public JWT(IJwtBackendHandler backendHandler, Duration jwtTimeToLive, byte[] jwtSharedSecret, String serverIssuer) {
     super();
-    this.backendHandler = backendHandler;
+    this.backendHandler = Objects.requireNonNull(backendHandler);
     this.jwtTimeToLive = jwtTimeToLive;
-    this.jkey = new SecretKeySpec(jwtSharedSecret, 0, jwtSharedSecret.length, "AES");
-    this.serverIssuer = serverIssuer;
+    this.jkey = new SecretKeySpec(Objects.requireNonNull(jwtSharedSecret), 0, jwtSharedSecret.length, "AES");
+    this.serverIssuer = Objects.requireNonNull(serverIssuer);
     log.info("JWT configured with Time-to-live: {} hours, Issuer: {}.", jwtTimeToLive.toHours(), serverIssuer);
   }
 
@@ -277,17 +278,10 @@ public class JWT {
       return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
     }
 
-    // Backend verification:
+    // [Default] Backend verification behavior:
     // 1) the jwt id is *known* and *not blacklisted*
     // 2) the associated user has a valid status
-
-    // NOTE: if no backend status provider is provided, we default to NOT_PRESENT backend status!
-    //       This is a questionable provision for the case when we wish to opt-out of backend
-    //       jwt status checking.
-
-    final FetchResult<JwtBackendStatus> fr = isNull(backendHandler) ?
-      new FetchResult<>(JwtBackendStatus.NOT_PRESENT, null) :
-      backendHandler.getBackendJwtStatus(jwtId);
+    final FetchResult<JwtBackendStatus> fr = backendHandler.getBackendJwtStatus(jwtId);
     if(isNull(fr) || isNull(fr.get())) {
       log.error("JWT {} fetch backend status error: {}.",
         jwtId,
