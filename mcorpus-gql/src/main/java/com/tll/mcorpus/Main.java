@@ -113,6 +113,8 @@ public class Main {
           .all(ctx -> {
             if(not(ctx.getServerConfig().get(MCorpusServerConfig.class).metricsOn)) {
               ctx.render("metrics is off.");
+            } else {
+              ctx.next();
             }
           })
           .get("metrics-report", new MetricsWebsocketBroadcastHandler())
