@@ -1,5 +1,6 @@
 package com.tll.mcorpus;
 
+import static com.tll.core.Util.not;
 import static com.tll.mcorpus.web.WebFileRenderer.TRefAndData.htmlNoCache;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
@@ -59,22 +60,25 @@ public class Main {
         .require("", MCorpusServerConfig.class)
         .require("/metrics", DropwizardMetricsConfig.class)
       )
-      .registry(Guice.registry(bindings -> bindings
-        .module(DropwizardMetricsModule.class)
-        .module(HikariModule.class, hikariConfig -> {
-          final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
+      .registry(Guice.registry(bindings -> {
+        final MCorpusServerConfig config = bindings.getServerConfig().get(MCorpusServerConfig.class);
+        if(config.metricsOn) {
+          bindings.module(DropwizardMetricsModule.class);
+        }
+        glog().info("metrics is {}", config.metricsOn ? "ON" : "OFF");
+        bindings.module(HikariModule.class, hikariConfig -> {
           hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
           hikariConfig.addDataSourceProperty("URL", config.dbUrl);
-        })
-        .module(MCorpusRepoModule.class)
-        .module(MCorpusWebModule.class)
+        });
+        bindings.module(MCorpusRepoModule.class);
+        bindings.module(MCorpusWebModule.class);
         // slf4j MDC Ratpack style
-        .add(MDCInterceptor.withInit(e ->
+        bindings.add(MDCInterceptor.withInit(e ->
           e.maybeGet(RequestId.class).ifPresent(rid ->
             MDC.put("requestId", uuidToToken(uuidFromToken(rid.toString())))
           )
-        ))
-      ))
+        ));
+      }))
       .handlers(chain -> chain
         .all(RequestLogger.ncsa(glog)) // log all incoming requests
 
@@ -106,6 +110,11 @@ public class Main {
         .prefix("admin", chainsub -> chainsub
           .all(JWTStatusHandler.class)
           .all(JWTRequireAdminHandler.class)
+          .all(ctx -> {
+            if(not(ctx.getServerConfig().get(MCorpusServerConfig.class).metricsOn)) {
+              ctx.render("metrics is off.");
+            }
+          })
           .get("metrics-report", new MetricsWebsocketBroadcastHandler())
           .get("metrics", ctx -> ctx.render(htmlNoCache(ctx.file("public/admin/metrics/metrics.html"))))
           .files(f -> f.dir("public/admin"))

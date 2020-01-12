@@ -63,4 +63,11 @@ public class MCorpusServerConfig {
    * The default is <code>true</code>.
    */
   public boolean cookieSecure = true;
+
+  /**
+   * Capture app metrics?
+   * <p>
+   * The default is <code>true</code>.
+   */
+  public boolean metricsOn = true;
 }
