@@ -10,7 +10,6 @@ import com.tll.web.RequestSnapshot;
 import ratpack.handling.Context;
 import ratpack.handling.RequestId;
 import ratpack.http.Request;
-import ratpack.registry.NotInRegistryException;
 
 /**
  * MCorpus-specific utility methods for processing incoming http requests.
@@ -40,15 +39,12 @@ public class RequestUtil {
    * @return Never-null {@link RequestSnapshot} instance.
    */
   public static RequestSnapshot getOrCreateRequestSnapshot(final Context ctx) {
-    try {
-      return ctx.getRequest().get(RequestSnapshot.class);
-    }
-    catch(NotInRegistryException e) {
+    return ctx.maybeGet(RequestSnapshot.class).orElseGet(() -> {
       final RequestSnapshot rs = takeRequestSnapshot(ctx.getRequest());
       ctx.getRequest().add(rs);
       glog().info("Request snapshot taken: {}", rs);
       return rs;
-    }
+    });
   }
 
   /**
