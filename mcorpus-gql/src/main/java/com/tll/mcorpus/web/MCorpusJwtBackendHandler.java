@@ -42,7 +42,7 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     }
   }
 
-  private Logger log = LoggerFactory.getLogger(MCorpusJwtBackendHandler.class);
+  private final Logger log = LoggerFactory.getLogger(MCorpusJwtBackendHandler.class);
 
   private final MCorpusUserRepo mcuserRepo;
 
