@@ -3,10 +3,10 @@
 <Configuration status="INFO">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} [%T] [%X{requestId}] %-5level %-20.-20c{1} %msg%n"/>
+      <PatternLayout pattern="%d{ISO8601} [%-4T] [%X{requestId}] %-5level %-20.-20c{1} %msg%n"/>
     </Console>
     <RandomAccessFile name="File" fileName="/tmp/mcorpus-gql-server.log">
-      <PatternLayout pattern="%d{ISO8601} [%T] [%X{requestId}] %-5level %-20.-20c{1} %msg%n"/>
+      <PatternLayout pattern="%d{ISO8601} [%-4T] [%X{requestId}] %-5level %-20.-20c{1} %msg%n"/>
     </RandomAccessFile>
   </Appenders>
   <Loggers>
