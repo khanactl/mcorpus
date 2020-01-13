@@ -1,10 +1,6 @@
-testoutput*
+*.log
+
+archive
 
 *local*.jmx
 *aws*.jmx
-
-*local*.sh
-*aws*.sh
-
-*local*.bat
-*aws*.bat
