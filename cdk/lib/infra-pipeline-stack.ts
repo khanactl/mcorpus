@@ -51,6 +51,11 @@ export class InfraPipelineStack extends BaseStack {
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: "0.2",
+        env: {
+          variables: {
+            "GIT_BRANCH_NAME": props.gitBranchName,
+          },
+        },
         phases: {
           install: {
             "runtime-versions": {
@@ -59,24 +64,28 @@ export class InfraPipelineStack extends BaseStack {
             },
             commands: [
               "pip install --upgrade awscli",
-              "npm install",
             ],
           },
           pre_build: {
             commands: [
               "mvn -DskipTests package",
+              "cd cdk",
+              "npm install",
             ],
           },
           build: {
             commands: [
+              // note: we're still in cdk subdir
               "npm run build",
               "npm run cdk synth -- -o dist",
             ],
           },
         },
         artifacts: {
-          "base-directory": "dist",
+          "base-directory": "cdk/dist",
           files: [
+            "**/*"
+            /*
             `${this.appName}-VPC-SHARED.template.json`,
             `${this.appName}-SecGrp-SHARED.template.json`,
             `${this.appName}-Db-SHARED.template.json`,
@@ -85,6 +94,7 @@ export class InfraPipelineStack extends BaseStack {
             `${this.appName}-ECS-${this.appEnv}.template.json`,
             `${this.appName}-WAF-${this.appEnv}.template.json`,
             `${this.appName}-CICD-${this.appEnv}.template.json`,
+            */
           ],
         },
       }),
@@ -118,6 +128,7 @@ export class InfraPipelineStack extends BaseStack {
     */
 
     const infraPipeline = new codepipeline.Pipeline(this, this.iname('InfraPipeline'), {
+      pipelineName: this.iname('InfraPipeline'),
       stages: [
         {
           stageName: `Source-${this.appEnv}`,
