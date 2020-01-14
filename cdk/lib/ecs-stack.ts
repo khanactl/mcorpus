@@ -172,6 +172,7 @@ export class ECSStack extends BaseStack {
         'JAVA_OPTS' : props.javaOpts,
         'MCORPUS_COOKIE_SECURE' : 'true',
         'MCORPUS_DB_DATA_SOURCE_CLASS_NAME' : 'org.postgresql.ds.PGSimpleDataSource',
+        'MCORPUS_RST_TTL_IN_SECONDS' : '1800',
         'MCORPUS_JWT_STATUS_CACHE_MAX_SIZE' : '60',
         'MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES' : '10',
         'MCORPUS_JWT_TTL_IN_SECONDS' : '172800',
