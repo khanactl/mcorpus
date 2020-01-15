@@ -20,6 +20,14 @@ import { ECSStack } from '../lib/ecs-stack';
 import { WafStack } from '../lib/waf-stack';
 import { CICDStack } from '../lib/cicd-stack';
 
+/**
+ * The expected name of the required cdk app config json file.
+ *
+ * This JSON object (assumed to adhere to an expected structure)
+ * provides the needed input to all instantiated cdk stacks herein.
+ */
+const appConfigFilename = "mcorpus-cdk-app-config.json";
+
 function resolveCurrentGitBranch(): string {
   // are we in codebuild env (there is no .git dir there)?
   let branch = process.env.GIT_BRANCH_NAME;  // rely on custom buildspec env var
@@ -40,7 +48,6 @@ function resolveAppEnv(gitBranchName: string): AppEnv {
 }
 
 async function loadConfig(): Promise<any> {
-  const appConfigFilename = 'mcorpus-cdk-app-config.json';
   let config: any;
     // first try local home dir
   try {
@@ -50,7 +57,7 @@ async function loadConfig(): Promise<any> {
     config = null;
   }
   if(config == null) {
-    // try to fetch from s3
+    // try to fetch from known s3
     try {
       const s3 = new aws.S3();
       config = await s3.getObject({
@@ -67,8 +74,27 @@ async function loadConfig(): Promise<any> {
 
 loadConfig().then(configObj => {
   //console.log('configObj: ' + configObj);
-  const config = JSON.parse(configObj.Body.toString());
+  let config: any;
+  try {
+    // s3 case
+    const configStr = configObj.Body.toString();
+    config = JSON.parse(configStr);
+    if(config) {
+      // cache in user home dir only if one not already present
+      if(!fs.existsSync(`${os.homedir()}/${appConfigFilename}`)) {
+        // cache config file locally
+        fs.writeFileSync(`${os.homedir()}/${appConfigFilename}`, configStr, {
+          encoding: "utf-8"
+        });
+        // console.log("local config file created");
+      }
+    }
+  } catch(e) {
+    // [assume] loaded from locally cached config file case
+    config = JSON.parse(configObj);
+  }
   //console.log('config: ' + config);
+  if(!config) throw new Error("Unresolved config.");
 
   const currentGitBranch = resolveCurrentGitBranch();
   const currentAppEnv = resolveAppEnv(currentGitBranch);
