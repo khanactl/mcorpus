@@ -134,7 +134,7 @@ export class ECSStack extends BaseStack {
     // ecr repo
     const dockerAssetInstNme = this.iname('docker-asset');
     const dockerAsset = new DockerImageAsset(this, dockerAssetInstNme, {
-      directory: path.join(__dirname, "../../mcorpus-gql/target"),
+      directory: path.join(__dirname, "../../mcorpus-gql/target/awsdockerasset"),
       repositoryName: 'mcorpus-gql',
     });
     this.ecrRepo = dockerAsset.repository;
