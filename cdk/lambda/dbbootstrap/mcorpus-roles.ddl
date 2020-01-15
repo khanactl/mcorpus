@@ -1,1 +1,1 @@
-../../../mcorpus-db/mcorpus-ddl/mcorpus-roles.ddl
+../../../mcorpus-db/gen/mcorpus-roles.ddl

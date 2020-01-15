@@ -1,1 +1,1 @@
-../../../mcorpus-db/mcorpus-ddl/mcorpus-schema.ddl
+../../../mcorpus-db/gen/mcorpus-schema.ddl
