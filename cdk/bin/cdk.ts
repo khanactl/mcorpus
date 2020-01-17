@@ -20,6 +20,12 @@ import { ECSStack } from '../lib/ecs-stack';
 import { WafStack } from '../lib/waf-stack';
 import { CICDStack } from '../lib/cicd-stack';
 
+const app = new cdk.App();
+
+const currentGitBranch = resolveCurrentGitBranch();
+const currentAppEnv = resolveAppEnv(currentGitBranch);
+// console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
+
 /**
  * The expected name of the required cdk app config json file.
  *
@@ -47,9 +53,101 @@ function resolveAppEnv(gitBranchName: string): AppEnv {
   }
 }
 
+function createAppInstance(
+  appEnv: AppEnv,
+  awsEnv: cdk.Environment,
+  appConfig: any,
+  vpcStack: VpcStack,
+  secGrpStack: SecGrpStack,
+  dbBootstrapStack: DbBootstrapStack
+): void {
+  var webAppContainerConfig;
+  var cicdConfig;
+  switch(appEnv) {
+    case AppEnv.PRD: {
+      webAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
+      cicdConfig = appConfig.prdConfig.cicdConfig;
+      break;
+    }
+    case AppEnv.DEV: {
+      webAppContainerConfig = appConfig.devConfig.webAppContainerConfig;
+      cicdConfig = appConfig.devConfig.cicdConfig;
+      break;
+    }
+    default:
+      throw new Error(`Invalid target app env: ${appEnv}`);
+  }
+
+  const awsStackTags_appInstance = {
+    "AppName": appConfig.appName,
+    "AppEnv": appEnv,
+  }
+
+  const gitRepoRef = appConfig.sharedConfig.gitRepoRef;
+
+  const infraPipelineStack = new InfraPipelineStack(app, {
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    githubOwner: gitRepoRef.githubOwner,
+    githubRepo: gitRepoRef.githubRepo,
+    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
+    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    gitBranchName: cicdConfig.gitBranchName,
+  });
+
+  const ecsStack = new ECSStack(app, {
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    vpc: vpcStack.vpc,
+    lbToEcsPort: webAppContainerConfig.lbToAppPort,
+    sslCertArn: webAppContainerConfig.tlsCertArn,
+    // ssmKmsArn: appappConfig.ssmKmsArn,
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
+    ecsSecGrp: secGrpStack.ecsSecGrp,
+    lbSecGrp: secGrpStack.lbSecGrp,
+    webAppUrl: webAppContainerConfig.webAppUrl,
+    javaOpts: webAppContainerConfig.javaOpts,
+    publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
+    awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
+  });
+  const wafStack = new WafStack(app, {
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    appLoadBalancerRef: ecsStack.appLoadBalancer,
+  });
+  const cicdStack = new CICDStack(app, {
+    appEnv: appEnv,
+    appName: appConfig.appName,
+    env: awsEnv,
+    tags: awsStackTags_appInstance,
+    githubOwner: gitRepoRef.githubOwner,
+    githubRepo: gitRepoRef.githubRepo,
+    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
+    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    gitBranchName: cicdConfig.gitBranchName,
+    vpc: vpcStack.vpc,
+    codebuildSecGrp: secGrpStack.codebuildSecGrp,
+    ecsTaskDefContainerName: ecsStack.containerName,
+    lbToEcsPort: webAppContainerConfig.lbToAppPort,
+    ecrRepo: ecsStack.ecrRepo,
+    fargateSvc: ecsStack.fargateSvc,
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
+    cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
+  });
+  cicdStack.addDependency(wafStack, "CICD is always the last stack.");
+} // createAppInstance
+
 async function loadConfig(): Promise<any> {
   let config: any;
-    // first try local home dir
+  // first try local home dir
   try {
     config = fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8');
     return Promise.resolve(config);
@@ -96,12 +194,6 @@ loadConfig().then(configObj => {
   //console.log('config: ' + config);
   if(!config) throw new Error("Unresolved config.");
 
-  const currentGitBranch = resolveCurrentGitBranch();
-  const currentAppEnv = resolveAppEnv(currentGitBranch);
-  // console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
-
-  const app = new cdk.App();
-
   const awsEnv: cdk.Environment = {
     account: config.sharedConfig.awsAccountId,
     region: config.sharedConfig.awsRegion,
@@ -111,91 +203,6 @@ loadConfig().then(configObj => {
     "AppName": config.appName,
     "AppEnv": AppEnv.SHARED,
   };
-
-  function createAppInstance(appEnv: AppEnv, appConfig: any): void {
-    var webAppContainerConfig;
-    var cicdConfig;
-    switch(appEnv) {
-      case AppEnv.PRD: {
-        webAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
-        cicdConfig = appConfig.prdConfig.cicdConfig;
-        break;
-      }
-      case AppEnv.DEV: {
-        webAppContainerConfig = appConfig.devConfig.webAppContainerConfig;
-        cicdConfig = appConfig.devConfig.cicdConfig;
-        break;
-      }
-      default:
-        throw new Error(`Invalid target app env: ${appEnv}`);
-    }
-
-    const awsStackTags_appInstance = {
-      "AppName": appConfig.appName,
-      "AppEnv": appEnv,
-    }
-
-    const gitRepoRef = appConfig.sharedConfig.gitRepoRef;
-
-    const infraPipelineStack = new InfraPipelineStack(app, {
-      appEnv: appEnv,
-      appName: config.appName,
-      env: awsEnv,
-      tags: awsStackTags_Shared,
-      githubOwner: gitRepoRef.githubOwner,
-      githubRepo: gitRepoRef.githubRepo,
-      githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-      githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
-      gitBranchName: cicdConfig.gitBranchName,
-    });
-
-    const ecsStack = new ECSStack(app, {
-      appEnv: appEnv,
-      appName: appConfig.appName,
-      env: awsEnv,
-      tags: awsStackTags_appInstance,
-      vpc: vpcStack.vpc,
-      lbToEcsPort: webAppContainerConfig.lbToAppPort,
-      sslCertArn: webAppContainerConfig.tlsCertArn,
-      // ssmKmsArn: appappConfig.ssmKmsArn,
-      ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
-      ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
-      ecsSecGrp: secGrpStack.ecsSecGrp,
-      lbSecGrp: secGrpStack.lbSecGrp,
-      webAppUrl: webAppContainerConfig.webAppUrl,
-      javaOpts: webAppContainerConfig.javaOpts,
-      publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
-      awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
-    });
-    const wafStack = new WafStack(app, {
-      appEnv: appEnv,
-      appName: appConfig.appName,
-      env: awsEnv,
-      tags: awsStackTags_appInstance,
-      appLoadBalancerRef: ecsStack.appLoadBalancer,
-    });
-    const cicdStack = new CICDStack(app, {
-      appEnv: appEnv,
-      appName: appConfig.appName,
-      env: awsEnv,
-      tags: awsStackTags_appInstance,
-      githubOwner: gitRepoRef.githubOwner,
-      githubRepo: gitRepoRef.githubRepo,
-      githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-      githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
-      gitBranchName: cicdConfig.gitBranchName,
-      vpc: vpcStack.vpc,
-      codebuildSecGrp: secGrpStack.codebuildSecGrp,
-      ecsTaskDefContainerName: ecsStack.containerName,
-      lbToEcsPort: webAppContainerConfig.lbToAppPort,
-      ecrRepo: ecsStack.ecrRepo,
-      fargateSvc: ecsStack.fargateSvc,
-      ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
-      ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
-      cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
-    });
-    cicdStack.addDependency(wafStack, "CICD is always the last stack.");
-  } // createAppInstance
 
   // common VPC
   const vpcStack = new VpcStack(app, {
@@ -247,9 +254,14 @@ loadConfig().then(configObj => {
   });
 
   // constrain stack output by current git branch
-  createAppInstance(currentAppEnv, config);
-  // createAppInstance(AppEnv.DEV, config);
-  // createAppInstance(AppEnv.PRD, config);
+  createAppInstance(
+    currentAppEnv,
+    awsEnv,
+    config,
+    vpcStack,
+    secGrpStack,
+    dbBootstrapStack
+  );
 }).catch(err => {
   console.log(err);
 });
