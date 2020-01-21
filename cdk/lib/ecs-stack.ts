@@ -26,6 +26,33 @@ export interface IECSProps extends IStackProps {
    * The VPC ref
    */
   readonly vpc: ec2.IVpc;
+
+  /**
+   * The ECR repo reference holding the target docker container image to deploy.
+   */
+  readonly ecrRepo: ecr.IRepository;
+  /**
+   * The tage name identifying the target docker image to use.
+   */
+  readonly ecrRepoTargetTagName: string;
+
+  /**
+   * The [docker] container task def cpu setting.
+   */
+  readonly taskdefCpu: number;
+  /**
+   * The [docker] container task def memory in MB setting.
+   */
+  readonly taskdefMemoryLimitMiB: number;
+  /**
+   * The [docker] container def memory *limit* in MB.
+   */
+  readonly containerDefMemoryLimitMiB: number;
+  /**
+   * The [docker] container def memory *reservation* in MB.
+   */
+  readonly containerDefMemoryReservationMiB: number;
+
   /**
    * SSL Certificate Arn
    */
@@ -79,8 +106,6 @@ export interface IECSProps extends IStackProps {
  */
 export class ECSStack extends BaseStack {
 
-  public readonly ecrRepo: ecr.IRepository;
-
   public readonly ecsTaskExecutionRole: iam.Role;
 
   public readonly fargateSvc: FargateService;
@@ -131,19 +156,11 @@ export class ECSStack extends BaseStack {
       ],
     }));
 
-    // ecr repo
-    const dockerAssetInstNme = this.iname('docker-asset');
-    const dockerAsset = new DockerImageAsset(this, dockerAssetInstNme, {
-      directory: path.join(__dirname, "../../mcorpus-gql/target/awsdockerasset"),
-      repositoryName: 'mcorpus-gql',
-    });
-    this.ecrRepo = dockerAsset.repository;
-
     // task def
     const taskDefInstNme = this.iname('fargate-taskdef');
     const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
-      cpu: 256,
-      memoryLimitMiB: 1024,
+      cpu: props.taskdefCpu,
+      memoryLimitMiB: props.taskdefMemoryLimitMiB,
       taskRole: this.ecsTaskExecutionRole,
       executionRole: this.ecsTaskExecutionRole,
     });
@@ -157,7 +174,7 @@ export class ECSStack extends BaseStack {
 
     this.containerName = this.iname('gql');
     const containerDef = taskDef.addContainer(this.containerName, {
-     image: ecs.ContainerImage.fromEcrRepository(this.ecrRepo),
+     image: ecs.ContainerImage.fromEcrRepository(props.ecrRepo, props.ecrRepoTargetTagName),
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
         interval: Duration.seconds(120),
@@ -165,8 +182,8 @@ export class ECSStack extends BaseStack {
         startPeriod: Duration.seconds(15),
         retries: 3,
       },
-      memoryLimitMiB: 900,
-      memoryReservationMiB: 500,
+      memoryLimitMiB: props.containerDefMemoryLimitMiB,
+      memoryReservationMiB: props.containerDefMemoryReservationMiB,
       essential: true,
       environment: {
         'JAVA_OPTS' : props.javaOpts,
