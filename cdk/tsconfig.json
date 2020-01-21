@@ -19,5 +19,5 @@
     "strictPropertyInitialization":false,
     "resolveJsonModule": true,
   },
-  "exclude": ["cdk.out"]
+  "exclude": ["cdk.out", "dist"]
 }
