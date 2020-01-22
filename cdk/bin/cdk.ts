@@ -110,7 +110,7 @@ function createAppInstance(
     containerDefMemoryLimitMiB: webAppContainerConfig.containerDefMemoryLimitMiB,
     containerDefMemoryReservationMiB: webAppContainerConfig.containerDefMemoryReservationMiB,
     ecrRepo: ecrStack.ecrRepo,
-    ecrRepoTargetTagName: ecrStack.targetImageTagName,
+    ecrRepoTargetTag: ecrStack.targetImageTagName,
     lbToEcsPort: webAppContainerConfig.lbToAppPort,
     sslCertArn: webAppContainerConfig.tlsCertArn,
     // ssmKmsArn: appappConfig.ssmKmsArn,
@@ -153,19 +153,6 @@ function createAppInstance(
   cicdStack.addDependency(wafStack, "CICD is always the last stack.");
 } // createAppInstance
 
-async function getEcrImages(repoName: string): Promise<any> {
-  const aws = require('aws-sdk');
-  const aws_ecr = new aws.ECR();
-  try {
-    return await aws_ecr.describeImages({
-      repositoryName: repoName,
-    }).promise();
-  } catch(e) {
-    throw new Error('Unable to get ECR image list.');
-  }
-}
-
-
 async function loadConfig(): Promise<any> {
   let config: any;
   // first try local home dir
@@ -173,9 +160,6 @@ async function loadConfig(): Promise<any> {
     config = fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8');
     return Promise.resolve(config);
   } catch(e) {
-    config = null;
-  }
-  if(config == null) {
     // try to fetch from known s3
     try {
       const s3 = new aws.S3();
@@ -191,27 +175,27 @@ async function loadConfig(): Promise<any> {
   }
 }
 
-function createStacks(config: any) {
+function createStacks(appConfig: any) {
   const awsEnv: cdk.Environment = {
-    account: config.sharedConfig.awsAccountId,
-    region: config.sharedConfig.awsRegion,
+    account: appConfig.sharedConfig.awsAccountId,
+    region: appConfig.sharedConfig.awsRegion,
   };
 
   const awsStackTags_Shared = {
-    "AppName": config.appName,
+    "AppName": appConfig.appName,
     "AppEnv": AppEnv.SHARED,
   };
 
   // common VPC
   const vpcStack = new VpcStack(app, {
     appEnv: AppEnv.SHARED,
-    appName: config.appName,
+    appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_Shared,
   });
   const secGrpStack = new SecGrpStack(app, {
     appEnv: AppEnv.SHARED,
-    appName: config.appName,
+    appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
@@ -220,29 +204,29 @@ function createStacks(config: any) {
   // common RDS instance
   const dbStack = new DbStack(app, {
     appEnv: AppEnv.SHARED,
-    appName: config.appName,
+    appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
     ecsSecGrp: secGrpStack.ecsSecGrp,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
-    dbName: config.sharedConfig.dbConfig.dbName,
-    dbMasterUsername: config.sharedConfig.dbConfig.dbMasterUsername,
+    dbName: appConfig.sharedConfig.dbConfig.dbName,
+    dbMasterUsername: appConfig.sharedConfig.dbConfig.dbMasterUsername,
   });
   const dbBootstrapStack = new DbBootstrapStack(app, {
     appEnv: AppEnv.SHARED,
-    appName: config.appName,
+    appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
-    targetRegion: config.sharedConfig.awsRegion,
+    targetRegion: appConfig.sharedConfig.awsRegion,
   });
   const dbDataStack = new DbDataStack(app, {
     appEnv: AppEnv.SHARED,
-    appName: config.appName,
+    appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
@@ -254,10 +238,10 @@ function createStacks(config: any) {
   // common ECR repo
   const ecrStack = new ECRStack(app, {
     appEnv: AppEnv.SHARED,
-    appName: config.appName,
+    appName: appConfig.appName,
     env: awsEnv,
     tags: awsStackTags_Shared,
-    repoName: config.sharedConfig.ecrRepoName,
+    repoName: appConfig.sharedConfig.ecrRepoName,
   });
   ecrStack.addDependency(dbDataStack, "ECR stack shall come after all db stacks.");
 
@@ -265,7 +249,7 @@ function createStacks(config: any) {
   createAppInstance(
     currentAppEnv,
     awsEnv,
-    config,
+    appConfig,
     vpcStack,
     secGrpStack,
     dbBootstrapStack,
@@ -296,23 +280,6 @@ loadConfig().then(configObj => {
   }
   //console.log('config: ' + config);
   if(!config) throw new Error("Unresolved config.");
-
-  /*
-  // determine target docker image tag name
-  // (based on app env and web app version)
-  // TODO figure out best strategy for ascertaining target tag name
-  let tagname: string = '';
-  getEcrImages(config.sharedConfig.ecrRepoName).then(jimgs => {
-    const jido = jimgs.imageDetails.reduce(function(prev: any, current: any) {
-      // most recent one by timestamp
-      return prev.imagePushedAt > current.imagePushedAt ? prev : current;
-    });
-    if(jido && jido.imageTags.size() > 0) tagname = jido.imageTags[0];
-  }).catch(err => {
-    // do-nothing
-  });
-  if(!tagname || tagname.length == 0) throw new Error("Unresolved ecr tag name");
-  */
 
   createStacks(config);
 

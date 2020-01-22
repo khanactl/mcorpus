@@ -1,5 +1,5 @@
 import cdk = require('@aws-cdk/core');
-import { ISecurityGroup, Port, SubnetType } from '@aws-cdk/aws-ec2';
+import { ISecurityGroup, Peer, Port, SubnetType } from '@aws-cdk/aws-ec2';
 import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
 import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
 import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
@@ -32,9 +32,9 @@ export interface IECSProps extends IStackProps {
    */
   readonly ecrRepo: ecr.IRepository;
   /**
-   * The tage name identifying the target docker image to use.
+   * The tag value identifying the target docker image to use.
    */
-  readonly ecrRepoTargetTagName: string;
+  readonly ecrRepoTargetTag: string;
 
   /**
    * The [docker] container task def cpu setting.
@@ -174,7 +174,7 @@ export class ECSStack extends BaseStack {
 
     this.containerName = this.iname('gql');
     const containerDef = taskDef.addContainer(this.containerName, {
-     image: ecs.ContainerImage.fromEcrRepository(props.ecrRepo, props.ecrRepoTargetTagName),
+     image: ecs.ContainerImage.fromEcrRepository(props.ecrRepo, props.ecrRepoTargetTag),
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
         interval: Duration.seconds(120),
@@ -248,6 +248,13 @@ export class ECSStack extends BaseStack {
       internetFacing: true,
       securityGroup: props.lbSecGrp,
     });
+
+    // sec grp rule: outside internet access only by TLS on 443
+    props.lbSecGrp.addIngressRule(
+      Peer.anyIpv4(),
+      Port.tcp(443),
+      'TLS/443 access from internet'
+    );
 
     const listenerInstNme = this.iname('alb-tls-listener');
     const listener = this.appLoadBalancer.addListener(listenerInstNme, {
