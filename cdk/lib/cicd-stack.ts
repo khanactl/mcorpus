@@ -112,7 +112,7 @@ export class CICDStack extends BaseStack {
       output: sourceOutput,
     });
 
-    // manual approve [post-source] action
+    // manual approve [pre-build] action
     const maaPostSource = new codepipeline_actions.ManualApprovalAction({
       actionName: this.iname('manual-approval-build'),
       notificationTopic: new sns.Topic(this, this.iname('confirm-build')),
@@ -244,11 +244,8 @@ export class CICDStack extends BaseStack {
         "ecs:ListTaskDefinitions",
       ],
       resources: [
-        /* does not work
-        props.ecrRepo.repositoryArn,
-        props.fargateSvc.serviceArn,
-        */
-       "*"
+        `${props.ecrRepo.repositoryArn}/*`,
+        `${props.fargateSvc.serviceArn}/*`,
       ],
     }));
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
@@ -304,7 +301,7 @@ export class CICDStack extends BaseStack {
       actions: [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
-        "logs:PutLogEvents"
+        "logs:PutLogEvents",
       ],
       resources: [
         "*" // TODO limit scope!
@@ -385,7 +382,6 @@ export class CICDStack extends BaseStack {
     }));
     this.pipeline.addToRolePolicy(new iam.PolicyStatement({
       actions: [
-        "elasticbeanstalk:*",
         "ec2:*",
         "elasticloadbalancing:*",
         "autoscaling:*",
