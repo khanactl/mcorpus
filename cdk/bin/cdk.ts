@@ -55,13 +55,11 @@ function resolveAppEnv(gitBranchName: string): AppEnv {
   }
 }
 
-function resolveEcsDockerImageTag(appConfig: any): string {
+function resolveEcsDockerImageTag(appConfig: any, ecrBootstrapImageTag: string): string {
   let imgTag = process.env.CDK_ECS_DOCKER_IMAGE_TAG;
   if(!imgTag || imgTag.length < 1) {
-    // fallback on default
-    // TODO never use 'latest'!
-    imgTag = "latest";
-    // throw new Error("Unresolved ecs docker image tag.");
+    // fallback on ECR [bootstrap] docker image tag
+    imgTag = ecrBootstrapImageTag;
   }
   return imgTag;
 }
@@ -111,9 +109,6 @@ function createStacks(appConfig: any) {
       throw new Error(`Invalid target app env: ${currentAppEnv}`);
   }
 
-  // determine which ecs docker image to deploy by resolving the tag name from env
-  const ecsDkrImgTag = resolveEcsDockerImageTag(appConfig);
-
   // app env dependent infra-bootstrap pipeline (the app env genesis stack)
   const infraPipelineStack = new InfraPipelineStack(app, {
     appEnv: currentAppEnv,
@@ -135,6 +130,9 @@ function createStacks(appConfig: any) {
     tags: awsStackTags_Shared,
     repoName: appConfig.sharedConfig.ecrRepoName,
   });
+
+  // determine which web app docker image to deploy
+  const ecsDkrImgTag = resolveEcsDockerImageTag(appConfig, ecrStack.imageTag);
 
   // common VPC
   const vpcStack = new VpcStack(app, {
@@ -209,7 +207,7 @@ function createStacks(appConfig: any) {
     publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
     awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
-  ecsStack.addDependency(infraPipelineStack, "Infra pipeline preceeds ECS stack.");
+  ecsStack.addDependency(ecrStack, "ECS depends on common ECR");
 
   const wafStack = new WafStack(app, {
     appEnv: currentAppEnv,
@@ -238,7 +236,7 @@ function createStacks(appConfig: any) {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
   });
-  cicdStack.addDependency(wafStack, "CICD is always the last stack.");
+  cicdStack.addDependency(wafStack, "CICD pipeline depends on ecs and waf.");
 }
 
 async function loadConfig(): Promise<any> {

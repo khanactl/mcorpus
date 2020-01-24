@@ -28,9 +28,9 @@ export class ECRStack extends BaseStack {
   public readonly ecrRepo: ecr.IRepository;
 
   /**
-   * The resolved name of the image tag uploaded to ECR.
+   * The tag bound to the uploaded docker image to ECR.
    */
-  public readonly targetImageTagName: string;
+  public readonly imageTag: string;
 
   constructor(scope: cdk.Construct, props: IECRProps) {
     super(scope, 'ECR', props);
@@ -42,14 +42,14 @@ export class ECRStack extends BaseStack {
       repositoryName: props.repoName,
     });
     this.ecrRepo = dockerAsset.repository;
-    this.targetImageTagName = "latest"; // TODO -HACK ALERT- FIX by extracting the image tag name
+    this.imageTag = dockerAsset.sourceHash;
 
     // stack outputs
     new cdk.CfnOutput(this, 'ecrRepoName', { value:
       this.ecrRepo.repositoryName
     });
     new cdk.CfnOutput(this, 'targetImageTagName', { value:
-      this.targetImageTagName ? this.targetImageTagName : "-UNSET-"
+      this.imageTag ? this.imageTag : "-UNSET-"
     });
 
   }
