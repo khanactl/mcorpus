@@ -183,6 +183,7 @@ export class CICDStack extends BaseStack {
               "echo Building the Docker image...",
               "cd mcorpus-gql/target",
               "docker build -t $REPOSITORY_URI:$COMMIT_HASH .",
+              "docker tag $REPOSITORY_URI:$COMMIT_HASH $REPOSITORY_URI:$BUILD_VERSION_TAG",
             ]
           },
           post_build: {
@@ -196,7 +197,7 @@ export class CICDStack extends BaseStack {
               `CONTAINER_PORT=${props.lbToEcsPort}`,
 
               "echo Writing image detail file...",
-              "printf '[{\"name\":\"%s\",\"imageUri\":\"%s\"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json",
+              "printf '[{\"name\":\"%s\",\"imageUri\":\"%s\"}]' $CONTAINER_NAME $REPOSITORY_URI:$COMMIT_HASH > imageDetail.json",
 
               "echo Generating appspec.yaml file...",
               "cat ../../appspec-template.yaml | sed -e \"s%\\\${taskDefArn}%$TASKDEF_ARN%\" -e \"s%\\\${containerName}%$CONTAINER_NAME%\" -e \"s%\\\${containerPort}%$CONTAINER_PORT%\" > appspec.yaml",
@@ -245,18 +246,11 @@ export class CICDStack extends BaseStack {
         "ecr:UploadLayerPart",
         "ecr:CompleteLayerUpload",
         "ecr:PutImage",
-      ],
-      resources: [
-        `${ecrRef.repositoryArn}/*`,
-      ],
-    }));
-    codebuildProject.addToRolePolicy(new iam.PolicyStatement({
-      actions: [
         // ECS
         "ecs:ListTaskDefinitions",
       ],
       resources: [
-        `${props.fargateSvc.serviceArn}/*`,
+        "*"
       ],
     }));
     codebuildProject.addToRolePolicy(new iam.PolicyStatement({
