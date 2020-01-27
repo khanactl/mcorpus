@@ -88,7 +88,7 @@
             </manifest>
             <manifestEntries>
               <Main-Class>com.tll.mcorpus.Main</Main-Class>
-              <Build-Number>${project.version}</Build-Number>
+              <App-Version>${project.version}</App-Version>
               <Build-Timestamp>${timestamp}</Build-Timestamp>
             </manifestEntries>
           </archive>
