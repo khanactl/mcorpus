@@ -1,8 +1,36 @@
 #!/usr/bin/env node
 
 import cdk = require('@aws-cdk/core');
-import { AppEnv } from './app-env';
 import cml = require('camelcase');
+
+/**
+ * The supported application environments.
+ */
+export enum AppEnv {
+  /** development (staging / non-production) */
+  DEV = 'DEV',
+  /** production */
+  PRD = 'PRD',
+  /** shared (common to all concrete application environments) */
+  SHARED = 'SHARED',
+}
+
+/**
+ * The app build info definition meant to capture
+ * needed properties of the underlying app build operation.
+ */
+export interface IAppBuildInfo {
+  /**
+   * The resolved app version (usu. gotten from maven build)
+   */
+  readonly appVersion: string;
+  /**
+   * The resolved app build timestamp relative to GMT (usu. gotten from maven build)
+   *
+   * FORMAT: "yyyymmddHHmmss"
+   */
+  readonly appBuildTimestamp: number;
+}
 
 /**
  * Native stack properties definition.
@@ -36,10 +64,6 @@ export abstract class BaseStack extends cdk.Stack {
     return `${appName.toLowerCase()}-${rootName}-${appEnv.toLowerCase()}`;
   }
 
-  protected readonly appEnv: AppEnv;
-
-  protected readonly appName: string;
-
   /**
    * Constructor.
    *
@@ -49,8 +73,6 @@ export abstract class BaseStack extends cdk.Stack {
    */
   constructor(scope: cdk.Construct, rootStackName: string, props: IStackProps) {
     super(scope, `${props.appName}-${rootStackName}-${props.appEnv}`, props);
-    this.appEnv = props.appEnv;
-    this.appName = props.appName;
   }
 
   /**
@@ -59,10 +81,12 @@ export abstract class BaseStack extends cdk.Stack {
    * This method delegates to the static method BaseStack.iname.
    *
    * @see BaseStack.iname
+   *
    * @param rootName the root name
+   * @param props the stack properties object
    */
-  public iname(rootName: string): string {
-    return BaseStack.iname(this.appName, rootName, this.appEnv);
+  public iname(rootName: string, props: IStackProps): string {
+    return BaseStack.iname(props.appName, rootName, props.appEnv);
   }
 
   /**
@@ -71,8 +95,8 @@ export abstract class BaseStack extends cdk.Stack {
    *
    * @param rootName the root name
    */
-  public inameCml(rootName: string) {
-    return cml(this.iname(rootName));
+  public inameCml(rootName: string, props: IStackProps) {
+    return cml(this.iname(rootName, props));
   }
 
 } // BaseStack class

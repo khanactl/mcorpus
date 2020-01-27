@@ -88,14 +88,14 @@ export class InfraPipelineStack extends BaseStack {
           files: [
             "**/*"
             /*
-            `${this.appName}-VPC-SHARED.template.json`,
-            `${this.appName}-SecGrp-SHARED.template.json`,
-            `${this.appName}-Db-SHARED.template.json`,
-            `${this.appName}-DbBootstrap-SHARED.template.json`,
-            `${this.appName}-DbData-SHARED.template.json`,
-            `${this.appName}-ECS-${this.appEnv}.template.json`,
-            `${this.appName}-WAF-${this.appEnv}.template.json`,
-            `${this.appName}-CICD-${this.appEnv}.template.json`,
+            `${props.appName}-VPC-SHARED.template.json`,
+            `${props.appName}-SecGrp-SHARED.template.json`,
+            `${props.appName}-Db-SHARED.template.json`,
+            `${props.appName}-DbBootstrap-SHARED.template.json`,
+            `${props.appName}-DbData-SHARED.template.json`,
+            `${props.appName}-ECS-${props.appEnv}.template.json`,
+            `${props.appName}-WAF-${props.appEnv}.template.json`,
+            `${props.appName}-CICD-${props.appEnv}.template.json`,
             */
           ],
         },
@@ -103,11 +103,11 @@ export class InfraPipelineStack extends BaseStack {
     });
 
     const sourceOutput = new codepipeline.Artifact();
-    const cdkBuildOutput = new codepipeline.Artifact(this.iname('CdkBuildOutput'));
+    const cdkBuildOutput = new codepipeline.Artifact(this.iname('CdkBuildOutput', props));
 
     // source (github)
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: `GitHub-Source-${this.appEnv}`,
+      actionName: `GitHub-Source-${props.appEnv}`,
       owner: props.githubOwner,
       repo: props.githubRepo,
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
@@ -132,7 +132,7 @@ export class InfraPipelineStack extends BaseStack {
     const arnS3ConfigObj = "arn:aws:s3:::mcorpus-db-data-bucket-shared/mcorpus-cdk-app-config.json";
 
     const cdkBuildAction = new codepipeline_actions.CodeBuildAction({
-      actionName: this.iname("CDK_Build"),
+      actionName: this.iname("CDK_Build", props),
       project: cdkBuild,
       input: sourceOutput,
       outputs: [ cdkBuildOutput ],
@@ -146,15 +146,15 @@ export class InfraPipelineStack extends BaseStack {
       ],
     }));
 
-    const infraPipeline = new codepipeline.Pipeline(this, this.iname('InfraPipeline'), {
-      pipelineName: this.iname('InfraPipeline'),
+    const infraPipeline = new codepipeline.Pipeline(this, this.iname('InfraPipeline', props), {
+      pipelineName: this.iname('InfraPipeline', props),
       stages: [
         {
-          stageName: `Source-${this.appEnv}`,
+          stageName: `Source-${props.appEnv}`,
           actions: [ sourceAction ],
         },
         {
-          stageName: `Build-${this.appEnv}`,
+          stageName: `Build-${props.appEnv}`,
           actions: [
             cdkBuildAction,
           ],
@@ -164,8 +164,8 @@ export class InfraPipelineStack extends BaseStack {
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
               actionName: "VPC_CFN_Deploy",
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-VPC-SHARED.template.json`),
-              stackName: `${this.appName}-VPC-SHARED`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-VPC-SHARED.template.json`),
+              stackName: `${props.appName}-VPC-SHARED`,
               adminPermissions: true,
               // extraInputs: [ vpcBuildOutput ],
             }),
@@ -176,8 +176,8 @@ export class InfraPipelineStack extends BaseStack {
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
               actionName: "SecGrp_CFN_Deploy",
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-SecGrp-SHARED.template.json`),
-              stackName: `${this.appName}-SecGrp-SHARED`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-SecGrp-SHARED.template.json`),
+              stackName: `${props.appName}-SecGrp-SHARED`,
               adminPermissions: true,
               // extraInputs: [ secGrpBuildOutput ],
             }),
@@ -188,8 +188,8 @@ export class InfraPipelineStack extends BaseStack {
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
               actionName: "Db_CFN_Deploy",
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-Db-SHARED.template.json`),
-              stackName: `${this.appName}-Db-SHARED`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-Db-SHARED.template.json`),
+              stackName: `${props.appName}-Db-SHARED`,
               adminPermissions: true,
               // extraInputs: [ dbBuildOutput ],
             }),
@@ -200,8 +200,8 @@ export class InfraPipelineStack extends BaseStack {
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
               actionName: "DbBootstrap_CFN_Deploy",
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-DbBootstrap-SHARED.template.json`),
-              stackName: `${this.appName}-DbBootstrap-SHARED`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-DbBootstrap-SHARED.template.json`),
+              stackName: `${props.appName}-DbBootstrap-SHARED`,
               adminPermissions: true,
               // extraInputs: [ dbBootstrapBuildOutput ],
             }),
@@ -212,44 +212,44 @@ export class InfraPipelineStack extends BaseStack {
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
               actionName: "DbData_CFN_Deploy",
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-DbData-SHARED.template.json`),
-              stackName: `${this.appName}-DbData-SHARED`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-DbData-SHARED.template.json`),
+              stackName: `${props.appName}-DbData-SHARED`,
               adminPermissions: true,
               // extraInputs: [ dbDataBuildOutput ],
             }),
           ],
         },
         {
-          stageName: `Deploy-ECS-${this.appEnv}`,
+          stageName: `Deploy-ECS-${props.appEnv}`,
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: `ECS_${this.appEnv}_CFN_Deploy`,
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-ECS-${this.appEnv}.template.json`),
-              stackName: `${this.appName}-ECS-${this.appEnv}`,
+              actionName: `ECS_${props.appEnv}_CFN_Deploy`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-ECS-${props.appEnv}.template.json`),
+              stackName: `${props.appName}-ECS-${props.appEnv}`,
               adminPermissions: true,
               // extraInputs: [ ecsBuildOutput ],
             }),
           ],
         },
         {
-          stageName: `Deploy-WAF-${this.appEnv}`,
+          stageName: `Deploy-WAF-${props.appEnv}`,
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: `WAF_${this.appEnv}_CFN_Deploy`,
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-WAF-${this.appEnv}.template.json`),
-              stackName: `${this.appName}-WAF-${this.appEnv}`,
+              actionName: `WAF_${props.appEnv}_CFN_Deploy`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-WAF-${props.appEnv}.template.json`),
+              stackName: `${props.appName}-WAF-${props.appEnv}`,
               adminPermissions: true,
               // extraInputs: [ wafBuildOutput ],
             }),
           ],
         },
         {
-          stageName: `Deploy-CICD-${this.appEnv}`,
+          stageName: `Deploy-CICD-${props.appEnv}`,
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: `CICD_${this.appEnv}_CFN_Deploy`,
-              templatePath: cdkBuildOutput.atPath(`${this.appName}-CICD-${this.appEnv}.template.json`),
-              stackName: `${this.appName}-CICD-${this.appEnv}`,
+              actionName: `CICD_${props.appEnv}_CFN_Deploy`,
+              templatePath: cdkBuildOutput.atPath(`${props.appName}-CICD-${props.appEnv}.template.json`),
+              stackName: `${props.appName}-CICD-${props.appEnv}`,
               adminPermissions: true,
               // extraInputs: [ cicdBuildOutput ],
             }),

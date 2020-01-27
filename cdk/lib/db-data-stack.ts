@@ -49,7 +49,7 @@ export class DbDataStack extends BaseStack {
     // const s3KmsKey: IKey = kms.Key.fromKeyArn(this, 's3-kms-key', props.s3KmsEncKeyArn);
 
     // create s3 bucket to hold db data
-    const dbDataBucketInstNme = this.iname('db-data-bucket');
+    const dbDataBucketInstNme = this.iname('db-data-bucket', props);
     this.dbDataBucket = new s3.Bucket(this, dbDataBucketInstNme, {
       bucketName: dbDataBucketInstNme,
       // encryption: BucketEncryption.KMS, // a key will be auto created
@@ -60,7 +60,7 @@ export class DbDataStack extends BaseStack {
     });
 
     // create db data lambda fn exec role
-    const dbDataRoleInstNme = this.iname('db-data-role');
+    const dbDataRoleInstNme = this.iname('db-data-role', props);
     this.dbDataRole = new iam.Role(this, dbDataRoleInstNme, {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
     });
@@ -94,7 +94,7 @@ export class DbDataStack extends BaseStack {
     // END db data role
 
     // lambda fn
-    const dbDataFnInstNme = this.iname('db-data-fn');
+    const dbDataFnInstNme = this.iname('db-data-fn', props);
     this.dbDataFn = new lambda.Function(this, dbDataFnInstNme, {
       vpc: props.vpc,
       vpcSubnets: { subnetType: SubnetType.PRIVATE },

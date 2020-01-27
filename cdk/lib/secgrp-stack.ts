@@ -30,7 +30,7 @@ export class SecGrpStack extends BaseStack {
     super(scope, 'SecGrp', props);
 
     // db bootstrap security group
-    const sgDbBootstrapInstNme = this.iname('dbbootstrap-sec-grp');
+    const sgDbBootstrapInstNme = this.iname('dbbootstrap-sec-grp', props);
     this.dbBootstrapSecGrp = new SecurityGroup(this, sgDbBootstrapInstNme, {
       vpc: props.vpc,
       description: 'Db bootstrap security group.',
@@ -40,7 +40,7 @@ export class SecGrpStack extends BaseStack {
     this.dbBootstrapSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbBootstrapInstNme));
 
     // load balancer security group
-    const sgLbInstNme = this.iname('lb-sec-grp');
+    const sgLbInstNme = this.iname('lb-sec-grp', props);
     this.lbSecGrp = new SecurityGroup(this, sgLbInstNme, {
       vpc: props.vpc,
       description: 'App load balancer security group.',
@@ -50,7 +50,7 @@ export class SecGrpStack extends BaseStack {
     this.lbSecGrp.node.applyAspect(new cdk.Tag('Name', sgLbInstNme));
 
     // ecs container security group
-    const sgEcsInstNme = this.iname('ecs-container-sec-grp');
+    const sgEcsInstNme = this.iname('ecs-container-sec-grp', props);
     this.ecsSecGrp = new SecurityGroup(this, sgEcsInstNme, {
       vpc: props.vpc,
       description: 'ECS container security group',
@@ -60,7 +60,7 @@ export class SecGrpStack extends BaseStack {
     this.ecsSecGrp.node.applyAspect(new cdk.Tag('Name', sgEcsInstNme));
 
     // codebuild security group
-    const sgCodebuildInstNme = this.iname('codebuild-sec-grp');
+    const sgCodebuildInstNme = this.iname('codebuild-sec-grp', props);
     this.codebuildSecGrp = new SecurityGroup(this, sgCodebuildInstNme, {
       vpc: props.vpc,
       description: 'Codebuild security group',

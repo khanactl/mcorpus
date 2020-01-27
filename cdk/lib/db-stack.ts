@@ -58,7 +58,7 @@ export class DbStack extends BaseStack {
     // const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
     // const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
 
-    const dbInstNme = this.iname('db');
+    const dbInstNme = this.iname('db', props);
     const instance = new DatabaseInstance(this, dbInstNme, {
       vpc: props.vpc,
       instanceIdentifier: dbInstNme,
@@ -112,7 +112,7 @@ export class DbStack extends BaseStack {
     const rdsSecretRotation = instance.addRotationSingleUser(cdk.Duration.days(30));
 
     // Add alarm for high CPU
-    const cloudWatchAlarmInstNme = this.iname('high-cpu');
+    const cloudWatchAlarmInstNme = this.iname('high-cpu', props);
     const cloudWatchAlarm = new cloudwatch.Alarm(this, cloudWatchAlarmInstNme, {
       metric: instance.metricCPUUtilization(),
       threshold: 90,

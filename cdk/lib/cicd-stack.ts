@@ -56,9 +56,9 @@ export interface ICICDProps extends IStackProps {
    */
   readonly lbToEcsPort: number;
   /**
-   * The ECR repository ref holding the generated web app docker images.
+   * The pre-existing ECR ref as an ARN.
    */
-  readonly ecrRepo: ecr.IRepository;
+  readonly ecrArn: string;
   /**
    * The aws ecs fargate service ref.
    */
@@ -89,8 +89,11 @@ export class CICDStack extends BaseStack {
   constructor(scope: cdk.Construct, props: ICICDProps) {
     super(scope, 'CICD', props);
 
+    // get the ECR handle
+    const ecrRef = ecr.Repository.fromRepositoryArn(this, "ecr-repo-ref", props.ecrArn);
+
     // dedicated codepipeline artifact bucket
-    const pipelineArtifactBucketInstNme = this.iname('pipeline-bucket');
+    const pipelineArtifactBucketInstNme = this.iname('pipeline-bucket', props);
     this.pipelineArtifactBucket = new s3.Bucket(this, pipelineArtifactBucketInstNme, {
       bucketName: pipelineArtifactBucketInstNme,
       encryption: s3.BucketEncryption.S3_MANAGED,
@@ -101,7 +104,7 @@ export class CICDStack extends BaseStack {
     // source (github)
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: `GitHub-Source-${this.appEnv}`,
+      actionName: `GitHub-Source-${props.appEnv}`,
       owner: props.githubOwner,
       repo: props.githubRepo,
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
@@ -114,14 +117,14 @@ export class CICDStack extends BaseStack {
 
     // manual approve [pre-build] action
     const maaPostSource = new codepipeline_actions.ManualApprovalAction({
-      actionName: this.iname('manual-approval-build'),
-      notificationTopic: new sns.Topic(this, this.iname('confirm-build')),
+      actionName: this.iname('manual-approval-build', props),
+      notificationTopic: new sns.Topic(this, this.iname('confirm-build', props)),
       notifyEmails: props.cicdDeployApprovalEmails,
-      additionalInformation: `Confirm or reject this ${this.appEnv} build?`
+      additionalInformation: `Confirm or reject this ${props.appEnv} build?`
     });
 
     // build and test action
-    const codebuildInstNme = this.iname('ecs-cdk');
+    const codebuildInstNme = this.iname('ecs-cdk', props);
     const codebuildProject = new codebuild.PipelineProject(this, codebuildInstNme, {
       vpc: props.vpc,
       projectName: codebuildInstNme,
@@ -164,9 +167,12 @@ export class CICDStack extends BaseStack {
               "echo $AWS_DEFAULT_REGION",
               "$(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)",
               // `REPOSITORY_URI=${props.env!.account}.dkr.ecr.${props.env!.region}.amazonaws.com/${props.ecrRepo.repositoryName}`,
-              `REPOSITORY_URI=${props.ecrRepo.repositoryUri}`,
+              `REPOSITORY_URI=${ecrRef.repositoryUri}`,
               "COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)",
-              "IMAGE_TAG=${COMMIT_HASH:=latest}",
+              "APP_VERSION=$(cat mcorpus-gql/target/classes/app.properties | grep app.version | cut -d'=' -f2)",
+              "BUILD_TIMESTAMP=$(cat mcorpus-gql/target/classes/app.properties | grep build.timestamp | cut -d'=' -f2)",
+              "BUILD_TIMESTAMP_DIGITS=$(echo $BUILD_TIMESTAMP | sed 's/[^0-9]//g')",
+              "BUILD_VERSION_TAG=${APP_VERSION}.${BUILD_TIMESTAMP_DIGITS}",
             ]
           },
           build: {
@@ -176,15 +182,14 @@ export class CICDStack extends BaseStack {
 
               "echo Building the Docker image...",
               "cd mcorpus-gql/target",
-              "docker build -t $REPOSITORY_URI:latest .",
-              "docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG",
+              "docker build -t $REPOSITORY_URI:$COMMIT_HASH .",
             ]
           },
           post_build: {
             commands: [
               "echo Pushing the Docker images...",
-              "docker push $REPOSITORY_URI:latest",
-              "docker push $REPOSITORY_URI:$IMAGE_TAG",
+              "docker push $REPOSITORY_URI:$COMMIT_HASH",
+              "docker push $REPOSITORY_URI:$BUILD_VERSION_TAG",
 
               "TASKDEF_ARN=$(aws ecs list-task-definitions | jq -r '.taskDefinitionArns[-1]')",
               `CONTAINER_NAME=${props.ecsTaskDefContainerName}`,
@@ -240,11 +245,17 @@ export class CICDStack extends BaseStack {
         "ecr:UploadLayerPart",
         "ecr:CompleteLayerUpload",
         "ecr:PutImage",
+      ],
+      resources: [
+        `${ecrRef.repositoryArn}/*`,
+      ],
+    }));
+    codebuildProject.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
         // ECS
         "ecs:ListTaskDefinitions",
       ],
       resources: [
-        `${props.ecrRepo.repositoryArn}/*`,
         `${props.fargateSvc.serviceArn}/*`,
       ],
     }));
@@ -308,7 +319,7 @@ export class CICDStack extends BaseStack {
       ],
     }));
 
-    const buildActionInstNme = this.iname('build-test');
+    const buildActionInstNme = this.iname('build-test', props);
     const buildOutput = new codepipeline.Artifact();
     const buildAction = new codepipeline_actions.CodeBuildAction({
       actionName: buildActionInstNme,
@@ -319,41 +330,41 @@ export class CICDStack extends BaseStack {
 
     // manual approve [deployment] action
     const maaDeploy = new codepipeline_actions.ManualApprovalAction({
-      actionName: this.iname('manual-approval-deployment'),
-      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment')),
+      actionName: this.iname('manual-approval-deployment', props),
+      notificationTopic: new sns.Topic(this, this.iname('confirm-deployment', props)),
       notifyEmails: props.cicdDeployApprovalEmails,
-      additionalInformation: `Please confirm or reject this change for ${this.appEnv} deployment.`
+      additionalInformation: `Please confirm or reject this change for ${props.appEnv} deployment.`
     });
 
     // deploy action
     const deployAction = new codepipeline_actions.EcsDeployAction({
-      actionName: this.iname('deploy'),
+      actionName: this.iname('deploy', props),
       service: props.fargateSvc,
       imageFile: buildOutput.atPath('imageDetail.json'),
     });
 
-    const pipelineInstNme = this.iname('cicd-pipeline');
+    const pipelineInstNme = this.iname('cicd-pipeline', props);
     this.pipeline = new codepipeline.Pipeline(this, pipelineInstNme, {
       pipelineName: pipelineInstNme,
       stages: [
         {
-          stageName: `Source-${this.appEnv}`,
+          stageName: `Source-${props.appEnv}`,
           actions: [ sourceAction ]
         },
         {
-          stageName: `Confirm-Build-${this.appEnv}`,
+          stageName: `Confirm-Build-${props.appEnv}`,
           actions: [ maaPostSource ]
         },
         {
-          stageName: `Build-Test-${this.appEnv}`,
+          stageName: `Build-Test-${props.appEnv}`,
           actions: [ buildAction ]
         },
         {
-          stageName: `Confirm-Deployment-${this.appEnv}`,
+          stageName: `Confirm-Deployment-${props.appEnv}`,
           actions: [ maaDeploy ]
         },
         {
-          stageName: `Deploy-${this.appEnv}`,
+          stageName: `Deploy-${props.appEnv}`,
           actions: [ deployAction ]
         },
       ],

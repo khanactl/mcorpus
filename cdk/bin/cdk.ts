@@ -4,11 +4,11 @@ import 'source-map-support/register';
 import fs = require('fs');
 import os = require('os');
 
+import { AppEnv, IAppBuildInfo } from '../lib/cdk-native';
+
 import aws = require('aws-sdk');
 
 import cdk = require('@aws-cdk/core');
-
-import { AppEnv } from '../lib/app-env';
 
 import { InfraPipelineStack } from '../lib/infra-pipeline-stack';
 import { VpcStack } from '../lib/vpc-stack';
@@ -26,6 +26,7 @@ const app = new cdk.App();
 const currentGitBranch = resolveCurrentGitBranch();
 const currentAppEnv = resolveAppEnv(currentGitBranch);
 // console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
+const appBuild = resolveAppBuild();
 
 /**
  * The expected name of the required cdk app config json file.
@@ -55,13 +56,47 @@ function resolveAppEnv(gitBranchName: string): AppEnv {
   }
 }
 
-function resolveEcsDockerImageTag(appConfig: any, ecrBootstrapImageTag: string): string {
-  let imgTag = process.env.CDK_ECS_DOCKER_IMAGE_TAG;
-  if(!imgTag || imgTag.length < 1) {
-    // fallback on ECR [bootstrap] docker image tag
-    imgTag = ecrBootstrapImageTag;
+function resolveAppBuild(): IAppBuildInfo {
+    // load app props file from local build output
+    try {
+      const arrAppProps =
+        fs.readFileSync(
+          "../mcorpus-gql/target/classes/app.properties", "utf-8"
+        ).split("\n");
+      let appVersion = "";
+      let buildTimestamp = 0;
+      for(var i = 0; i < arrAppProps.length; i++) {
+        const cpl = arrAppProps[i] ? arrAppProps[i].toString().replace("/\s/g", "") : "";
+        if(cpl && cpl.length > 3 && cpl.indexOf("=") > 0) {
+          if(cpl.startsWith("app.version")) {
+            appVersion = cpl.split("=")[1];
+          } else if(cpl.startsWith("build-timestamp")) {
+            buildTimestamp = parseInt(cpl.split("=")[1].replace(/[^0-9]+/g, ""));
+            // console.log(`buildTimestamp: ${buildTimestamp}`);
+          }
+          if(buildTimestamp > 0 && appVersion.length > 0)
+            return {
+              appVersion: appVersion,
+              appBuildTimestamp: buildTimestamp,
+            };
+        }
+      };
+      throw new Error("No app.version and/or build-timestamp properties found in app.properties.");
+    } catch(err) {
+      throw new Error(`Unable to resolve the app build info: ${err}`);
+    }
+}
+
+function resolveEcsDockerImageTag(appConfig: any): string {
+  const envImgTag = process.env.CDK_ECS_DOCKER_IMAGE_TAG;
+  if(envImgTag && envImgTag.length > 0) {
+    // env var override case
+    return envImgTag;
+  } else {
+    // fallback on local build info
+    // FORMAT: "{appVersion}.{buildTimestamp}"
+    return `${appBuild.appVersion}.${appBuild.appBuildTimestamp.toString()}`;
   }
-  return imgTag;
 }
 
 /**
@@ -109,10 +144,17 @@ function createStacks(appConfig: any) {
       throw new Error(`Invalid target app env: ${currentAppEnv}`);
   }
 
+  // get the ECR ref
+  const ecrArn = `arn:aws:ecr:${appConfig.sharedConfig.ecrConfig.awsRegion}:${appConfig.sharedConfig.ecrConfig.awsAccountId}:repository/${appConfig.sharedConfig.ecrConfig.name}`;
+
+  // resolve the web app docker image tag
+  const ecsDkrImgTag = resolveEcsDockerImageTag(appConfig);
+  // console.log(`ecsDkrImgTag: ${ecsDkrImgTag}`);
+
   // app env dependent infra-bootstrap pipeline (the app env genesis stack)
   const infraPipelineStack = new InfraPipelineStack(app, {
-    appEnv: currentAppEnv,
     appName: appConfig.appName,
+    appEnv: currentAppEnv,
     env: awsEnv,
     tags: awsStackTags_appInstance,
     githubOwner: gitRepoRef.githubOwner,
@@ -122,28 +164,16 @@ function createStacks(appConfig: any) {
     gitBranchName: cicdConfig.gitBranchName,
   });
 
-  // common ECR repo
-  const ecrStack = new ECRStack(app, {
-    appEnv: AppEnv.SHARED,
-    appName: appConfig.appName,
-    env: awsEnv,
-    tags: awsStackTags_Shared,
-    repoName: appConfig.sharedConfig.ecrRepoName,
-  });
-
-  // determine which web app docker image to deploy
-  const ecsDkrImgTag = resolveEcsDockerImageTag(appConfig, ecrStack.imageTag);
-
   // common VPC
   const vpcStack = new VpcStack(app, {
-    appEnv: AppEnv.SHARED,
     appName: appConfig.appName,
+    appEnv: AppEnv.SHARED,
     env: awsEnv,
     tags: awsStackTags_Shared,
   });
   const secGrpStack = new SecGrpStack(app, {
-    appEnv: AppEnv.SHARED,
     appName: appConfig.appName,
+    appEnv: AppEnv.SHARED,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
@@ -151,8 +181,8 @@ function createStacks(appConfig: any) {
 
   // common RDS instance
   const dbStack = new DbStack(app, {
-    appEnv: AppEnv.SHARED,
     appName: appConfig.appName,
+    appEnv: AppEnv.SHARED,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
@@ -163,8 +193,8 @@ function createStacks(appConfig: any) {
     dbMasterUsername: appConfig.sharedConfig.dbConfig.dbMasterUsername,
   });
   const dbBootstrapStack = new DbBootstrapStack(app, {
-    appEnv: AppEnv.SHARED,
     appName: appConfig.appName,
+    appEnv: AppEnv.SHARED,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
@@ -173,8 +203,8 @@ function createStacks(appConfig: any) {
     targetRegion: appConfig.sharedConfig.awsRegion,
   });
   const dbDataStack = new DbDataStack(app, {
-    appEnv: AppEnv.SHARED,
     appName: appConfig.appName,
+    appEnv: AppEnv.SHARED,
     env: awsEnv,
     tags: awsStackTags_Shared,
     vpc: vpcStack.vpc,
@@ -184,8 +214,8 @@ function createStacks(appConfig: any) {
   });
 
   const ecsStack = new ECSStack(app, {
-    appEnv: currentAppEnv,
     appName: appConfig.appName,
+    appEnv: currentAppEnv,
     env: awsEnv,
     tags: awsStackTags_appInstance,
     vpc: vpcStack.vpc,
@@ -193,7 +223,7 @@ function createStacks(appConfig: any) {
     taskdefMemoryLimitMiB: webAppContainerConfig.taskdefMemoryLimitMiB,
     containerDefMemoryLimitMiB: webAppContainerConfig.containerDefMemoryLimitMiB,
     containerDefMemoryReservationMiB: webAppContainerConfig.containerDefMemoryReservationMiB,
-    ecrRepo: ecrStack.ecrRepo,
+    ecrArn: ecrArn,
     ecrRepoTargetTag: ecsDkrImgTag,
     lbToEcsPort: webAppContainerConfig.lbToAppPort,
     sslCertArn: webAppContainerConfig.tlsCertArn,
@@ -207,18 +237,17 @@ function createStacks(appConfig: any) {
     publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
     awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
-  ecsStack.addDependency(ecrStack, "ECS depends on common ECR");
 
   const wafStack = new WafStack(app, {
-    appEnv: currentAppEnv,
     appName: appConfig.appName,
+    appEnv: currentAppEnv,
     env: awsEnv,
     tags: awsStackTags_appInstance,
     appLoadBalancerRef: ecsStack.appLoadBalancer,
   });
   const cicdStack = new CICDStack(app, {
-    appEnv: currentAppEnv,
     appName: appConfig.appName,
+    appEnv: currentAppEnv,
     env: awsEnv,
     tags: awsStackTags_appInstance,
     githubOwner: gitRepoRef.githubOwner,
@@ -230,7 +259,7 @@ function createStacks(appConfig: any) {
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
     ecsTaskDefContainerName: ecsStack.containerName,
     lbToEcsPort: webAppContainerConfig.lbToAppPort,
-    ecrRepo: ecrStack.ecrRepo,
+    ecrArn: ecrArn,
     fargateSvc: ecsStack.fargateSvc,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,

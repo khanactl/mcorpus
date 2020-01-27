@@ -28,9 +28,9 @@ export interface IECSProps extends IStackProps {
   readonly vpc: ec2.IVpc;
 
   /**
-   * The ECR repo reference holding the target docker container image to deploy.
+   * The pre-existing ECR ref as an ARN.
    */
-  readonly ecrRepo: ecr.IRepository;
+  readonly ecrArn: string;
   /**
    * The tag value identifying the target docker image to use.
    */
@@ -122,16 +122,19 @@ export class ECSStack extends BaseStack {
   constructor(scope: cdk.Construct, props: IECSProps) {
     super(scope, 'ECS', props);
 
+    // get the ECR handle
+    const ecrRef = ecr.Repository.fromRepositoryArn(this, "ecr-repo-ref", props.ecrArn);
+
     // generate JWT salt ssm param
     const rhs = randomBytes(32).toString('hex');
-    const jwtSaltInstNme = this.iname('jwtSalt');
+    const jwtSaltInstNme = this.iname('jwtSalt', props);
     const jwtSalt:ssm.IParameter = new ssm.StringParameter(this, jwtSaltInstNme, {
       parameterName: `/${jwtSaltInstNme}`,
       stringValue: rhs,
     });
 
     // ECS/Fargate task execution role
-    const escTskExecInstNme = this.iname('ecs-tsk-exec-role');
+    const escTskExecInstNme = this.iname('ecs-tsk-exec-role', props);
     this.ecsTaskExecutionRole = new iam.Role(this, escTskExecInstNme, {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
     });
@@ -157,7 +160,7 @@ export class ECSStack extends BaseStack {
     }));
 
     // task def
-    const taskDefInstNme = this.iname('fargate-taskdef');
+    const taskDefInstNme = this.iname('fargate-taskdef', props);
     const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
       cpu: props.taskdefCpu,
       memoryLimitMiB: props.taskdefMemoryLimitMiB,
@@ -166,15 +169,15 @@ export class ECSStack extends BaseStack {
     });
 
     // web app container log group
-    this.webContainerLogGrp = new logs.LogGroup(this, this.iname("webapp"), {
+    this.webContainerLogGrp = new logs.LogGroup(this, this.iname("webapp", props), {
       retention: logs.RetentionDays.ONE_WEEK,
-      logGroupName: `webapp-${this.appEnv}`,
+      logGroupName: `webapp-${props.appEnv}`,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    this.containerName = this.iname('gql');
+    this.containerName = this.iname('gql', props);
     const containerDef = taskDef.addContainer(this.containerName, {
-     image: ecs.ContainerImage.fromEcrRepository(props.ecrRepo, props.ecrRepoTargetTag),
+     image: ecs.ContainerImage.fromEcrRepository(ecrRef, props.ecrRepoTargetTag),
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
         interval: Duration.seconds(120),
@@ -203,7 +206,7 @@ export class ECSStack extends BaseStack {
         'MCORPUS_JWT_SALT' : ecs.Secret.fromSsmParameter(jwtSalt),
       },
       logging: new ecs.AwsLogDriver({
-        streamPrefix: this.iname('webapplogs'),
+        streamPrefix: this.iname('webapplogs', props),
         logGroup: this.webContainerLogGrp,
       }),
     });
@@ -212,7 +215,7 @@ export class ECSStack extends BaseStack {
     });
 
     // cluster
-    const ecsClusterInstNme = this.iname('ecs-cluster');
+    const ecsClusterInstNme = this.iname('ecs-cluster', props);
     const cluster = new ecs.Cluster(this, ecsClusterInstNme, {
       vpc: props.vpc,
       clusterName: ecsClusterInstNme,
@@ -225,7 +228,7 @@ export class ECSStack extends BaseStack {
       'lb to ecs container traffic'
     );
 
-    const fargateSvcInstNme = this.iname('fargate-svc');
+    const fargateSvcInstNme = this.iname('fargate-svc', props);
     this.fargateSvc = new ecs.FargateService(this, fargateSvcInstNme, {
       cluster: cluster,
       taskDefinition: taskDef,
@@ -242,7 +245,7 @@ export class ECSStack extends BaseStack {
     // *** inline load balancer ***
     // ****************************
     // application load balancer
-    const albInstNme = this.iname('app-loadbalancer');
+    const albInstNme = this.iname('app-loadbalancer', props);
     this.appLoadBalancer = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
       internetFacing: true,
@@ -256,7 +259,7 @@ export class ECSStack extends BaseStack {
       'TLS/443 access from internet'
     );
 
-    const listenerInstNme = this.iname('alb-tls-listener');
+    const listenerInstNme = this.iname('alb-tls-listener', props);
     const listener = this.appLoadBalancer.addListener(listenerInstNme, {
       protocol: ApplicationProtocol.HTTPS,
       port: 443,
@@ -267,7 +270,7 @@ export class ECSStack extends BaseStack {
 
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
-    const albTargetGroupInstNme = this.iname('fargate-target');
+    const albTargetGroupInstNme = this.iname('fargate-target', props);
     const albTargetGroup = listener.addTargets(albTargetGroupInstNme, {
       // targetGroupName: '',
       port: props.lbToEcsPort,
@@ -294,13 +297,13 @@ export class ECSStack extends BaseStack {
     if(props.awsHostedZoneId && props.publicDomainName) {
       // console.log('Load balancer DNS will be bound in Route53.');
       const hostedZone = r53.HostedZone.fromHostedZoneAttributes(
-        this, this.iname('hostedzone'), {
+        this, this.iname('hostedzone', props), {
           hostedZoneId: props.awsHostedZoneId,
           zoneName: props.publicDomainName,
         }
       );
       // NOTE: arecord creation will fail if it already exists
-      const arecordInstNme = this.iname('arecord');
+      const arecordInstNme = this.iname('arecord', props);
       const arecord = new r53.ARecord(this, arecordInstNme, {
         recordName: props.publicDomainName,
         zone: hostedZone,

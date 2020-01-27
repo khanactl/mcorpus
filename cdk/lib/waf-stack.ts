@@ -46,7 +46,7 @@ export class WafStack extends BaseStack {
     // *** END firewall rules ***
 
     // acl (groups rules)
-    const webAclName = this.inameCml("webAcl");
+    const webAclName = this.inameCml("webAcl", props);
     this.webAcl = new waf.CfnWebACL(this, webAclName, {
       name: webAclName,
       metricName: `${webAclName}Metrics`,
@@ -64,7 +64,7 @@ export class WafStack extends BaseStack {
     });
 
     // bind waf to alb
-    const wafToAlb = new waf.CfnWebACLAssociation(this, this.inameCml("Waf2Alb"), {
+    const wafToAlb = new waf.CfnWebACLAssociation(this, this.inameCml("Waf2Alb", props), {
       resourceArn: props.appLoadBalancerRef.loadBalancerArn,
       webAclId: this.webAcl.ref,
     });
