@@ -7,25 +7,27 @@ import { SubnetType } from '@aws-cdk/aws-ec2';
  * VPC stack config properties.
  */
 export interface IVpcProps extends IStackProps {
-
+  readonly maxAzs: number;
+  readonly cidr: string;
 };
 
 /**
  * VPC stack.
  */
 export class VpcStack extends BaseStack {
-  
+
   public readonly vpc: ec2.Vpc;
-  
+
   constructor(scope: cdk.Construct, props: IVpcProps) {
     super(scope, 'VPC', props);
 
     this.vpc = new ec2.Vpc(this, 'VPC', {
-      maxAzs: 2,
-      natGateways: 1,
-      cidr: '10.0.0.0/23', // 512
+      maxAzs: props.maxAzs,
+      // natGateways: 1,
+      cidr: props.cidr,
       enableDnsHostnames: true,
       enableDnsSupport: true,
+      /*
       subnetConfiguration: [
         {
           cidrMask: 26, // 64
@@ -36,8 +38,9 @@ export class VpcStack extends BaseStack {
           cidrMask: 26, // 64
           name: 'Private',
           subnetType: SubnetType.PRIVATE,
-        }, 
+        },
       ],
+      */
     });
 
     const publicSubnetIds: string[] = [];

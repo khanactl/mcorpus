@@ -1,32 +1,32 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
+import {
+  AppEnv,
+  resolveAppBuild,
+  resolveAppEnv,
+  resolveAppImageTag,
+  resolveCurrentGitBranch,
+  loadConfig
+} from '../lib/cdk-native';
+import { CICDStack } from '../lib/cicd-stack';
+import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
+import { DbDataStack } from '../lib/db-data-stack';
+import { DbStack } from '../lib/db-stack';
+import { ECSStack } from '../lib/ecs-stack';
+import { ClusterStack } from '../lib/cluster-stack';
+import { SecGrpStack } from '../lib/secgrp-stack';
+import { VpcStack } from '../lib/vpc-stack';
+import { WafStack } from '../lib/waf-stack';
+import { AppStack } from '../lib/app-stack';
 
 import fs = require('fs');
 import os = require('os');
-
-import { AppEnv, IAppBuildInfo } from '../lib/cdk-native';
-
-import aws = require('aws-sdk');
+import path = require('path');
 
 import cdk = require('@aws-cdk/core');
-
-import { InfraPipelineStack } from '../lib/infra-pipeline-stack';
-import { VpcStack } from '../lib/vpc-stack';
-import { SecGrpStack } from '../lib/secgrp-stack';
-import { DbStack } from '../lib/db-stack';
-import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
-import { DbDataStack } from '../lib/db-data-stack';
-import { ECRStack } from '../lib/ecr-stack';
-import { ECSStack } from '../lib/ecs-stack';
-import { WafStack } from '../lib/waf-stack';
-import { CICDStack } from '../lib/cicd-stack';
+import { DevPipelineStack } from '../lib/dev-pipeline-stack';
 
 const app = new cdk.App();
-
-const currentGitBranch = resolveCurrentGitBranch();
-const currentAppEnv = resolveAppEnv(currentGitBranch);
-// console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
-const appBuild = resolveAppBuild();
 
 /**
  * The expected name of the required cdk app config json file.
@@ -36,68 +36,13 @@ const appBuild = resolveAppBuild();
  */
 const appConfigFilename = "mcorpus-cdk-app-config.json";
 
-function resolveCurrentGitBranch(): string {
-  // are we in codebuild env (there is no .git dir there)?
-  let branch = process.env.GIT_BRANCH_NAME;  // rely on custom buildspec env var
-  if(!branch) {
-    // assume a .git project dir present and use a 3rd party dep to resolve current git branch
-    branch = require('git-branch');
-  }
-  if(!branch) throw Error("Fatal: Unable to determine the current Git branch.");
-  return branch;
-}
-
-function resolveAppEnv(gitBranchName: string): AppEnv {
-  switch(gitBranchName) {
-    case 'master': // the master branch is always production
-      return AppEnv.PRD;
-    default:  // always default to DEV
-      return AppEnv.DEV;
-  }
-}
-
-function resolveAppBuild(): IAppBuildInfo {
-    // load app props file from local build output
-    try {
-      const arrAppProps =
-        fs.readFileSync(
-          "../mcorpus-gql/target/classes/app.properties", "utf-8"
-        ).split("\n");
-      let appVersion = "";
-      let buildTimestamp = 0;
-      for(var i = 0; i < arrAppProps.length; i++) {
-        const cpl = arrAppProps[i] ? arrAppProps[i].toString().replace("/\s/g", "") : "";
-        if(cpl && cpl.length > 3 && cpl.indexOf("=") > 0) {
-          if(cpl.startsWith("app.version")) {
-            appVersion = cpl.split("=")[1];
-          } else if(cpl.startsWith("build-timestamp")) {
-            buildTimestamp = parseInt(cpl.split("=")[1].replace(/[^0-9]+/g, ""));
-            // console.log(`buildTimestamp: ${buildTimestamp}`);
-          }
-          if(buildTimestamp > 0 && appVersion.length > 0)
-            return {
-              appVersion: appVersion,
-              appBuildTimestamp: buildTimestamp,
-            };
-        }
-      };
-      throw new Error("No app.version and/or build-timestamp properties found in app.properties.");
-    } catch(err) {
-      throw new Error(`Unable to resolve the app build info: ${err}`);
-    }
-}
-
-function resolveEcsDockerImageTag(appConfig: any): string {
-  const envImgTag = process.env.CDK_ECS_DOCKER_IMAGE_TAG;
-  if(envImgTag && envImgTag.length > 0) {
-    // env var override case
-    return envImgTag;
-  } else {
-    // fallback on local build info
-    // FORMAT: "{appVersion}.{buildTimestamp}"
-    return `${appBuild.appVersion}.${appBuild.appBuildTimestamp.toString()}`;
-  }
-}
+/**
+ * The S3 bucket name in the default AWS account holding a cached copy of
+ * the app config file.
+ *
+ * This is used when no local app config file is found.
+ */
+const appConfigCacheS3BucketName = "mcorpus-db-data-bucket-shared";
 
 /**
  * Generate the CDK stacks.
@@ -105,8 +50,13 @@ function resolveEcsDockerImageTag(appConfig: any): string {
  * @param appConfig json obj of config to use
  */
 function createStacks(appConfig: any) {
-
   const gitRepoRef = appConfig.sharedConfig.gitRepoRef;
+
+  // const currentGitBranch = resolveCurrentGitBranch();
+  // const currentAppEnv = resolveAppEnv(currentGitBranch);
+  // console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
+
+  const appBuild = resolveAppBuild("../mcorpus-gql/target/classes/app.properties");
 
   // single aws account houses all app instances
   const awsEnv: cdk.Environment = {
@@ -116,20 +66,29 @@ function createStacks(appConfig: any) {
 
   // common aws stack tags
   const awsStackTags_Shared = {
-    "AppName": appConfig.appName,
-    "AppEnv": AppEnv.SHARED,
+    AppName: appConfig.appName,
+    AppEnv: AppEnv.SHARED,
   };
 
-  // app env specific stack tags
-  const awsStackTags_appInstance = {
-    "AppName": appConfig.appName,
-    "AppEnv": currentAppEnv,
-  }
+  const awsStackTags_DEV = {
+    AppName: appConfig.appName,
+    AppEnv: AppEnv.DEV,
+  };
+  const awsStackTags_PRD = {
+    AppName: appConfig.appName,
+    AppEnv: AppEnv.PRD,
+  };
 
   // isolate app env dependent config
+  const devWebAppContainerConfig = appConfig.devConfig.webAppContainerConfig;
+  const prdWebAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
+  const devCicdConfig = appConfig.devConfig.cicdConfig;
+  const prdCicdConfig = appConfig.prdConfig.cicdConfig;
+
+  /*
   let webAppContainerConfig: any;
   let cicdConfig: any;
-  switch(currentAppEnv) {
+  switch (currentAppEnv) {
     case AppEnv.PRD: {
       webAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
       cicdConfig = appConfig.prdConfig.cicdConfig;
@@ -143,14 +102,16 @@ function createStacks(appConfig: any) {
     default:
       throw new Error(`Invalid target app env: ${currentAppEnv}`);
   }
+  */
 
   // get the ECR ref
-  const ecrArn = `arn:aws:ecr:${appConfig.sharedConfig.ecrConfig.awsRegion}:${appConfig.sharedConfig.ecrConfig.awsAccountId}:repository/${appConfig.sharedConfig.ecrConfig.name}`;
+  // const ecrArn = `arn:aws:ecr:${appConfig.sharedConfig.ecrConfig.awsRegion}:${appConfig.sharedConfig.ecrConfig.awsAccountId}:repository/${appConfig.sharedConfig.ecrConfig.name}`;
 
   // resolve the web app docker image tag
-  const ecsDkrImgTag = resolveEcsDockerImageTag(appConfig);
+  // const ecsDkrImgTag = resolveAppImageTag(appConfig, appBuild);
   // console.log(`ecsDkrImgTag: ${ecsDkrImgTag}`);
 
+  /*
   // app env dependent infra-bootstrap pipeline (the app env genesis stack)
   const infraPipelineStack = new InfraPipelineStack(app, {
     appName: appConfig.appName,
@@ -160,9 +121,11 @@ function createStacks(appConfig: any) {
     githubOwner: gitRepoRef.githubOwner,
     githubRepo: gitRepoRef.githubRepo,
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    githubOauthTokenSecretJsonFieldName:
+      gitRepoRef.githubOauthTokenSecretJsonFieldName,
     gitBranchName: cicdConfig.gitBranchName,
   });
+  */
 
   // common VPC
   const vpcStack = new VpcStack(app, {
@@ -170,6 +133,8 @@ function createStacks(appConfig: any) {
     appEnv: AppEnv.SHARED,
     env: awsEnv,
     tags: awsStackTags_Shared,
+    maxAzs: appConfig.sharedConfig.networkConfig.maxAzs,
+    cidr: appConfig.sharedConfig.networkConfig.cidr,
   });
   const secGrpStack = new SecGrpStack(app, {
     appName: appConfig.appName,
@@ -213,31 +178,61 @@ function createStacks(appConfig: any) {
     // s3KmsEncKeyArn: appConfig.ssmKmsArn
   });
 
-  const ecsStack = new ECSStack(app, {
+  // dev cluster
+  const devClusterStack = new ClusterStack(app, {
     appName: appConfig.appName,
-    appEnv: currentAppEnv,
+    appEnv: AppEnv.DEV,
     env: awsEnv,
-    tags: awsStackTags_appInstance,
+    tags: awsStackTags_DEV,
     vpc: vpcStack.vpc,
-    taskdefCpu: webAppContainerConfig.taskdefCpu,
-    taskdefMemoryLimitMiB: webAppContainerConfig.taskdefMemoryLimitMiB,
-    containerDefMemoryLimitMiB: webAppContainerConfig.containerDefMemoryLimitMiB,
-    containerDefMemoryReservationMiB: webAppContainerConfig.containerDefMemoryReservationMiB,
-    ecrArn: ecrArn,
-    ecrRepoTargetTag: ecsDkrImgTag,
-    lbToEcsPort: webAppContainerConfig.lbToAppPort,
-    sslCertArn: webAppContainerConfig.tlsCertArn,
-    // ssmKmsArn: appappConfig.ssmKmsArn,
+  });
+  devClusterStack.addDependency(secGrpStack);
+
+  const devPipelineStack = new DevPipelineStack(app, {
+    appName: appConfig.appName,
+    appEnv: AppEnv.DEV,
+    env: awsEnv,
+    tags: awsStackTags_DEV,
+    vpc: vpcStack.vpc,
+    codebuildSecGrp: secGrpStack.codebuildSecGrp,
+    ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
+    githubOwner: gitRepoRef.githubOwner,
+    githubRepo: gitRepoRef.githubRepo,
+    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
+    githubOauthTokenSecretJsonFieldName:
+      gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    gitBranchName: devCicdConfig.gitBranchName,
+    ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
+    ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
+  });
+
+  const devAppStack = new AppStack(app, {
+    appName: appConfig.appName,
+    appEnv: AppEnv.DEV,
+    env: awsEnv,
+    tags: awsStackTags_DEV,
+    vpc: vpcStack.vpc,
+    cluster: devClusterStack.cluster,
+    appImage: devPipelineStack.appBuiltImage,
+    taskdefCpu: devWebAppContainerConfig.taskdefCpu,
+    taskdefMemoryLimitMiB: devWebAppContainerConfig.taskdefMemoryLimitMiB,
+    containerDefMemoryLimitMiB:
+      devWebAppContainerConfig.containerDefMemoryLimitMiB,
+    containerDefMemoryReservationMiB:
+      devWebAppContainerConfig.containerDefMemoryReservationMiB,
+    lbToEcsPort: devWebAppContainerConfig.lbToAppPort,
+    sslCertArn: devWebAppContainerConfig.tlsCertArn,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     ecsSecGrp: secGrpStack.ecsSecGrp,
     lbSecGrp: secGrpStack.lbSecGrp,
-    webAppUrl: webAppContainerConfig.webAppUrl,
-    javaOpts: webAppContainerConfig.javaOpts,
-    publicDomainName: webAppContainerConfig.dnsConfig.publicDomainName,
-    awsHostedZoneId: webAppContainerConfig.dnsConfig.awsHostedZoneId,
+    webAppUrl: devWebAppContainerConfig.webAppUrl,
+    javaOpts: devWebAppContainerConfig.javaOpts,
+    publicDomainName: devWebAppContainerConfig.dnsConfig.publicDomainName,
+    awsHostedZoneId: devWebAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
 
+  /*
   const wafStack = new WafStack(app, {
     appName: appConfig.appName,
     appEnv: currentAppEnv,
@@ -245,6 +240,9 @@ function createStacks(appConfig: any) {
     tags: awsStackTags_appInstance,
     appLoadBalancerRef: ecsStack.appLoadBalancer,
   });
+  */
+
+  /*
   const cicdStack = new CICDStack(app, {
     appName: appConfig.appName,
     appEnv: currentAppEnv,
@@ -253,7 +251,8 @@ function createStacks(appConfig: any) {
     githubOwner: gitRepoRef.githubOwner,
     githubRepo: gitRepoRef.githubRepo,
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    githubOauthTokenSecretJsonFieldName:
+      gitRepoRef.githubOauthTokenSecretJsonFieldName,
     gitBranchName: cicdConfig.gitBranchName,
     vpc: vpcStack.vpc,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
@@ -265,57 +264,10 @@ function createStacks(appConfig: any) {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
   });
-  cicdStack.addDependency(wafStack, "CICD pipeline depends on ecs and waf.");
+  cicdStack.addDependency(wafStack, 'CICD pipeline depends on ecs and waf.');
+  */
 }
 
-async function loadConfig(): Promise<any> {
-  let config: any;
-  // first try local home dir
-  try {
-    config = fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8');
-    return Promise.resolve(config);
-  } catch(e) {
-    // try to fetch from known s3
-    try {
-      const s3 = new aws.S3();
-      config = await s3.getObject({
-        Bucket: "mcorpus-db-data-bucket-shared",
-        Key: appConfigFilename,
-      }).promise();
-      return config;
-    } catch(e) {
-      console.log('s3.getObject-err: ' + e);
-      throw new Error('unable to get mcorpus cdk app config from s3.');
-    }
-  }
-}
-
-loadConfig().then(configObj => {
-  //console.log('configObj: ' + configObj);
-  let config: any;
-  try {
-    // s3 case
-    const configStr = configObj.Body.toString();
-    config = JSON.parse(configStr);
-    if(config) {
-      // cache in user home dir only if one not already present
-      if(!fs.existsSync(`${os.homedir()}/${appConfigFilename}`)) {
-        // cache config file locally
-        fs.writeFileSync(`${os.homedir()}/${appConfigFilename}`, configStr, {
-          encoding: "utf-8"
-        });
-        // console.log("local config file created");
-      }
-    }
-  } catch(e) {
-    // [assume] loaded from locally cached config file case
-    config = JSON.parse(configObj);
-  }
-  //console.log('config: ' + config);
-  if(!config) throw new Error("Unresolved config.");
-
-  createStacks(config);
-
-}).catch(err => {
-  console.log(err);
-});
+loadConfig(appConfigFilename, appConfigCacheS3BucketName)
+  .then(config => createStacks(config))
+  .catch(err => console.log(err));
