@@ -216,8 +216,8 @@ export class AppStack extends BaseStack {
         MCORPUS_DB_DATA_SOURCE_CLASS_NAME:
           'org.postgresql.ds.PGSimpleDataSource',
         MCORPUS_RST_TTL_IN_SECONDS: '1800',
-        MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: '60',
-        MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES: '10',
+        MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: '10',
+        MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES: '5',
         MCORPUS_JWT_TTL_IN_SECONDS: '172800',
         MCORPUS_SERVER__DEVELOPMENT: 'false',
         MCORPUS_SERVER__PORT: `${props.lbToEcsPort}`,
