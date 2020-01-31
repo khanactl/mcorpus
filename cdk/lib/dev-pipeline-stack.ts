@@ -243,7 +243,7 @@ export class DevPipelineStack extends BaseStack {
           build: {
             commands: [
               "npm run build",
-              "npm run cdk synth mcorpus-App-DEV -o dist",
+              "npm run cdk synth -- -o dist",
             ]
           }
         },
