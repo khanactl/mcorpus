@@ -56,7 +56,7 @@ function createStacks(appConfig: any) {
   // const currentAppEnv = resolveAppEnv(currentGitBranch);
   // console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
 
-  const appBuild = resolveAppBuild("../mcorpus-gql/target/classes/app.properties");
+  // const appBuild = resolveAppBuild("../mcorpus-gql/target/classes/app.properties");
 
   // single aws account houses all app instances
   const awsEnv: cdk.Environment = {
@@ -195,6 +195,8 @@ function createStacks(appConfig: any) {
     tags: awsStackTags_DEV,
     vpc: vpcStack.vpc,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
+    appConfigCacheS3BucketName: appConfigCacheS3BucketName,
+    appConfigFilename: appConfigFilename,
     ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
     githubOwner: gitRepoRef.githubOwner,
     githubRepo: gitRepoRef.githubRepo,

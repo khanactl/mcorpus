@@ -22,6 +22,10 @@ export interface IDevPipelineStackProps extends IStackProps {
    */
   readonly codebuildSecGrp: ec2.ISecurityGroup;
 
+  readonly appConfigCacheS3BucketName: string;
+
+  readonly appConfigFilename: string;
+
   /**
    * The SSM param name holding the target docker image tag.
    */
@@ -253,6 +257,13 @@ export class DevPipelineStack extends BaseStack {
       new iam.PolicyStatement({
         resources: ["*"],
         actions: ["ec2:DescribeAvailabilityZones"]
+      })
+    );
+    // allow codebuild to pull cdk config file from s3
+    cdkBuild.addToRolePolicy(
+      new iam.PolicyStatement({
+        resources: [`arn:aws:s3:::${props.appConfigCacheS3BucketName}/${props.appConfigFilename}`],
+        actions: ["s3:GetObject"]
       })
     );
 
