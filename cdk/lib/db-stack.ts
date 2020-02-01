@@ -1,15 +1,16 @@
 import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack, iname } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import rds = require('@aws-cdk/aws-rds');
 import secrets = require('@aws-cdk/aws-secretsmanager');
 import cloudwatch = require('@aws-cdk/aws-cloudwatch');
-import { DatabaseInstance } from '@aws-cdk/aws-rds'
+import { DatabaseInstance } from '@aws-cdk/aws-rds';
 import { SubnetType, IVpc, ISecurityGroup } from '@aws-cdk/aws-ec2';
 
 /**
  * Db Stack config properties.
  */
-export interface IDbProps extends cdk.StackProps {
+export interface IDbProps extends IStackProps {
   /**
    * The VPC ref
    */
@@ -26,13 +27,20 @@ export interface IDbProps extends cdk.StackProps {
    * The CICD codebuild security group ref.
    */
   readonly codebuildSecGrp: ISecurityGroup;
+  /**
+   * The database name to use.
+   */
+  readonly dbName: string;
+  /**
+   * The database master username to use.
+   */
+  readonly dbMasterUsername: string;
 }
 
 /**
  * Db Stack.
  */
-export class DbStack extends cdk.Stack {
-
+export class DbStack extends BaseStack {
   /**
    * The RDS db security group.
    */
@@ -49,63 +57,56 @@ export class DbStack extends cdk.Stack {
     // const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
     // const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
 
-    const instance = new DatabaseInstance(this, 'McorpusDbInstance', {
-      vpc: props.vpc, 
-      instanceIdentifier: 'mcorpus-db', 
-      databaseName: 'mcorpus', 
-      masterUsername: 'mcadmin', 
-      engine: rds.DatabaseInstanceEngine.POSTGRES, 
-      instanceClass: ec2.InstanceType.of(
-        ec2.InstanceClass.T2,  
-        ec2.InstanceSize.SMALL
-      ),
-      // parameterGroup: parameterGroup, 
-      // optionGroup: optionGroup, 
-      enablePerformanceInsights: false, 
-      multiAz: false, 
-      autoMinorVersionUpgrade: true, 
+    const dbInstNme = iname('db', props);
+    const instance = new DatabaseInstance(this, dbInstNme, {
+      vpc: props.vpc,
+      instanceIdentifier: dbInstNme,
+      databaseName: props.dbName,
+      masterUsername: props.dbMasterUsername,
+      engine: rds.DatabaseInstanceEngine.POSTGRES,
+      instanceClass: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),
+      // parameterGroup: parameterGroup,
+      // optionGroup: optionGroup,
+      enablePerformanceInsights: false,
+      multiAz: false,
+      autoMinorVersionUpgrade: true,
       /*
       cloudwatchLogsExports: [
         'trace',
         'audit',
         'alert',
         'listener'
-      ], 
-      cloudwatchLogsRetention: logs.RetentionDays.ONE_WEEK, 
+      ],
+      cloudwatchLogsRetention: logs.RetentionDays.ONE_WEEK,
       */
       monitoringInterval: cdk.Duration.seconds(60), // default is 1 min
-      storageEncrypted: true, 
+      storageEncrypted: true,
       backupRetention: cdk.Duration.days(0), // i.e. do not do backups
       vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
-      deletionProtection: false, 
+      deletionProtection: false,
     });
 
     // allow db bootstrap lambda fn to connect to db
-    instance.connections.allowDefaultPortFrom(
-      props.dbBootstrapSecGrp, 
-      'from db bootstrap', 
-    );
-    
+    instance.connections.allowDefaultPortFrom(props.dbBootstrapSecGrp, 'from db bootstrap');
+
     // allow ecs container traffic to db
     instance.connections.allowDefaultPortFrom(
-      props.ecsSecGrp, 
-      'from ecs container', // NOTE: connections construct resolves to a db specific sec grp!
+      props.ecsSecGrp,
+      'from ecs container' // NOTE: connections construct resolves to a db specific sec grp!
     );
 
     // allow codebuild traffic to db
-    instance.connections.allowDefaultPortFrom(
-      props.codebuildSecGrp, 
-      'from codebuild', 
-    );
+    instance.connections.allowDefaultPortFrom(props.codebuildSecGrp, 'from codebuild');
 
     // Rotate the master user password every 30 days
-    const rdsSecretRotation = instance.addRotationSingleUser('Rotation');
+    const rdsSecretRotation = instance.addRotationSingleUser(cdk.Duration.days(30));
 
     // Add alarm for high CPU
-    const cloudWatchAlarm = new cloudwatch.Alarm(this, 'HighCPU', {
+    const cloudWatchAlarmInstNme = iname('high-cpu', props);
+    const cloudWatchAlarm = new cloudwatch.Alarm(this, cloudWatchAlarmInstNme, {
       metric: instance.metricCPUUtilization(),
       threshold: 90,
-      evaluationPeriods: 1
+      evaluationPeriods: 1,
     });
 
     // Trigger Lambda function on instance availability events
@@ -128,15 +129,10 @@ export class DbStack extends cdk.Stack {
     this.dbInstanceJsonSecret = instance.secret!;
 
     // stack output
-    new cdk.CfnOutput(this, 'dbEndpoint', { value: 
-      instance.dbInstanceEndpointAddress + ':' + instance.dbInstanceEndpointPort
+    new cdk.CfnOutput(this, 'dbEndpoint', {
+      value: instance.dbInstanceEndpointAddress + ':' + instance.dbInstanceEndpointPort,
     });
-    new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: 
-      this.dbInstanceJsonSecret!.secretArn
-    });
-    new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value: 
-      cloudWatchAlarm.alarmArn
-    });
-
+    new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: this.dbInstanceJsonSecret!.secretArn });
+    new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value: cloudWatchAlarm.alarmArn });
   }
 }

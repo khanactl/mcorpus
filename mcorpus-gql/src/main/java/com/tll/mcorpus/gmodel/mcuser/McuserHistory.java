@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
 import com.tll.gmodel.IKey;
+import com.tll.gmodel.UUIDKey;
 
 public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
 
@@ -36,15 +37,14 @@ public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
     }
   }
 
-  public final IKey pk; // really the related one pk
-  public final UUID uid;
+  public final UUIDKey mcuserKey;
   public final List<LoginEvent> logins;
   public final List<LogoutEvent> logouts;
 
   /**
    * Constructor - When no mcuser history exists.
-   * 
-   * @param uid
+   *
+   * @param uid the parent mcuser id
    */
   public McuserHistory(UUID uid) {
     this(uid, null, null);
@@ -52,18 +52,17 @@ public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
 
   /**
    * Constructor.
-   * 
+   *
    * @param uid
    * @param logins
    * @param logouts
    */
   public McuserHistory(UUID uid, List<LoginEvent> logins, List<LogoutEvent> logouts) {
-    this.pk = IKey.uuid("McuserHistory", uid);
-    this.uid = uid;
+    this.mcuserKey = new UUIDKey(uid, "mcuser");
     this.logins = logins == null ? Collections.emptyList() : logins;
     this.logouts = logouts == null ? Collections.emptyList() : logouts;
   }
 
   @Override
-  public IKey getPk() { return  pk; }
+  public UUIDKey getPk() { return  mcuserKey; }
 }

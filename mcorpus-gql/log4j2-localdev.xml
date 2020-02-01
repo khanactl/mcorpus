@@ -3,18 +3,20 @@
 <Configuration status="INFO">
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} [%t] [%X{requestId}] %-5level %logger{36} - %msg%n"/>
+      <PatternLayout pattern="%d{ISO8601} [%-4T] [%X{requestId}] %-5level %-20.-20c{1} %msg%n"/>
     </Console>
-    <File name="File" fileName="/tmp/mcorpus-gql-server.log">
-      <PatternLayout pattern="%d{ISO8601} [%t] [%X{requestId}] %-5level %logger{36} %msg%n"/>
-    </File>
+    <RandomAccessFile name="File" fileName="/tmp/mcorpus-gql-server.log">
+      <PatternLayout pattern="%d{ISO8601} [%-4T] [%X{requestId}] %-5level %-20.-20c{1} %msg%n"/>
+    </RandomAccessFile>
   </Appenders>
   <Loggers>
     <Logger name="org.jooq" level="info" />
+    <Logger name="org.jooq.tools.LoggerListener" level="debug" />
     <Logger name="com.zaxxer.hikari" level="info" />
+    <Logger name="ratpack.util.internal.TransportDetector" level="info" />
     <Logger name="io.netty" level="info" />
     <Logger name="graphql" level="info" />
-    
+
     <Root level="DEBUG">
       <AppenderRef ref="Console"/>
       <AppenderRef ref="File"/>

@@ -3,12 +3,12 @@ package com.tll.mcorpus.transform;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.nclean;
+import static com.tll.core.Util.nechk;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
 import static com.tll.transform.TransformUtil.asSqlDate;
 import static com.tll.transform.TransformUtil.digits;
 import static com.tll.transform.TransformUtil.fval;
-import static com.tll.transform.TransformUtil.odtFromDate;
 import static com.tll.transform.TransformUtil.odtToDate;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 
@@ -36,7 +36,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
     // default
     return null;
   }
-  
+
   public static String memberStatusToString(MemberStatus memberStatus) {
     return memberStatus == null ? null : memberStatus.getLiteral();
   }
@@ -55,25 +55,25 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
   @Override
   protected Member fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
     return new Member(
-      uuidFromToken(fval("mid", gqlMap)),
-      fval("created", gqlMap),
-      fval("modified", gqlMap),
+      null,
+      null,
+      null,
       fval("empId", gqlMap),
       fval("location", gqlMap),
-      fval("nameFirst", gqlMap),
+      clean(fval("nameFirst", gqlMap)),
       clean(fval("nameMiddle", gqlMap)), // make empty if null for middle name (not null in db ddl)
-      fval("nameLast", gqlMap),
-      fval("displayName", gqlMap),
-      fval("status", gqlMap),
+      clean(fval("nameLast", gqlMap)),
+      nclean(fval("displayName", gqlMap)),
+      clean(fval("status", gqlMap)),
       fval("dob", gqlMap),
-      fval("ssn", gqlMap),
-      fval("personalEmail", gqlMap),
-      fval("workEmail", gqlMap),
-      fval("mobilePhone", gqlMap),
-      fval("homePhone", gqlMap),
-      fval("workPhone", gqlMap),
-      fval("username", gqlMap),
-      fval("pswd", gqlMap)
+      clean(fval("ssn", gqlMap)),
+      nclean(fval("personalEmail", gqlMap)),
+      nclean(fval("workEmail", gqlMap)),
+      nclean(fval("mobilePhone", gqlMap)),
+      nclean(fval("homePhone", gqlMap)),
+      nclean(fval("workPhone", gqlMap)),
+      clean(fval("username", gqlMap)),
+      fval("pswd", gqlMap) // do not clean pswd
     );
   }
 
@@ -81,24 +81,24 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
   public Member fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
     return new Member(
       uuidFromToken(fval("mid", gqlMap)),
-      fval("created", gqlMap),
-      fval("modified", gqlMap),
-      fval("empId", gqlMap),
-      fval("location", gqlMap),
-      fval("nameFirst", gqlMap),
-      fval("nameMiddle", gqlMap),
-      fval("nameLast", gqlMap),
-      fval("displayName", gqlMap),
-      fval("status", gqlMap),
+      null,
+      null,
+      neclean(fval("empId", gqlMap)),
+      neclean(fval("location", gqlMap)),
+      neclean(fval("nameFirst", gqlMap)),
+      nclean(fval("nameMiddle", gqlMap)),
+      neclean(fval("nameLast", gqlMap)),
+      nclean(fval("displayName", gqlMap)),
+      neclean(fval("status", gqlMap)),
       fval("dob", gqlMap),
-      fval("ssn", gqlMap),
-      fval("personalEmail", gqlMap),
-      fval("workEmail", gqlMap),
-      fval("mobilePhone", gqlMap),
-      fval("homePhone", gqlMap),
-      fval("workPhone", gqlMap),
-      fval("username", gqlMap),
-      fval("pswd", gqlMap)
+      neclean(fval("ssn", gqlMap)),
+      nclean(fval("personalEmail", gqlMap)),
+      nclean(fval("workEmail", gqlMap)),
+      nclean(fval("mobilePhone", gqlMap)),
+      nclean(fval("homePhone", gqlMap)),
+      nclean(fval("workPhone", gqlMap)),
+      neclean(fval("username", gqlMap)),
+      nechk(fval("pswd", gqlMap))
     );
   }
 
@@ -108,21 +108,21 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
       d.dbMember.getMid(),
       odtToDate(d.dbMember.getCreated()),
       odtToDate(d.dbMember.getModified()),
-      d.dbMember.getEmpId(),
+      clean(d.dbMember.getEmpId()),
       locationToString(d.dbMember.getLocation()),
-      d.dbMember.getNameFirst(),
-      d.dbMember.getNameMiddle(),
-      d.dbMember.getNameLast(),
-      d.dbMember.getDisplayName(),
+      clean(d.dbMember.getNameFirst()),
+      nclean(d.dbMember.getNameMiddle()),
+      clean(d.dbMember.getNameLast()),
+      clean(d.dbMember.getDisplayName()),
       memberStatusToString(d.dbMember.getStatus()),
       d.dbMauth.getDob(),
-      d.dbMauth.getSsn(),
-      d.dbMauth.getEmailPersonal(),
-      d.dbMauth.getEmailWork(),
-      d.dbMauth.getMobilePhone(),
-      d.dbMauth.getHomePhone(),
-      d.dbMauth.getWorkPhone(),
-      d.dbMauth.getUsername(),
+      clean(d.dbMauth.getSsn()),
+      clean(d.dbMauth.getEmailPersonal()),
+      clean(d.dbMauth.getEmailWork()),
+      clean(d.dbMauth.getMobilePhone()),
+      clean(d.dbMauth.getHomePhone()),
+      clean(d.dbMauth.getWorkPhone()),
+      clean(d.dbMauth.getUsername()),
       null // pswd
     );
   }
@@ -132,29 +132,29 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
     return new MemberAndMauth(
       new com.tll.mcorpus.db.tables.pojos.Member(
         g.getMid(),
-        odtFromDate(g.getCreated()),
-        odtFromDate(g.getModified()),
-        neclean(g.getEmpId()),
+        null,
+        null,
+        g.getEmpId(),
         locationFromString(g.getLocation()),
-        upper(neclean(g.getNameFirst())),
-        upper(nclean(g.getNameMiddle())), // middle name do not set to null when empty
-        upper(neclean(g.getNameLast())),
-        neclean(g.getDisplayName()),
+        upper(g.getNameFirst()),
+        upper(g.getNameMiddle()),
+        upper(g.getNameLast()),
+        g.getDisplayName(),
         memberStatusFromString(g.getStatus())
       ),
       new com.tll.mcorpus.db.tables.pojos.Mauth(
         g.getMid(),
         null, // modified
         asSqlDate(g.getDob()),
-        digits(neclean(g.getSsn())),
-        neclean(g.getPersonalEmail()),
-        neclean(g.getWorkEmail()),
-        digits(neclean(g.getMobilePhone())),
-        digits(neclean(g.getHomePhone())),
+        digits(g.getSsn()),
+        g.getPersonalEmail(),
+        g.getWorkEmail(),
+        digits(g.getMobilePhone()),
+        digits(g.getHomePhone()),
+        digits(g.getWorkPhone()),
         null, // fax
-        digits(neclean(g.getWorkPhone())),
-        neclean(g.getUsername()),
-        neclean(g.getPswd())
+        g.getUsername(),
+        g.getPswd()
       )
     );
   }

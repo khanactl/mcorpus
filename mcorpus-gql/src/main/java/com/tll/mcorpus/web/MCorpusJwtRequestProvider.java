@@ -2,9 +2,7 @@ package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNull;
-import static com.tll.core.Util.isNullOrEmpty;
-import static com.tll.core.Util.lower;
-import static com.tll.core.Util.not;
+import static com.tll.core.Util.isNotNullOrEmpty;
 
 import java.time.Instant;
 import java.util.regex.Matcher;
@@ -20,25 +18,17 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
 
   public static MCorpusJwtRequestProvider fromRequestSnapshot(final RequestSnapshot rs) {
     return new MCorpusJwtRequestProvider(
-      rs, 
-      String.format("%s|%s", 
-        nullwiseClean(rs.getRemoteAddressHost()), 
-        nullwiseClean(rs.getxForwardedFor())
+      rs,
+      String.format("%s|%s",
+        clean(rs.getRemoteAddressHost()),
+        clean(rs.getXForwardedFor())
       )
     );
   }
 
-  private static boolean isNullwiseOrEmpty(final String s) {
-    return isNullOrEmpty(s) || "null".equals(lower(s));
-  }
-
-  private static String nullwiseClean(final String s) {
-    return isNullwiseOrEmpty(s) ? "" : clean(s);
-  }
-
   /**
    * Parse a given client origin token into its constituent parts.
-   * 
+   *
    * @param clientOrigin the client origin to parse
    * @return Never-null String array of size 2 where:<br>
    *         <ul>
@@ -48,7 +38,7 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
    * @see #getClientOrigin() for the expected client origin format
    */
   private static String[] parseClientOriginToken(final String clientOrigin) {
-    if(not(isNullOrEmpty(clientOrigin)) && clientOrigin.indexOf('|') >= 0) {
+    if(isNotNullOrEmpty(clientOrigin) && clientOrigin.indexOf('|') >= 0) {
       final Matcher matcher = clientOriginExtractor.matcher(clientOrigin);
       if(matcher.matches()) {
         return new String[] { matcher.group(1), matcher.group(2) };
@@ -56,9 +46,9 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
     }
     return new String[] { "", "" };
   }
-  
+
   private static final Pattern clientOriginExtractor = Pattern.compile("^(.*)\\|(.*)$");
-  
+
   private final RequestSnapshot rs;
   private final String clientOrigin;
 
@@ -85,24 +75,24 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   @Override
   public boolean verifyClientOrigin(final String jwtAudience) {
     if(isNull(jwtAudience)) return false;
-    
+
     final String[] httpReqClientOriginParsed = parseClientOriginToken(getClientOrigin());
     final String[] jwtAudienceParsed = parseClientOriginToken(jwtAudience);
-    
+
     String httpReqRemoteAddrHost = httpReqClientOriginParsed[0];
     String httpReqXForwardedFor = httpReqClientOriginParsed[1];
-    
+
     String jwtAudienceRemoteAddrHost = jwtAudienceParsed[0];
     String jwtAudienceXForwardedFor = jwtAudienceParsed[1];
-    
-    // if the original remote address host matches either the current remote address host 
+
+    // if the original remote address host matches either the current remote address host
     // -OR- the x-forwarded-for then we approve this message
-    if(httpReqRemoteAddrHost.equals(jwtAudienceRemoteAddrHost) || httpReqRemoteAddrHost.equals(jwtAudienceXForwardedFor)) 
+    if(httpReqRemoteAddrHost.equals(jwtAudienceRemoteAddrHost) || httpReqRemoteAddrHost.equals(jwtAudienceXForwardedFor))
       return true;
-    
-    if(httpReqXForwardedFor.equals(jwtAudienceRemoteAddrHost) || httpReqXForwardedFor.equals(jwtAudienceXForwardedFor)) 
+
+    if(httpReqXForwardedFor.equals(jwtAudienceRemoteAddrHost) || httpReqXForwardedFor.equals(jwtAudienceXForwardedFor))
       return true;
-    
+
     // denied
     return false;
   }

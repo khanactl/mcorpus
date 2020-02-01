@@ -1,8 +1,9 @@
+import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack, iname } from './cdk-native';
 import cfn = require('@aws-cdk/aws-cloudformation');
 import lambda = require('@aws-cdk/aws-lambda');
 import ssm = require('@aws-cdk/aws-ssm');
 import iam = require('@aws-cdk/aws-iam');
-import cdk = require('@aws-cdk/core');
 import path = require('path');
 import { IVpc, SubnetType, ISecurityGroup } from '@aws-cdk/aws-ec2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
@@ -10,7 +11,7 @@ import { PolicyStatement } from '@aws-cdk/aws-iam';
 import fs = require('fs');
 import archiver = require('archiver');
 
-export interface IDbBootstrapProps extends cdk.StackProps {
+export interface IDbBootstrapProps extends IStackProps {
   /**
    * The VPC ref.
    */
@@ -33,111 +34,110 @@ export interface IDbBootstrapProps extends cdk.StackProps {
 
 /**
  * DbBootstrapStack
- * 
+ *
  * Wrapper around a Custom Resource that is responsible for:
  * 1. Creating the db schema
  * 2. Creating the db roles/users
  * 3. Creating the needed SSM db/jdbc secure param secrets for downstream use
  */
-export class DbBootstrapStack extends cdk.Stack {
-
+export class DbBootstrapStack extends BaseStack {
   public readonly dbBootstrapRole: iam.Role;
-  
+
   public readonly ssmNameJdbcUrl: string;
   public readonly ssmVersionJdbcUrl: number;
 
   public readonly ssmNameJdbcTestUrl: string;
   public readonly ssmVersionJdbcTestUrl: number;
-  
+
   public readonly responseMessage: string;
 
   public readonly ssmJdbcUrl: IStringParameter;
   public readonly ssmJdbcTestUrl: IStringParameter;
 
   constructor(scope: cdk.Construct, id: string, props: IDbBootstrapProps) {
-    super(scope, id);
+    super(scope, id, props);
 
     // db dbootstrap role
-    this.dbBootstrapRole = new iam.Role(this, 'dbBootstrapRole', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
+    const dbBootstrapRoleInstNme = iname('db-bootstrap-role', props);
+    this.dbBootstrapRole = new iam.Role(this, dbBootstrapRoleInstNme, {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
     this.dbBootstrapRole.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
     });
     this.dbBootstrapRole.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole'
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole',
     });
-    this.dbBootstrapRole.addToPolicy(new PolicyStatement({
-      actions: ['secretsmanager:GetSecretValue'], 
-      resources: [ 
-        props.dbJsonSecretArn, 
-      ],
-    }));
-    this.dbBootstrapRole.addToPolicy(new PolicyStatement({
-      actions: ['ssm:PutParameter'], 
-      resources: [ 
-        '*' // TODO narrow scope
-      ],
-    }));
+    this.dbBootstrapRole.addToPolicy(
+      new PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [props.dbJsonSecretArn],
+      })
+    );
+    this.dbBootstrapRole.addToPolicy(
+      new PolicyStatement({
+        actions: ['ssm:PutParameter'],
+        resources: [
+          '*', // TODO narrow scope
+        ],
+      })
+    );
     // END db bootstrap role
 
-    const lambdaProvider = new lambda.SingletonFunction(this, 'DbBootstrapLambda', {
-      vpc: props.vpc, 
-      vpcSubnets: { subnetType: SubnetType.PRIVATE }, 
-      securityGroup: props.dbBootstrapSecGrp, 
-      uuid: 'f8dfc6d4-d864-4f4f-8d65-63c2ea54f2ac', // one-time globaly unique 
-      runtime: lambda.Runtime.PYTHON_3_7, 
-      // functionName: 'DbBootstrapLambda', 
-      memorySize: 128, 
-      timeout: cdk.Duration.seconds(60), 
+    const lambdaProviderInstNme = iname('db-bootstrap-lambda', props);
+    const lambdaProvider = new lambda.SingletonFunction(this, lambdaProviderInstNme, {
+      vpc: props.vpc,
+      vpcSubnets: { subnetType: SubnetType.PRIVATE },
+      securityGroup: props.dbBootstrapSecGrp,
+      uuid: 'f8dfc6d4-d864-4f4f-8d65-63c2ea54f2ac', // one-time globaly unique
+      runtime: lambda.Runtime.PYTHON_3_7,
+      // functionName: 'DbBootstrapLambda',
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(60),
       code: lambda.Code.fromAsset(
-        path.join(__dirname, "../lambda/dbbootstrap") // dir ref
-      ), 
-      handler: 'dbbootstrap.main', 
-      role: this.dbBootstrapRole, 
+        path.join(__dirname, '../lambda/dbbootstrap') // dir ref
+      ),
+      handler: 'dbbootstrap.main',
+      role: this.dbBootstrapRole,
     });
-  
-    const resource = new cfn.CustomResource(this, 'DbBootstrap', {
+
+    const resourceInstNme = iname('db-bootstrap', props);
+    const resource = new cfn.CustomResource(this, resourceInstNme, {
       provider: cfn.CustomResourceProvider.lambda(lambdaProvider),
       properties: {
-        'DbJsonSecretArn': props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
-        'TargetRegion': props.targetRegion, 
-      }
+        DbJsonSecretArn: props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
+        TargetRegion: props.targetRegion,
+        SsmNameJdbcUrl: `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
+        SsmNameJdbcTestUrl: `/mcorpusTestDbUrl/${props.appEnv}`,
+      },
     });
-  
+
     this.ssmNameJdbcUrl = resource.getAtt('SsmNameJdbcUrl').toString();
     this.ssmVersionJdbcUrl = parseInt(resource.getAtt('SsmVersionJdbcUrl').toString());
-    
+
     this.ssmNameJdbcTestUrl = resource.getAtt('SsmNameJdbcTestUrl').toString();
     this.ssmVersionJdbcTestUrl = parseInt(resource.getAtt('SsmVersionJdbcTestUrl').toString());
-    
+
     this.responseMessage = resource.getAtt('Message').toString();
 
     // obtain the just generated SSM jdbc url param refs
-    this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'mcorpusDbUrl', {
-      parameterName: this.ssmNameJdbcUrl, 
-      version: this.ssmVersionJdbcUrl, 
-      simpleName: false, 
-    });  
-    this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'mcorpusTestDbUrl', {
-      parameterName: this.ssmNameJdbcTestUrl, 
-      version: this.ssmVersionJdbcTestUrl, 
-      simpleName: false, 
+    const ssmJdbcUrlInstNme = iname('db-url', props);
+    this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcUrlInstNme, {
+      parameterName: this.ssmNameJdbcUrl,
+      version: this.ssmVersionJdbcUrl,
+      simpleName: false,
+    });
+    const ssmJdbcTestUrlInstNme = iname('test-db-url', props);
+    this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcTestUrlInstNme, {
+      parameterName: this.ssmNameJdbcTestUrl,
+      version: this.ssmVersionJdbcTestUrl,
+      simpleName: false,
     });
 
     // stack output
-    new cdk.CfnOutput(this, 'dbBootstrapRoleArn', { value: 
-      this.dbBootstrapRole.roleArn
-    });
-    new cdk.CfnOutput(this, 'dbBootstrapResponseMessage', { value: 
-      this.responseMessage
-    });
-    new cdk.CfnOutput(this, 'ssmJdbcUrlArn', { value: 
-      this.ssmJdbcUrl.parameterArn
-    });
-    new cdk.CfnOutput(this, 'ssmJdbcTestUrlArn', { value: 
-      this.ssmJdbcTestUrl.parameterArn
-    });
-
+    new cdk.CfnOutput(this, 'dbBootstrapRoleArn', { value: this.dbBootstrapRole.roleArn });
+    new cdk.CfnOutput(this, 'dbBootstrapResponseMessage', { value: this.responseMessage });
+    new cdk.CfnOutput(this, 'ssmJdbcUrlArn', { value: this.ssmJdbcUrl.parameterArn });
+    new cdk.CfnOutput(this, 'ssmJdbcTestUrlArn', { value: this.ssmJdbcTestUrl.parameterArn });
   }
 }

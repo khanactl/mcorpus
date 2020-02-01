@@ -7,33 +7,57 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
-import com.tll.gmodel.IKey;
+import com.tll.gmodel.UUIDKey;
 
 public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAndAddressNameKey> {
 
-  public static class MidAndAddressNameKey implements IKey {
+  public static class MidAndAddressNameKey extends UUIDKey {
 
-    private final UUID mid;
     private final String addressName;
 
     public MidAndAddressNameKey(final UUID mid, final String addressName) {
-      this.mid = mid;
+      super(mid, "maddress");
       this.addressName = addressName;
     }
 
-    public UUID getMid() { return mid; }
+    public UUID getMid() { return uuid; }
 
     public String getAddressName() { return addressName; }
 
     @Override
-    public boolean isSet() { return mid != null && isNotNullOrEmpty(addressName); }
+    public boolean isSet() { return super.isSet() && isNotNullOrEmpty(addressName); }
 
     @Override
-    public String refToken() { return String.format("Maddress[mid: %s, AddressName: %s]", mid, addressName); }
-  }
+    public String refToken() { return String.format("Maddress[mid: %s, AddressName: %s]", uuid, addressName); }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (!super.equals(obj))
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      MidAndAddressNameKey other = (MidAndAddressNameKey) obj;
+      if (addressName == null) {
+        if (other.addressName != null)
+          return false;
+      } else if (!addressName.equals(other.addressName))
+        return false;
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + ((addressName == null) ? 0 : addressName.hashCode());
+      return result;
+    }
+
+  } // MidAndAddressNameKey
 
   private final MidAndAddressNameKey pk;
-  private final UUID        mid;
   private final String      addressName;
   private final Date        modified;
   private final String      attn;
@@ -46,7 +70,6 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
 
   public MemberAddress(UUID mid, String addressName, Date modified, String attn, String street1, String street2, String city, String state, String postalCode, String country) {
     this.pk = new MidAndAddressNameKey(mid, addressName);
-    this.mid = mid;
     this.addressName = addressName;
     this.modified = copy(modified);
     this.attn = attn;
@@ -60,9 +83,9 @@ public class MemberAddress extends BaseEntity<MemberAddress, MemberAddress.MidAn
 
   @Override
   public MemberAddress.MidAndAddressNameKey getPk() { return pk; }
-  
+
   public UUID getMid() {
-    return mid;
+    return pk.getUUID();
   }
 
   public String getAddressName() {

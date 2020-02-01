@@ -20,18 +20,25 @@ import ratpack.server.ServerConfig;
 
 /**
  * Object bindings for the web layer.
- * 
+ *
  * @author jkirton
  */
 public class MCorpusWebModule extends AbstractModule {
-  
+
   @Override
   protected void configure() {
+    bind(WebFileRenderer.class);
+    bind(CommonHttpHeaders.class);
+    bind(JWTRequireAdminHandler.class);
     bind(JWTStatusHandler.class);
-    bind(GraphQLIndexHandler.class);
-    bind(CsrfGuardHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
+  }
+
+  @Provides
+  @Singleton
+  CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
+    return new CsrfGuardHandler(config.rstTtlInSeconds);
   }
 
   @Provides
@@ -46,23 +53,19 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Provides
   @Singleton
-  IJwtBackendHandler jwtBackendHandler(MCorpusServerConfig config, MCorpusUserRepo mcuserRepo) {
+  JWT jwt(MCorpusUserRepo mcuserRepo, ServerConfig serverConfig, MCorpusServerConfig config) {
     // the mcorpus server config determines whether we use a caching jwt handler or not
-    return config.jwtStatusCacheTimeoutInMinutes <= 0 ? 
-      new MCorpusJwtBackendHandler(mcuserRepo) : 
+    final IJwtBackendHandler backendHandler = config.jwtStatusCacheTimeoutInMinutes <= 0 ?
+      new MCorpusJwtBackendHandler(mcuserRepo) :
       new CachingJwtBackendHandler(
-        new MCorpusJwtBackendHandler(mcuserRepo), 
-        config.jwtStatusCacheTimeoutInMinutes, 
-        config.jwtStatusCacheMaxSize)
-    ;
-  }
-
-  @Provides
-  @Singleton
-  JWT jwt(ServerConfig serverConfig, MCorpusServerConfig config) {
+        new MCorpusJwtBackendHandler(mcuserRepo),
+        config.jwtStatusCacheTimeoutInMinutes,
+        config.jwtStatusCacheMaxSize
+      );
     return new JWT(
-      Duration.ofSeconds(config.jwtTtlInSeconds), 
-      JWT.deserialize(config.jwtSalt), 
+      backendHandler,
+      Duration.ofSeconds(config.jwtTtlInSeconds),
+      JWT.deserialize(config.jwtSalt),
       serverConfig.getPublicAddress().toString()
     );
   }

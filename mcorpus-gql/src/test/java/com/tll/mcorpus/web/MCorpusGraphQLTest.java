@@ -4,10 +4,9 @@ import static com.tll.TestUtil.cpr;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.jwt;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
-import static com.tll.mcorpus.MCorpusTestUtil.testJwtBackendHandler;
 import static com.tll.mcorpus.MCorpusTestUtil.testJwtResponseProvider;
 import static com.tll.mcorpus.db.Tables.MEMBER;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -83,13 +82,15 @@ public class MCorpusGraphQLTest {
     return new RequestSnapshot(
         Instant.now(),
         "127.0.0.1",
-        "localhost",
+        "path",
+        "POST",
+        "host",
         "origin",
         "https://mcorpus.d2d",
         "forwarded",
         "X-Forwarded-For",
+        "X-Forwarded-Host",
         "X-Forwarded-Proto",
-        "X-Forwarded-Port",
         null, // jwt cookie
         null, // rst cookie
         null, // rst header
@@ -103,7 +104,7 @@ public class MCorpusGraphQLTest {
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),
-      roles, 
+      roles,
       lnow,
       lnow
     );
@@ -111,17 +112,16 @@ public class MCorpusGraphQLTest {
 
   static JWTUserGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
     return new JWTUserGraphQLWebContext(
-      query, 
-      null, 
-      MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot), 
-      jwtRequestStatus, 
-      jwt(), 
-      testJwtBackendHandler(), 
-      testJwtResponseProvider(), 
+      query,
+      null,
+      MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot),
+      jwtRequestStatus,
+      jwt(),
+      testJwtResponseProvider(),
       "mclogin"
     );
   }
-	  
+
   /**
    * Issue a GraphQL query with with a context of VALID jwt status under a given role.
    */
@@ -135,7 +135,7 @@ public class MCorpusGraphQLTest {
   static ExecutionResult query(final String query, JWTStatus jwtStatus, String roles) {
     final GraphQLSchema schema = mcgql().getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final ExecutionInput executionInput = 
+    final ExecutionInput executionInput =
       ExecutionInput.newExecutionInput()
         .query(query)
         .context(gqlWebContext(query, testRequestSnapshot(), testJwtStatus(jwtStatus, roles)))
@@ -150,14 +150,14 @@ public class MCorpusGraphQLTest {
   static ExecutionResult queryNoContext(final String query) {
     final GraphQLSchema schema = mcgql().getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final ExecutionInput executionInput = 
+    final ExecutionInput executionInput =
       ExecutionInput.newExecutionInput()
         .query(query)
         .build();
     final ExecutionResult result = graphQL.execute(executionInput);
     return result;
   }
-  
+
   @Test
   public void testJsonStringToMap() throws Exception {
     final String json = cpr("introspect.gql");
@@ -166,7 +166,7 @@ public class MCorpusGraphQLTest {
     assertTrue(rmap.size() == 1);
     assertTrue(rmap.containsKey("query"));
   }
-  
+
   @Test
   public void testLoadSchema() {
     final MCorpusGraphQL g = mcgql();
@@ -217,7 +217,7 @@ public class MCorpusGraphQLTest {
   @Test
   public void testSimpleQueryParse() throws Exception {
     final String initialQuery = String.format(
-      "{\"query\":\"{\\n  mrefByMid(mid: \\\"%s\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}", 
+      "{\"query\":\"{\\n  mrefByMid(mid: \\\"%s\\\") {\\n    empId\\n  }\\n}\",\"variables\":null,\"operationName\":null}",
       queryRandomMemberId()
     );
     final Map<String, Object> qmap = jsonStringToMap(initialQuery);

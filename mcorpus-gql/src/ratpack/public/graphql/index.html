@@ -5,20 +5,23 @@
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
 -->
-<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <title>mcorpus GraphiQL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link href="/favicon.ico" rel="shortcut icon" />
   <style>
-      body {
-        height: 100%;
-        margin: 0;
-        width: 100%;
-        overflow: hidden;
-      }
-      #graphiql {
-        height: 100vh;
-      }
-    </style>
+    body {
+      height: 100%;
+      margin: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+    #graphiql {
+      height: 100vh;
+    }
+  </style>
 
   <!--
     This GraphiQL example depends on Promise and fetch, which are available in
@@ -27,12 +30,12 @@
     If you do not want to rely on a CDN, you can host these files locally or
     include them directly in your favored resource bunder.
   -->
-  <script src="es6-promise.auto.min.js"></script>
-  <script src="fetch.0.9.0.min.js"></script>
-  <script src="react.15.4.2.min.js"></script>
-  <script src="react-dom.15.4.2.min.js"></script>
-  <link rel="stylesheet" href="graphiql.css" />
-  <script src="graphiql.js"></script>
+  <script src="/graphql/es6-promise.auto.min.js"></script>
+  <script src="/graphql/fetch.0.9.0.min.js"></script>
+  <script src="/graphql/react.15.4.2.min.js"></script>
+  <script src="/graphql/react-dom.15.4.2.min.js"></script>
+  <link rel="stylesheet" href="/graphql/graphiql.css" />
+  <script src="/graphql/graphiql.js"></script>
 </head>
 <body>
 <div id="graphiql">Loading...</div>
@@ -105,11 +108,11 @@
       body: JSON.stringify(graphQLParams),
       credentials: 'include',
     }).then(function (response) {
-    	  // grab the updated RST token
-    	  try {
-    		  rst = response.headers.get('rst');
-    	  } catch (error) { }
-    	  ///
+      // grab the updated RST token
+      try {
+        rst = response.headers.get('rst');
+      } catch (error) { }
+      ///
       return response.text();
     }).then(function (responseBody) {
       try {

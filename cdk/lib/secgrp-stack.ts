@@ -1,28 +1,24 @@
 import cdk = require('@aws-cdk/core');
+import { IStackProps, BaseStack, iname } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import { SecurityGroup, Peer, Port } from '@aws-cdk/aws-ec2';
 
 /**
  * Security Group config properties.
  */
-export interface ISecGrpProps extends cdk.StackProps {
+export interface ISecGrpProps extends IStackProps {
   /**
    * The VPC ref
    */
   readonly vpc: ec2.IVpc;
-  /**
-   * The load balancer to app ecs container (traffic) port.
-   */
-  readonly lbTrafficPort: number;
 }
 
 /**
  * Security Group Stack.
  */
-export class SecGrpStack extends cdk.Stack {
-
+export class SecGrpStack extends BaseStack {
   public readonly dbBootstrapSecGrp: SecurityGroup;
-  
+
   public readonly lbSecGrp: SecurityGroup;
 
   public readonly ecsSecGrp: SecurityGroup;
@@ -33,61 +29,49 @@ export class SecGrpStack extends cdk.Stack {
     super(scope, id, props);
 
     // db bootstrap security group
-    this.dbBootstrapSecGrp = new SecurityGroup(this, 'sg-dbbootstrap', {
+    const sgDbBootstrapInstNme = iname('dbbootstrap-sec-grp', props);
+    this.dbBootstrapSecGrp = new SecurityGroup(this, sgDbBootstrapInstNme, {
       vpc: props.vpc,
       description: 'Db bootstrap security group.',
-      allowAllOutbound: true, 
-      securityGroupName: 'db-bootstrap-sec-grp', 
+      allowAllOutbound: true,
+      securityGroupName: sgDbBootstrapInstNme,
     });
+    this.dbBootstrapSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbBootstrapInstNme));
 
     // load balancer security group
-    this.lbSecGrp = new SecurityGroup(this, 'sg-alb', {
+    const sgLbInstNme = iname('lb-sec-grp', props);
+    this.lbSecGrp = new SecurityGroup(this, sgLbInstNme, {
       vpc: props.vpc,
       description: 'App load balancer security group.',
-      allowAllOutbound: true, 
-      securityGroupName: 'load-balancer-sec-grp', 
+      allowAllOutbound: true,
+      securityGroupName: sgLbInstNme,
     });
-    // rule: outside internet access only by TLS on 443
-    this.lbSecGrp.addIngressRule(
-      Peer.anyIpv4(), 
-      Port.tcp(443), 
-      'TLS/443 access from internet'
-    );
-    
+    this.lbSecGrp.node.applyAspect(new cdk.Tag('Name', sgLbInstNme));
+
     // ecs container security group
-    this.ecsSecGrp = new SecurityGroup(this, 'ecs-container-sec-grp', {
-      vpc: props.vpc, 
+    const sgEcsInstNme = iname('ecs-container-sec-grp', props);
+    this.ecsSecGrp = new SecurityGroup(this, sgEcsInstNme, {
+      vpc: props.vpc,
       description: 'ECS container security group',
-      allowAllOutbound: true, 
-      securityGroupName: 'ecs-container-sec-grp', 
+      allowAllOutbound: true,
+      securityGroupName: sgEcsInstNme,
     });
-    // rule: lb to ecs container traffic
-    this.ecsSecGrp.addIngressRule(
-      this.lbSecGrp, 
-      Port.tcp(props.lbTrafficPort), 
-      'lb to ecs container traffic'
-    );
+    this.ecsSecGrp.node.applyAspect(new cdk.Tag('Name', sgEcsInstNme));
 
     // codebuild security group
-    this.codebuildSecGrp = new SecurityGroup(this, 'codebuild-sec-grp', {
-      vpc: props.vpc, 
+    const sgCodebuildInstNme = iname('codebuild-sec-grp', props);
+    this.codebuildSecGrp = new SecurityGroup(this, sgCodebuildInstNme, {
+      vpc: props.vpc,
       description: 'Codebuild security group',
-      allowAllOutbound: true, 
-      securityGroupName: 'codebuild-sec-grp', 
+      allowAllOutbound: true,
+      securityGroupName: sgCodebuildInstNme,
     });
+    this.codebuildSecGrp.node.applyAspect(new cdk.Tag('Name', sgCodebuildInstNme));
 
     // stack output
-    new cdk.CfnOutput(this, 'DbBootstrapSecurityGroup', { value: 
-      this.dbBootstrapSecGrp.securityGroupName
-    });
-    new cdk.CfnOutput(this, 'LoadBalancerSecurityGroup', { value: 
-      this.lbSecGrp.securityGroupName
-    });
-    new cdk.CfnOutput(this, 'ECSContainerSecurityGroup', { value: 
-      this.ecsSecGrp.securityGroupName
-    });
-    new cdk.CfnOutput(this, 'CodebuildSecurityGroup', { value: 
-      this.codebuildSecGrp.securityGroupName
-    });
+    new cdk.CfnOutput(this, 'DbBootstrapSecurityGroup', { value: this.dbBootstrapSecGrp.securityGroupName });
+    new cdk.CfnOutput(this, 'LoadBalancerSecurityGroup', { value: this.lbSecGrp.securityGroupName });
+    new cdk.CfnOutput(this, 'ECSContainerSecurityGroup', { value: this.ecsSecGrp.securityGroupName });
+    new cdk.CfnOutput(this, 'CodebuildSecurityGroup', { value: this.codebuildSecGrp.securityGroupName });
   }
 }

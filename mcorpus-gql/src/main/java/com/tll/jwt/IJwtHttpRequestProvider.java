@@ -3,45 +3,39 @@ package com.tll.jwt;
 import java.time.Instant;
 
 /**
- * Contract for obtaining the status of a possibly absent JWT 
+ * Contract for obtaining the status of a possibly absent JWT
  * for an incoming http request.
- * 
+ *
  * @author jpk
  */
 public interface IJwtHttpRequestProvider {
 
   /**
-   * @return The ascribed id of the assockated http request.
-   */
-  // String getRequestId();
-
-  /**
    * @return the instant the associated http request reached the server.
    */
   Instant getRequestInstant();
-  
+
   /**
-   * @return the client origin token which is a constructed token 
-   *         from http header values of an incoming http request.
-   *         <p>
-   *         Recommended client origin token:<br>
-   *         <code>{remoteAddressHost}|{X-Forwarded-For}</code>.
+   * @return the client origin of the sourcing http request.
    */
   String getClientOrigin();
 
   /**
-   * @return the JWT value of the incoming http request.
+   * @return the JWT value held in the sourcing http request.
    */
   String getJwt();
 
   /**
-   * Verify the given client origin token against the held client origin in this instance.
+   * Verify the client origin of the sourcing http request against the
+   * extracted JWT audience claim gotten from the JWT held in the same http request.
    * <p>
-   * This allows for the client origin definition to be defined and maintained outside 
-   * the scope of JWT processing.
-   * 
-   * @param jwtAudience the JWT audience claim extracted from the incoming JWT
-   * @return true if the given client origin was successfully verified
+   * This allows for the client origin definition to be owned and maintained in
+   * {@link IJwtHttpRequestProvider} instances rather than in the JWT business/processing object.
+   *
+   * @param jwtAudience the JWT audience claim extracted from the JWT held in the
+   *                    sourcing http request
+   * @return true if the given JWT audience claim is verified against the
+   *         client origin of the sourcing http request.  False otherwise.
    */
   boolean verifyClientOrigin(final String jwtAudience);
 }

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Core (language-level), project-agnostic static utility methods.
  * <p>
  * Created on 11/22/17.
- * 
+ *
  * @author jpk
  */
 public class Util {
@@ -39,7 +39,7 @@ public class Util {
    * @return true if the given string is null or empty, false otherwise.
    */
   public static boolean isNullOrEmpty(final String s) { return s == null || s.isEmpty(); }
-  
+
   /**
    * Is the given string 0-length ("")?
    *
@@ -47,7 +47,7 @@ public class Util {
    * @return true if the given string is empty, false otherwise.
    */
   public static boolean isEmpty(final String s) { return s != null && s.isEmpty(); }
-  
+
   /**
    * Is the given string non-null and not-empty (greater than zero-length)?
    *
@@ -55,7 +55,7 @@ public class Util {
    * @return true if the given string is no-null and not empty, false otherwise.
    */
   public static boolean isNotNullOrEmpty(final String s) { return s != null && !s.isEmpty(); }
-  
+
   /**
    * Is the given array null or 0-length?
    *
@@ -63,7 +63,7 @@ public class Util {
    * @return true if the given array null 0-length, false otherwise.
    */
   public static boolean isNullOrEmpty(final Object[] a) { return a == null || a.length == 0; }
-  
+
   /**
    * Is the given array non-null and has at least one element?
    *
@@ -71,10 +71,10 @@ public class Util {
    * @return true if the given array null 0-length, false otherwise.
    */
   public static boolean isNotNullOrEmpty(final Object[] a) { return a != null && a.length > 0; }
-  
+
   /**
    * Is the given collection null or empty?
-   * 
+   *
    * @param clc the collection to check
    * @return true if the given collection is null or empty, false otherwise
    */
@@ -82,7 +82,7 @@ public class Util {
 
   /**
    * Is the given collection non-null and not empty?
-   * 
+   *
    * @param clc the collection to check
    * @return true if the given collection is non-null and not empty, false otherwise
    */
@@ -90,7 +90,7 @@ public class Util {
 
   /**
    * Is the given map null or empty?
-   * 
+   *
    * @param clc the map to check
    * @return true if the given map is null or empty, false otherwise
    */
@@ -98,12 +98,12 @@ public class Util {
 
   /**
    * Is the given map non-null and not empty?
-   * 
+   *
    * @param clc the map to check
    * @return true if the given map is non-null and not empty, false otherwise
    */
   public static boolean isNotNullOrEmpty(final Map<?, ?> map) { return map != null && !map.isEmpty(); }
-  
+
   /**
    * Is the given string blank? (I.e. null or 0-length or contains only whitespace)
    *
@@ -175,6 +175,15 @@ public class Util {
   public static String neclean(final String s) { return isNullOrEmpty(s) ? null : s.trim(); }
 
   /**
+   * Check a string for nullness and emptiness and return null if either null or empty.
+   * Otherwise, return the string unaltered.
+   *
+   * @param s the string to check
+   * @return null or the given string
+   */
+  public static String nechk(final String s) { return isNullOrEmpty(s) ? null : s; }
+
+  /**
    * Convert a possibly absent (null) object to a string where null begets an empty string.
    *
    * @param o the object to express as a string
@@ -206,12 +215,12 @@ public class Util {
 
   /**
    * Physical copy for <code>java.util.Date</code> objects.
-   * 
-   * @return Newly created {@link Date} with the same time as <code>d</code> 
+   *
+   * @return Newly created {@link Date} with the same time as <code>d</code>
    *         or null if <code>d</code> is null.
    */
   public static Date copy(final Date d) { return d == null ? null : new Date(d.getTime()); }
-  
+
   /**
    * Takes a list as input and adds each list element to a string
    * along with the given delimiter for every list element.
@@ -223,7 +232,7 @@ public class Util {
    * @return Never-null string
    */
   public static String flatten(final List<String> list, final String delim) {
-    return isNullOrEmpty(list) ? "" : list.stream().map(s -> clean(s)).collect(Collectors.joining(delim)).toString();
+    return isNullOrEmpty(list) ? "" : list.stream().map(s -> clean(s)).collect(Collectors.joining(delim));
   }
 
   /**

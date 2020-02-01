@@ -33,9 +33,13 @@ import com.tll.mcorpus.db.tables.pojos.Mauth;
 import com.tll.mcorpus.db.tables.pojos.Member;
 import com.tll.mcorpus.db.tables.records.MemberRecord;
 import com.tll.mcorpus.db.udt.pojos.Mref;
+import com.tll.mcorpus.dmodel.MemberAndMaddresses;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
+import com.tll.mcorpus.dmodel.MemberSearch;
 import com.tll.repo.FetchResult;
 
+import org.jooq.Condition;
+import org.jooq.SortField;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -52,7 +56,7 @@ public class MCorpusRepoTest {
 
   /*
   private static final Random rand = new Random();
-  
+
   public static String randomEmpId() {
     String s = String.format("%02d-%07d",
       Integer.valueOf(rand.nextInt(100)),
@@ -73,12 +77,12 @@ public class MCorpusRepoTest {
   static final String           TEST_MEMBER_LAST_NAME = "McGidrich";
   static final String           TEST_MEMBER_DISPLAY_NAME = "JAMFMan";
   static final MemberStatus     TEST_MEMBER_STATUS = MemberStatus.ACTIVE;
-  
+
   static final String           TEST_MEMBER_FIRST_NAME_U = "JakeU";
   static final String           TEST_MEMBER_MIDDLE_NAME_U = "ArthurU";
   static final String           TEST_MEMBER_LAST_NAME_U = "McGidrichU";
   static final MemberStatus     TEST_MEMBER_STATUS_U = MemberStatus.INACTIVE;
-  
+
   static final java.sql.Date    TEST_MAUTH_DOB = toSqlDate("1977-09-04");
   static final String           TEST_MAUTH_SSN = "101010101";
   static final String           TEST_MAUTH_EMAIL_HOME = "jam@ggl.com";
@@ -89,7 +93,7 @@ public class MCorpusRepoTest {
   static final String           TEST_MAUTH_FAX = "4156747835";
   static final String           TEST_MAUTH_USERNAME = "jamuser";
   static final String           TEST_MAUTH_PSWD = "nixem567ert";
-  
+
   static final java.sql.Date    TEST_MAUTH_DOB_U = toSqlDate("1977-09-05");
   static final String           TEST_MAUTH_SSN_U = "101010102";
   static final String           TEST_MAUTH_EMAIL_HOME_U = "jamU@ggl.com";
@@ -97,34 +101,34 @@ public class MCorpusRepoTest {
   static final String           TEST_MAUTH_MOBILE_PHONE_U = "4156747833";
   static final String           TEST_MAUTH_HOME_PHONE_U = "4156747834";
   static final String           TEST_MAUTH_WORK_PHONE_U = "4156747835";
-  
+
   static MemberAndMauth generateMemberToAdd() {
     return new MemberAndMauth(
       new Member(
-        null, 
-        null, 
-        null, 
-        TEST_MEMBER_EMP_ID, 
-        TEST_MEMBER_LOCATION, 
-        TEST_MEMBER_FIRST_NAME, 
-        TEST_MEMBER_MIDDLE_NAME, 
-        TEST_MEMBER_LAST_NAME, 
-        TEST_MEMBER_DISPLAY_NAME, 
-        TEST_MEMBER_STATUS 
+        null,
+        null,
+        null,
+        TEST_MEMBER_EMP_ID,
+        TEST_MEMBER_LOCATION,
+        TEST_MEMBER_FIRST_NAME,
+        TEST_MEMBER_MIDDLE_NAME,
+        TEST_MEMBER_LAST_NAME,
+        TEST_MEMBER_DISPLAY_NAME,
+        TEST_MEMBER_STATUS
       ),
       new Mauth(
         null,
         null,
-        TEST_MAUTH_DOB, 
-        TEST_MAUTH_SSN, 
-        TEST_MAUTH_EMAIL_HOME, 
-        TEST_MAUTH_EMAIL_WORK, 
-        TEST_MAUTH_MOBILE_PHONE, 
-        TEST_MAUTH_HOME_PHONE, 
-        TEST_MAUTH_WORK_PHONE, 
-        TEST_MAUTH_FAX, 
-        TEST_MAUTH_USERNAME, 
-        TEST_MAUTH_PSWD 
+        TEST_MAUTH_DOB,
+        TEST_MAUTH_SSN,
+        TEST_MAUTH_EMAIL_HOME,
+        TEST_MAUTH_EMAIL_WORK,
+        TEST_MAUTH_MOBILE_PHONE,
+        TEST_MAUTH_HOME_PHONE,
+        TEST_MAUTH_WORK_PHONE,
+        TEST_MAUTH_FAX,
+        TEST_MAUTH_USERNAME,
+        TEST_MAUTH_PSWD
       )
     );
   }
@@ -132,29 +136,29 @@ public class MCorpusRepoTest {
   static MemberAndMauth generateMemberToUpdate(final UUID mid) {
     return new MemberAndMauth(
       new Member(
-        mid, 
-        null, 
-        null, 
-        null, 
-        null, 
-        TEST_MEMBER_FIRST_NAME_U, 
-        TEST_MEMBER_MIDDLE_NAME_U, 
-        TEST_MEMBER_LAST_NAME_U, 
-        null, 
-        MemberStatus.INACTIVE 
+        mid,
+        null,
+        null,
+        null,
+        null,
+        TEST_MEMBER_FIRST_NAME_U,
+        TEST_MEMBER_MIDDLE_NAME_U,
+        TEST_MEMBER_LAST_NAME_U,
+        null,
+        MemberStatus.INACTIVE
       ),
       new Mauth(
         null,
         null,
-        TEST_MAUTH_DOB_U, 
-        TEST_MAUTH_SSN_U, 
-        TEST_MAUTH_EMAIL_HOME_U, 
-        TEST_MAUTH_EMAIL_WORK_U, 
-        TEST_MAUTH_MOBILE_PHONE_U, 
-        TEST_MAUTH_HOME_PHONE_U, 
-        TEST_MAUTH_WORK_PHONE_U, 
-        null, 
-        null, 
+        TEST_MAUTH_DOB_U,
+        TEST_MAUTH_SSN_U,
+        TEST_MAUTH_EMAIL_HOME_U,
+        TEST_MAUTH_EMAIL_WORK_U,
+        TEST_MAUTH_MOBILE_PHONE_U,
+        TEST_MAUTH_HOME_PHONE_U,
+        TEST_MAUTH_WORK_PHONE_U,
+        null,
+        null,
         null
       )
     );
@@ -215,7 +219,7 @@ public class MCorpusRepoTest {
       )
       .returning(MEMBER.MID)
       .fetchOne();
-    
+
     assertNotNull(memberRecord);
     UUID mid = memberRecord.getMid();
     assertNotNull(mid);
@@ -228,7 +232,7 @@ public class MCorpusRepoTest {
 
     // add mauth record
     testDslMcweb()
-      .insertInto(MAUTH, 
+      .insertInto(MAUTH,
         MAUTH.MID,
         MAUTH.DOB,
         MAUTH.SSN,
@@ -257,6 +261,20 @@ public class MCorpusRepoTest {
     return mid;
   }
 
+  static MemberSearch generateMemberSearch() {
+    return new MemberSearch(
+      new Condition[] {
+        MEMBER.MODIFIED.isNull(),
+        MAUTH.USERNAME.likeIgnoreCase("eb%"),
+      },
+      new SortField[] {
+        MEMBER.CREATED.asc(),
+        MAUTH.USERNAME.asc(),
+      },
+      0, 50
+    );
+  }
+
   static void deleteTestMember(UUID mid) {
     if(mid != null) testDslMcweb().delete(MEMBER).where(MEMBER.MID.eq(mid)).execute();
   }
@@ -265,15 +283,15 @@ public class MCorpusRepoTest {
     Maddress maddress = generateMemberAddressToAdd(mid, addressname);
 
     // add member address record
-    testDslMcweb().insertInto(MADDRESS, 
+    testDslMcweb().insertInto(MADDRESS,
       MADDRESS.MID,
       MADDRESS.ADDRESS_NAME,
-      MADDRESS.ATTN, 
-      MADDRESS.STREET1, 
-      MADDRESS.STREET2, 
-      MADDRESS.CITY, 
-      MADDRESS.STATE, 
-      MADDRESS.POSTAL_CODE, 
+      MADDRESS.ATTN,
+      MADDRESS.STREET1,
+      MADDRESS.STREET2,
+      MADDRESS.CITY,
+      MADDRESS.STATE,
+      MADDRESS.POSTAL_CODE,
       MADDRESS.COUNTRY)
     .values(
       mid,
@@ -290,7 +308,7 @@ public class MCorpusRepoTest {
   }
 
   static void deleteTestMemberAddress(UUID mid, Addressname addressname) {
-    if(mid != null && addressname != null) 
+    if(mid != null && addressname != null)
       testDslMcweb().delete(MADDRESS).where(MADDRESS.MID.eq(mid).and(MADDRESS.ADDRESS_NAME.eq(addressname))).execute();
   }
 
@@ -298,11 +316,11 @@ public class MCorpusRepoTest {
   public static void clearBackend() {
     try {
       // delete test member_audit records
-      log.info("Num member_audit records deleted after test: {}.", 
+      log.info("Num member_audit records deleted after test: {}.",
         testDslMcwebTest().deleteFrom(MEMBER_AUDIT).where(MEMBER_AUDIT.REQUEST_ORIGIN.eq(testRequestOrigin)).execute());
 
       // delete test member records
-      log.info("Num member records deleted after test: {}.", 
+      log.info("Num member records deleted after test: {}.",
         testDslMcwebTest().deleteFrom(MEMBER).where(MEMBER.DISPLAY_NAME.eq("JAMFMan")).execute());
     }
     catch(Exception e) {
@@ -312,7 +330,7 @@ public class MCorpusRepoTest {
       if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
     }
   }
-  
+
   static MCorpusRepo mcorpusRepo() { return new MCorpusRepo(ds_mcweb()); }
 
   @Test
@@ -324,7 +342,7 @@ public class MCorpusRepoTest {
       mid = insertTestMember();
 
       FetchResult<Mref> mrefFetch = repo.memberLogin(
-        TEST_MAUTH_USERNAME, 
+        TEST_MAUTH_USERNAME,
         TEST_MAUTH_PSWD,
         Instant.now(),
         testRequestOrigin
@@ -345,7 +363,7 @@ public class MCorpusRepoTest {
       }
     }
   }
-  
+
   @Test
   public void testMemberLogout() {
     MCorpusRepo repo = null;
@@ -353,7 +371,7 @@ public class MCorpusRepoTest {
     try {
       repo = mcorpusRepo();
       mid = insertTestMember();
-      
+
       FetchResult<UUID> memberLogoutResult = repo.memberLogout(
         mid,
         Instant.now(),
@@ -428,16 +446,75 @@ public class MCorpusRepoTest {
   }
 
   @Test
+  public void testFetchMemberAndAddresses_withAddresses() {
+    MCorpusRepo repo = null;
+    UUID mid = null;
+    try {
+      repo = mcorpusRepo();
+
+      mid = insertTestMember();
+      insertTestMemberAddress(mid, Addressname.home);
+      insertTestMemberAddress(mid, Addressname.work);
+      insertTestMemberAddress(mid, Addressname.other);
+
+      FetchResult<MemberAndMaddresses> maaFetch = repo.fetchMemberAndAddresses(mid);
+      assertNotNull(maaFetch);
+      assertTrue(maaFetch.isSuccess());
+      assertNotNull(maaFetch.get());
+      assertNull(maaFetch.getErrorMsg());
+      assertFalse(maaFetch.get().addresses.isEmpty());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        deleteTestMember(mid);
+        repo.close();
+      }
+    }
+  }
+
+  @Test
+  public void testFetchMemberAndAddresses_withoutAddresses() {
+    MCorpusRepo repo = null;
+    UUID mid = null;
+    try {
+      repo = mcorpusRepo();
+
+      mid = insertTestMember();
+
+      FetchResult<MemberAndMaddresses> maaFetch = repo.fetchMemberAndAddresses(mid);
+      assertNotNull(maaFetch);
+      assertTrue(maaFetch.isSuccess());
+      assertNotNull(maaFetch.get());
+      assertNull(maaFetch.getErrorMsg());
+      assertTrue(maaFetch.get().addresses.isEmpty());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        deleteTestMember(mid);
+        repo.close();
+      }
+    }
+  }
+
+  @Test
   public void testFetchMemberAddresses() {
     MCorpusRepo repo = null;
     UUID mid = null;
     Addressname addressname = Addressname.other;
     try {
       repo = mcorpusRepo();
-      
+
       mid = insertTestMember();
       insertTestMemberAddress(mid, addressname);
-      
+
       FetchResult<List<Maddress>> fetchResult = repo.fetchMemberAddresses(mid);
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
@@ -509,12 +586,12 @@ public class MCorpusRepoTest {
       assertNotNull(fetchResult);
       assertNotNull(fetchResult.get());
       assertNull(fetchResult.getErrorMsg());
-      
+
       // verify we have an mid and modified timestamp present
       assertNotNull(fetchResult.get().dbMember.getMid());
       assertNotNull(fetchResult.get().dbMember.getCreated());
       assertNotNull(fetchResult.get().dbMember.getModified());
-      
+
       assertNotNull(fetchResult.get().dbMauth);
     }
     catch(Exception e) {
@@ -614,7 +691,7 @@ public class MCorpusRepoTest {
       repo = mcorpusRepo();
 
       Maddress ma = generateMemberAddressToUpdate(mid, Addressname.other);
-      
+
       FetchResult<Maddress> fetchResult = repo.updateMemberAddress(ma);
 
       assertNotNull(fetchResult);
@@ -642,7 +719,7 @@ public class MCorpusRepoTest {
 
       mid = insertTestMember();
       insertTestMemberAddress(mid, Addressname.other);
-      
+
       FetchResult<Boolean> fetchResult = repo.deleteMemberAddress(mid, Addressname.other);
 
       assertNotNull(fetchResult);
@@ -658,4 +735,31 @@ public class MCorpusRepoTest {
       }
     }
   }
+
+  @Test
+  public void testMemberSearch() {
+    MCorpusRepo repo = null;
+    try {
+      repo = mcorpusRepo();
+
+      MemberSearch msearch = generateMemberSearch();
+
+      FetchResult<List<MemberAndMauth>> memberFetch = repo.memberSearch(msearch);
+      assertNotNull(memberFetch);
+      assertTrue(memberFetch.isSuccess());
+      assertNotNull(memberFetch.get());
+      assertNull(memberFetch.getErrorMsg());
+      assertFalse(memberFetch.get().isEmpty());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        repo.close();
+      }
+    }
+  }
+
 }

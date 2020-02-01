@@ -3,6 +3,7 @@ package com.tll.mcorpus.transform;
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
 import static com.tll.transform.TransformUtil.fval;
@@ -12,6 +13,7 @@ import static com.tll.transform.TransformUtil.uuidFromToken;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +33,11 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
       return null;
     }
   }
-  
+
   public static String mcuserStatusToString(final McuserStatus enm) {
     return isNull(enm) ? null : enm.getLiteral();
   }
-  
+
   public static McuserRole mcuserRoleFromString(final String s) {
     try {
       return McuserRole.valueOf(upper(clean(s)));
@@ -43,13 +45,13 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
       return null;
     }
   }
-  
+
   public static String mcuserRoleToString(final McuserRole enm) {
     return isNull(enm) ? null : enm.getLiteral();
   }
 
   public static McuserRole[] mcuserRolesArrayFromStringCollection(final Collection<String> sroles) {
-    return isNull(sroles) ? null : sroles.stream()
+    return isNullOrEmpty(sroles) ? new McuserRole[0] : sroles.stream()
         .map(srole -> mcuserRoleFromString(srole))
         .filter(mr -> isNotNull(mr))
         .collect(Collectors.toSet())
@@ -57,7 +59,7 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   }
 
   public static Set<String> mcuserRolesArrayToStringSet(final McuserRole[] roles) {
-    return isNull(roles) ? null : Arrays.stream(roles)
+    return isNullOrEmpty(roles) ? Collections.emptySet() : Arrays.stream(roles)
         .map(role -> mcuserRoleToString(role))
         .filter(mr -> isNotNull(mr))
         .collect(Collectors.toSet())
@@ -67,18 +69,18 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
   public static Set<String> rolesListToSet(final List<String> rlist) {
     return isNull(rlist) ? null : new HashSet<>(rlist);
   }
-  
+
   @Override
   protected Mcuser fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
     return new Mcuser(
       null,
       null,
-      fval("name", gqlMap),
-      fval("email", gqlMap),
-      fval("username", gqlMap),
-      fval("pswd", gqlMap),
-      fval("status", gqlMap),
-      fval("initialStatus", gqlMap),
+      null,
+      clean(fval("name", gqlMap)),
+      clean(fval("email", gqlMap)),
+      clean(fval("username", gqlMap)),
+      fval("pswd", gqlMap), // do not clean pswd
+      clean(fval("status", gqlMap)),
       rolesListToSet(fval("roles", gqlMap))
     );
   }
@@ -89,11 +91,11 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
       uuidFromToken(fval("uid", gqlMap)),
       null,
       null,
-      fval("name", gqlMap),
-      fval("email", gqlMap),
-      fval("username", gqlMap),
+      neclean(fval("name", gqlMap)),
+      neclean(fval("email", gqlMap)),
+      neclean(fval("username", gqlMap)),
       null,
-      fval("status", gqlMap),
+      neclean(fval("status", gqlMap)),
       rolesListToSet(fval("roles", gqlMap))
     );
   }
@@ -104,9 +106,9 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
       d.getUid(),
       odtToDate(d.getCreated()),
       odtToDate(d.getModified()),
-      d.getName(),
-      d.getEmail(),
-      d.getUsername(),
+      clean(d.getName()),
+      clean(d.getEmail()),
+      clean(d.getUsername()),
       d.getPswd(),
       mcuserStatusToString(d.getStatus()),
       mcuserRolesArrayToStringSet(d.getRoles())

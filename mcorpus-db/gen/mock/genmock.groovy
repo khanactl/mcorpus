@@ -1,13 +1,8 @@
 /*
  * Generate mock member data for mcorpus db.
- * 
+ *
  * Author:      jkirton
  * Date:        8/19/2018
- *
- * psql>
- *   COPY member(mid,emp_id,location,name_first,name_middle,name_last,display_name) FROM '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mock/mout-member.csv' DELIMITER ',' CSV HEADER;
- *   COPY mauth(mid,dob,ssn,email_personal,email_work,mobile_phone,home_phone,work_phone,fax,username,pswd) FROM '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mock/mout-mauth.csv' DELIMITER ',' CSV HEADER;
- *   COPY maddress(mid,address_name,attn,street1,street2,city,state,postal_code,country) FROM '/Users/d2d/dev/mcorpus/mcorpus-db/mcorpus-ddl/mock/mout-maddress.csv' DELIMITER ',' QUOTE '"' CSV HEADER;
  */
 
 import java.util.Random;
@@ -30,7 +25,7 @@ class StCity {
 
 class Data {
   Random rand = new Random()
-  
+
   String alphas = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   String alphanums = alphas + "0123456789"
   String pswdsoup = alphanums + "[{]}=+-_)(*&^%\$#@!"
@@ -38,7 +33,7 @@ class Data {
   List addressNames = ['home', 'work', 'other']
 
   List locations = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '98', '20' ]
-  
+
   Date dobStart = Date.parse('yyyy-MM-dd', '1931-01-01')
   Date dobEnd = Date.parse('yyyy-MM-dd', '2002-01-01')
 
@@ -56,10 +51,10 @@ class Data {
   String ctrim(String s) { return s == null ? "" : s.trim() }
 
   Integer rint(Integer upper) { return rand.nextInt(upper) }
-  
+
   Data() {
     println '\nLoading data..'
-    
+
     this.surnames = loadSurnames()
     println 'Num surnames loaded: ' + surnames.size()
 
@@ -78,10 +73,10 @@ class Data {
 
     this.streetnames = loadStreetnames()
     println 'Num streetnames loaded: ' + streetnames.size()
-    
+
     this.zipz = loadZipz()
     println 'Num zipz loaded: ' + zipz.size()
-    
+
     println 'Data loaded.\n\n'
   }
 
@@ -89,7 +84,7 @@ class Data {
     def f = new File('./genmock-zipz.txt')
     def map = new HashMap()
     def lines = f.readLines()
-    lines.each { line -> 
+    lines.each { line ->
       String[] sline = line.split("\\t")
       if(sline != null && sline.length == 2) {
         String zippfx = ctrim(sline[0])
@@ -126,7 +121,7 @@ class Data {
     def f = new File('./genmock-city-states.txt')
     def map = new HashMap()
     def lines = f.readLines()
-    lines.each { line -> 
+    lines.each { line ->
       String[] sline = line.split("\\t")
       if(sline != null && sline.length == 2) {
         def city = sline[0]
@@ -158,7 +153,7 @@ class Data {
     def f = new File('./genmock-areacodes-by-st.txt')
     def map = new HashMap()
     def lines = f.readLines()
-    lines.each { line -> 
+    lines.each { line ->
       String[] sline = line.split("\\t")
       if(sline != null && sline.length == 2) {
         def st = sline[0]
@@ -201,8 +196,8 @@ class Data {
   }
 
   String cap(String s) {
-    return isEmpty(s) ? 
-      "" : has2Chars(s) ? 
+    return isEmpty(s) ?
+      "" : has2Chars(s) ?
         (Character.toUpperCase(s.charAt(0)).toString() + s.substring(1).toLowerCase()) : s.charAt(0)
   }
 
@@ -235,7 +230,7 @@ class Data {
   }
 
   String randomUsername() {
-    return String.format("%s%s%s%s%s%s%s%s", 
+    return String.format("%s%s%s%s%s%s%s%s",
       alphas.charAt(rint(52)),
       alphas.charAt(rint(52)),
       alphas.charAt(rint(52)),
@@ -249,7 +244,7 @@ class Data {
 
   String randomPassword() {
     def len = pswdsoup.length()
-    return String.format("%s%s%s%s%s%s%s%s", 
+    return String.format("%s%s%s%s%s%s%s%s",
       pswdsoup.charAt(rint(len)),
       pswdsoup.charAt(rint(len)),
       pswdsoup.charAt(rint(len)),
@@ -334,25 +329,25 @@ class Member {
    */
   Member(Data d) {
     this.mid = UUID.randomUUID()
-    
+
     this.nameFirst = d.randomFirstname()
     this.nameMiddle = d.randomFirstname()
     this.nameLast = d.randomSurname()
-    
+
     this.empId = d.randomEmpId()
     this.location = d.randomLocation()
-    
-    this.displayName = String.format("%s%s%d", 
+
+    this.displayName = String.format("%s%s%d",
       Character.toLowerCase(this.nameFirst.charAt(0)),
       this.nameLast.toLowerCase(),
       d.rint(100))
-    
+
     this.dob = d.randomDob()
     this.ssn = d.randomSsn()
-    
+
     this.emailPersonal = this.nameFirst.toLowerCase() + "@" + d.randomEmailDomain()
     this.emailWork = this.displayName + "@" + d.randomEmailDomain()
-    
+
     this.username = d.randomUsername()
     this.pswd = d.randomPassword()
 
@@ -365,7 +360,7 @@ class Member {
     this.phoneWork = phones[1]
     this.phoneHome = phones[2]
     this.fax = phones[3]
-    
+
     def numAddresses = d.rint(3) + 1 // i.e. 1 - 3
     this.addresses = new ArrayList(numAddresses)
     for(int i = 0; i < numAddresses; i++) {
@@ -390,11 +385,11 @@ class Member {
     // member
     String smem = String.format("%s,%s,%s,%s,%s,%s,%s\n", m.mid, m.empId, m.location, m.nameFirst, m.nameMiddle, m.nameLast, m.displayName)
     fwMem.write(smem)
-    
+
     // mauth
     String smaut = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", m.mid, m.dob, m.ssn, m.emailPersonal, m.emailWork, m.phoneMobile, m.phoneHome, m.phoneWork, m.fax, m.username, m.pswd)
     fwMaut.write(smaut)
-    
+
     // maddress
     if(m.addresses != null) {
       for(MAddress ma : m.addresses) {
@@ -410,26 +405,26 @@ class Member {
    * @param d the data object
    * @param n the number of records to generate
    */
-  static void mout(Data d, int n) {    
+  static void mout(Data d, int n) {
     File fmem = new File('mout-member.csv')
     // fmem.createNewFile()
     FileWriter fwMem = new FileWriter(fmem)
-    
+
     File fmaut = new File('mout-mauth.csv')
     // fmaut.createNewFile()
     FileWriter fwMaut = new FileWriter(fmaut)
-    
+
     File fadd = new File('mout-maddress.csv')
     // fadd.createNewFile()
     FileWriter fwAdd = new FileWriter(fadd)
 
     moutHeaders(fwMem, fwMaut, fwAdd)
-    
+
     for(int i = 0; i < n; i++) {
       Member m = new Member(d)
       moutMember(m, fwMem, fwMaut, fwAdd)
-    }    
-    
+    }
+
     fwMem.flush()
     fwMem.close()
 

@@ -16,7 +16,7 @@ import org.junit.experimental.categories.Category;
 public class JWTUserGraphQLWebContextTest {
 
   static JWTUserGraphQLWebContext create(String query) {
-    return new JWTUserGraphQLWebContext(query, null, null, null, null, null, null, "jwtLogin");
+    return new JWTUserGraphQLWebContext(query, null, null, null, null, null, "jwtLogin");
   }
 
   @Test
@@ -25,16 +25,16 @@ public class JWTUserGraphQLWebContextTest {
 
     ctx = create("{ fetchOp");
     assertFalse(ctx.isJwtUserLoginQuery());
-  
+
     ctx = create("{ jwtLogin");
     assertFalse(ctx.isJwtUserLoginQuery());
-    
+
     ctx = create("login { jwtLogin");
     assertFalse(ctx.isJwtUserLoginQuery());
-    
+
     ctx = create("query IntrospectionQuery {");
     assertFalse(ctx.isJwtUserLoginQuery());
-    
+
     ctx = create("IntrospectionQuery {");
     assertFalse(ctx.isJwtUserLoginQuery());
 

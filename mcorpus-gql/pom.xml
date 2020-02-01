@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.20-SNAPSHOT</version>
+  <version>0.9.24-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -21,8 +21,7 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-build.mode>DEV</mcorpus-build.mode>
-    <mcorpus-db.version>1.4.8</mcorpus-db.version>
+    <mcorpus-db.version>1.4.10</mcorpus-db.version>
   </properties>
 
   <profiles>
@@ -35,7 +34,6 @@
     <profile>
       <id>prod</id>
       <properties>
-        <mcorpus-build.mode>PROD</mcorpus-build.mode>
       </properties>
     </profile>
   </profiles>
@@ -90,9 +88,8 @@
             </manifest>
             <manifestEntries>
               <Main-Class>com.tll.mcorpus.Main</Main-Class>
-              <Build-Number>${project.version}</Build-Number>
+              <App-Version>${project.version}</App-Version>
               <Build-Timestamp>${timestamp}</Build-Timestamp>
-              <Build-Mode>${mcorpus-build.mode}</Build-Mode>
             </manifestEntries>
           </archive>
         </configuration>
@@ -127,57 +124,6 @@
       </plugin>
       -->
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>snapshot-to-target</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>.</directory>
-                  <filtering>true</filtering>
-                  <includes>
-                    <include>log4j2-*.xml</include>
-                    <include>Dockerfile</include>
-                    <include>dockerbuild.sh</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- copy log4j2 deps to build output dir -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-log4j2-deps</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeGroupIds>org.apache.logging.log4j, com.lmax</includeGroupIds>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>false</overWriteSnapshots>
-              <overWriteIfNewer>true</overWriteIfNewer>
-              <stripVersion>false</stripVersion>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      
       <!-- gql-server uber-jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -219,7 +165,6 @@
                     <Main-Class>com.tll.mcorpus.Main</Main-Class>
                     <Build-Number>${project.version}</Build-Number>
                     <Build-Timestamp>${timestamp}</Build-Timestamp>
-                    <Build-Mode>${mcorpus-build.mode}</Build-Mode>
                   </manifestEntries>
                 </transformer>
               </transformers>
@@ -227,7 +172,83 @@
           </execution>
         </executions>
       </plugin>
-      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>snapshot-to-target</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>.</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>log4j2-*.xml</include>
+                    <include>Dockerfile</include>
+                    <include>dockerbuild.sh</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-awsdockerasset</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/awsdockerasset</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>mcorpus-gql-server.jar</include>
+                    <include>log4j2-aws.xml</include>
+                    <include>log4j-api-*.jar</include>
+                    <include>log4j-core-*.jar</include>
+                    <include>log4j-slf4j-impl-*.jar</include>
+                    <include>disruptor-*.jar</include>
+                    <include>Dockerfile</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <!-- copy log4j2 deps to build output dir -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-log4j2-deps</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>org.apache.logging.log4j, com.lmax</includeGroupIds>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+              <stripVersion>false</stripVersion>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -249,6 +270,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -303,10 +325,12 @@
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
     </dependency>
+
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
+
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
@@ -320,11 +344,13 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
+    <!--
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
-    
+    -->
+
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
@@ -371,12 +397,39 @@
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-hikari</artifactId>
     </dependency>
-    <!-- 
     <dependency>
       <groupId>io.ratpack</groupId>
       <artifactId>ratpack-dropwizard-metrics</artifactId>
     </dependency>
-    -->
+
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-healthchecks</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jvm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-annotation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jmx</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-graphite</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>

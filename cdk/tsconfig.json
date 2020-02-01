@@ -16,7 +16,8 @@
     "inlineSourceMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization":false
+    "strictPropertyInitialization":false,
+    "resolveJsonModule": true,
   },
-  "exclude": ["cdk.out"]
+  "exclude": ["cdk.out", "dist"]
 }

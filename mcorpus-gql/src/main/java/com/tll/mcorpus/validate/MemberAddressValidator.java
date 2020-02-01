@@ -17,7 +17,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
 
   @Override
   public String getEntityTypeName() { return "MemberAddress"; }
-  
+
   @Override
   protected void doValidateForAdd(final VldtnBuilder<MemberAddress> vldtn) {
     vldtn
@@ -39,7 +39,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
     vldtn
       // require pk
       .vrqd(t -> t.isSet(), MemberAddress::getPk, "maddress.nopk.emsg", "pk")
-      
+
       .vtok(MemberAddressValidator::addressAttnValid, MemberAddress::getAttn, "maddress.attn.emsg", "attn")
       .vtok(MemberAddressValidator::addressStreet1Valid, MemberAddress::getStreet1, "maddress.street1.emsg", "street1")
       .vtok(MemberAddressValidator::addressStreet2Valid, MemberAddress::getStreet2, "maddress.street2.emsg", "street2")
@@ -52,14 +52,14 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
 
   @Override
   protected boolean hasAnyUpdatableFields(MemberAddress e) {
-    return 
-      isNotBlank(e.getAttn()) || 
-      isNotBlank(e.getStreet1()) || 
-      isNotBlank(e.getStreet2()) || 
-      isNotBlank(e.getCity()) || 
-      isNotNull(e.getState()) || 
-      isNotNull(e.getPostalCode()) || 
-      isNotNull(e.getCountry()) 
+    return
+      isNotNull(e.getAttn()) || // optional
+      isNotBlank(e.getStreet1()) ||
+      isNotNull(e.getStreet2()) || // optional
+      isNotBlank(e.getCity()) ||
+      isNotBlank(e.getState()) ||
+      isNotBlank(e.getPostalCode()) ||
+      isNotBlank(e.getCountry())
       ;
   }
 
@@ -67,7 +67,7 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
   protected String getVmkForNoUpdateFieldsPresent() {
     return "maddress.noupdatefields.emsg";
   }
-  
+
   /**
    * Verify an address name is specified.
    *
@@ -180,5 +180,5 @@ public class MemberAddressValidator extends BaseMcorpusValidator<MemberAddress> 
     } catch(Exception e) {
       return null;
     }
-  }  
+  }
 }

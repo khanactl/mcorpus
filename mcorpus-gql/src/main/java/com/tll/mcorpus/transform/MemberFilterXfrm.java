@@ -51,42 +51,51 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
       for(final Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         switch(key) {
-          case "dateOp":
+          case "op":
             dop = DateOp.valueOf(upper(clean((String) entry.getValue())));
             break;
-          case "a":
+          case "argA":
             a = (Date) entry.getValue();
             break;
-          case "b":
+          case "argB":
             b = (Date) entry.getValue();
             break;
         }
       }
     }
-    return isNotNull(dop) && isNotNull(a) ? new DatePredicate(dop, a, b) : null;
+    return new DatePredicate(dop, a, b);
   }
 
   private static StringPredicate stringPredicatefromGraphQLMap(final Map<String, Object> gqlMap) {
     String value = null;
     boolean ignoreCase = false;
-    Operation op = Operation.EQUALS;
+    Operation opValue = Operation.EQUALS; // default op
+    Operation opIsNull = null;
     if(gqlMap != null && !gqlMap.isEmpty()) {
       for(final Entry<String, Object> entry : gqlMap.entrySet()) {
         String key = entry.getKey();
         switch(key) {
+          case "isNull":
+            Boolean bin = (Boolean) entry.getValue();
+            opIsNull = (isNull(bin) || bin.booleanValue()) ? Operation.IS_NULL : Operation.IS_NOT_NULL;
+            break;
           case "value":
             final String sval = clean((String) entry.getValue());
             value = sval.replaceAll("[^a-zA-Z|\\d| |\\*|%]", "");
-            op = sval.matches("^.*?[*|%].*?$") ? Operation.LIKE : Operation.EQUALS;
+            opValue = sval.matches("^.*?[*|%].*?$") ? Operation.LIKE : Operation.EQUALS;
             break;
           case "ignoreCase":
-            Boolean b = (Boolean) entry.getValue();
-            ignoreCase = isNotNull(b) ? b.booleanValue() : false;
+            Boolean bic = (Boolean) entry.getValue();
+            ignoreCase = isNotNull(bic) ? bic.booleanValue() : false;
             break;
         }
       }
     }
-    return isNotNullOrEmpty(value) ? new StringPredicate(value, ignoreCase, op) : null;
+    return new StringPredicate(
+      isNotNull(opIsNull) ? opIsNull : opValue, // nullness check takes precedence
+      isNotNull(opIsNull) ? null : value,
+      ignoreCase
+    );
   }
 
   private static LocationPredicate locationPredicatefromGraphQLMap(final Map<String, Object> gqlMap) {
@@ -97,9 +106,9 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
         String key = entry.getKey();
         switch (key) {
           case "locations":
-            @SuppressWarnings("unchecked") 
+            @SuppressWarnings("unchecked")
             final List<String> sloclist = (List<String>) entry.getValue();
-            locations = isNotNullOrEmpty(sloclist) ? 
+            locations = isNotNullOrEmpty(sloclist) ?
               sloclist.stream().filter(e -> isNotNull(e)).map(e -> clean(e)).collect(Collectors.toList())
               : Collections.emptyList();
             break;
@@ -109,7 +118,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
         }
       }
     }
-    return isNotNullOrEmpty(locations) ? new LocationPredicate(locations, negate) : null;
+    return new LocationPredicate(locations, negate);
   }
 
   private static OrderBy.Dir orderByDirFromToken(final String dirtok) {
@@ -133,8 +142,8 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   }
 
   private static List<OrderBy> orderByListFromToken(final String orderByToken) {
-    return isNotNullOrEmpty(orderByToken) ? 
-      Arrays.stream(orderByToken.split(",")) 
+    return isNotNullOrEmpty(orderByToken) ?
+      Arrays.stream(orderByToken.split(","))
         .map(elm -> orderByFromToken(elm))
         .filter(ob -> isNotNull(ob))
         .collect(Collectors.toList())
@@ -155,7 +164,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     if(mf.hasStatus()) conditions.add(memberStatusAsJooqCondition(mf.getStatus(), MEMBER.STATUS));
     if(mf.hasDob()) conditions.add(datePredicateAsJooqCondition(mf.getDob(), MAUTH.DOB));
     if(mf.hasUsername()) conditions.add(stringPredicateAsJooqCondition(mf.getUsername(), MAUTH.USERNAME));
-    
+
     return conditions.toArray(new Condition[conditions.size()]);
   }
 
@@ -167,6 +176,12 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   private static Condition datePredicateAsJooqCondition(final DatePredicate dp, final Field<java.sql.Date> f) {
     final Condition c;
     switch(dp.getDateOp()) {
+      case IS_NULL:
+        c = f.isNull();
+        break;
+      case IS_NOT_NULL:
+        c = f.isNotNull();
+        break;
       default:
       case EQUAL_TO:
         c = f.eq(new java.sql.Date(dp.getA().getTime()));
@@ -211,6 +226,12 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   private static Condition timestampPredicateAsJooqCondition(final DatePredicate dp, final Field<OffsetDateTime> f) {
     final Condition c;
     switch(dp.getDateOp()) {
+      case IS_NULL:
+        c = f.isNull();
+        break;
+      case IS_NOT_NULL:
+        c = f.isNotNull();
+        break;
       default:
       case EQUAL_TO:
         c = f.eq(odtFromDate(dp.getA()));
@@ -255,6 +276,12 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   private static Condition stringPredicateAsJooqCondition(final StringPredicate sp, final Field<String> f) {
     final Condition c;
     switch(sp.getOperation()) {
+      case IS_NULL:
+        c = f.isNull();
+        break;
+      case IS_NOT_NULL:
+        c = f.isNotNull();
+        break;
       default:
       case EQUALS:
         c = sp.isIgnoreCase() ? f.equalIgnoreCase(sqlEqualsStatement(sp.getValue())) : f.eq(sqlEqualsStatement(sp.getValue()));
@@ -338,7 +365,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   public static SortField<?>[] getDefaultJooqSortFields() {
     // keep internal array safe from mutations by returning a copy
     final int len = defaultJooqSorting.length;
-    final SortField<?>[] rval = new SortField[len]; 
+    final SortField<?>[] rval = new SortField[len];
     System.arraycopy(defaultJooqSorting, 0, rval, 0, len);
     return rval;
   }
@@ -444,9 +471,9 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
   @Override
   protected MemberSearch toBackendFromNonNull(MemberFilter e) {
     return new MemberSearch(
-      asJooqCondition(e), 
-      generateJooqSortFields(e), 
-      e.getOffset(), 
+      asJooqCondition(e),
+      generateJooqSortFields(e),
+      e.getOffset(),
       e.getLimit()
     );
   }
