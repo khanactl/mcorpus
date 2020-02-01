@@ -1,5 +1,5 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack } from './cdk-native'
+import { IStackProps, BaseStack, iname } from './cdk-native';
 import cfn = require('@aws-cdk/aws-cloudformation');
 import lambda = require('@aws-cdk/aws-lambda');
 import ssm = require('@aws-cdk/aws-ssm');
@@ -41,7 +41,6 @@ export interface IDbBootstrapProps extends IStackProps {
  * 3. Creating the needed SSM db/jdbc secure param secrets for downstream use
  */
 export class DbBootstrapStack extends BaseStack {
-
   public readonly dbBootstrapRole: iam.Role;
 
   public readonly ssmNameJdbcUrl: string;
@@ -55,35 +54,37 @@ export class DbBootstrapStack extends BaseStack {
   public readonly ssmJdbcUrl: IStringParameter;
   public readonly ssmJdbcTestUrl: IStringParameter;
 
-  constructor(scope: cdk.Construct, props: IDbBootstrapProps) {
-    super(scope, 'DbBootstrap', props);
+  constructor(scope: cdk.Construct, id: string, props: IDbBootstrapProps) {
+    super(scope, id, props);
 
     // db dbootstrap role
-    const dbBootstrapRoleInstNme = this.iname('db-bootstrap-role', props);
+    const dbBootstrapRoleInstNme = iname('db-bootstrap-role', props);
     this.dbBootstrapRole = new iam.Role(this, dbBootstrapRoleInstNme, {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
     this.dbBootstrapRole.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
     });
     this.dbBootstrapRole.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole'
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole',
     });
-    this.dbBootstrapRole.addToPolicy(new PolicyStatement({
-      actions: ['secretsmanager:GetSecretValue'],
-      resources: [
-        props.dbJsonSecretArn,
-      ],
-    }));
-    this.dbBootstrapRole.addToPolicy(new PolicyStatement({
-      actions: ['ssm:PutParameter'],
-      resources: [
-        '*' // TODO narrow scope
-      ],
-    }));
+    this.dbBootstrapRole.addToPolicy(
+      new PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [props.dbJsonSecretArn],
+      })
+    );
+    this.dbBootstrapRole.addToPolicy(
+      new PolicyStatement({
+        actions: ['ssm:PutParameter'],
+        resources: [
+          '*', // TODO narrow scope
+        ],
+      })
+    );
     // END db bootstrap role
 
-    const lambdaProviderInstNme = this.iname('db-bootstrap-lambda', props);
+    const lambdaProviderInstNme = iname('db-bootstrap-lambda', props);
     const lambdaProvider = new lambda.SingletonFunction(this, lambdaProviderInstNme, {
       vpc: props.vpc,
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
@@ -94,21 +95,21 @@ export class DbBootstrapStack extends BaseStack {
       memorySize: 128,
       timeout: cdk.Duration.seconds(60),
       code: lambda.Code.fromAsset(
-        path.join(__dirname, "../lambda/dbbootstrap") // dir ref
+        path.join(__dirname, '../lambda/dbbootstrap') // dir ref
       ),
       handler: 'dbbootstrap.main',
       role: this.dbBootstrapRole,
     });
 
-    const resourceInstNme = this.iname('db-bootstrap', props);
+    const resourceInstNme = iname('db-bootstrap', props);
     const resource = new cfn.CustomResource(this, resourceInstNme, {
       provider: cfn.CustomResourceProvider.lambda(lambdaProvider),
       properties: {
-        'DbJsonSecretArn': props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
-        'TargetRegion': props.targetRegion,
-        'SsmNameJdbcUrl': `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
-        'SsmNameJdbcTestUrl': `/mcorpusTestDbUrl/${props.appEnv}`,
-      }
+        DbJsonSecretArn: props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
+        TargetRegion: props.targetRegion,
+        SsmNameJdbcUrl: `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
+        SsmNameJdbcTestUrl: `/mcorpusTestDbUrl/${props.appEnv}`,
+      },
     });
 
     this.ssmNameJdbcUrl = resource.getAtt('SsmNameJdbcUrl').toString();
@@ -120,13 +121,13 @@ export class DbBootstrapStack extends BaseStack {
     this.responseMessage = resource.getAtt('Message').toString();
 
     // obtain the just generated SSM jdbc url param refs
-    const ssmJdbcUrlInstNme = this.iname('db-url', props);
+    const ssmJdbcUrlInstNme = iname('db-url', props);
     this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcUrlInstNme, {
       parameterName: this.ssmNameJdbcUrl,
       version: this.ssmVersionJdbcUrl,
       simpleName: false,
     });
-    const ssmJdbcTestUrlInstNme = this.iname('test-db-url', props);
+    const ssmJdbcTestUrlInstNme = iname('test-db-url', props);
     this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcTestUrlInstNme, {
       parameterName: this.ssmNameJdbcTestUrl,
       version: this.ssmVersionJdbcTestUrl,
@@ -134,18 +135,9 @@ export class DbBootstrapStack extends BaseStack {
     });
 
     // stack output
-    new cdk.CfnOutput(this, 'dbBootstrapRoleArn', { value:
-      this.dbBootstrapRole.roleArn
-    });
-    new cdk.CfnOutput(this, 'dbBootstrapResponseMessage', { value:
-      this.responseMessage
-    });
-    new cdk.CfnOutput(this, 'ssmJdbcUrlArn', { value:
-      this.ssmJdbcUrl.parameterArn
-    });
-    new cdk.CfnOutput(this, 'ssmJdbcTestUrlArn', { value:
-      this.ssmJdbcTestUrl.parameterArn
-    });
-
+    new cdk.CfnOutput(this, 'dbBootstrapRoleArn', { value: this.dbBootstrapRole.roleArn });
+    new cdk.CfnOutput(this, 'dbBootstrapResponseMessage', { value: this.responseMessage });
+    new cdk.CfnOutput(this, 'ssmJdbcUrlArn', { value: this.ssmJdbcUrl.parameterArn });
+    new cdk.CfnOutput(this, 'ssmJdbcTestUrlArn', { value: this.ssmJdbcTestUrl.parameterArn });
   }
 }

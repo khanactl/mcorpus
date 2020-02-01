@@ -1,30 +1,17 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import {
-  AppEnv,
-  resolveAppBuild,
-  resolveAppEnv,
-  resolveAppImageTag,
-  resolveCurrentGitBranch,
-  loadConfig
-} from '../lib/cdk-native';
-import { CICDStack } from '../lib/cicd-stack';
+import cdk = require('@aws-cdk/core');
+import { AppEnv, resolveAppEnv, resolveCurrentGitBranch, loadConfig } from '../lib/cdk-native';
+import { ClusterStack } from '../lib/cluster-stack';
+import { VpcStack } from '../lib/vpc-stack';
+import { SecGrpStack } from '../lib/secgrp-stack';
+import { DbStack } from '../lib/db-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbDataStack } from '../lib/db-data-stack';
-import { DbStack } from '../lib/db-stack';
-import { ECSStack } from '../lib/ecs-stack';
-import { ClusterStack } from '../lib/cluster-stack';
-import { SecGrpStack } from '../lib/secgrp-stack';
-import { VpcStack } from '../lib/vpc-stack';
-import { WafStack } from '../lib/waf-stack';
-import { AppStack } from '../lib/app-stack';
-
-import fs = require('fs');
-import os = require('os');
-import path = require('path');
-
-import cdk = require('@aws-cdk/core');
 import { DevPipelineStack } from '../lib/dev-pipeline-stack';
+import { StagingProdPipelineStack } from '../lib/staging-prod-pipeline-stack';
+import { AppStack } from '../lib/app-stack';
+import { EcrStack } from '../lib/ecr-stack';
 
 const app = new cdk.App();
 
@@ -34,7 +21,7 @@ const app = new cdk.App();
  * This JSON object (assumed to adhere to an expected structure)
  * provides the needed input to all instantiated cdk stacks herein.
  */
-const appConfigFilename = "mcorpus-cdk-app-config.json";
+const appConfigFilename = 'mcorpus-cdk-app-config.json';
 
 /**
  * The S3 bucket name in the default AWS account holding a cached copy of
@@ -42,7 +29,7 @@ const appConfigFilename = "mcorpus-cdk-app-config.json";
  *
  * This is used when no local app config file is found.
  */
-const appConfigCacheS3BucketName = "mcorpus-db-data-bucket-shared";
+const appConfigCacheS3BucketName = 'mcorpus-db-data-bucket-common';
 
 /**
  * Generate the CDK stacks.
@@ -58,23 +45,28 @@ function createStacks(appConfig: any) {
 
   // const appBuild = resolveAppBuild("../mcorpus-gql/target/classes/app.properties");
 
-  // single aws account houses all app instances
-  const awsEnv: cdk.Environment = {
+  // common aws env
+  const awsEnvCommon: cdk.Environment = {
     account: appConfig.sharedConfig.awsAccountId,
     region: appConfig.sharedConfig.awsRegion,
   };
 
-  // common aws stack tags
-  const awsStackTags_Shared = {
-    AppName: appConfig.appName,
-    AppEnv: AppEnv.SHARED,
+  // ecr-specific aws env
+  const awsEnvEcr: cdk.Environment = {
+    account: appConfig.sharedConfig.ecrConfig.awsAccountId,
+    region: appConfig.sharedConfig.ecrConfig.awsRegion,
   };
 
-  const awsStackTags_DEV = {
+  // app env stack tags
+  const awsStackTagsCommon = {
+    AppName: appConfig.appName,
+    AppEnv: AppEnv.COMMON,
+  };
+  const awsStackTagsDev = {
     AppName: appConfig.appName,
     AppEnv: AppEnv.DEV,
   };
-  const awsStackTags_PRD = {
+  const awsStackTagsPrd = {
     AppName: appConfig.appName,
     AppEnv: AppEnv.PRD,
   };
@@ -85,71 +77,38 @@ function createStacks(appConfig: any) {
   const devCicdConfig = appConfig.devConfig.cicdConfig;
   const prdCicdConfig = appConfig.prdConfig.cicdConfig;
 
-  /*
-  let webAppContainerConfig: any;
-  let cicdConfig: any;
-  switch (currentAppEnv) {
-    case AppEnv.PRD: {
-      webAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
-      cicdConfig = appConfig.prdConfig.cicdConfig;
-      break;
-    }
-    case AppEnv.DEV: {
-      webAppContainerConfig = appConfig.devConfig.webAppContainerConfig;
-      cicdConfig = appConfig.devConfig.cicdConfig;
-      break;
-    }
-    default:
-      throw new Error(`Invalid target app env: ${currentAppEnv}`);
-  }
-  */
-
-  // get the ECR ref
-  // const ecrArn = `arn:aws:ecr:${appConfig.sharedConfig.ecrConfig.awsRegion}:${appConfig.sharedConfig.ecrConfig.awsAccountId}:repository/${appConfig.sharedConfig.ecrConfig.name}`;
-
-  // resolve the web app docker image tag
-  // const ecsDkrImgTag = resolveAppImageTag(appConfig, appBuild);
-  // console.log(`ecsDkrImgTag: ${ecsDkrImgTag}`);
-
-  /*
-  // app env dependent infra-bootstrap pipeline (the app env genesis stack)
-  const infraPipelineStack = new InfraPipelineStack(app, {
+  // common ECR
+  const ecrStack = new EcrStack(app, 'mcorpusEcrRepo', {
     appName: appConfig.appName,
-    appEnv: currentAppEnv,
-    env: awsEnv,
-    tags: awsStackTags_appInstance,
-    githubOwner: gitRepoRef.githubOwner,
-    githubRepo: gitRepoRef.githubRepo,
-    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-    githubOauthTokenSecretJsonFieldName:
-      gitRepoRef.githubOauthTokenSecretJsonFieldName,
-    gitBranchName: cicdConfig.gitBranchName,
+    appEnv: AppEnv.COMMON,
+    env: awsEnvEcr,
+    tags: awsStackTagsCommon,
+    ecrName: appConfig.sharedConfig.ecrConfig.name,
   });
-  */
 
   // common VPC
-  const vpcStack = new VpcStack(app, {
+  const vpcStack = new VpcStack(app, 'mcorpusVpc', {
     appName: appConfig.appName,
-    appEnv: AppEnv.SHARED,
-    env: awsEnv,
-    tags: awsStackTags_Shared,
+    appEnv: AppEnv.COMMON,
+    env: awsEnvCommon,
+    tags: awsStackTagsCommon,
     maxAzs: appConfig.sharedConfig.networkConfig.maxAzs,
     cidr: appConfig.sharedConfig.networkConfig.cidr,
   });
-  const secGrpStack = new SecGrpStack(app, {
+  const secGrpStack = new SecGrpStack(app, 'mcorpusSecGrp', {
     appName: appConfig.appName,
-    appEnv: AppEnv.SHARED,
-    env: awsEnv,
-    tags: awsStackTags_Shared,
+    appEnv: AppEnv.COMMON,
+    env: awsEnvCommon,
+    tags: awsStackTagsCommon,
     vpc: vpcStack.vpc,
   });
 
-  // common RDS instance
-  const dbStack = new DbStack(app, {
+  // common RDS
+  const dbStack = new DbStack(app, 'mcorpusDb', {
     appName: appConfig.appName,
-    appEnv: AppEnv.SHARED,
-    env: awsEnv,
-    tags: awsStackTags_Shared,
+    appEnv: AppEnv.COMMON,
+    env: awsEnvCommon,
+    tags: awsStackTagsCommon,
     vpc: vpcStack.vpc,
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
     ecsSecGrp: secGrpStack.ecsSecGrp,
@@ -157,42 +116,56 @@ function createStacks(appConfig: any) {
     dbName: appConfig.sharedConfig.dbConfig.dbName,
     dbMasterUsername: appConfig.sharedConfig.dbConfig.dbMasterUsername,
   });
-  const dbBootstrapStack = new DbBootstrapStack(app, {
+  const dbBootstrapStack = new DbBootstrapStack(app, 'mcorpusDbSchema', {
     appName: appConfig.appName,
-    appEnv: AppEnv.SHARED,
-    env: awsEnv,
-    tags: awsStackTags_Shared,
+    appEnv: AppEnv.COMMON,
+    env: awsEnvCommon,
+    tags: awsStackTagsCommon,
     vpc: vpcStack.vpc,
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
     targetRegion: appConfig.sharedConfig.awsRegion,
   });
-  const dbDataStack = new DbDataStack(app, {
+  const dbDataStack = new DbDataStack(app, 'mcorpusDbData', {
     appName: appConfig.appName,
-    appEnv: AppEnv.SHARED,
-    env: awsEnv,
-    tags: awsStackTags_Shared,
+    appEnv: AppEnv.COMMON,
+    env: awsEnvCommon,
+    tags: awsStackTagsCommon,
     vpc: vpcStack.vpc,
     dbDataSecGrp: secGrpStack.dbBootstrapSecGrp,
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
     // s3KmsEncKeyArn: appConfig.ssmKmsArn
   });
+  dbDataStack.addDependency(dbBootstrapStack);
 
   // dev cluster
-  const devClusterStack = new ClusterStack(app, {
+  const devClusterStack = new ClusterStack(app, 'mcorpusDevCluster', {
     appName: appConfig.appName,
     appEnv: AppEnv.DEV,
-    env: awsEnv,
-    tags: awsStackTags_DEV,
+    env: awsEnvCommon,
+    tags: awsStackTagsDev,
     vpc: vpcStack.vpc,
   });
   devClusterStack.addDependency(secGrpStack);
+  // prd cluster
+  const prdClusterStack = new ClusterStack(app, 'mcorpusPrdCluster', {
+    appName: appConfig.appName,
+    appEnv: AppEnv.PRD,
+    env: awsEnvCommon,
+    tags: awsStackTagsPrd,
+    vpc: vpcStack.vpc,
+  });
+  prdClusterStack.addDependency(secGrpStack);
 
-  const devPipelineStack = new DevPipelineStack(app, {
+  const devAppStackName = 'mcorpusDevApp';
+  const prdAppStackName = 'mcorpusPrdApp';
+
+  const devPipelineStack = new DevPipelineStack(app, 'mcorpusDevPipeline', {
     appName: appConfig.appName,
     appEnv: AppEnv.DEV,
-    env: awsEnv,
-    tags: awsStackTags_DEV,
+    env: awsEnvCommon,
+    tags: awsStackTagsDev,
+    appRepository: ecrStack.appRepository,
     vpc: vpcStack.vpc,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
     appConfigCacheS3BucketName: appConfigCacheS3BucketName,
@@ -201,27 +174,49 @@ function createStacks(appConfig: any) {
     githubOwner: gitRepoRef.githubOwner,
     githubRepo: gitRepoRef.githubRepo,
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-    githubOauthTokenSecretJsonFieldName:
-      gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
     gitBranchName: devCicdConfig.gitBranchName,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
+    appDeployApprovalEmails: devCicdConfig.appDeployApprovalEmails,
+    onBuildFailureEmails: devCicdConfig.onBuildFailureEmails,
+    cdkDevAppStackName: devAppStackName,
   });
+  devPipelineStack.addDependency(ecrStack);
+  devPipelineStack.addDependency(secGrpStack);
+  devPipelineStack.addDependency(devClusterStack);
 
-  const devAppStack = new AppStack(app, {
+  const prodPipelineStack = new StagingProdPipelineStack(app, 'mcorpusPrdPipeline', {
+    appName: appConfig.appName,
+    appEnv: AppEnv.PRD,
+    env: awsEnvCommon,
+    tags: awsStackTagsPrd,
+    appRepository: ecrStack.appRepository,
+    imageTag: devPipelineStack.imageTag,
+    githubOwner: gitRepoRef.githubOwner,
+    githubRepo: gitRepoRef.githubRepo,
+    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
+    githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
+    gitProdBranch: prdCicdConfig.gitBranchName,
+    ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
+    prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
+    cdkPrdAppStackName: prdAppStackName,
+  });
+  prodPipelineStack.addDependency(devPipelineStack);
+  prodPipelineStack.addDependency(prdClusterStack);
+
+  const devAppStack = new AppStack(app, devAppStackName, {
     appName: appConfig.appName,
     appEnv: AppEnv.DEV,
-    env: awsEnv,
-    tags: awsStackTags_DEV,
+    env: awsEnvCommon,
+    tags: awsStackTagsDev,
     vpc: vpcStack.vpc,
     cluster: devClusterStack.cluster,
     appImage: devPipelineStack.appBuiltImage,
     taskdefCpu: devWebAppContainerConfig.taskdefCpu,
     taskdefMemoryLimitMiB: devWebAppContainerConfig.taskdefMemoryLimitMiB,
-    containerDefMemoryLimitMiB:
-      devWebAppContainerConfig.containerDefMemoryLimitMiB,
-    containerDefMemoryReservationMiB:
-      devWebAppContainerConfig.containerDefMemoryReservationMiB,
+    containerDefMemoryLimitMiB: devWebAppContainerConfig.containerDefMemoryLimitMiB,
+    containerDefMemoryReservationMiB: devWebAppContainerConfig.containerDefMemoryReservationMiB,
     lbToEcsPort: devWebAppContainerConfig.lbToAppPort,
     sslCertArn: devWebAppContainerConfig.tlsCertArn,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
@@ -233,43 +228,35 @@ function createStacks(appConfig: any) {
     publicDomainName: devWebAppContainerConfig.dnsConfig.publicDomainName,
     awsHostedZoneId: devWebAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
+  devAppStack.addDependency(devPipelineStack);
 
-  /*
-  const wafStack = new WafStack(app, {
+  const prdAppStack = new AppStack(app, prdAppStackName, {
     appName: appConfig.appName,
-    appEnv: currentAppEnv,
-    env: awsEnv,
-    tags: awsStackTags_appInstance,
-    appLoadBalancerRef: ecsStack.appLoadBalancer,
-  });
-  */
-
-  /*
-  const cicdStack = new CICDStack(app, {
-    appName: appConfig.appName,
-    appEnv: currentAppEnv,
-    env: awsEnv,
-    tags: awsStackTags_appInstance,
-    githubOwner: gitRepoRef.githubOwner,
-    githubRepo: gitRepoRef.githubRepo,
-    githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
-    githubOauthTokenSecretJsonFieldName:
-      gitRepoRef.githubOauthTokenSecretJsonFieldName,
-    gitBranchName: cicdConfig.gitBranchName,
+    appEnv: AppEnv.PRD,
+    env: awsEnvCommon,
+    tags: awsStackTagsPrd,
     vpc: vpcStack.vpc,
-    codebuildSecGrp: secGrpStack.codebuildSecGrp,
-    ecsTaskDefContainerName: ecsStack.containerName,
-    lbToEcsPort: webAppContainerConfig.lbToAppPort,
-    ecrArn: ecrArn,
-    fargateSvc: ecsStack.fargateSvc,
+    cluster: prdClusterStack.cluster,
+    appImage: prodPipelineStack.appBuiltImageProd,
+    taskdefCpu: prdWebAppContainerConfig.taskdefCpu,
+    taskdefMemoryLimitMiB: prdWebAppContainerConfig.taskdefMemoryLimitMiB,
+    containerDefMemoryLimitMiB: prdWebAppContainerConfig.containerDefMemoryLimitMiB,
+    containerDefMemoryReservationMiB: prdWebAppContainerConfig.containerDefMemoryReservationMiB,
+    lbToEcsPort: prdWebAppContainerConfig.lbToAppPort,
+    sslCertArn: prdWebAppContainerConfig.tlsCertArn,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
-    cicdDeployApprovalEmails: cicdConfig.appDeployApprovalEmails,
+    ecsSecGrp: secGrpStack.ecsSecGrp,
+    lbSecGrp: secGrpStack.lbSecGrp,
+    webAppUrl: prdWebAppContainerConfig.webAppUrl,
+    javaOpts: prdWebAppContainerConfig.javaOpts,
+    publicDomainName: prdWebAppContainerConfig.dnsConfig.publicDomainName,
+    awsHostedZoneId: prdWebAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
-  cicdStack.addDependency(wafStack, 'CICD pipeline depends on ecs and waf.');
-  */
+  prdAppStack.addDependency(prodPipelineStack);
 }
 
+// run the trap
 loadConfig(appConfigFilename, appConfigCacheS3BucketName)
   .then(config => createStacks(config))
   .catch(err => console.log(err));

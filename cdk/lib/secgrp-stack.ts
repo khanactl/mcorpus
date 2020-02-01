@@ -1,5 +1,5 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack } from './cdk-native'
+import { IStackProps, BaseStack, iname } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import { SecurityGroup, Peer, Port } from '@aws-cdk/aws-ec2';
 
@@ -17,7 +17,6 @@ export interface ISecGrpProps extends IStackProps {
  * Security Group Stack.
  */
 export class SecGrpStack extends BaseStack {
-
   public readonly dbBootstrapSecGrp: SecurityGroup;
 
   public readonly lbSecGrp: SecurityGroup;
@@ -26,11 +25,11 @@ export class SecGrpStack extends BaseStack {
 
   public readonly codebuildSecGrp: SecurityGroup;
 
-  constructor(scope: cdk.Construct, props: ISecGrpProps) {
-    super(scope, 'SecGrp', props);
+  constructor(scope: cdk.Construct, id: string, props: ISecGrpProps) {
+    super(scope, id, props);
 
     // db bootstrap security group
-    const sgDbBootstrapInstNme = this.iname('dbbootstrap-sec-grp', props);
+    const sgDbBootstrapInstNme = iname('dbbootstrap-sec-grp', props);
     this.dbBootstrapSecGrp = new SecurityGroup(this, sgDbBootstrapInstNme, {
       vpc: props.vpc,
       description: 'Db bootstrap security group.',
@@ -40,7 +39,7 @@ export class SecGrpStack extends BaseStack {
     this.dbBootstrapSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbBootstrapInstNme));
 
     // load balancer security group
-    const sgLbInstNme = this.iname('lb-sec-grp', props);
+    const sgLbInstNme = iname('lb-sec-grp', props);
     this.lbSecGrp = new SecurityGroup(this, sgLbInstNme, {
       vpc: props.vpc,
       description: 'App load balancer security group.',
@@ -50,7 +49,7 @@ export class SecGrpStack extends BaseStack {
     this.lbSecGrp.node.applyAspect(new cdk.Tag('Name', sgLbInstNme));
 
     // ecs container security group
-    const sgEcsInstNme = this.iname('ecs-container-sec-grp', props);
+    const sgEcsInstNme = iname('ecs-container-sec-grp', props);
     this.ecsSecGrp = new SecurityGroup(this, sgEcsInstNme, {
       vpc: props.vpc,
       description: 'ECS container security group',
@@ -60,7 +59,7 @@ export class SecGrpStack extends BaseStack {
     this.ecsSecGrp.node.applyAspect(new cdk.Tag('Name', sgEcsInstNme));
 
     // codebuild security group
-    const sgCodebuildInstNme = this.iname('codebuild-sec-grp', props);
+    const sgCodebuildInstNme = iname('codebuild-sec-grp', props);
     this.codebuildSecGrp = new SecurityGroup(this, sgCodebuildInstNme, {
       vpc: props.vpc,
       description: 'Codebuild security group',
@@ -70,17 +69,9 @@ export class SecGrpStack extends BaseStack {
     this.codebuildSecGrp.node.applyAspect(new cdk.Tag('Name', sgCodebuildInstNme));
 
     // stack output
-    new cdk.CfnOutput(this, 'DbBootstrapSecurityGroup', { value:
-      this.dbBootstrapSecGrp.securityGroupName
-    });
-    new cdk.CfnOutput(this, 'LoadBalancerSecurityGroup', { value:
-      this.lbSecGrp.securityGroupName
-    });
-    new cdk.CfnOutput(this, 'ECSContainerSecurityGroup', { value:
-      this.ecsSecGrp.securityGroupName
-    });
-    new cdk.CfnOutput(this, 'CodebuildSecurityGroup', { value:
-      this.codebuildSecGrp.securityGroupName
-    });
+    new cdk.CfnOutput(this, 'DbBootstrapSecurityGroup', { value: this.dbBootstrapSecGrp.securityGroupName });
+    new cdk.CfnOutput(this, 'LoadBalancerSecurityGroup', { value: this.lbSecGrp.securityGroupName });
+    new cdk.CfnOutput(this, 'ECSContainerSecurityGroup', { value: this.ecsSecGrp.securityGroupName });
+    new cdk.CfnOutput(this, 'CodebuildSecurityGroup', { value: this.codebuildSecGrp.securityGroupName });
   }
 }

@@ -1,5 +1,5 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack } from './cdk-native'
+import { IStackProps, BaseStack } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import { SubnetType } from '@aws-cdk/aws-ec2';
 
@@ -9,17 +9,16 @@ import { SubnetType } from '@aws-cdk/aws-ec2';
 export interface IVpcProps extends IStackProps {
   readonly maxAzs: number;
   readonly cidr: string;
-};
+}
 
 /**
  * VPC stack.
  */
 export class VpcStack extends BaseStack {
-
   public readonly vpc: ec2.Vpc;
 
-  constructor(scope: cdk.Construct, props: IVpcProps) {
-    super(scope, 'VPC', props);
+  constructor(scope: cdk.Construct, id: string, props: IVpcProps) {
+    super(scope, id, props);
 
     this.vpc = new ec2.Vpc(this, 'VPC', {
       maxAzs: props.maxAzs,
@@ -48,7 +47,7 @@ export class VpcStack extends BaseStack {
 
     // Iterate the public subnets
     for (let [key, subnet] of this.vpc.publicSubnets.entries()) {
-      publicSubnetIds.push(subnet.subnetId)
+      publicSubnetIds.push(subnet.subnetId);
     }
 
     // Iterate the private subnets

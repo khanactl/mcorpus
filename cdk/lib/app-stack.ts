@@ -1,18 +1,11 @@
 import cdk = require('@aws-cdk/core');
 import { ISecurityGroup, Peer, Port, SubnetType } from '@aws-cdk/aws-ec2';
-import {
-  FargatePlatformVersion,
-  FargateService,
-  LogDrivers,
-} from '@aws-cdk/aws-ecs';
-import {
-  ApplicationProtocol,
-  SslPolicy,
-} from '@aws-cdk/aws-elasticloadbalancingv2';
+import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
+import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { Duration } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
-import { BaseStack, IStackProps } from './cdk-native';
+import { BaseStack, IStackProps, iname, inameCml } from './cdk-native';
 import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
@@ -22,7 +15,7 @@ import r53 = require('@aws-cdk/aws-route53');
 import path = require('path');
 import alias = require('@aws-cdk/aws-route53-targets');
 import logs = require('@aws-cdk/aws-logs');
-import waf = require("@aws-cdk/aws-wafregional");
+import waf = require('@aws-cdk/aws-wafregional');
 
 /**
  * ECS Stack config properties.
@@ -121,32 +114,27 @@ export class AppStack extends BaseStack {
 
   public readonly webAcl: waf.CfnWebACL;
 
-  constructor(scope: cdk.Construct, props: IAppStackProps) {
-    super(scope, "App", props);
+  constructor(scope: cdk.Construct, id: string, props: IAppStackProps) {
+    super(scope, id, props);
 
     // get the ECR handle
     // const ecrRef = ecr.Repository.fromRepositoryArn(this, "ecr-repo-ref", props.ecrArn);
 
     // generate JWT salt ssm param
     const rhs = randomBytes(32).toString('hex');
-    const jwtSaltInstNme = this.iname('jwtSalt', props);
-    const jwtSalt: ssm.IParameter = new ssm.StringParameter(
-      this,
-      jwtSaltInstNme,
-      {
-        parameterName: `/${jwtSaltInstNme}`,
-        stringValue: rhs,
-      }
-    );
+    const jwtSaltInstNme = iname('jwtSalt', props);
+    const jwtSalt: ssm.IParameter = new ssm.StringParameter(this, jwtSaltInstNme, {
+      parameterName: `/${jwtSaltInstNme}`,
+      stringValue: rhs,
+    });
 
     // ECS/Fargate task execution role
-    const escTskExecInstNme = this.iname('ecs-tsk-exec-role', props);
+    const escTskExecInstNme = iname('ecs-tsk-exec-role', props);
     this.ecsTaskExecutionRole = new iam.Role(this, escTskExecInstNme, {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
     this.ecsTaskExecutionRole.addManagedPolicy({
-      managedPolicyArn:
-        'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy',
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy',
     });
     this.ecsTaskExecutionRole.addToPolicy(
       new iam.PolicyStatement({
@@ -169,7 +157,7 @@ export class AppStack extends BaseStack {
     );
 
     // task def
-    const taskDefInstNme = this.iname('fargate-taskdef', props);
+    const taskDefInstNme = iname('fargate-taskdef', props);
     const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
       cpu: props.taskdefCpu,
       memoryLimitMiB: props.taskdefMemoryLimitMiB,
@@ -178,30 +166,20 @@ export class AppStack extends BaseStack {
     });
 
     // web app container log group
-    this.webContainerLogGrp = new logs.LogGroup(
-      this,
-      this.iname('webapp', props),
-      {
-        retention: logs.RetentionDays.ONE_WEEK,
-        logGroupName: `webapp-${props.appEnv}`,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-      }
-    );
+    this.webContainerLogGrp = new logs.LogGroup(this, iname('webapp', props), {
+      retention: logs.RetentionDays.ONE_WEEK,
+      logGroupName: `webapp-${props.appEnv}`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
 
-    const appImage =
-      props.appImage ||
-      new ecs.AssetImage(
-        path.join(__dirname, '../mcorpus-gql/target/awsdockerasset')
-      );
+    const appImage = props.appImage || new ecs.AssetImage(path.join(__dirname, '../mcorpus-gql/target/awsdockerasset'));
 
-    this.containerName = this.iname('gql', props);
+    this.containerName = iname('gql', props);
     const containerDef = taskDef.addContainer(this.containerName, {
       // image: ecs.ContainerImage.fromEcrRepository(ecrRef, props.ecrRepoTargetTag),
       image: appImage,
       healthCheck: {
-        command: [
-          `curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`,
-        ],
+        command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
         interval: Duration.seconds(120),
         timeout: Duration.seconds(5),
         startPeriod: Duration.seconds(15),
@@ -213,8 +191,7 @@ export class AppStack extends BaseStack {
       environment: {
         JAVA_OPTS: props.javaOpts,
         MCORPUS_COOKIE_SECURE: 'true',
-        MCORPUS_DB_DATA_SOURCE_CLASS_NAME:
-          'org.postgresql.ds.PGSimpleDataSource',
+        MCORPUS_DB_DATA_SOURCE_CLASS_NAME: 'org.postgresql.ds.PGSimpleDataSource',
         MCORPUS_RST_TTL_IN_SECONDS: '1800',
         MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: '10',
         MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES: '5',
@@ -229,7 +206,7 @@ export class AppStack extends BaseStack {
         MCORPUS_JWT_SALT: ecs.Secret.fromSsmParameter(jwtSalt),
       },
       logging: new ecs.AwsLogDriver({
-        streamPrefix: this.iname('webapplogs', props),
+        streamPrefix: iname('webapplogs', props),
         logGroup: this.webContainerLogGrp,
       }),
     });
@@ -239,7 +216,7 @@ export class AppStack extends BaseStack {
 
     /*
     // cluster
-    const ecsClusterInstNme = this.iname('ecs-cluster', props);
+    const ecsClusterInstNme = iname('ecs-cluster', props);
     const cluster = new ecs.Cluster(this, ecsClusterInstNme, {
       vpc: props.vpc,
       clusterName: ecsClusterInstNme,
@@ -247,13 +224,9 @@ export class AppStack extends BaseStack {
     */
 
     // sec grp rule: lb to ecs container traffic
-    props.ecsSecGrp.addIngressRule(
-      props.lbSecGrp,
-      Port.tcp(props.lbToEcsPort),
-      'lb to ecs container traffic'
-    );
+    props.ecsSecGrp.addIngressRule(props.lbSecGrp, Port.tcp(props.lbToEcsPort), 'lb to ecs container traffic');
 
-    const fargateSvcInstNme = this.iname('fargate-svc', props);
+    const fargateSvcInstNme = iname('fargate-svc', props);
     this.fargateSvc = new ecs.FargateService(this, fargateSvcInstNme, {
       cluster: props.cluster,
       taskDefinition: taskDef,
@@ -270,7 +243,7 @@ export class AppStack extends BaseStack {
     // *** inline load balancer ***
     // ****************************
     // application load balancer
-    const albInstNme = this.iname('app-loadbalancer', props);
+    const albInstNme = iname('app-loadbalancer', props);
     this.appLoadBalancer = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
       internetFacing: true,
@@ -278,13 +251,9 @@ export class AppStack extends BaseStack {
     });
 
     // sec grp rule: outside internet access only by TLS on 443
-    props.lbSecGrp.addIngressRule(
-      Peer.anyIpv4(),
-      Port.tcp(443),
-      'TLS/443 access from internet'
-    );
+    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(443), 'TLS/443 access from internet');
 
-    const listenerInstNme = this.iname('alb-tls-listener', props);
+    const listenerInstNme = iname('alb-tls-listener', props);
     const listener = this.appLoadBalancer.addListener(listenerInstNme, {
       protocol: ApplicationProtocol.HTTPS,
       port: 443,
@@ -295,7 +264,7 @@ export class AppStack extends BaseStack {
 
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
-    const albTargetGroupInstNme = this.iname('fargate-target', props);
+    const albTargetGroupInstNme = iname('fargate-target', props);
     const albTargetGroup = listener.addTargets(albTargetGroupInstNme, {
       // targetGroupName: '',
       port: props.lbToEcsPort,
@@ -319,22 +288,16 @@ export class AppStack extends BaseStack {
     // DNS bind load balancer to domain name record
     if (props.awsHostedZoneId && props.publicDomainName) {
       // console.log('Load balancer DNS will be bound in Route53.');
-      const hostedZone = r53.HostedZone.fromHostedZoneAttributes(
-        this,
-        this.iname('hostedzone', props),
-        {
-          hostedZoneId: props.awsHostedZoneId,
-          zoneName: props.publicDomainName,
-        }
-      );
+      const hostedZone = r53.HostedZone.fromHostedZoneAttributes(this, iname('hostedzone', props), {
+        hostedZoneId: props.awsHostedZoneId,
+        zoneName: props.publicDomainName,
+      });
       // NOTE: arecord creation will fail if it already exists
-      const arecordInstNme = this.iname('arecord', props);
+      const arecordInstNme = iname('arecord', props);
       const arecord = new r53.ARecord(this, arecordInstNme, {
         recordName: props.publicDomainName,
         zone: hostedZone,
-        target: r53.RecordTarget.fromAlias(
-          new alias.LoadBalancerTarget(this.appLoadBalancer)
-        ),
+        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(this.appLoadBalancer)),
       });
       // dns specific stack output
       new cdk.CfnOutput(this, 'HostedZone', {
@@ -370,11 +333,11 @@ export class AppStack extends BaseStack {
     // *** END firewall rules ***
 
     // acl (groups rules)
-    const webAclName = this.inameCml("webAcl", props);
+    const webAclName = inameCml('webAcl', props);
     this.webAcl = new waf.CfnWebACL(this, webAclName, {
       name: webAclName,
       metricName: `${webAclName}Metrics`,
-      defaultAction: { type: "ALLOW" },
+      defaultAction: { type: 'ALLOW' },
       /*
       rules: [
         {
@@ -388,7 +351,7 @@ export class AppStack extends BaseStack {
     });
 
     // bind waf to alb
-    const wafToAlb = new waf.CfnWebACLAssociation(this, this.inameCml("Waf2Alb", props), {
+    const wafToAlb = new waf.CfnWebACLAssociation(this, inameCml('Waf2Alb', props), {
       resourceArn: this.appLoadBalancer.loadBalancerArn,
       webAclId: this.webAcl.ref,
     });
@@ -415,6 +378,6 @@ export class AppStack extends BaseStack {
     new cdk.CfnOutput(this, 'loadBalancerDnsName', {
       value: this.appLoadBalancer.loadBalancerDnsName,
     });
-    new cdk.CfnOutput(this, "WebAclName", { value: this.webAcl.name });
+    new cdk.CfnOutput(this, 'WebAclName', { value: this.webAcl.name });
   }
 }
