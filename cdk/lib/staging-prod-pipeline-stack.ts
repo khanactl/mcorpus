@@ -101,8 +101,8 @@ export class StagingProdPipelineStack extends BaseStack {
           },
         },
         artifacts: {
-          'base-directory': 'cdk/dist',
-          files: [`${props.cdkPrdAppStackName}.template.json`, 'imageTag.json'],
+          files: [`cdk/dist/${props.cdkPrdAppStackName}.template.json`, 'cdk/imageTag.json'],
+          'discard-paths': 'yes',
         },
       }),
     });

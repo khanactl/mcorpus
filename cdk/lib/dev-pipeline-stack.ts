@@ -153,8 +153,6 @@ export class DevPipelineStack extends BaseStack {
               'echo Logging in to Amazon ECR...',
               'echo $AWS_DEFAULT_REGION',
               '$(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)',
-              // `REPOSITORY_URI=${props.env!.account}.dkr.ecr.${props.env!.region}.amazonaws.com/${props.ecrRepo.repositoryName}`,
-              // `REPOSITORY_URI=${ecrRef.repositoryUri}`,
               'COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)',
               "APP_VERSION=$(cat mcorpus-gql/target/classes/app.properties | grep app.version | cut -d'=' -f2)",
               "BUILD_TIMESTAMP=$(cat mcorpus-gql/target/classes/app.properties | grep build.timestamp | cut -d'=' -f2)",
@@ -164,7 +162,6 @@ export class DevPipelineStack extends BaseStack {
           },
           build: {
             commands: [
-              // 'docker build -t $APP_REPOSITORY_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION app',
               'echo Build started on `date`',
               'mvn -DskipTests package',
 
@@ -176,33 +173,12 @@ export class DevPipelineStack extends BaseStack {
           },
           post_build: {
             commands: [
-              /* TODO mimic
-                'docker push $APP_REPOSITORY_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION',
-                'docker push $NGINX_REPOSITORY_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION',
-                `printf '{ "imageTag": "'$CODEBUILD_RESOLVED_SOURCE_VERSION'" }' > imageTag.json`,
-                `aws ssm put-parameter --name "${props.ssmImageTagParamName}" --value $CODEBUILD_RESOLVED_SOURCE_VERSION --type String --overwrite`
-                */
-
               'echo Pushing the Docker images...',
               'docker push $REPOSITORY_URI:$COMMIT_HASH',
               'docker push $REPOSITORY_URI:$BUILD_VERSION_TAG',
-
-              /* TODO needed?
-                "TASKDEF_ARN=$(aws ecs list-task-definitions | jq -r '.taskDefinitionArns[-1]')",
-                `CONTAINER_NAME=${props.ecsTaskDefContainerName}`,
-                `CONTAINER_PORT=${props.lbToEcsPort}`,
-                */
-
               'echo Writing image detail file...',
-              // "printf '[{\"name\":\"%s\",\"imageUri\":\"%s\"}]' $CONTAINER_NAME $REPOSITORY_URI:$COMMIT_HASH > imageDetail.json",
               `printf '{ "imageTag": "'$COMMIT_HASH'" }' > imageTag.json`,
-
-              /*
-                "echo Generating appspec.yaml file...",
-                "cat ../../appspec-template.yaml | sed -e \"s%\\\${taskDefArn}%$TASKDEF_ARN%\" -e \"s%\\\${containerName}%$CONTAINER_NAME%\" -e \"s%\\\${containerPort}%$CONTAINER_PORT%\" > appspec.yaml",
-                */
               `aws ssm put-parameter --name "${props.ssmImageTagParamName}" --value $COMMIT_HASH --type String --overwrite`,
-
               'echo Build completed on `date`',
             ],
           },
