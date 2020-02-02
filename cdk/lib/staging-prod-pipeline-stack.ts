@@ -95,7 +95,7 @@ export class StagingProdPipelineStack extends BaseStack {
             commands: [
               'npm run build',
               'npm run cdk synth -- -o dist',
-              `IMAGE_TAG=$(aws ssm get-parameter --name "${props.ssmImageTagParamName}" --output text --query Parameter.Value`,
+              `IMAGE_TAG=$(aws ssm get-parameter --name "${props.ssmImageTagParamName}" --output text --query Parameter.Value)`,
               `printf '{ "imageTag": "'$IMAGE_TAG'" }' > imageTag.json`,
             ],
           },
