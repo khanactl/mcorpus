@@ -274,6 +274,7 @@ export class DevPipelineStack extends BaseStack {
     const cdkBuildOutput = new codepipeline.Artifact();
 
     const devCicdPipeline = new codepipeline.Pipeline(this, 'Pipeline', {
+      pipelineName: iname('pipeline', props),
       stages: [
         {
           stageName: 'Source',

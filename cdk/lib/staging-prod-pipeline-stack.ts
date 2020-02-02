@@ -6,7 +6,7 @@ import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
 import { PipelineContainerImage } from './pipeline-container-image';
-import { IStackProps, BaseStack } from './cdk-native';
+import { IStackProps, BaseStack, iname } from './cdk-native';
 import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
 
 export interface IStagingProdPipelineStackProps extends IStackProps {
@@ -129,6 +129,7 @@ export class StagingProdPipelineStack extends BaseStack {
     const cdkBuildOutput = new codepipeline.Artifact();
 
     new codepipeline.Pipeline(this, 'Pipeline', {
+      pipelineName: iname('pipeline', props),
       stages: [
         {
           stageName: 'Source',
