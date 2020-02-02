@@ -13,6 +13,17 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
   readonly appRepository: ecr.Repository;
 
   readonly imageTag: string;
+
+  /**
+   * The name of the S3 bucket holding the CDK JSON config.
+   */
+  readonly appConfigCacheS3BucketName: string;
+
+  /**
+   * The filename of the CDK JSON config.
+   */
+  readonly appConfigFilename: string;
+
   /**
    * The GitHub user of the target repo.
    */
@@ -105,6 +116,13 @@ export class StagingProdPipelineStack extends BaseStack {
       new iam.PolicyStatement({
         resources: ['*'],
         actions: ['ec2:DescribeAvailabilityZones'],
+      })
+    );
+    // allow codebuild to pull cdk config file from s3
+    cdkBuild.addToRolePolicy(
+      new iam.PolicyStatement({
+        resources: [`arn:aws:s3:::${props.appConfigCacheS3BucketName}/${props.appConfigFilename}`],
+        actions: ['s3:GetObject'],
       })
     );
 
