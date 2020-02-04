@@ -10,9 +10,11 @@ import { IStackProps, BaseStack, iname } from './cdk-native';
 import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
 
 export interface IStagingProdPipelineStackProps extends IStackProps {
+  /**
+   * The ECR repo from which docker web app images are pulled
+   * for deployment into QA and PROD app environments.
+   */
   readonly appRepository: ecr.Repository;
-
-  readonly imageTag: string;
 
   /**
    * The name of the S3 bucket holding the CDK JSON config.
