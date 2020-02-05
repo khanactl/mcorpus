@@ -192,7 +192,6 @@ function createStacks(appConfig: any) {
     env: awsEnvCommon,
     tags: awsStackTagsPrd,
     appRepository: ecrStack.appRepository,
-    imageTag: devPipelineStack.imageTag,
     appConfigCacheS3BucketName: appConfigCacheS3BucketName,
     appConfigFilename: appConfigFilename,
     githubOwner: gitRepoRef.githubOwner,
