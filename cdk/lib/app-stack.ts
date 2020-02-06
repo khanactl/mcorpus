@@ -1,7 +1,7 @@
 import cdk = require('@aws-cdk/core');
 import { ISecurityGroup, Peer, Port, SubnetType } from '@aws-cdk/aws-ec2';
 import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
-import { ApplicationProtocol, SslPolicy, CfnListener } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { Duration } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
@@ -246,15 +246,15 @@ export class AppStack extends BaseStack {
     const albInstNme = iname('app-loadbalancer', props);
     this.appLoadBalancer = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
-      loadBalancerName: albInstNme,
       internetFacing: true,
       securityGroup: props.lbSecGrp,
     });
 
     // sec grp rule: outside internet access only by TLS on 443
-    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(443), 'HTTPS(443) access from internet');
+    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(443), 'TLS/443 access from internet');
 
-    const listenerHttps = this.appLoadBalancer.addListener(iname('alb-tls-listener', props), {
+    const listenerInstNme = iname('alb-tls-listener', props);
+    const listener = this.appLoadBalancer.addListener(listenerInstNme, {
       protocol: ApplicationProtocol.HTTPS,
       port: 443,
       certificateArns: [props.sslCertArn],
@@ -262,27 +262,10 @@ export class AppStack extends BaseStack {
       // defaultTargetGroups: []
     });
 
-    /* doesn't work
-    // http -> https redirect rule
-    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'HTTP(80) access from internet');
-    const listenerHttp = this.appLoadBalancer.addListener(iname('alb-http-listener', props), {
-      protocol: ApplicationProtocol.HTTP,
-    });
-    listenerHttp.addRedirectResponse(iname('alb-redirect-https', props), {
-      protocol: 'HTTPS',
-      host: '#{host}',
-      path: '/#{path}',
-      query: '#{query}',
-      port: '443',
-      statusCode: 'HTTP_301',
-    });
-    // END http -> https redirect rule
-    */
-
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
     const albTargetGroupInstNme = iname('fargate-target', props);
-    const albTargetGroup = listenerHttps.addTargets(albTargetGroupInstNme, {
+    const albTargetGroup = listener.addTargets(albTargetGroupInstNme, {
       // targetGroupName: '',
       port: props.lbToEcsPort,
       targets: [this.fargateSvc],
