@@ -84,6 +84,7 @@ export interface IDevPipelineStackProps extends IStackProps {
 export class DevPipelineStack extends BaseStack {
   public readonly appBuiltImage: PipelineContainerImage;
   public readonly imageTag: string;
+  public readonly gitBranchName: string;
 
   public readonly dockerBuildFailureEventTopic?: sns.Topic;
   public readonly cdkBuildFailureEventTopic?: sns.Topic;
@@ -106,6 +107,7 @@ export class DevPipelineStack extends BaseStack {
       trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
       output: sourceOutput,
     });
+    this.gitBranchName = props.gitBranchName;
 
     // *** Docker (web app container) build ***
 

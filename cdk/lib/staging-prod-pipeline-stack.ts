@@ -43,9 +43,9 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
    */
   readonly githubOauthTokenSecretJsonFieldName: string;
   /**
-   * The Git branch corresponding to production.
+   * The Git branch corresponding to the branch that the dev pipeline uses.
    */
-  readonly gitProdBranch: string;
+  readonly gitDevPipelineBranch: string;
 
   readonly ssmImageTagParamName: string;
 
@@ -78,7 +78,7 @@ export class StagingProdPipelineStack extends BaseStack {
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
         jsonField: props.githubOauthTokenSecretJsonFieldName,
       }),
-      branch: props.gitProdBranch,
+      branch: props.gitDevPipelineBranch,
       trigger: codepipeline_actions.GitHubTrigger.NONE,
       output: sourceOutput,
     });

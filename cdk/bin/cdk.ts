@@ -198,7 +198,7 @@ function createStacks(appConfig: any) {
     githubRepo: gitRepoRef.githubRepo,
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
     githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
-    gitProdBranch: prdCicdConfig.gitBranchName,
+    gitDevPipelineBranch: devPipelineStack.gitBranchName,
     ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
     prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
     cdkPrdAppStackName: prdAppStackName,

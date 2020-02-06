@@ -246,26 +246,42 @@ export class AppStack extends BaseStack {
     const albInstNme = iname('app-loadbalancer', props);
     this.appLoadBalancer = new elb.ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
+      loadBalancerName: albInstNme,
       internetFacing: true,
       securityGroup: props.lbSecGrp,
     });
 
     // sec grp rule: outside internet access only by TLS on 443
-    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(443), 'TLS/443 access from internet');
+    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(443), 'HTTPS(443) access from internet');
 
-    const listenerInstNme = iname('alb-tls-listener', props);
-    const listener = this.appLoadBalancer.addListener(listenerInstNme, {
+    const listenerHttps = this.appLoadBalancer.addListener(iname('alb-tls-listener', props), {
       protocol: ApplicationProtocol.HTTPS,
       port: 443,
       certificateArns: [props.sslCertArn],
       sslPolicy: SslPolicy.RECOMMENDED,
       // defaultTargetGroups: []
     });
+    // http -> https redirect rule
+    props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'HTTP(80) access from internet');
+    const listenerHttp = this.appLoadBalancer.addListener(iname('alb-http-listener', props), {
+      protocol: ApplicationProtocol.HTTP,
+      port: 80,
+      // defaultTargetGroups: []
+    });
+    listenerHttp.addRedirectResponse(iname('alb-redirect-https', props), {
+      protocol: 'HTTPS',
+      host: '#{host}',
+      path: '/#{path}',
+      query: '#{query}',
+      port: '443',
+      statusCode: 'HTTP_301',
+    });
+    // http -> https redirect rule
 
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
     const albTargetGroupInstNme = iname('fargate-target', props);
-    const albTargetGroup = listener.addTargets(albTargetGroupInstNme, {
+    const albTargetGroup = listenerHttps.addTargets(albTargetGroupInstNme, {
       // targetGroupName: '',
       port: props.lbToEcsPort,
       targets: [this.fargateSvc],
