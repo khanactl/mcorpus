@@ -75,6 +75,8 @@ export interface IDevPipelineStackProps extends IStackProps {
 
   readonly onBuildFailureEmails?: string[];
 
+  readonly cdkDevVpcStackName: string;
+  readonly cdkDevSecGrpStackName: string;
   /**
    * The CDK stack name of the **DEV** app instance.
    */
@@ -239,7 +241,11 @@ export class DevPipelineStack extends BaseStack {
         },
         artifacts: {
           'base-directory': 'cdk/dist',
-          files: [`${props.cdkDevAppStackName}.template.json`],
+          files: [
+            `${props.cdkDevVpcStackName}.template.json`,
+            `${props.cdkDevSecGrpStackName}.template.json`,
+            `${props.cdkDevAppStackName}.template.json`,
+          ],
         },
       }),
     });
@@ -303,7 +309,21 @@ export class DevPipelineStack extends BaseStack {
           stageName: 'Deploy',
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: 'CFN_Deploy',
+              actionName: 'CFN_Deploy_VPC',
+              stackName: props.cdkDevVpcStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkDevVpcStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 1,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_SecGrps',
+              stackName: props.cdkDevSecGrpStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkDevSecGrpStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 2,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_App',
               stackName: props.cdkDevAppStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevAppStackName}.template.json`),
               adminPermissions: true,
@@ -311,6 +331,7 @@ export class DevPipelineStack extends BaseStack {
                 [this.appBuiltImage.paramName]: dockerBuildOutput.getParam('imageTag.json', 'imageTag'),
               },
               extraInputs: [dockerBuildOutput],
+              runOrder: 3,
             }),
           ],
         },
