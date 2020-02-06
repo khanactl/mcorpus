@@ -261,29 +261,13 @@ export class AppStack extends BaseStack {
       sslPolicy: SslPolicy.RECOMMENDED,
       // defaultTargetGroups: []
     });
+
+    /* doesn't work
     // http -> https redirect rule
     props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'HTTP(80) access from internet');
     const listenerHttp = this.appLoadBalancer.addListener(iname('alb-http-listener', props), {
       protocol: ApplicationProtocol.HTTP,
     });
-    listenerHttp.addFixedResponse('DummyResponse', {
-      statusCode: '404',
-    });
-    const cfnHttpListener = listenerHttp.node.defaultChild as CfnListener;
-    cfnHttpListener.defaultActions = [
-      {
-        type: 'redirect',
-        redirectConfig: {
-          protocol: 'HTTPS',
-          host: '#{host}',
-          path: '/#{path}',
-          query: '#{query}',
-          port: '443',
-          statusCode: 'HTTP_301',
-        },
-      },
-    ];
-    /*
     listenerHttp.addRedirectResponse(iname('alb-redirect-https', props), {
       protocol: 'HTTPS',
       host: '#{host}',
@@ -292,8 +276,8 @@ export class AppStack extends BaseStack {
       port: '443',
       statusCode: 'HTTP_301',
     });
-    */
     // END http -> https redirect rule
+    */
 
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
