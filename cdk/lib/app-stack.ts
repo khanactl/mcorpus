@@ -1,7 +1,7 @@
 import cdk = require('@aws-cdk/core');
 import { ISecurityGroup, Peer, Port, SubnetType } from '@aws-cdk/aws-ec2';
 import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
-import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { ApplicationProtocol, SslPolicy, CfnListener } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { Duration } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
@@ -265,9 +265,25 @@ export class AppStack extends BaseStack {
     props.lbSecGrp.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'HTTP(80) access from internet');
     const listenerHttp = this.appLoadBalancer.addListener(iname('alb-http-listener', props), {
       protocol: ApplicationProtocol.HTTP,
-      port: 80,
-      // defaultTargetGroups: []
     });
+    listenerHttp.addFixedResponse('DummyResponse', {
+      statusCode: '404',
+    });
+    const cfnHttpListener = listenerHttp.node.defaultChild as CfnListener;
+    cfnHttpListener.defaultActions = [
+      {
+        type: 'redirect',
+        redirectConfig: {
+          protocol: 'HTTPS',
+          host: '#{host}',
+          path: '/#{path}',
+          query: '#{query}',
+          port: '443',
+          statusCode: 'HTTP_301',
+        },
+      },
+    ];
+    /*
     listenerHttp.addRedirectResponse(iname('alb-redirect-https', props), {
       protocol: 'HTTPS',
       host: '#{host}',
@@ -276,7 +292,8 @@ export class AppStack extends BaseStack {
       port: '443',
       statusCode: 'HTTP_301',
     });
-    // http -> https redirect rule
+    */
+    // END http -> https redirect rule
 
     // bind load balancing target to lb group
     // this.fargateSvc.attachToApplicationTargetGroup(albTargetGroup);
