@@ -207,6 +207,8 @@ function createStacks(appConfig: any) {
     ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
     prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
     cdkPrdAppStackName: prdAppStackName,
+    cdkPrdVpcStackName: mcorpusVpcStackName,
+    cdkPrdSecGrpStackName: mcorpusSecGrpStackName,
   });
   prodPipelineStack.addDependency(devPipelineStack);
   prodPipelineStack.addDependency(prdClusterStack);

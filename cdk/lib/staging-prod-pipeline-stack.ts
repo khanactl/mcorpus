@@ -55,6 +55,8 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
    * The CDK stack name of the **PRD** app instance.
    */
   readonly cdkPrdAppStackName: string;
+  readonly cdkPrdVpcStackName: string;
+  readonly cdkPrdSecGrpStackName: string;
 }
 
 export class StagingProdPipelineStack extends BaseStack {
@@ -103,7 +105,14 @@ export class StagingProdPipelineStack extends BaseStack {
           },
         },
         artifacts: {
-          files: [`cdk/dist/${props.cdkPrdAppStackName}.template.json`, 'cdk/imageTag.json'],
+          files: [
+            `cdk/dist/${props.cdkPrdVpcStackName}.template.json`,
+            'cdk/imageTag.json',
+            `cdk/dist/${props.cdkPrdSecGrpStackName}.template.json`,
+            'cdk/imageTag.json',
+            `cdk/dist/${props.cdkPrdAppStackName}.template.json`,
+            'cdk/imageTag.json',
+          ],
           'discard-paths': 'yes',
         },
       }),
@@ -175,20 +184,39 @@ export class StagingProdPipelineStack extends BaseStack {
         },
         */
         {
-          stageName: 'DeployProd',
+          stageName: 'Validation',
           actions: [
             new codepipeline_actions.ManualApprovalAction({
-              actionName: 'Validation',
+              actionName: 'Confirm_Production_Deployment',
               runOrder: 1,
               notificationTopic: new sns.Topic(this, 'confirm-production-deployment', {
                 topicName: 'confirm-production-deployment',
               }),
               notifyEmails: props.prodDeployApprovalEmails,
             }),
+          ],
+        },
+        {
+          stageName: 'Deploy_Production',
+          actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: 'CFN_Deploy',
-              stackName: props.cdkPrdAppStackName,
+              actionName: 'CFN_Deploy_VPC',
+              stackName: props.cdkPrdVpcStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkPrdVpcStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 1,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_SecGrps',
+              stackName: props.cdkPrdSecGrpStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkPrdSecGrpStackName}.template.json`),
+              adminPermissions: true,
               runOrder: 2,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_App',
+              stackName: props.cdkPrdAppStackName,
+              runOrder: 3,
               templatePath: cdkBuildOutput.atPath(`${props.cdkPrdAppStackName}.template.json`),
               adminPermissions: true,
               parameterOverrides: {
