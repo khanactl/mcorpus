@@ -86,8 +86,11 @@ function createStacks(appConfig: any) {
     ecrName: appConfig.sharedConfig.ecrConfig.name,
   });
 
+  const mcorpusVpcStackName = 'mcorpusVpc';
+  const mcorpusSecGrpStackName = 'mcorpusSecGrp';
+
   // common VPC
-  const vpcStack = new VpcStack(app, 'mcorpusVpc', {
+  const vpcStack = new VpcStack(app, mcorpusVpcStackName, {
     appName: appConfig.appName,
     appEnv: AppEnv.COMMON,
     env: awsEnvCommon,
@@ -95,7 +98,7 @@ function createStacks(appConfig: any) {
     maxAzs: appConfig.sharedConfig.networkConfig.maxAzs,
     cidr: appConfig.sharedConfig.networkConfig.cidr,
   });
-  const secGrpStack = new SecGrpStack(app, 'mcorpusSecGrp', {
+  const secGrpStack = new SecGrpStack(app, mcorpusSecGrpStackName, {
     appName: appConfig.appName,
     appEnv: AppEnv.COMMON,
     env: awsEnvCommon,
@@ -180,6 +183,8 @@ function createStacks(appConfig: any) {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     appDeployApprovalEmails: devCicdConfig.appDeployApprovalEmails,
     onBuildFailureEmails: devCicdConfig.onBuildFailureEmails,
+    cdkDevVpcStackName: mcorpusVpcStackName,
+    cdkDevSecGrpStackName: mcorpusSecGrpStackName,
     cdkDevAppStackName: devAppStackName,
   });
   devPipelineStack.addDependency(ecrStack);
@@ -198,10 +203,12 @@ function createStacks(appConfig: any) {
     githubRepo: gitRepoRef.githubRepo,
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
     githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
-    gitProdBranch: prdCicdConfig.gitBranchName,
+    gitDevPipelineBranch: devPipelineStack.gitBranchName,
     ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
     prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
     cdkPrdAppStackName: prdAppStackName,
+    cdkPrdVpcStackName: mcorpusVpcStackName,
+    cdkPrdSecGrpStackName: mcorpusSecGrpStackName,
   });
   prodPipelineStack.addDependency(devPipelineStack);
   prodPipelineStack.addDependency(prdClusterStack);

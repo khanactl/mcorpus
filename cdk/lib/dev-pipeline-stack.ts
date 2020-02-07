@@ -75,6 +75,8 @@ export interface IDevPipelineStackProps extends IStackProps {
 
   readonly onBuildFailureEmails?: string[];
 
+  readonly cdkDevVpcStackName: string;
+  readonly cdkDevSecGrpStackName: string;
   /**
    * The CDK stack name of the **DEV** app instance.
    */
@@ -84,6 +86,7 @@ export interface IDevPipelineStackProps extends IStackProps {
 export class DevPipelineStack extends BaseStack {
   public readonly appBuiltImage: PipelineContainerImage;
   public readonly imageTag: string;
+  public readonly gitBranchName: string;
 
   public readonly dockerBuildFailureEventTopic?: sns.Topic;
   public readonly cdkBuildFailureEventTopic?: sns.Topic;
@@ -106,6 +109,7 @@ export class DevPipelineStack extends BaseStack {
       trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
       output: sourceOutput,
     });
+    this.gitBranchName = props.gitBranchName;
 
     // *** Docker (web app container) build ***
 
@@ -237,7 +241,11 @@ export class DevPipelineStack extends BaseStack {
         },
         artifacts: {
           'base-directory': 'cdk/dist',
-          files: [`${props.cdkDevAppStackName}.template.json`],
+          files: [
+            `${props.cdkDevVpcStackName}.template.json`,
+            `${props.cdkDevSecGrpStackName}.template.json`,
+            `${props.cdkDevAppStackName}.template.json`,
+          ],
         },
       }),
     });
@@ -301,7 +309,21 @@ export class DevPipelineStack extends BaseStack {
           stageName: 'Deploy',
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: 'CFN_Deploy',
+              actionName: 'CFN_Deploy_VPC',
+              stackName: props.cdkDevVpcStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkDevVpcStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 1,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_SecGrps',
+              stackName: props.cdkDevSecGrpStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkDevSecGrpStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 2,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_App',
               stackName: props.cdkDevAppStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevAppStackName}.template.json`),
               adminPermissions: true,
@@ -309,6 +331,7 @@ export class DevPipelineStack extends BaseStack {
                 [this.appBuiltImage.paramName]: dockerBuildOutput.getParam('imageTag.json', 'imageTag'),
               },
               extraInputs: [dockerBuildOutput],
+              runOrder: 3,
             }),
           ],
         },
