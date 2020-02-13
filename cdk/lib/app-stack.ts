@@ -248,6 +248,7 @@ export class AppStack extends BaseStack {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.lbSecGrp,
+      loadBalancerName: albInstNme,
     });
 
     // sec grp rule: outside internet access only by TLS on 443
