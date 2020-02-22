@@ -1,11 +1,14 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack, iname } from './cdk-native';
+import { ISecurityGroup, IVpc, SecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
+import { LambdaFunction } from '@aws-cdk/aws-events-targets';
+import { RetentionDays } from '@aws-cdk/aws-logs';
+import { DatabaseInstance } from '@aws-cdk/aws-rds';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import rds = require('@aws-cdk/aws-rds');
 import secrets = require('@aws-cdk/aws-secretsmanager');
+import lambda = require('@aws-cdk/aws-lambda');
 import cloudwatch = require('@aws-cdk/aws-cloudwatch');
-import { DatabaseInstance } from '@aws-cdk/aws-rds';
-import { SubnetType, IVpc, ISecurityGroup } from '@aws-cdk/aws-ec2';
 
 /**
  * Db Stack config properties.
@@ -15,6 +18,7 @@ export interface IDbProps extends IStackProps {
    * The VPC ref
    */
   readonly vpc: IVpc;
+
   /**
    * The db bootstrap security group ref.
    */
@@ -54,8 +58,18 @@ export class DbStack extends BaseStack {
   constructor(scope: cdk.Construct, id: string, props: IDbProps) {
     super(scope, id, props);
 
-    // const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParamGroup', 'default.postgres11');
-    // const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
+    // db security group
+    const sgDbInstNme = iname('db-sec-grp', props);
+    this.dbSecGrp = new SecurityGroup(this, sgDbInstNme, {
+      vpc: props.vpc,
+      description: 'Db security group.',
+      allowAllOutbound: true,
+      securityGroupName: sgDbInstNme,
+    });
+    this.dbSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbInstNme));
+
+    const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
+    const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParameterGroup', 'default.postgres11');
 
     const dbInstNme = iname('db', props);
     const instance = new DatabaseInstance(this, dbInstNme, {
@@ -65,25 +79,19 @@ export class DbStack extends BaseStack {
       masterUsername: props.dbMasterUsername,
       engine: rds.DatabaseInstanceEngine.POSTGRES,
       instanceClass: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),
-      // parameterGroup: parameterGroup,
-      // optionGroup: optionGroup,
+      optionGroup: optionGroup,
+      parameterGroup: parameterGroup,
       enablePerformanceInsights: false,
       multiAz: false,
       autoMinorVersionUpgrade: true,
-      /*
-      cloudwatchLogsExports: [
-        'trace',
-        'audit',
-        'alert',
-        'listener'
-      ],
-      cloudwatchLogsRetention: logs.RetentionDays.ONE_WEEK,
-      */
+      // cloudwatchLogsExports: ['alert'],
+      cloudwatchLogsRetention: RetentionDays.ONE_MONTH,
       monitoringInterval: cdk.Duration.seconds(60), // default is 1 min
       storageEncrypted: true,
       backupRetention: cdk.Duration.days(0), // i.e. do not do backups
       vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
       deletionProtection: false,
+      securityGroups: [this.dbSecGrp],
     });
 
     // allow db bootstrap lambda fn to connect to db
@@ -107,24 +115,21 @@ export class DbStack extends BaseStack {
       metric: instance.metricCPUUtilization(),
       threshold: 90,
       evaluationPeriods: 1,
+      alarmName: cloudWatchAlarmInstNme,
     });
 
     // Trigger Lambda function on instance availability events
-    /*
-    const fn = new lambda.Function(this, 'Function', {
+    const fn = new lambda.Function(this, 'fnDbInstanceAvailability', {
       code: lambda.Code.inline('exports.handler = (event) => console.log(event);'),
       handler: 'index.handler',
-      runtime: lambda.Runtime.NODEJS_8_10
+      runtime: lambda.Runtime.NODEJS_10_X,
     });
-    const availabilityRule = instance.onEvent('Availability', { target: new targets.LambdaFunction(fn) });
+    const availabilityRule = instance.onEvent('Availability', { target: new LambdaFunction(fn) });
     availabilityRule.addEventPattern({
       detail: {
-        EventCategories: [
-          'availability'
-        ]
-      }
+        EventCategories: ['availability'],
+      },
     });
-    */
 
     this.dbInstanceJsonSecret = instance.secret!;
 

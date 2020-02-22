@@ -113,6 +113,7 @@ function createStacks(appConfig: any) {
     env: awsEnvCommon,
     tags: awsStackTagsCommon,
     vpc: vpcStack.vpc,
+    // dbSecGrp: secGrpStack.dbSecGrp,
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
     ecsSecGrp: secGrpStack.ecsSecGrp,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
