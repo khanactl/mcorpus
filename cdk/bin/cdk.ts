@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import cdk = require('@aws-cdk/core');
-import { AppEnv, resolveAppEnv, resolveCurrentGitBranch, loadConfig } from '../lib/cdk-native';
+import { AppStack } from '../lib/app-stack';
+import { AppEnv, loadConfig } from '../lib/cdk-native';
 import { ClusterStack } from '../lib/cluster-stack';
-import { VpcStack } from '../lib/vpc-stack';
-import { SecGrpStack } from '../lib/secgrp-stack';
-import { DbStack } from '../lib/db-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbDataStack } from '../lib/db-data-stack';
+import { DbStack } from '../lib/db-stack';
 import { DevPipelineStack } from '../lib/dev-pipeline-stack';
-import { StagingProdPipelineStack } from '../lib/staging-prod-pipeline-stack';
-import { AppStack } from '../lib/app-stack';
 import { EcrStack } from '../lib/ecr-stack';
+import { LbStack } from '../lib/lb-stack';
+import { SecGrpStack } from '../lib/secgrp-stack';
+import { StagingProdPipelineStack } from '../lib/staging-prod-pipeline-stack';
+import { VpcStack } from '../lib/vpc-stack';
+import cdk = require('@aws-cdk/core');
 
 const app = new cdk.App();
 
@@ -28,8 +29,11 @@ const appConfigFilename = 'mcorpus-cdk-app-config.json';
  * the app config file.
  *
  * This is used when no local app config file is found.
+ *
+ * This bucket's life-cycle is **not managed** by these CDK stacks.
+ * That is, it is assumed to *pre-exist*.
  */
-const appConfigCacheS3BucketName = 'mcorpus-db-data-bucket-common';
+const appConfigCacheS3BucketName = 'mcorpus-app-config';
 
 /**
  * Generate the CDK stacks.
@@ -88,6 +92,10 @@ function createStacks(appConfig: any) {
 
   const mcorpusVpcStackName = 'mcorpusVpc';
   const mcorpusSecGrpStackName = 'mcorpusSecGrp';
+  const mcorpusDevLbStackName = 'mcorpusDevLb';
+  const mcorpusPrdLbStackName = 'mcorpusPrdLb';
+  const mcorpusDevAppStackName = 'mcorpusDevApp';
+  const mcorpusPrdAppStackName = 'mcorpusPrdApp';
 
   // common VPC
   const vpcStack = new VpcStack(app, mcorpusVpcStackName, {
@@ -161,9 +169,6 @@ function createStacks(appConfig: any) {
   });
   prdClusterStack.addDependency(secGrpStack);
 
-  const devAppStackName = 'mcorpusDevApp';
-  const prdAppStackName = 'mcorpusPrdApp';
-
   const devPipelineStack = new DevPipelineStack(app, 'mcorpusDevPipeline', {
     appName: appConfig.appName,
     appEnv: AppEnv.DEV,
@@ -184,9 +189,8 @@ function createStacks(appConfig: any) {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     appDeployApprovalEmails: devCicdConfig.appDeployApprovalEmails,
     onBuildFailureEmails: devCicdConfig.onBuildFailureEmails,
-    cdkDevVpcStackName: mcorpusVpcStackName,
-    cdkDevSecGrpStackName: mcorpusSecGrpStackName,
-    cdkDevAppStackName: devAppStackName,
+    cdkDevLbStackName: mcorpusDevLbStackName,
+    cdkDevAppStackName: mcorpusDevAppStackName,
   });
   devPipelineStack.addDependency(ecrStack);
   devPipelineStack.addDependency(secGrpStack);
@@ -207,14 +211,38 @@ function createStacks(appConfig: any) {
     gitDevPipelineBranch: devPipelineStack.gitBranchName,
     ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
     prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
-    cdkPrdAppStackName: prdAppStackName,
-    cdkPrdVpcStackName: mcorpusVpcStackName,
-    cdkPrdSecGrpStackName: mcorpusSecGrpStackName,
+    cdkPrdLbStackName: mcorpusPrdLbStackName,
+    cdkPrdAppStackName: mcorpusPrdAppStackName,
   });
   prodPipelineStack.addDependency(devPipelineStack);
   prodPipelineStack.addDependency(prdClusterStack);
 
-  const devAppStack = new AppStack(app, devAppStackName, {
+  const devLbStack = new LbStack(app, mcorpusDevLbStackName, {
+    appName: appConfig.appName,
+    appEnv: AppEnv.DEV,
+    env: awsEnvCommon,
+    tags: awsStackTagsDev,
+    vpc: vpcStack.vpc,
+    lbSecGrp: secGrpStack.lbSecGrp,
+    lbToEcsPort: devWebAppContainerConfig.lbToAppPort,
+    sslCertArn: devWebAppContainerConfig.tlsCertArn,
+    awsHostedZoneId: devWebAppContainerConfig.dnsConfig.awsHostedZoneId,
+    publicDomainName: devWebAppContainerConfig.dnsConfig.publicDomainName,
+  });
+  const prdLbStack = new LbStack(app, mcorpusPrdLbStackName, {
+    appName: appConfig.appName,
+    appEnv: AppEnv.PRD,
+    env: awsEnvCommon,
+    tags: awsStackTagsPrd,
+    vpc: vpcStack.vpc,
+    lbSecGrp: secGrpStack.lbSecGrp,
+    lbToEcsPort: prdWebAppContainerConfig.lbToAppPort,
+    sslCertArn: prdWebAppContainerConfig.tlsCertArn,
+    awsHostedZoneId: prdWebAppContainerConfig.dnsConfig.awsHostedZoneId,
+    publicDomainName: prdWebAppContainerConfig.dnsConfig.publicDomainName,
+  });
+
+  const devAppStack = new AppStack(app, mcorpusDevAppStackName, {
     appName: appConfig.appName,
     appEnv: AppEnv.DEV,
     env: awsEnvCommon,
@@ -222,24 +250,23 @@ function createStacks(appConfig: any) {
     vpc: vpcStack.vpc,
     cluster: devClusterStack.cluster,
     appImage: devPipelineStack.appBuiltImage,
+    lbListener: devLbStack.lbListener,
     taskdefCpu: devWebAppContainerConfig.taskdefCpu,
     taskdefMemoryLimitMiB: devWebAppContainerConfig.taskdefMemoryLimitMiB,
     containerDefMemoryLimitMiB: devWebAppContainerConfig.containerDefMemoryLimitMiB,
     containerDefMemoryReservationMiB: devWebAppContainerConfig.containerDefMemoryReservationMiB,
     lbToEcsPort: devWebAppContainerConfig.lbToAppPort,
-    sslCertArn: devWebAppContainerConfig.tlsCertArn,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     ecsSecGrp: secGrpStack.ecsSecGrp,
     lbSecGrp: secGrpStack.lbSecGrp,
     webAppUrl: devWebAppContainerConfig.webAppUrl,
     javaOpts: devWebAppContainerConfig.javaOpts,
-    publicDomainName: devWebAppContainerConfig.dnsConfig.publicDomainName,
-    awsHostedZoneId: devWebAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
+  devAppStack.addDependency(devLbStack);
   devAppStack.addDependency(devPipelineStack);
 
-  const prdAppStack = new AppStack(app, prdAppStackName, {
+  const prdAppStack = new AppStack(app, mcorpusPrdAppStackName, {
     appName: appConfig.appName,
     appEnv: AppEnv.PRD,
     env: awsEnvCommon,
@@ -247,21 +274,20 @@ function createStacks(appConfig: any) {
     vpc: vpcStack.vpc,
     cluster: prdClusterStack.cluster,
     appImage: prodPipelineStack.appBuiltImageProd,
+    lbListener: prdLbStack.lbListener,
     taskdefCpu: prdWebAppContainerConfig.taskdefCpu,
     taskdefMemoryLimitMiB: prdWebAppContainerConfig.taskdefMemoryLimitMiB,
     containerDefMemoryLimitMiB: prdWebAppContainerConfig.containerDefMemoryLimitMiB,
     containerDefMemoryReservationMiB: prdWebAppContainerConfig.containerDefMemoryReservationMiB,
     lbToEcsPort: prdWebAppContainerConfig.lbToAppPort,
-    sslCertArn: prdWebAppContainerConfig.tlsCertArn,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     ecsSecGrp: secGrpStack.ecsSecGrp,
     lbSecGrp: secGrpStack.lbSecGrp,
     webAppUrl: prdWebAppContainerConfig.webAppUrl,
     javaOpts: prdWebAppContainerConfig.javaOpts,
-    publicDomainName: prdWebAppContainerConfig.dnsConfig.publicDomainName,
-    awsHostedZoneId: prdWebAppContainerConfig.dnsConfig.awsHostedZoneId,
   });
+  prdAppStack.addDependency(prdLbStack);
   prdAppStack.addDependency(prodPipelineStack);
 }
 

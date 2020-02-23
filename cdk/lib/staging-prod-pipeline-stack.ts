@@ -5,9 +5,9 @@ import sns = require('@aws-cdk/aws-sns');
 import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
+import { BuildSpec } from '@aws-cdk/aws-codebuild';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import { PipelineContainerImage } from './pipeline-container-image';
-import { IStackProps, BaseStack, iname } from './cdk-native';
-import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
 
 export interface IStagingProdPipelineStackProps extends IStackProps {
   /**
@@ -51,12 +51,8 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
 
   readonly prodDeployApprovalEmails: string[];
 
-  /**
-   * The CDK stack name of the **PRD** app instance.
-   */
+  readonly cdkPrdLbStackName: string;
   readonly cdkPrdAppStackName: string;
-  readonly cdkPrdVpcStackName: string;
-  readonly cdkPrdSecGrpStackName: string;
 }
 
 export class StagingProdPipelineStack extends BaseStack {
@@ -106,10 +102,7 @@ export class StagingProdPipelineStack extends BaseStack {
         },
         artifacts: {
           files: [
-            `cdk/dist/${props.cdkPrdVpcStackName}.template.json`,
-            'cdk/imageTag.json',
-            `cdk/dist/${props.cdkPrdSecGrpStackName}.template.json`,
-            'cdk/imageTag.json',
+            `cdk/dist/${props.cdkPrdLbStackName}.template.json`,
             `cdk/dist/${props.cdkPrdAppStackName}.template.json`,
             'cdk/imageTag.json',
           ],
@@ -200,23 +193,16 @@ export class StagingProdPipelineStack extends BaseStack {
           stageName: 'Deploy_Production',
           actions: [
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: 'CFN_Deploy_VPC',
-              stackName: props.cdkPrdVpcStackName,
-              templatePath: cdkBuildOutput.atPath(`${props.cdkPrdVpcStackName}.template.json`),
+              actionName: 'CFN_Deploy_Lb',
+              stackName: props.cdkPrdLbStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkPrdLbStackName}.template.json`),
               adminPermissions: true,
               runOrder: 1,
             }),
             new codepipeline_actions.CloudFormationCreateUpdateStackAction({
-              actionName: 'CFN_Deploy_SecGrps',
-              stackName: props.cdkPrdSecGrpStackName,
-              templatePath: cdkBuildOutput.atPath(`${props.cdkPrdSecGrpStackName}.template.json`),
-              adminPermissions: true,
-              runOrder: 2,
-            }),
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_App',
               stackName: props.cdkPrdAppStackName,
-              runOrder: 3,
+              runOrder: 2,
               templatePath: cdkBuildOutput.atPath(`${props.cdkPrdAppStackName}.template.json`),
               adminPermissions: true,
               parameterOverrides: {
