@@ -111,14 +111,6 @@ export class DbDataStack extends BaseStack {
     this.dbDataFn.addEventSource(
       new S3EventSource(this.dbDataBucket, {
         events: [s3.EventType.OBJECT_CREATED],
-        /*
-      filters: [
-        {
-          prefix: '',
-          suffix: '',
-        }
-      ]
-      */
       })
     );
 
