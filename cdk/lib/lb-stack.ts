@@ -1,20 +1,11 @@
 import cdk = require('@aws-cdk/core');
-import { ISecurityGroup, Peer, Port, SubnetType } from '@aws-cdk/aws-ec2';
-import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
+import { ISecurityGroup, Peer, Port } from '@aws-cdk/aws-ec2';
 import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
-import { IStringParameter } from '@aws-cdk/aws-ssm';
-import { Duration } from '@aws-cdk/core';
-import { randomBytes } from 'crypto';
-import { BaseStack, IStackProps, iname, inameCml } from './cdk-native';
-import iam = require('@aws-cdk/aws-iam');
+import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
-import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
-import ssm = require('@aws-cdk/aws-ssm');
 import r53 = require('@aws-cdk/aws-route53');
-import path = require('path');
 import alias = require('@aws-cdk/aws-route53-targets');
-import logs = require('@aws-cdk/aws-logs');
 import waf = require('@aws-cdk/aws-wafregional');
 
 export interface ILbStackProps extends IStackProps {
@@ -22,14 +13,6 @@ export interface ILbStackProps extends IStackProps {
    * The VPC ref
    */
   readonly vpc: ec2.IVpc;
-
-  // readonly fargateSvc: FargateService;
-
-  /**
-   * The inner or traffic port used to send traffic
-   * from the load balancer to the ecs/fargate service.
-   */
-  readonly lbToEcsPort: number;
 
   /**
    * The load balancer security group ref.
@@ -163,9 +146,11 @@ export class LbStack extends BaseStack {
     // ***************
 
     // stack output
+    new cdk.CfnOutput(this, 'AppLoadBalancerName', { value: this.appLoadBalancer.loadBalancerName });
+    new cdk.CfnOutput(this, 'AppLoadBalancerListenerArn', { value: this.lbListener.listenerArn });
     new cdk.CfnOutput(this, 'loadBalancerDnsName', {
       value: this.appLoadBalancer.loadBalancerDnsName,
     });
-    new cdk.CfnOutput(this, 'WebAclName', { value: this.webAcl.name });
+    new cdk.CfnOutput(this, 'WafWebAclName', { value: this.webAcl.name });
   }
 }

@@ -1,21 +1,18 @@
 import cdk = require('@aws-cdk/core');
-import { ISecurityGroup, Peer, Port, SubnetType } from '@aws-cdk/aws-ec2';
-import { FargatePlatformVersion, FargateService, LogDrivers } from '@aws-cdk/aws-ecs';
-import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { ISecurityGroup, Port, SubnetType } from '@aws-cdk/aws-ec2';
+import { FargatePlatformVersion, FargateService } from '@aws-cdk/aws-ecs';
+import { ApplicationProtocol } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
 import { Duration } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
-import { BaseStack, IStackProps, iname, inameCml } from './cdk-native';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import iam = require('@aws-cdk/aws-iam');
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ssm = require('@aws-cdk/aws-ssm');
-import r53 = require('@aws-cdk/aws-route53');
 import path = require('path');
-import alias = require('@aws-cdk/aws-route53-targets');
 import logs = require('@aws-cdk/aws-logs');
-import waf = require('@aws-cdk/aws-wafregional');
 
 /**
  * ECS Stack config properties.
