@@ -206,7 +206,7 @@ export class AppStack extends BaseStack {
       assignPublicIp: false,
       healthCheckGracePeriod: Duration.seconds(15),
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
-      // serviceName: 'mcorpus-fargate-service',
+      serviceName: iname('fargate-svc', props),
       platformVersion: FargatePlatformVersion.LATEST,
       securityGroup: props.ecsSecGrp,
     });
