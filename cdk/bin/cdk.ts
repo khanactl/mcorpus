@@ -43,12 +43,6 @@ const appConfigCacheS3BucketName = 'mcorpus-app-config';
 function createStacks(appConfig: any) {
   const gitRepoRef = appConfig.sharedConfig.gitRepoRef;
 
-  // const currentGitBranch = resolveCurrentGitBranch();
-  // const currentAppEnv = resolveAppEnv(currentGitBranch);
-  // console.log(`gitBranch: ${currentGitBranch}, currentAppEnv: ${currentAppEnv}`);
-
-  // const appBuild = resolveAppBuild("../mcorpus-gql/target/classes/app.properties");
-
   // common aws env
   const awsEnvCommon: cdk.Environment = {
     account: appConfig.sharedConfig.awsAccountId,
@@ -185,6 +179,7 @@ function createStacks(appConfig: any) {
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
     githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
     gitBranchName: devCicdConfig.gitBranchName,
+    triggerOnCommit: devCicdConfig.triggerOnCommit,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     appDeployApprovalEmails: devCicdConfig.appDeployApprovalEmails,
@@ -208,7 +203,8 @@ function createStacks(appConfig: any) {
     githubRepo: gitRepoRef.githubRepo,
     githubOauthTokenSecretArn: gitRepoRef.githubOauthTokenSecretArn,
     githubOauthTokenSecretJsonFieldName: gitRepoRef.githubOauthTokenSecretJsonFieldName,
-    gitDevPipelineBranch: devPipelineStack.gitBranchName,
+    gitBranchName: prdCicdConfig.gitBranchName,
+    triggerOnCommit: devCicdConfig.triggerOnCommit,
     ssmImageTagParamName: devCicdConfig.ssmImageTagParamName,
     prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
     cdkPrdLbStackName: mcorpusPrdLbStackName,

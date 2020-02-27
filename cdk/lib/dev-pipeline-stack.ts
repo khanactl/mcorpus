@@ -61,6 +61,10 @@ export interface IDevPipelineStackProps extends IStackProps {
    * The Git branch name to associate to the CICD pipeline.
    */
   readonly gitBranchName: string;
+  /**
+   * Trigger CICD build on commit OR trigger manually.
+   */
+  readonly triggerOnCommit: boolean;
 
   /**
    * The SSM secure param of the web app jdbc url to the backend db.
@@ -95,14 +99,16 @@ export class DevPipelineStack extends BaseStack {
     // source (github)
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: `GitHub-Source-${props.appEnv}`,
+      actionName: `GitHub-${props.gitBranchName}-branch`,
       owner: props.githubOwner,
       repo: props.githubRepo,
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
         jsonField: props.githubOauthTokenSecretJsonFieldName,
       }),
       branch: props.gitBranchName,
-      trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
+      trigger: props.triggerOnCommit
+        ? codepipeline_actions.GitHubTrigger.WEBHOOK
+        : codepipeline_actions.GitHubTrigger.NONE,
       output: sourceOutput,
     });
     this.gitBranchName = props.gitBranchName;
