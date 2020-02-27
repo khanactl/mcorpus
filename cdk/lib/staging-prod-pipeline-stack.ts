@@ -71,7 +71,7 @@ export class StagingProdPipelineStack extends BaseStack {
     const sourceOutput = new codepipeline.Artifact();
 
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: 'GitHub',
+      actionName: `GitHub-${props.gitBranchName}-branch`,
       owner: props.githubOwner,
       repo: props.githubRepo,
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {

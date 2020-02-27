@@ -99,7 +99,7 @@ export class DevPipelineStack extends BaseStack {
     // source (github)
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: `GitHub-Source-${props.appEnv}`,
+      actionName: `GitHub-${props.gitBranchName}-branch`,
       owner: props.githubOwner,
       repo: props.githubRepo,
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
