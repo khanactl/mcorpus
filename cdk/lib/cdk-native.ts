@@ -18,23 +18,6 @@ export enum AppEnv {
 }
 
 /**
- * The app build info definition meant to capture
- * needed properties of the underlying app build operation.
- */
-export interface IAppBuildInfo {
-  /**
-   * The resolved app version (usu. gotten from maven build)
-   */
-  readonly appVersion: string;
-  /**
-   * The resolved app build timestamp relative to GMT (usu. gotten from maven build)
-   *
-   * FORMAT: "yyyymmddHHmmss"
-   */
-  readonly appBuildTimestamp: number;
-}
-
-/**
  * Native stack properties definition.
  */
 export interface IStackProps extends cdk.StackProps {
@@ -63,27 +46,6 @@ export abstract class BaseStack extends cdk.Stack {
     super(scope, id, props);
   }
 } // BaseStack class
-
-export function resolveCurrentGitBranch(): string {
-  // are we in codebuild env (there is no .git dir there)?
-  let branch = process.env.GIT_BRANCH_NAME; // rely on custom buildspec env var
-  if (!branch) {
-    // assume a .git project dir present and use a 3rd party dep to resolve current git branch
-    branch = require('git-branch');
-  }
-  if (!branch) throw Error('Fatal: Unable to determine the current Git branch.');
-  return branch;
-}
-
-export function resolveAppEnv(gitBranchName: string): AppEnv {
-  switch (gitBranchName) {
-    case 'master': // the master branch is always production
-      return AppEnv.PRD;
-    default:
-      // always default to DEV
-      return AppEnv.DEV;
-  }
-}
 
 /**
  * Load the CDK app config JSON file either from local user dir

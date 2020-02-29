@@ -43,9 +43,13 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
    */
   readonly githubOauthTokenSecretJsonFieldName: string;
   /**
-   * The Git branch corresponding to the branch that the dev pipeline uses.
+   * The Git branch name to associate to the CICD pipeline.
    */
-  readonly gitDevPipelineBranch: string;
+  readonly gitBranchName: string;
+  /**
+   * Trigger CICD build on commit OR trigger manually.
+   */
+  readonly triggerOnCommit: boolean;
 
   readonly ssmImageTagParamName: string;
 
@@ -56,28 +60,27 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
 }
 
 export class StagingProdPipelineStack extends BaseStack {
-  public readonly appRepository: ecr.Repository;
-  public readonly appBuiltImageStaging: PipelineContainerImage;
+  // public readonly appBuiltImageStaging: PipelineContainerImage;
   public readonly appBuiltImageProd: PipelineContainerImage;
 
   constructor(scope: cdk.Construct, id: string, props: IStagingProdPipelineStackProps) {
     super(scope, id, props);
 
-    this.appRepository = props.appRepository;
-    // this.appBuiltImageStaging = new PipelineContainerImage(this.appRepository);
-    this.appBuiltImageProd = new PipelineContainerImage(this.appRepository);
+    this.appBuiltImageProd = new PipelineContainerImage(props.appRepository);
 
     const sourceOutput = new codepipeline.Artifact();
 
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
-      actionName: 'GitHub',
+      actionName: `GitHub-${props.gitBranchName}-branch`,
       owner: props.githubOwner,
       repo: props.githubRepo,
       oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
         jsonField: props.githubOauthTokenSecretJsonFieldName,
       }),
-      branch: props.gitDevPipelineBranch,
-      trigger: codepipeline_actions.GitHubTrigger.NONE,
+      branch: props.gitBranchName,
+      trigger: props.triggerOnCommit
+        ? codepipeline_actions.GitHubTrigger.WEBHOOK
+        : codepipeline_actions.GitHubTrigger.NONE,
       output: sourceOutput,
     });
 
