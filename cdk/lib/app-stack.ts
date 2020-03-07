@@ -15,7 +15,7 @@ import path = require('path');
 import logs = require('@aws-cdk/aws-logs');
 
 /**
- * ECS Stack config properties.
+ * AppStack config properties.
  */
 export interface IAppStackProps extends IStackProps {
   /**
@@ -82,6 +82,10 @@ export interface IAppStackProps extends IStackProps {
 
 /**
  * AppStack.
+ *
+ * Houses the web app in a Docker container on the AWS Fargate platform
+ * and binds the generated web app container to an already created
+ * app load balancer listener.
  */
 export class AppStack extends BaseStack {
   /**
@@ -89,17 +93,14 @@ export class AppStack extends BaseStack {
    */
   public readonly containerName: string;
 
-  // public readonly ecsTaskExecutionRole: iam.Role;
-
   public readonly fargateSvc: FargateService;
 
   public readonly webContainerLogGrp: logs.LogGroup;
 
+  public readonly albTargetGroup: elb.ApplicationTargetGroup;
+
   constructor(scope: cdk.Construct, id: string, props: IAppStackProps) {
     super(scope, id, props);
-
-    // get the ECR handle
-    // const ecrRef = ecr.Repository.fromRepositoryArn(this, "ecr-repo-ref", props.ecrArn);
 
     // generate JWT salt ssm param
     const rhs = randomBytes(32).toString('hex');
@@ -109,36 +110,11 @@ export class AppStack extends BaseStack {
       stringValue: rhs,
     });
 
-    // ECS/Fargate task execution role
-    /*
-    const escTskExecInstNme = iname('ecs-tsk-exec-role', props);
-    this.ecsTaskExecutionRole = new iam.Role(this, escTskExecInstNme, {
-      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-    });
-    this.ecsTaskExecutionRole.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy',
-    });
-    this.ecsTaskExecutionRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: [
-          'ssm:GetParameter',
-        ],
-        resources: [
-          props.ssmJdbcUrl.parameterArn,
-          props.ssmJdbcTestUrl.parameterArn,
-          jwtSalt.parameterArn,
-        ],
-      })
-    );
-    */
-
     // task def
     const taskDefInstNme = iname('fargate-taskdef', props);
     const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
       cpu: props.taskdefCpu,
       memoryLimitMiB: props.taskdefMemoryLimitMiB,
-      // taskRole: this.ecsTaskExecutionRole,
-      // executionRole: this.ecsTaskExecutionRole,
     });
     taskDef.addToExecutionRolePolicy(
       new iam.PolicyStatement({
@@ -213,7 +189,7 @@ export class AppStack extends BaseStack {
 
     // bind load balancing target to lb group
     const albTargetGroupInstNme = iname('fargate-target', props);
-    const albTargetGroup = props.lbListener.addTargets(albTargetGroupInstNme, {
+    this.albTargetGroup = props.lbListener.addTargets(albTargetGroupInstNme, {
       targetGroupName: albTargetGroupInstNme,
       port: props.lbToEcsPort,
       targets: [this.fargateSvc],
@@ -230,11 +206,6 @@ export class AppStack extends BaseStack {
     });
 
     // stack output
-    /*
-    new cdk.CfnOutput(this, 'fargateTaskExecRoleName', {
-      value: this.ecsTaskExecutionRole.roleName,
-    });
-    */
     new cdk.CfnOutput(this, 'fargateTaskDefArn', {
       value: taskDef.taskDefinitionArn,
     });
@@ -246,6 +217,9 @@ export class AppStack extends BaseStack {
     });
     new cdk.CfnOutput(this, 'containerName', {
       value: this.containerName,
+    });
+    new cdk.CfnOutput(this, 'appLoadBalancerTargetGroupName', {
+      value: this.albTargetGroup.targetGroupName,
     });
   }
 }
