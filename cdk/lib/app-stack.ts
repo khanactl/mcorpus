@@ -157,7 +157,6 @@ export class AppStack extends BaseStack {
 
     this.containerName = iname('gql', props);
     const containerDef = taskDef.addContainer(this.containerName, {
-      // image: ecs.ContainerImage.fromEcrRepository(ecrRef, props.ecrRepoTargetTag),
       image: appImage,
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
