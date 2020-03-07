@@ -89,7 +89,7 @@ export class AppStack extends BaseStack {
    */
   public readonly containerName: string;
 
-  public readonly ecsTaskExecutionRole: iam.Role;
+  // public readonly ecsTaskExecutionRole: iam.Role;
 
   public readonly fargateSvc: FargateService;
 
@@ -110,6 +110,7 @@ export class AppStack extends BaseStack {
     });
 
     // ECS/Fargate task execution role
+    /*
     const escTskExecInstNme = iname('ecs-tsk-exec-role', props);
     this.ecsTaskExecutionRole = new iam.Role(this, escTskExecInstNme, {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
@@ -120,31 +121,31 @@ export class AppStack extends BaseStack {
     this.ecsTaskExecutionRole.addToPolicy(
       new iam.PolicyStatement({
         actions: [
-          /*
-          'kms:Decrypt',
-          'kms:DescribeKey',
-          'kms:DescribeParamters',
-          'kms:GetParamters',
-          */
           'ssm:GetParameter',
         ],
         resources: [
           props.ssmJdbcUrl.parameterArn,
           props.ssmJdbcTestUrl.parameterArn,
           jwtSalt.parameterArn,
-          // props.ssmKmsArn, // TODO fix
         ],
       })
     );
+    */
 
     // task def
     const taskDefInstNme = iname('fargate-taskdef', props);
     const taskDef = new ecs.FargateTaskDefinition(this, taskDefInstNme, {
       cpu: props.taskdefCpu,
       memoryLimitMiB: props.taskdefMemoryLimitMiB,
-      taskRole: this.ecsTaskExecutionRole,
-      executionRole: this.ecsTaskExecutionRole,
+      // taskRole: this.ecsTaskExecutionRole,
+      // executionRole: this.ecsTaskExecutionRole,
     });
+    taskDef.addToExecutionRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['ssm:GetParameter'],
+        resources: [props.ssmJdbcUrl.parameterArn, props.ssmJdbcTestUrl.parameterArn, jwtSalt.parameterArn],
+      })
+    );
 
     // web app container log group
     this.webContainerLogGrp = new logs.LogGroup(this, iname('webapp', props), {
@@ -229,9 +230,11 @@ export class AppStack extends BaseStack {
     });
 
     // stack output
+    /*
     new cdk.CfnOutput(this, 'fargateTaskExecRoleName', {
       value: this.ecsTaskExecutionRole.roleName,
     });
+    */
     new cdk.CfnOutput(this, 'fargateTaskDefArn', {
       value: taskDef.taskDefinitionArn,
     });
