@@ -157,7 +157,6 @@ export class AppStack extends BaseStack {
 
     this.containerName = iname('gql', props);
     const containerDef = taskDef.addContainer(this.containerName, {
-      // image: ecs.ContainerImage.fromEcrRepository(ecrRef, props.ecrRepoTargetTag),
       image: appImage,
       healthCheck: {
         command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
@@ -206,7 +205,7 @@ export class AppStack extends BaseStack {
       assignPublicIp: false,
       healthCheckGracePeriod: Duration.seconds(15),
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
-      serviceName: iname('fargate-svc', props),
+      serviceName: fargateSvcInstNme,
       platformVersion: FargatePlatformVersion.LATEST,
       securityGroup: props.ecsSecGrp,
     });
