@@ -19,6 +19,7 @@ export class ClusterStack extends BaseStack {
     this.cluster = new ecs.Cluster(this, 'FargateCluster', {
       vpc: props.vpc,
       clusterName: iname('cluster', props),
+      containerInsights: true,
     });
 
     // stack output
