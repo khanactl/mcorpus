@@ -11,7 +11,7 @@ import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
 import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
 import { SubnetType } from '@aws-cdk/aws-ec2';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
-import { IStackProps, BaseStack, iname } from './cdk-native';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import { PipelineContainerImage } from './pipeline-container-image';
 
 export interface IDevPipelineStackProps extends IStackProps {

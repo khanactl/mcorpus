@@ -1,6 +1,6 @@
-import cdk = require("@aws-cdk/core");
-import ecs = require("@aws-cdk/aws-ecs");
-import ecr = require("@aws-cdk/aws-ecr");
+import cdk = require('@aws-cdk/core');
+import ecs = require('@aws-cdk/aws-ecs');
+import ecr = require('@aws-cdk/aws-ecr');
 
 export class PipelineContainerImage extends ecs.ContainerImage {
   public readonly imageName: string;
@@ -9,7 +9,6 @@ export class PipelineContainerImage extends ecs.ContainerImage {
 
   constructor(repository: ecr.IRepository) {
     super();
-    // this.imageName = repository.repositoryUriForTag(new cdk.Token(() => this.parameter!.stringValue).toString());
     this.imageName = repository.repositoryUriForTag(
       cdk.Lazy.stringValue({ produce: () => this.parameter!.valueAsString })
     );
@@ -17,18 +16,12 @@ export class PipelineContainerImage extends ecs.ContainerImage {
   }
 
   public bind(containerDefinition: ecs.ContainerDefinition): ecs.ContainerImageConfig {
-    this.repository.grantPull(
-      containerDefinition.taskDefinition.obtainExecutionRole()
-    );
-    this.parameter = new cdk.CfnParameter(
-      containerDefinition,
-      "PipelineParam",
-      {
-        type: "String"
-      }
-    );
+    this.repository.grantPull(containerDefinition.taskDefinition.obtainExecutionRole());
+    this.parameter = new cdk.CfnParameter(containerDefinition, 'PipelineParam', {
+      type: 'String',
+    });
     return {
-      imageName: this.imageName
+      imageName: this.imageName,
     };
   }
 
@@ -37,9 +30,7 @@ export class PipelineContainerImage extends ecs.ContainerImage {
     return cdk.Lazy.stringValue({ produce: () => this.parameter!.logicalId });
   }
 
-  public toRepositoryCredentialsJson():
-    | ecs.CfnTaskDefinition.RepositoryCredentialsProperty
-    | undefined {
+  public toRepositoryCredentialsJson(): ecs.CfnTaskDefinition.RepositoryCredentialsProperty | undefined {
     return undefined;
   }
 }
