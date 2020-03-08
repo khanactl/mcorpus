@@ -301,6 +301,7 @@ function createStacks(appConfig: any) {
     appLoadBalancerRef: devLbStack.appLoadBalancer,
   });
   devMetricsStack.addDependency(devPipelineStack);
+  devMetricsStack.addDependency(devAppStack);
   const prdMetricsStack = new MetricsStack(app, mcorpusPrdMetricsStackName, {
     appName: appConfig.appName,
     appEnv: AppEnv.PRD,
@@ -312,6 +313,7 @@ function createStacks(appConfig: any) {
     appLoadBalancerRef: prdLbStack.appLoadBalancer,
   });
   prdMetricsStack.addDependency(prdPipelineStack);
+  prdMetricsStack.addDependency(prdAppStack);
 }
 
 // run the trap
