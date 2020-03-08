@@ -1,10 +1,9 @@
 import cdk = require('@aws-cdk/core');
-import { Dashboard, GraphWidget, Metric } from '@aws-cdk/aws-cloudwatch';
+import { Alarm, AlarmWidget, Dashboard, GraphWidget, Metric } from '@aws-cdk/aws-cloudwatch';
 import { Cluster, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IDatabaseInstance } from '@aws-cdk/aws-rds';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import cloudwatch = require('@aws-cdk/aws-cloudwatch');
 
 export interface IMetricsStackProps extends IStackProps {
   // readonly vpc: ec2.IVpc;
@@ -48,20 +47,20 @@ export class MetricsStack extends BaseStack {
 
     // *** alarms ***
     // db
-    const alarmDbHighCpu = new cloudwatch.Alarm(this, 'db-high-cpu', {
+    const alarmDbHighCpu = new Alarm(this, 'db-high-cpu', {
       metric: metricDbCpuUtilization,
       threshold: 90,
       evaluationPeriods: 1,
       alarmName: 'db-high-cpu',
     });
     // ecs
-    const alarmEcsCpu = new cloudwatch.Alarm(this, 'ecs-high-cpu', {
+    const alarmEcsCpu = new Alarm(this, 'ecs-high-cpu', {
       metric: metricEcsCpu,
       threshold: 90,
       evaluationPeriods: 1,
       alarmName: 'ecs-high-cpu',
     });
-    const alarmEcsMemory = new cloudwatch.Alarm(this, 'ecs-high-memory', {
+    const alarmEcsMemory = new Alarm(this, 'ecs-high-memory', {
       metric: metricEcsMemory,
       threshold: 90,
       evaluationPeriods: 1,
@@ -78,12 +77,12 @@ export class MetricsStack extends BaseStack {
     });
     this.dashboard.addWidgets(
       // db
-      this.buildGraphWidget('db-cpu', metricDbCpuUtilization),
+      this.buildAlarmWidget('db-cpu', alarmDbHighCpu),
       this.buildGraphWidget('db-freeable-memory', metricDbFreeableMemory),
       this.buildGraphWidget('db-num-connections', metricDbNumConnections),
       // ecs
-      this.buildGraphWidget('ecs-cpu', metricEcsCpu),
-      this.buildGraphWidget('ecs-memory', metricEcsMemory),
+      this.buildAlarmWidget('ecs-cpu', alarmEcsCpu),
+      this.buildAlarmWidget('ecs-memory', alarmEcsMemory),
       // lb
       this.buildGraphWidget('lb-request-count', metricsLbRequestCount)
     );
@@ -108,6 +107,13 @@ export class MetricsStack extends BaseStack {
     return new GraphWidget({
       title: title,
       left: [metric],
+    });
+  }
+
+  private buildAlarmWidget(title: string, alarm: Alarm): AlarmWidget {
+    return new AlarmWidget({
+      title: title,
+      alarm: alarm,
     });
   }
 }
