@@ -47,24 +47,27 @@ export class MetricsStack extends BaseStack {
 
     // *** alarms ***
     // db
-    const alarmDbHighCpu = new Alarm(this, 'db-high-cpu', {
+    const alarmDbHighCpuName = iname(`db-high-cpu`, props, false);
+    const alarmDbHighCpu = new Alarm(this, alarmDbHighCpuName, {
       metric: metricDbCpuUtilization,
       threshold: 90,
       evaluationPeriods: 1,
-      alarmName: 'db-high-cpu',
+      alarmName: alarmDbHighCpuName,
     });
     // ecs
-    const alarmEcsCpu = new Alarm(this, 'ecs-high-cpu', {
+    const alarmEcsCpuName = iname('ecs-high-cpu', props, false);
+    const alarmEcsCpu = new Alarm(this, alarmEcsCpuName, {
       metric: metricEcsCpu,
       threshold: 90,
       evaluationPeriods: 1,
-      alarmName: 'ecs-high-cpu',
+      alarmName: alarmEcsCpuName,
     });
-    const alarmEcsMemory = new Alarm(this, 'ecs-high-memory', {
+    const alarmEcsMemoryName = iname('ecs-high-memory', props, false);
+    const alarmEcsMemory = new Alarm(this, alarmEcsMemoryName, {
       metric: metricEcsMemory,
       threshold: 90,
       evaluationPeriods: 1,
-      alarmName: 'ecs-high-memory',
+      alarmName: alarmEcsMemoryName,
     });
     // lb
     // NONE at present

@@ -104,10 +104,13 @@ export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketN
  *
  * @param rootName the root name
  * @param props the stack properties object
+ * @param useAppName Use the app name in the generated iname?  Defaults to true.
  * @returns the generated iname
  */
-export function iname(rootName: string, props: IStackProps): string {
-  return `${props.appName.toLowerCase()}-${rootName}-${props.appEnv.toLowerCase()}`;
+export function iname(rootName: string, props: IStackProps, useAppName: boolean = true): string {
+  return useAppName
+    ? `${props.appName.toLowerCase()}-${rootName}-${props.appEnv.toLowerCase()}`
+    : `${rootName}-${props.appEnv.toLowerCase()}`;
 }
 
 /**
