@@ -57,6 +57,7 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
 
   readonly cdkPrdLbStackName: string;
   readonly cdkPrdAppStackName: string;
+  readonly cdkPrdMetricsStackName: string;
 }
 
 export class StagingProdPipelineStack extends BaseStack {
@@ -107,6 +108,7 @@ export class StagingProdPipelineStack extends BaseStack {
           files: [
             `cdk/dist/${props.cdkPrdLbStackName}.template.json`,
             `cdk/dist/${props.cdkPrdAppStackName}.template.json`,
+            `cdk/dist/${props.cdkPrdMetricsStackName}.template.json`,
             'cdk/imageTag.json',
           ],
           'discard-paths': 'yes',
@@ -212,6 +214,13 @@ export class StagingProdPipelineStack extends BaseStack {
                 [this.appBuiltImageProd.paramName]: cdkBuildOutput.getParam('imageTag.json', 'imageTag'),
               },
               extraInputs: [cdkBuildOutput],
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_Metrics',
+              stackName: props.cdkPrdMetricsStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkPrdMetricsStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 3,
             }),
           ],
         },
