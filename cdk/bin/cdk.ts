@@ -9,10 +9,12 @@ import { DbStack } from '../lib/db-stack';
 import { DevPipelineStack } from '../lib/dev-pipeline-stack';
 import { EcrStack } from '../lib/ecr-stack';
 import { LbStack } from '../lib/lb-stack';
+import { MetricsStack } from '../lib/metrics-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
 import { StagingProdPipelineStack } from '../lib/staging-prod-pipeline-stack';
 import { VpcStack } from '../lib/vpc-stack';
 import cdk = require('@aws-cdk/core');
+import { Vpc } from '@aws-cdk/aws-ec2';
 
 const app = new cdk.App();
 
@@ -90,6 +92,8 @@ function createStacks(appConfig: any) {
   const mcorpusPrdLbStackName = 'mcorpusPrdLb';
   const mcorpusDevAppStackName = 'mcorpusDevApp';
   const mcorpusPrdAppStackName = 'mcorpusPrdApp';
+  const mcorpusDevMetricsStackName = 'mcorpusDevMetrics';
+  const mcorpusPrdMetricsStackName = 'mcorpusPrdMetrics';
 
   // common VPC
   const vpcStack = new VpcStack(app, mcorpusVpcStackName, {
@@ -186,12 +190,13 @@ function createStacks(appConfig: any) {
     onBuildFailureEmails: devCicdConfig.onBuildFailureEmails,
     cdkDevLbStackName: mcorpusDevLbStackName,
     cdkDevAppStackName: mcorpusDevAppStackName,
+    cdkDevMetricsStackName: mcorpusDevMetricsStackName,
   });
   devPipelineStack.addDependency(ecrStack);
   devPipelineStack.addDependency(secGrpStack);
   devPipelineStack.addDependency(devClusterStack);
 
-  const prodPipelineStack = new StagingProdPipelineStack(app, 'mcorpusPrdPipeline', {
+  const prdPipelineStack = new StagingProdPipelineStack(app, 'mcorpusPrdPipeline', {
     appName: appConfig.appName,
     appEnv: AppEnv.PRD,
     env: awsEnvCommon,
@@ -209,9 +214,10 @@ function createStacks(appConfig: any) {
     prodDeployApprovalEmails: prdCicdConfig.appDeployApprovalEmails,
     cdkPrdLbStackName: mcorpusPrdLbStackName,
     cdkPrdAppStackName: mcorpusPrdAppStackName,
+    cdkPrdMetricsStackName: mcorpusPrdMetricsStackName,
   });
-  prodPipelineStack.addDependency(devPipelineStack);
-  prodPipelineStack.addDependency(prdClusterStack);
+  prdPipelineStack.addDependency(devPipelineStack);
+  prdPipelineStack.addDependency(prdClusterStack);
 
   const devLbStack = new LbStack(app, mcorpusDevLbStackName, {
     appName: appConfig.appName,
@@ -267,7 +273,7 @@ function createStacks(appConfig: any) {
     tags: awsStackTagsPrd,
     vpc: vpcStack.vpc,
     cluster: prdClusterStack.cluster,
-    appImage: prodPipelineStack.appBuiltImageProd,
+    appImage: prdPipelineStack.appBuiltImageProd,
     lbListener: prdLbStack.lbListener,
     taskdefCpu: prdWebAppContainerConfig.taskdefCpu,
     taskdefMemoryLimitMiB: prdWebAppContainerConfig.taskdefMemoryLimitMiB,
@@ -282,7 +288,32 @@ function createStacks(appConfig: any) {
     javaOpts: prdWebAppContainerConfig.javaOpts,
   });
   prdAppStack.addDependency(prdLbStack);
-  prdAppStack.addDependency(prodPipelineStack);
+  prdAppStack.addDependency(prdPipelineStack);
+
+  const devMetricsStack = new MetricsStack(app, mcorpusDevMetricsStackName, {
+    appName: appConfig.appName,
+    appEnv: AppEnv.DEV,
+    env: awsEnvCommon,
+    tags: awsStackTagsDev,
+    dbInstanceRef: dbStack.dbInstance,
+    ecsClusterRef: devClusterStack.cluster,
+    fargateSvcRef: devAppStack.fargateSvc,
+    appLoadBalancerRef: devLbStack.appLoadBalancer,
+  });
+  devMetricsStack.addDependency(devPipelineStack);
+  devMetricsStack.addDependency(devAppStack);
+  const prdMetricsStack = new MetricsStack(app, mcorpusPrdMetricsStackName, {
+    appName: appConfig.appName,
+    appEnv: AppEnv.PRD,
+    env: awsEnvCommon,
+    tags: awsStackTagsPrd,
+    dbInstanceRef: dbStack.dbInstance,
+    ecsClusterRef: prdClusterStack.cluster,
+    fargateSvcRef: prdAppStack.fargateSvc,
+    appLoadBalancerRef: prdLbStack.appLoadBalancer,
+  });
+  prdMetricsStack.addDependency(prdPipelineStack);
+  prdMetricsStack.addDependency(prdAppStack);
 }
 
 // run the trap

@@ -81,6 +81,7 @@ export interface IDevPipelineStackProps extends IStackProps {
 
   readonly cdkDevLbStackName: string;
   readonly cdkDevAppStackName: string;
+  readonly cdkDevMetricsStackName: string;
 }
 
 export class DevPipelineStack extends BaseStack {
@@ -243,7 +244,11 @@ export class DevPipelineStack extends BaseStack {
         },
         artifacts: {
           'base-directory': 'cdk/dist',
-          files: [`${props.cdkDevLbStackName}.template.json`, `${props.cdkDevAppStackName}.template.json`],
+          files: [
+            `${props.cdkDevLbStackName}.template.json`,
+            `${props.cdkDevAppStackName}.template.json`,
+            `${props.cdkDevMetricsStackName}.template.json`,
+          ],
         },
       }),
     });
@@ -323,6 +328,13 @@ export class DevPipelineStack extends BaseStack {
               },
               extraInputs: [dockerBuildOutput],
               runOrder: 2,
+            }),
+            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_Metrics',
+              stackName: props.cdkDevMetricsStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkDevMetricsStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 3,
             }),
           ],
         },
