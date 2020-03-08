@@ -4,9 +4,7 @@ import { Cluster, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IDatabaseInstance } from '@aws-cdk/aws-rds';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import ec2 = require('@aws-cdk/aws-ec2');
 import cloudwatch = require('@aws-cdk/aws-cloudwatch');
-import lambda = require('@aws-cdk/aws-lambda');
 
 export interface IMetricsStackProps extends IStackProps {
   // readonly vpc: ec2.IVpc;

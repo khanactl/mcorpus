@@ -1,7 +1,6 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack } from './cdk-native';
+import { BaseStack, IStackProps } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
-import { SubnetType } from '@aws-cdk/aws-ec2';
 
 /**
  * VPC stack config properties.

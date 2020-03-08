@@ -1,15 +1,13 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack, iname } from './cdk-native';
+import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
+import { PolicyStatement } from '@aws-cdk/aws-iam';
+import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import cfn = require('@aws-cdk/aws-cloudformation');
 import lambda = require('@aws-cdk/aws-lambda');
 import ssm = require('@aws-cdk/aws-ssm');
 import iam = require('@aws-cdk/aws-iam');
 import path = require('path');
-import { IVpc, SubnetType, ISecurityGroup } from '@aws-cdk/aws-ec2';
-import { IStringParameter } from '@aws-cdk/aws-ssm';
-import { PolicyStatement } from '@aws-cdk/aws-iam';
-import fs = require('fs');
-import archiver = require('archiver');
 
 export interface IDbBootstrapProps extends IStackProps {
   /**
