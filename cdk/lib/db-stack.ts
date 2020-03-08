@@ -1,13 +1,11 @@
 import cdk = require('@aws-cdk/core');
 import { ISecurityGroup, IVpc, SecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
-import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 import { RetentionDays } from '@aws-cdk/aws-logs';
 import { DatabaseInstance } from '@aws-cdk/aws-rds';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import rds = require('@aws-cdk/aws-rds');
 import secrets = require('@aws-cdk/aws-secretsmanager');
-import lambda = require('@aws-cdk/aws-lambda');
 
 /**
  * Db Stack config properties.
@@ -113,30 +111,6 @@ export class DbStack extends BaseStack {
     // Rotate the master user password every 30 days
     const rdsSecretRotation = this.dbInstance.addRotationSingleUser(cdk.Duration.days(30));
 
-    /*
-    // Add alarm for high CPU
-    const cloudWatchAlarmInstNme = iname('high-cpu', props);
-    const cloudWatchAlarm = new cloudwatch.Alarm(this, cloudWatchAlarmInstNme, {
-      metric: this.dbInstance.metricCPUUtilization(),
-      threshold: 90,
-      evaluationPeriods: 1,
-      alarmName: cloudWatchAlarmInstNme,
-    });
-
-    // Trigger Lambda function on instance availability events
-    const fn = new lambda.Function(this, 'fnDbInstanceAvailability', {
-      code: lambda.Code.inline('exports.handler = (event) => console.log(event);'),
-      handler: 'index.handler',
-      runtime: lambda.Runtime.NODEJS_10_X,
-    });
-    const availabilityRule = this.dbInstance.onEvent('Availability', { target: new LambdaFunction(fn) });
-    availabilityRule.addEventPattern({
-      detail: {
-        EventCategories: ['availability'],
-      },
-    });
-    */
-
     this.dbInstanceJsonSecret = this.dbInstance.secret!;
 
     // stack output
@@ -144,6 +118,5 @@ export class DbStack extends BaseStack {
       value: this.dbInstance.dbInstanceEndpointAddress + ':' + this.dbInstance.dbInstanceEndpointPort,
     });
     new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: this.dbInstanceJsonSecret!.secretArn });
-    // new cdk.CfnOutput(this, 'dbCloudWatchAlarmArn', { value: cloudWatchAlarm.alarmArn });
   }
 }

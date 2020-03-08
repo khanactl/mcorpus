@@ -1,5 +1,5 @@
 import cdk = require('@aws-cdk/core');
-import { IStackProps, BaseStack, iname } from './cdk-native';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import ec2 = require('@aws-cdk/aws-ec2');
 import ecs = require('@aws-cdk/aws-ecs');
 
