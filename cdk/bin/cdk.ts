@@ -295,9 +295,10 @@ function createStacks(appConfig: any) {
     appEnv: AppEnv.DEV,
     env: awsEnvCommon,
     tags: awsStackTagsDev,
-    dbInstance: dbStack.dbInstance,
-    ecsCluster: devClusterStack.cluster,
-    alb: devLbStack.appLoadBalancer,
+    dbInstanceRef: dbStack.dbInstance,
+    ecsClusterRef: devClusterStack.cluster,
+    fargateSvcRef: devAppStack.fargateSvc,
+    appLoadBalancerRef: devLbStack.appLoadBalancer,
   });
   devMetricsStack.addDependency(devPipelineStack);
   const prdMetricsStack = new MetricsStack(app, mcorpusPrdMetricsStackName, {
@@ -305,9 +306,10 @@ function createStacks(appConfig: any) {
     appEnv: AppEnv.PRD,
     env: awsEnvCommon,
     tags: awsStackTagsPrd,
-    dbInstance: dbStack.dbInstance,
-    ecsCluster: prdClusterStack.cluster,
-    alb: prdLbStack.appLoadBalancer,
+    dbInstanceRef: dbStack.dbInstance,
+    ecsClusterRef: prdClusterStack.cluster,
+    fargateSvcRef: prdAppStack.fargateSvc,
+    appLoadBalancerRef: prdLbStack.appLoadBalancer,
   });
   prdMetricsStack.addDependency(prdPipelineStack);
 }

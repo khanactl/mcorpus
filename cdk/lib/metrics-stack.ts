@@ -1,6 +1,6 @@
 import cdk = require('@aws-cdk/core');
 import { Dashboard, GraphWidget, Metric } from '@aws-cdk/aws-cloudwatch';
-import { Cluster } from '@aws-cdk/aws-ecs';
+import { Cluster, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IDatabaseInstance } from '@aws-cdk/aws-rds';
 import { BaseStack, iname, IStackProps } from './cdk-native';
@@ -11,11 +11,13 @@ import lambda = require('@aws-cdk/aws-lambda');
 export interface IMetricsStackProps extends IStackProps {
   // readonly vpc: ec2.IVpc;
 
-  readonly dbInstance: IDatabaseInstance;
+  readonly dbInstanceRef: IDatabaseInstance;
 
-  readonly ecsCluster: Cluster;
+  readonly ecsClusterRef: Cluster;
 
-  readonly alb: ApplicationLoadBalancer;
+  readonly fargateSvcRef: FargateService;
+
+  readonly appLoadBalancerRef: ApplicationLoadBalancer;
 }
 
 export class MetricsStack extends BaseStack {
@@ -24,22 +26,37 @@ export class MetricsStack extends BaseStack {
   constructor(scope: cdk.Construct, id: string, props: IMetricsStackProps) {
     super(scope, id, props);
 
-    // *** RDS metrics ***
-    // Add alarm for high db CPU
-    const metricDbCpuUtilization = props.dbInstance.metricCPUUtilization();
-    const metricDbFreeableMemory = props.dbInstance.metricFreeableMemory();
-    const metricDbNumConnections = props.dbInstance.metricDatabaseConnections();
+    // *** metrics ***
+    // db
+    const metricDbCpuUtilization = props.dbInstanceRef.metricCPUUtilization();
+    const metricDbFreeableMemory = props.dbInstanceRef.metricFreeableMemory();
+    const metricDbNumConnections = props.dbInstanceRef.metricDatabaseConnections();
+    // ecs
+    const metricEcsCpu = props.ecsClusterRef.metric('CPUUtilization', {
+      dimensions: {
+        ClusterName: props.ecsClusterRef.clusterName,
+        ServiceName: props.fargateSvcRef.serviceName,
+      },
+    });
+    const metricEcsMemory = props.ecsClusterRef.metric('MemoryUtilization', {
+      dimensions: {
+        ClusterName: props.ecsClusterRef.clusterName,
+        ServiceName: props.fargateSvcRef.serviceName,
+      },
+    });
+    // load balancer
+    const metricsLbRequestCount = props.appLoadBalancerRef.metricRequestCount({});
+    // *** END metrics ***
+
+    // *** alarms ***
+    // db
     const alarmDbHighCpu = new cloudwatch.Alarm(this, 'db-high-cpu', {
       metric: metricDbCpuUtilization,
       threshold: 90,
       evaluationPeriods: 1,
       alarmName: 'db-high-cpu',
     });
-    // *** END RDS metrics ***
-
-    // *** ECS metrics ***
-    const metricEcsCpu = props.ecsCluster.metric('CPUUtilization', {});
-    const metricEcsMemory = props.ecsCluster.metric('MemoryUtilization', {});
+    // ecs
     const alarmEcsCpu = new cloudwatch.Alarm(this, 'ecs-high-cpu', {
       metric: metricEcsCpu,
       threshold: 90,
@@ -52,12 +69,9 @@ export class MetricsStack extends BaseStack {
       evaluationPeriods: 1,
       alarmName: 'ecs-high-memory',
     });
-    // *** END ECS metrics ***
-
-    // *** load balancer metrics ***
-    const metricsLbRequestCount = props.alb.metricRequestCount({});
-    const metricsLbAuthSuccess = props.alb.metricElbAuthSuccess({});
-    // END load balancer metrics ***
+    // lb
+    // NONE at present
+    // *** END alarms ***
 
     // *** cloudwatch dashboard ***
     const dashboardName = iname('metrics', props);
@@ -66,27 +80,35 @@ export class MetricsStack extends BaseStack {
     });
     this.dashboard.addWidgets(
       // db
-      this.buildGraphWidget(metricDbCpuUtilization),
-      this.buildGraphWidget(metricDbFreeableMemory),
-      this.buildGraphWidget(metricDbNumConnections),
+      this.buildGraphWidget('db-cpu', metricDbCpuUtilization),
+      this.buildGraphWidget('db-freeable-memory', metricDbFreeableMemory),
+      this.buildGraphWidget('db-num-connections', metricDbNumConnections),
       // ecs
-      this.buildGraphWidget(metricEcsCpu),
-      this.buildGraphWidget(metricEcsMemory),
+      this.buildGraphWidget('ecs-cpu', metricEcsCpu),
+      this.buildGraphWidget('ecs-memory', metricEcsMemory),
       // lb
-      this.buildGraphWidget(metricsLbRequestCount),
-      this.buildGraphWidget(metricsLbAuthSuccess)
+      this.buildGraphWidget('lb-request-count', metricsLbRequestCount)
     );
     // *** END cloudwatch dashboard ***
 
     // stack output
+    new cdk.CfnOutput(this, 'dbHighCpuAlarmName', {
+      value: alarmDbHighCpu.alarmName,
+    });
+    new cdk.CfnOutput(this, 'ecsHighCpuAlarmName', {
+      value: alarmEcsCpu.alarmName,
+    });
+    new cdk.CfnOutput(this, 'ecsHighMemoryAlarmName', {
+      value: alarmEcsMemory.alarmName,
+    });
     new cdk.CfnOutput(this, 'dashboard', {
       value: this.dashboard.toString(),
     });
   }
 
-  private buildGraphWidget(metric: Metric): GraphWidget {
+  private buildGraphWidget(title: string, metric: Metric): GraphWidget {
     return new GraphWidget({
-      title: metric.metricName,
+      title: title,
       left: [metric],
     });
   }
