@@ -213,16 +213,18 @@ export class DevPipelineStack extends BaseStack {
 
     // docker build failure email dispatch
     if (props.onBuildFailureEmails && props.onBuildFailureEmails.length > 0) {
-      this.dockerBuildFailureEventTopic = new sns.Topic(this, 'dev-cicd-docker-build-failure', {
-        topicName: 'dev-cicd-docker-build-failure',
-        displayName: 'DEV CICD Docker Build Failure',
+      const topicName = iname('docker-build-failure', props);
+      const displayName = `${props.appName} ${props.appEnv} Docker/app build failure.`;
+      this.dockerBuildFailureEventTopic = new sns.Topic(this, topicName, {
+        topicName: topicName,
+        displayName: displayName,
       });
       props.onBuildFailureEmails.forEach(email =>
         this.dockerBuildFailureEventTopic!.addSubscription(new sns_sub.EmailSubscription(email))
       );
-      dockerBuild.onBuildFailed('dev-cicd-docker-build-failure', {
+      dockerBuild.onBuildFailed(topicName, {
         target: new event_targets.SnsTopic(this.dockerBuildFailureEventTopic),
-        description: 'On DEV CICD Docker web app container build failure.',
+        description: displayName,
       });
     }
 
@@ -268,16 +270,18 @@ export class DevPipelineStack extends BaseStack {
 
     // cdk build failure email dispatch
     if (props.onBuildFailureEmails && props.onBuildFailureEmails.length > 0) {
-      this.cdkBuildFailureEventTopic = new sns.Topic(this, 'dev-cicd-cdk-build-failure', {
-        topicName: 'dev-cicd-cdk-build-failure',
-        displayName: 'DEV CICD CDK Synth Build Failure',
+      const topicName = iname('cdk-build-failure', props);
+      const displayName = `${props.appName} ${props.appEnv} CDK build failure.`;
+      this.cdkBuildFailureEventTopic = new sns.Topic(this, topicName, {
+        topicName: topicName,
+        displayName: displayName,
       });
       props.onBuildFailureEmails.forEach(email =>
         this.cdkBuildFailureEventTopic!.addSubscription(new sns_sub.EmailSubscription(email))
       );
-      dockerBuild.onBuildFailed('dev-cicd-cdk-build-failure', {
+      cdkBuild.onBuildFailed(topicName, {
         target: new event_targets.SnsTopic(this.cdkBuildFailureEventTopic),
-        description: 'On DEV CICD CDK Synth build failure.',
+        description: displayName,
       });
     }
 
