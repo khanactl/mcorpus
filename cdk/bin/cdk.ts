@@ -72,10 +72,12 @@ function createStacks(appConfig: any) {
   };
 
   // isolate app env dependent config
-  const devWebAppContainerConfig = appConfig.devConfig.webAppContainerConfig;
-  const prdWebAppContainerConfig = appConfig.prdConfig.webAppContainerConfig;
-  const devCicdConfig = appConfig.devConfig.cicdConfig;
-  const prdCicdConfig = appConfig.prdConfig.cicdConfig;
+  const devConfig = appConfig.devConfig;
+  const prdConfig = appConfig.prdConfig;
+  const devWebAppContainerConfig = devConfig.webAppContainerConfig;
+  const prdWebAppContainerConfig = prdConfig.webAppContainerConfig;
+  const devCicdConfig = devConfig.cicdConfig;
+  const prdCicdConfig = prdConfig.cicdConfig;
 
   // common ECR
   const ecrStack = new EcrStack(app, 'mcorpusEcrRepo', {
@@ -299,6 +301,7 @@ function createStacks(appConfig: any) {
     ecsClusterRef: devClusterStack.cluster,
     fargateSvcRef: devAppStack.fargateSvc,
     appLoadBalancerRef: devLbStack.appLoadBalancer,
+    onMetricAlarmEmails: devConfig.onMetricAlarmEmails,
   });
   devMetricsStack.addDependency(devPipelineStack);
   devMetricsStack.addDependency(devAppStack);
@@ -311,6 +314,7 @@ function createStacks(appConfig: any) {
     ecsClusterRef: prdClusterStack.cluster,
     fargateSvcRef: prdAppStack.fargateSvc,
     appLoadBalancerRef: prdLbStack.appLoadBalancer,
+    onMetricAlarmEmails: prdConfig.onMetricAlarmEmails,
   });
   prdMetricsStack.addDependency(prdPipelineStack);
   prdMetricsStack.addDependency(prdAppStack);
