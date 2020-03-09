@@ -39,7 +39,8 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
    */
   readonly githubOauthTokenSecretArn: string;
   /**
-   * The JSON field name holding the GitHub Oauth token in the {@link githubOauthTokenSecretArn} value.
+   * The JSON field name holding the GitHub Oauth token
+   * in the {@link githubOauthTokenSecretArn} value.
    */
   readonly githubOauthTokenSecretJsonFieldName: string;
   /**
@@ -63,6 +64,8 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
 export class StagingProdPipelineStack extends BaseStack {
   // public readonly appBuiltImageStaging: PipelineContainerImage;
   public readonly appBuiltImageProd: PipelineContainerImage;
+
+  public readonly cfnDeployConfirmTopic?: sns.Topic;
 
   constructor(scope: cdk.Construct, id: string, props: IStagingProdPipelineStackProps) {
     super(scope, id, props);
@@ -137,6 +140,11 @@ export class StagingProdPipelineStack extends BaseStack {
 
     const cdkBuildOutput = new codepipeline.Artifact();
 
+    const topicName = iname('confirm-cfn-deployment', props);
+    this.cfnDeployConfirmTopic = new sns.Topic(this, topicName, {
+      topicName: topicName,
+    });
+
     new codepipeline.Pipeline(this, 'Pipeline', {
       pipelineName: iname('pipeline', props),
       stages: [
@@ -187,9 +195,7 @@ export class StagingProdPipelineStack extends BaseStack {
             new codepipeline_actions.ManualApprovalAction({
               actionName: 'Confirm_Production_Deployment',
               runOrder: 1,
-              notificationTopic: new sns.Topic(this, 'confirm-production-deployment', {
-                topicName: 'confirm-production-deployment',
-              }),
+              notificationTopic: this.cfnDeployConfirmTopic,
               notifyEmails: props.prodDeployApprovalEmails,
             }),
           ],
