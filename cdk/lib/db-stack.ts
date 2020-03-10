@@ -1,10 +1,16 @@
-import cdk = require('@aws-cdk/core');
-import { ISecurityGroup, IVpc, SecurityGroup, SubnetType } from '@aws-cdk/aws-ec2';
+import {
+  InstanceClass,
+  InstanceSize,
+  InstanceType,
+  ISecurityGroup,
+  IVpc,
+  SecurityGroup,
+  SubnetType,
+} from '@aws-cdk/aws-ec2';
 import { RetentionDays } from '@aws-cdk/aws-logs';
-import { DatabaseInstance } from '@aws-cdk/aws-rds';
+import { DatabaseInstance, DatabaseInstanceEngine, OptionGroup, ParameterGroup } from '@aws-cdk/aws-rds';
+import { CfnOutput, Construct, Duration, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import ec2 = require('@aws-cdk/aws-ec2');
-import rds = require('@aws-cdk/aws-rds');
 import secrets = require('@aws-cdk/aws-secretsmanager');
 
 /**
@@ -45,7 +51,7 @@ export class DbStack extends BaseStack {
   /**
    * The RDS db security group.
    */
-  public readonly dbSecGrp: ec2.ISecurityGroup;
+  public readonly dbSecGrp: ISecurityGroup;
 
   /**
    * The db master user secret.
@@ -57,7 +63,7 @@ export class DbStack extends BaseStack {
    */
   public readonly dbInstance: DatabaseInstance;
 
-  constructor(scope: cdk.Construct, id: string, props: IDbProps) {
+  constructor(scope: Construct, id: string, props: IDbProps) {
     super(scope, id, props);
 
     // db security group
@@ -68,10 +74,10 @@ export class DbStack extends BaseStack {
       allowAllOutbound: true,
       securityGroupName: sgDbInstNme,
     });
-    this.dbSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbInstNme));
+    this.dbSecGrp.node.applyAspect(new Tag('Name', sgDbInstNme));
 
-    const optionGroup = rds.OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
-    const parameterGroup = rds.ParameterGroup.fromParameterGroupName(this, 'dbParameterGroup', 'default.postgres11');
+    const optionGroup = OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
+    const parameterGroup = ParameterGroup.fromParameterGroupName(this, 'dbParameterGroup', 'default.postgres11');
 
     const dbInstNme = iname('db', props);
     this.dbInstance = new DatabaseInstance(this, dbInstNme, {
@@ -79,8 +85,8 @@ export class DbStack extends BaseStack {
       instanceIdentifier: dbInstNme,
       databaseName: props.dbName,
       masterUsername: props.dbMasterUsername,
-      engine: rds.DatabaseInstanceEngine.POSTGRES,
-      instanceClass: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),
+      engine: DatabaseInstanceEngine.POSTGRES,
+      instanceClass: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
       optionGroup: optionGroup,
       parameterGroup: parameterGroup,
       enablePerformanceInsights: false,
@@ -88,9 +94,9 @@ export class DbStack extends BaseStack {
       autoMinorVersionUpgrade: true,
       // cloudwatchLogsExports: ['alert'],
       cloudwatchLogsRetention: RetentionDays.ONE_MONTH,
-      monitoringInterval: cdk.Duration.seconds(60), // default is 1 min
+      monitoringInterval: Duration.seconds(60), // default is 1 min
       storageEncrypted: true,
-      backupRetention: cdk.Duration.days(0), // i.e. do not do backups
+      backupRetention: Duration.days(0), // i.e. do not do backups
       vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
       deletionProtection: false,
       securityGroups: [this.dbSecGrp],
@@ -109,14 +115,14 @@ export class DbStack extends BaseStack {
     this.dbInstance.connections.allowDefaultPortFrom(props.codebuildSecGrp, 'from codebuild');
 
     // Rotate the master user password every 30 days
-    const rdsSecretRotation = this.dbInstance.addRotationSingleUser(cdk.Duration.days(30));
+    const rdsSecretRotation = this.dbInstance.addRotationSingleUser(Duration.days(30));
 
     this.dbInstanceJsonSecret = this.dbInstance.secret!;
 
     // stack output
-    new cdk.CfnOutput(this, 'dbEndpoint', {
+    new CfnOutput(this, 'dbEndpoint', {
       value: this.dbInstance.dbInstanceEndpointAddress + ':' + this.dbInstance.dbInstanceEndpointPort,
     });
-    new cdk.CfnOutput(this, 'dbInstanceJsonSecretArn', { value: this.dbInstanceJsonSecret!.secretArn });
+    new CfnOutput(this, 'dbInstanceJsonSecretArn', { value: this.dbInstanceJsonSecret!.secretArn });
   }
 }

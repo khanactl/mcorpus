@@ -1,29 +1,29 @@
-import cdk = require('@aws-cdk/core');
+import { IVpc } from '@aws-cdk/aws-ec2';
+import { Cluster } from '@aws-cdk/aws-ecs';
+import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import ec2 = require('@aws-cdk/aws-ec2');
-import ecs = require('@aws-cdk/aws-ecs');
 
 export interface IClusterStackProps extends IStackProps {
   /**
    * The VPC ref.
    */
-  readonly vpc: ec2.IVpc;
+  readonly vpc: IVpc;
 }
 
 export class ClusterStack extends BaseStack {
-  public readonly cluster: ecs.Cluster;
+  public readonly cluster: Cluster;
 
-  constructor(scope: cdk.Construct, id: string, props: IClusterStackProps) {
+  constructor(scope: Construct, id: string, props: IClusterStackProps) {
     super(scope, id, props);
 
-    this.cluster = new ecs.Cluster(this, 'FargateCluster', {
+    this.cluster = new Cluster(this, 'FargateCluster', {
       vpc: props.vpc,
       clusterName: iname('cluster', props),
       containerInsights: true,
     });
 
     // stack output
-    new cdk.CfnOutput(this, 'FargateClusterName', {
+    new CfnOutput(this, 'FargateClusterName', {
       value: this.cluster.clusterName,
     });
   }

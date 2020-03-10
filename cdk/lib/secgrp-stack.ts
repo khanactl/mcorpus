@@ -1,7 +1,6 @@
-import cdk = require('@aws-cdk/core');
-import { SecurityGroup } from '@aws-cdk/aws-ec2';
+import { IVpc, SecurityGroup } from '@aws-cdk/aws-ec2';
+import { CfnOutput, Construct, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import ec2 = require('@aws-cdk/aws-ec2');
 
 /**
  * Security Group config properties.
@@ -10,7 +9,7 @@ export interface ISecGrpProps extends IStackProps {
   /**
    * The VPC ref
    */
-  readonly vpc: ec2.IVpc;
+  readonly vpc: IVpc;
 }
 
 /**
@@ -27,7 +26,7 @@ export class SecGrpStack extends BaseStack {
 
   public readonly codebuildSecGrp: SecurityGroup;
 
-  constructor(scope: cdk.Construct, id: string, props: ISecGrpProps) {
+  constructor(scope: Construct, id: string, props: ISecGrpProps) {
     super(scope, id, props);
 
     /* :( NO WORK - error - cyclic reference
@@ -50,7 +49,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true,
       securityGroupName: sgDbBootstrapInstNme,
     });
-    this.dbBootstrapSecGrp.node.applyAspect(new cdk.Tag('Name', sgDbBootstrapInstNme));
+    this.dbBootstrapSecGrp.node.applyAspect(new Tag('Name', sgDbBootstrapInstNme));
 
     // load balancer security group
     const sgLbInstNme = iname('lb-sec-grp', props);
@@ -60,7 +59,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true,
       securityGroupName: sgLbInstNme,
     });
-    this.lbSecGrp.node.applyAspect(new cdk.Tag('Name', sgLbInstNme));
+    this.lbSecGrp.node.applyAspect(new Tag('Name', sgLbInstNme));
 
     // ecs container security group
     const sgEcsInstNme = iname('ecs-container-sec-grp', props);
@@ -70,7 +69,7 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true,
       securityGroupName: sgEcsInstNme,
     });
-    this.ecsSecGrp.node.applyAspect(new cdk.Tag('Name', sgEcsInstNme));
+    this.ecsSecGrp.node.applyAspect(new Tag('Name', sgEcsInstNme));
 
     // codebuild security group
     const sgCodebuildInstNme = iname('codebuild-sec-grp', props);
@@ -80,13 +79,13 @@ export class SecGrpStack extends BaseStack {
       allowAllOutbound: true,
       securityGroupName: sgCodebuildInstNme,
     });
-    this.codebuildSecGrp.node.applyAspect(new cdk.Tag('Name', sgCodebuildInstNme));
+    this.codebuildSecGrp.node.applyAspect(new Tag('Name', sgCodebuildInstNme));
 
     // stack output
     // new cdk.CfnOutput(this, 'DbSecurityGroup', { value: this.dbSecGrp.securityGroupName });
-    new cdk.CfnOutput(this, 'DbBootstrapSecurityGroup', { value: this.dbBootstrapSecGrp.securityGroupName });
-    new cdk.CfnOutput(this, 'LoadBalancerSecurityGroup', { value: this.lbSecGrp.securityGroupName });
-    new cdk.CfnOutput(this, 'ECSContainerSecurityGroup', { value: this.ecsSecGrp.securityGroupName });
-    new cdk.CfnOutput(this, 'CodebuildSecurityGroup', { value: this.codebuildSecGrp.securityGroupName });
+    new CfnOutput(this, 'DbBootstrapSecurityGroup', { value: this.dbBootstrapSecGrp.securityGroupName });
+    new CfnOutput(this, 'LoadBalancerSecurityGroup', { value: this.lbSecGrp.securityGroupName });
+    new CfnOutput(this, 'ECSContainerSecurityGroup', { value: this.ecsSecGrp.securityGroupName });
+    new CfnOutput(this, 'CodebuildSecurityGroup', { value: this.codebuildSecGrp.securityGroupName });
   }
 }

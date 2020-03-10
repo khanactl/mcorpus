@@ -1,23 +1,23 @@
-import cdk = require('@aws-cdk/core');
+import { Repository } from '@aws-cdk/aws-ecr';
+import { CfnOutput, Construct, RemovalPolicy } from '@aws-cdk/core';
 import { BaseStack, IStackProps } from './cdk-native';
-import ecr = require('@aws-cdk/aws-ecr');
 
 export interface IEcrStackProps extends IStackProps {
   readonly ecrName: string;
 }
 
 export class EcrStack extends BaseStack {
-  public readonly appRepository: ecr.Repository;
+  public readonly appRepository: Repository;
 
-  constructor(scope: cdk.Construct, id: string, props: IEcrStackProps) {
+  constructor(scope: Construct, id: string, props: IEcrStackProps) {
     super(scope, id, props);
 
-    this.appRepository = new ecr.Repository(this, 'AppEcrRepo', {
+    this.appRepository = new Repository(this, 'AppEcrRepo', {
       repositoryName: props.ecrName,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     // stack output
-    new cdk.CfnOutput(this, 'ECRName', { value: this.appRepository.repositoryName });
+    new CfnOutput(this, 'ECRName', { value: this.appRepository.repositoryName });
   }
 }

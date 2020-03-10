@@ -1,18 +1,21 @@
-import cdk = require('@aws-cdk/core');
-import { ISecurityGroup, Peer, Port } from '@aws-cdk/aws-ec2';
-import { ApplicationProtocol, SslPolicy } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { ISecurityGroup, IVpc, Peer, Port } from '@aws-cdk/aws-ec2';
+import {
+  ApplicationListener,
+  ApplicationLoadBalancer,
+  ApplicationProtocol,
+  SslPolicy,
+} from '@aws-cdk/aws-elasticloadbalancingv2';
+import { ARecord, HostedZone, RecordTarget } from '@aws-cdk/aws-route53';
+import { LoadBalancerTarget } from '@aws-cdk/aws-route53-targets';
+import { CfnWebACL, CfnWebACLAssociation } from '@aws-cdk/aws-wafregional';
+import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
-import ec2 = require('@aws-cdk/aws-ec2');
-import elb = require('@aws-cdk/aws-elasticloadbalancingv2');
-import r53 = require('@aws-cdk/aws-route53');
-import alias = require('@aws-cdk/aws-route53-targets');
-import waf = require('@aws-cdk/aws-wafregional');
 
 export interface ILbStackProps extends IStackProps {
   /**
    * The VPC ref
    */
-  readonly vpc: ec2.IVpc;
+  readonly vpc: IVpc;
 
   /**
    * The load balancer security group ref.
@@ -35,12 +38,12 @@ export interface ILbStackProps extends IStackProps {
 }
 
 export class LbStack extends BaseStack {
-  public readonly appLoadBalancer: elb.ApplicationLoadBalancer;
-  public readonly lbListener: elb.ApplicationListener;
+  public readonly appLoadBalancer: ApplicationLoadBalancer;
+  public readonly lbListener: ApplicationListener;
 
-  public readonly webAcl: waf.CfnWebACL;
+  public readonly webAcl: CfnWebACL;
 
-  constructor(scope: cdk.Construct, id: string, props: ILbStackProps) {
+  constructor(scope: Construct, id: string, props: ILbStackProps) {
     super(scope, id, props);
 
     // ****************************
@@ -48,7 +51,7 @@ export class LbStack extends BaseStack {
     // ****************************
     // application load balancer
     const albInstNme = iname('app-loadbalancer', props);
-    this.appLoadBalancer = new elb.ApplicationLoadBalancer(this, albInstNme, {
+    this.appLoadBalancer = new ApplicationLoadBalancer(this, albInstNme, {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.lbSecGrp,
@@ -74,22 +77,22 @@ export class LbStack extends BaseStack {
     // DNS bind load balancer to domain name record
     if (props.awsHostedZoneId && props.publicDomainName) {
       // console.log('Load balancer DNS will be bound in Route53.');
-      const hostedZone = r53.HostedZone.fromHostedZoneAttributes(this, iname('hostedzone', props), {
+      const hostedZone = HostedZone.fromHostedZoneAttributes(this, iname('hostedzone', props), {
         hostedZoneId: props.awsHostedZoneId,
         zoneName: props.publicDomainName,
       });
       // NOTE: arecord creation will fail if it already exists
       const arecordInstNme = iname('arecord', props);
-      const arecord = new r53.ARecord(this, arecordInstNme, {
+      const arecord = new ARecord(this, arecordInstNme, {
         recordName: props.publicDomainName,
         zone: hostedZone,
-        target: r53.RecordTarget.fromAlias(new alias.LoadBalancerTarget(this.appLoadBalancer)),
+        target: RecordTarget.fromAlias(new LoadBalancerTarget(this.appLoadBalancer)),
       });
       // dns specific stack output
-      new cdk.CfnOutput(this, 'HostedZone', {
+      new CfnOutput(this, 'HostedZone', {
         value: hostedZone.hostedZoneId,
       });
-      new cdk.CfnOutput(this, 'ARecord', {
+      new CfnOutput(this, 'ARecord', {
         value: arecord.domainName,
       });
     }
@@ -120,7 +123,7 @@ export class LbStack extends BaseStack {
 
     // acl (groups rules)
     const webAclName = inameCml('webAcl', props);
-    this.webAcl = new waf.CfnWebACL(this, webAclName, {
+    this.webAcl = new CfnWebACL(this, webAclName, {
       name: webAclName,
       metricName: `${webAclName}Metrics`,
       defaultAction: { type: 'ALLOW' },
@@ -137,7 +140,7 @@ export class LbStack extends BaseStack {
     });
 
     // bind waf to alb
-    const wafToAlb = new waf.CfnWebACLAssociation(this, inameCml('Waf2Alb', props), {
+    const wafToAlb = new CfnWebACLAssociation(this, inameCml('Waf2Alb', props), {
       resourceArn: this.appLoadBalancer.loadBalancerArn,
       webAclId: this.webAcl.ref,
     });
@@ -146,11 +149,11 @@ export class LbStack extends BaseStack {
     // ***************
 
     // stack output
-    new cdk.CfnOutput(this, 'AppLoadBalancerName', { value: this.appLoadBalancer.loadBalancerName });
-    new cdk.CfnOutput(this, 'AppLoadBalancerListenerArn', { value: this.lbListener.listenerArn });
-    new cdk.CfnOutput(this, 'loadBalancerDnsName', {
+    new CfnOutput(this, 'AppLoadBalancerName', { value: this.appLoadBalancer.loadBalancerName });
+    new CfnOutput(this, 'AppLoadBalancerListenerArn', { value: this.lbListener.listenerArn });
+    new CfnOutput(this, 'loadBalancerDnsName', {
       value: this.appLoadBalancer.loadBalancerDnsName,
     });
-    new cdk.CfnOutput(this, 'WafWebAclName', { value: this.webAcl.name });
+    new CfnOutput(this, 'WafWebAclName', { value: this.webAcl.name });
   }
 }
