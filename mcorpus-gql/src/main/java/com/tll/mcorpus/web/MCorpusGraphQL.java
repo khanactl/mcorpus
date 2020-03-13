@@ -3,6 +3,8 @@ package com.tll.mcorpus.web;
 import static com.tll.core.Util.clean;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
+import static com.tll.repo.FetchResult.fetchrslt;
+
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -261,13 +263,13 @@ public class MCorpusGraphQL {
         // mcuser
 
         // mcuser login
-        .dataFetcher("mclogin", env -> processor.handleSimpleMutation(
+        .dataFetcher("mclogin", env -> processor.mutate(
           env,
           () -> new McusernameAndPswdKey(
             clean(env.getArgument("username")),
             clean(env.getArgument("pswd"))
           ),
-          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd()),
+          key -> fetchrslt(((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd())),
           b -> b)
         )
 
@@ -298,7 +300,7 @@ public class MCorpusGraphQL {
         )
 
         // delete mcuser
-        .dataFetcher("deleteMcuser", env -> processor.handleDeletion(
+        .dataFetcher("deleteMcuser", env -> processor.delete(
           env,
           () -> uuidFromToken(env.getArgument("uid")),
           key -> key,
@@ -306,28 +308,28 @@ public class MCorpusGraphQL {
         )
 
         // mcpswd
-        .dataFetcher("mcpswd", env -> processor.handleSimpleMutation(
+        .dataFetcher("mcpswd", env -> processor.mutate(
           env,
           () -> new McuserIdAndPswdKey(
             uuidFromToken(env.getArgument("uid")),
             clean(env.getArgument("pswd"))
           ),
-          key -> mcuserRepo.setPswd(key.getUid(), key.getPswd()),
+          key -> fetchrslt(mcuserRepo.setPswd(key.getUid(), key.getPswd())),
           fr -> fr.get())
         )
 
         // invalidateJwtsFor
-        .dataFetcher("invalidateJwtsFor", env -> processor.handleSimpleMutation(
+        .dataFetcher("invalidateJwtsFor", env -> processor.mutate(
           env,
           () -> uuidFromToken(env.getArgument("uid")),
-          key -> ((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key),
+          key -> fetchrslt(((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key)),
           b -> b)
         )
 
         // mcorpus
 
         // member login
-        .dataFetcher("mlogin", env -> processor.handleMutation(
+        .dataFetcher("mlogin", env -> processor.mutate(
           env,
           () -> new Mlogin(
             clean(env.getArgument("username")),
@@ -345,7 +347,7 @@ public class MCorpusGraphQL {
         )
 
         // member logout
-        .dataFetcher("mlogout", env -> processor.handleMutation(
+        .dataFetcher("mlogout", env -> processor.mutate(
           env,
           () -> new Mlogout(
             uuidFromToken(env.getArgument("mid")),
@@ -381,7 +383,7 @@ public class MCorpusGraphQL {
         )
 
         // delete member
-        .dataFetcher("deleteMember", env -> processor.handleDeletion(
+        .dataFetcher("deleteMember", env -> processor.delete(
           env,
           () -> uuidFromToken(env.getArgument("mid")),
           key -> key,
@@ -389,13 +391,13 @@ public class MCorpusGraphQL {
         )
 
         // member pswd
-        .dataFetcher("mpswd", env -> processor.handleSimpleMutation(
+        .dataFetcher("mpswd", env -> processor.mutate(
           env,
           () -> new MemberIdAndPswdKey(
             uuidFromToken(env.getArgument("mid")),
             clean(env.getArgument("pswd"))
           ),
-          key -> mcorpusRepo.setMemberPswd(key.getMid(), key.getPswd()),
+          key -> fetchrslt(mcorpusRepo.setMemberPswd(key.getMid(), key.getPswd())),
           fr -> fr.get())
         )
 
@@ -420,7 +422,7 @@ public class MCorpusGraphQL {
         )
 
         // delete member address
-        .dataFetcher("deleteMemberAddress", env -> processor.handleDeletion(
+        .dataFetcher("deleteMemberAddress", env -> processor.delete(
           env,
           () -> new MidAndAddressNameKey(
             uuidFromToken(env.getArgument("mid")),

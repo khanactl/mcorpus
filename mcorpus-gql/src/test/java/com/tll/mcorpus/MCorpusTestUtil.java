@@ -121,29 +121,29 @@ public class MCorpusTestUtil {
       @Override
       public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken,
           Instant requestInstant) {
-        return new FetchResult<>(Boolean.TRUE);
+        return FetchResult.fetchrslt(Boolean.TRUE);
       }
 
       @Override
       public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
           Instant requestInstant) {
-          return new FetchResult<>(Boolean.TRUE);
+          return FetchResult.fetchrslt(Boolean.TRUE);
       }
 
       @Override
       public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
           String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
-        return new FetchResult<>(jwtUser);
+        return FetchResult.fetchrslt(jwtUser);
       }
 
       @Override
       public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
-        return new FetchResult<>(2);
+        return FetchResult.fetchrslt(2);
       }
 
       @Override
       public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
-        return new FetchResult<>(JwtBackendStatus.NOT_PRESENT);
+        return FetchResult.fetchrslt(JwtBackendStatus.NOT_PRESENT);
       }
     };
   }

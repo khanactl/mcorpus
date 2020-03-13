@@ -17,25 +17,22 @@ import static com.tll.core.Util.isNotNullOrEmpty;
  */
 public final class FetchResult<T> {
 
+  public static <T> FetchResult<T> fetchrslt(T inst, String errorMsg) {
+    return new FetchResult<>(inst, errorMsg);
+  }
+
+  public static <T> FetchResult<T> fetchrslt(String errorMsg) {
+    return new FetchResult<>(null, errorMsg);
+  }
+
+  public static <T> FetchResult<T> fetchrslt(T inst) {
+    return new FetchResult<>(inst, null);
+  }
+
   private final T fetched;
   private final String errorMsg;
 
-  /**
-   * Constructor - No error msgs.
-   *
-   * @param fetched the fetched object
-   */
-  public FetchResult(final T fetched) {
-    this(fetched, null);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param fetched the fetched object
-   * @param errorMsg the error message
-   */
-  public FetchResult(final T fetched, final String errorMsg) {
+  private FetchResult(final T fetched, final String errorMsg) {
     this.errorMsg = errorMsg;
     this.fetched = fetched;
   }
@@ -64,7 +61,7 @@ public final class FetchResult<T> {
 
   @Override
   public String toString() {
-    return String.format("fetched: %s, errorMsg: %s", 
+    return String.format("fetched: %s, errorMsg: %s",
       isNotNull(fetched) ? "-present-" : "-ABSENT-",
       getErrorMsg()
     );
