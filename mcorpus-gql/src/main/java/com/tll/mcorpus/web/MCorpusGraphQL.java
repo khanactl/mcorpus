@@ -280,7 +280,7 @@ public class MCorpusGraphQL {
         )
 
         // add mcuser
-        .dataFetcher("addMcuser", env -> processor.handleMutation(
+        .dataFetcher("addMcuser", env -> processor.mutate(
           env,
           () -> xfrmMcuser.fromGraphQLMapForAdd(env.getArgument("mcuser")),
           g -> vldtnMcuser.validateForAdd(g),
@@ -290,7 +290,7 @@ public class MCorpusGraphQL {
         )
 
         // update mcuser
-        .dataFetcher("updateMcuser", env -> processor.handleMutation(
+        .dataFetcher("updateMcuser", env -> processor.mutate(
           env,
           () -> xfrmMcuser.fromGraphQLMapForUpdate(env.getArgument("mcuser")),
           g -> vldtnMcuser.validateForUpdate(g),
@@ -363,7 +363,7 @@ public class MCorpusGraphQL {
         )
 
         // add member
-        .dataFetcher("addMember", env -> processor.handleMutation(
+        .dataFetcher("addMember", env -> processor.mutate(
           env,
           () -> xfrmMember.fromGraphQLMapForAdd(env.getArgument("member")),
           (Member g) -> vldtnMember.validateForAdd(g),
@@ -373,7 +373,7 @@ public class MCorpusGraphQL {
         )
 
         // update member
-        .dataFetcher("updateMember", env -> processor.handleMutation(
+        .dataFetcher("updateMember", env -> processor.mutate(
           env,
           () -> xfrmMember.fromGraphQLMapForUpdate(env.getArgument("member")),
           (Member g) -> vldtnMember.validateForUpdate(g),
@@ -402,7 +402,7 @@ public class MCorpusGraphQL {
         )
 
         // add member address
-        .dataFetcher("addMemberAddress", env -> processor.handleMutation(
+        .dataFetcher("addMemberAddress", env -> processor.mutate(
           env,
           () -> xfrmMemberAddress.fromGraphQLMapForAdd(env.getArgument("memberAddress")),
           (MemberAddress g) -> vldtnMemberAddress.validateForAdd(g),
@@ -412,7 +412,7 @@ public class MCorpusGraphQL {
         )
 
         // update member address
-        .dataFetcher("updateMemberAddress", env -> processor.handleMutation(
+        .dataFetcher("updateMemberAddress", env -> processor.mutate(
           env,
           () -> xfrmMemberAddress.fromGraphQLMapForUpdate(env.getArgument("memberAddress")),
           (MemberAddress g) -> vldtnMemberAddress.validateForUpdate(g),

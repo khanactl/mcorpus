@@ -115,7 +115,7 @@ public class GraphQLRequestProcessor {
    *         which should be considered to be the post-mutation
    *         current state of the entity.
    */
-  public <G, D> DataFetcherResult<G> handleMutation(
+  public <G, D> DataFetcherResult<G> mutate(
     final DataFetchingEnvironment env,
     final Supplier<G> gextractor,
     final Function<G, VldtnResult> vldtn,
