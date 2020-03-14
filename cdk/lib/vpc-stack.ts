@@ -1,6 +1,6 @@
-import cdk = require('@aws-cdk/core');
+import { Vpc } from '@aws-cdk/aws-ec2';
+import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, IStackProps } from './cdk-native';
-import ec2 = require('@aws-cdk/aws-ec2');
 
 /**
  * VPC stack config properties.
@@ -14,12 +14,12 @@ export interface IVpcProps extends IStackProps {
  * VPC stack.
  */
 export class VpcStack extends BaseStack {
-  public readonly vpc: ec2.Vpc;
+  public readonly vpc: Vpc;
 
-  constructor(scope: cdk.Construct, id: string, props: IVpcProps) {
+  constructor(scope: Construct, id: string, props: IVpcProps) {
     super(scope, id, props);
 
-    this.vpc = new ec2.Vpc(this, 'VPC', {
+    this.vpc = new Vpc(this, 'VPC', {
       maxAzs: props.maxAzs,
       // natGateways: 1,
       cidr: props.cidr,
@@ -55,9 +55,9 @@ export class VpcStack extends BaseStack {
     }
 
     // stack output
-    new cdk.CfnOutput(this, 'VpcId', { value: this.vpc.vpcId });
-    new cdk.CfnOutput(this, 'AvailabilityZones', { value: this.vpc.availabilityZones.join(':') });
-    new cdk.CfnOutput(this, 'PublicSubnetIds', { value: publicSubnetIds.join(':') });
-    new cdk.CfnOutput(this, 'PrivateSubnetIds', { value: privateSubnetIds.join(':') });
+    new CfnOutput(this, 'VpcId', { value: this.vpc.vpcId });
+    new CfnOutput(this, 'AvailabilityZones', { value: this.vpc.availabilityZones.join(':') });
+    new CfnOutput(this, 'PublicSubnetIds', { value: publicSubnetIds.join(':') });
+    new CfnOutput(this, 'PrivateSubnetIds', { value: privateSubnetIds.join(':') });
   }
 }

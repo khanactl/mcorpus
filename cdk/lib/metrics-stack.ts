@@ -1,12 +1,12 @@
-import cdk = require('@aws-cdk/core');
 import { Alarm, AlarmWidget, Dashboard, GraphWidget, Metric } from '@aws-cdk/aws-cloudwatch';
+import { SnsAction } from '@aws-cdk/aws-cloudwatch-actions';
 import { Cluster, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { IDatabaseInstance } from '@aws-cdk/aws-rds';
+import { Topic } from '@aws-cdk/aws-sns';
+import { EmailSubscription } from '@aws-cdk/aws-sns-subscriptions';
+import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import cwa = require('@aws-cdk/aws-cloudwatch-actions');
-import sns = require('@aws-cdk/aws-sns');
-import sns_sub = require('@aws-cdk/aws-sns-subscriptions');
 
 export interface IMetricsStackProps extends IStackProps {
   // readonly vpc: ec2.IVpc;
@@ -24,17 +24,17 @@ export interface IMetricsStackProps extends IStackProps {
 
 export class MetricsStack extends BaseStack {
   public readonly dbCpuAlarm: Alarm;
-  public readonly dbCpuAlarmTopic: sns.Topic;
+  public readonly dbCpuAlarmTopic: Topic;
 
   public readonly ecsCpuAlarm: Alarm;
-  public readonly ecsCpuAlarmTopic: sns.Topic;
+  public readonly ecsCpuAlarmTopic: Topic;
 
   public readonly ecsMemoryAlarm: Alarm;
-  public readonly ecsMemoryAlarmTopic: sns.Topic;
+  public readonly ecsMemoryAlarmTopic: Topic;
 
   public readonly dashboard: Dashboard;
 
-  constructor(scope: cdk.Construct, id: string, props: IMetricsStackProps) {
+  constructor(scope: Construct, id: string, props: IMetricsStackProps) {
     super(scope, id, props);
 
     // *** metrics ***
@@ -62,7 +62,7 @@ export class MetricsStack extends BaseStack {
     // *** alarms ***
     // db high cpu
     const dbCpuAlarmTopicName = iname('db-high-cpu-alarm', props);
-    this.dbCpuAlarmTopic = new sns.Topic(this, dbCpuAlarmTopicName, {
+    this.dbCpuAlarmTopic = new Topic(this, dbCpuAlarmTopicName, {
       topicName: dbCpuAlarmTopicName,
     });
     const alarmDbHighCpuName = iname(`db-high-cpu`, props, false);
@@ -72,11 +72,11 @@ export class MetricsStack extends BaseStack {
       evaluationPeriods: 1,
       alarmName: alarmDbHighCpuName,
     });
-    this.dbCpuAlarm.addAlarmAction(new cwa.SnsAction(this.dbCpuAlarmTopic));
+    this.dbCpuAlarm.addAlarmAction(new SnsAction(this.dbCpuAlarmTopic));
 
     // ecs high cpu
     const ecsCpuAlarmTopicName = iname('ecs-high-cpu-alarm', props);
-    this.ecsCpuAlarmTopic = new sns.Topic(this, ecsCpuAlarmTopicName, {
+    this.ecsCpuAlarmTopic = new Topic(this, ecsCpuAlarmTopicName, {
       topicName: ecsCpuAlarmTopicName,
     });
     const alarmEcsCpuName = iname('ecs-high-cpu', props, false);
@@ -86,11 +86,11 @@ export class MetricsStack extends BaseStack {
       evaluationPeriods: 1,
       alarmName: alarmEcsCpuName,
     });
-    this.ecsCpuAlarm.addAlarmAction(new cwa.SnsAction(this.ecsCpuAlarmTopic));
+    this.ecsCpuAlarm.addAlarmAction(new SnsAction(this.ecsCpuAlarmTopic));
 
     // ecs high memory
     const ecsMemoryAlarmTopicName = iname('ecs-high-memory-alarm', props);
-    this.ecsMemoryAlarmTopic = new sns.Topic(this, ecsMemoryAlarmTopicName, {
+    this.ecsMemoryAlarmTopic = new Topic(this, ecsMemoryAlarmTopicName, {
       topicName: ecsMemoryAlarmTopicName,
     });
     const alarmEcsMemoryName = iname('ecs-high-memory', props, false);
@@ -100,7 +100,7 @@ export class MetricsStack extends BaseStack {
       evaluationPeriods: 1,
       alarmName: alarmEcsMemoryName,
     });
-    this.ecsMemoryAlarm.addAlarmAction(new cwa.SnsAction(this.ecsMemoryAlarmTopic));
+    this.ecsMemoryAlarm.addAlarmAction(new SnsAction(this.ecsMemoryAlarmTopic));
 
     // lb (NONE at present)
     // *** END alarms ***
@@ -108,7 +108,7 @@ export class MetricsStack extends BaseStack {
     // alarm action emails
     if (props.onMetricAlarmEmails && props.onMetricAlarmEmails.length > 0) {
       props.onMetricAlarmEmails
-        .map(email => new sns_sub.EmailSubscription(email))
+        .map(email => new EmailSubscription(email))
         .forEach(sub => {
           this.dbCpuAlarmTopic.addSubscription(sub);
           this.ecsCpuAlarmTopic.addSubscription(sub);
@@ -135,16 +135,16 @@ export class MetricsStack extends BaseStack {
     // *** END cloudwatch dashboard ***
 
     // stack output
-    new cdk.CfnOutput(this, 'dbHighCpuAlarmName', {
+    new CfnOutput(this, 'dbHighCpuAlarmName', {
       value: this.dbCpuAlarm.alarmName,
     });
-    new cdk.CfnOutput(this, 'ecsHighCpuAlarmName', {
+    new CfnOutput(this, 'ecsHighCpuAlarmName', {
       value: this.ecsCpuAlarm.alarmName,
     });
-    new cdk.CfnOutput(this, 'ecsHighMemoryAlarmName', {
+    new CfnOutput(this, 'ecsHighMemoryAlarmName', {
       value: this.ecsMemoryAlarm.alarmName,
     });
-    new cdk.CfnOutput(this, 'dashboard', {
+    new CfnOutput(this, 'dashboard', {
       value: this.dashboard.toString(),
     });
   }
