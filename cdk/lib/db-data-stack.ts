@@ -1,13 +1,11 @@
-import cdk = require('@aws-cdk/core');
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
-import { PolicyStatement } from '@aws-cdk/aws-iam';
+import { PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
+import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import { S3EventSource } from '@aws-cdk/aws-lambda-event-sources';
-import { BucketEncryption } from '@aws-cdk/aws-s3';
+import { BlockPublicAccess, Bucket, BucketEncryption, EventType } from '@aws-cdk/aws-s3';
+import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import lambda = require('@aws-cdk/aws-lambda');
-import iam = require('@aws-cdk/aws-iam');
 import path = require('path');
-import s3 = require('@aws-cdk/aws-s3');
 
 export interface IDbDataProps extends IStackProps {
   /**
@@ -30,34 +28,34 @@ export interface IDbDataProps extends IStackProps {
 }
 
 export class DbDataStack extends BaseStack {
-  public readonly dbDataBucket: s3.Bucket;
+  public readonly dbDataBucket: Bucket;
 
-  public readonly dbDataRole: iam.Role;
+  public readonly dbDataRole: Role;
 
-  public readonly dbDataFn: lambda.Function;
+  public readonly dbDataFn: Function;
 
   // public readonly s3KmsKey: IKey;
 
-  constructor(scope: cdk.Construct, id: string, props: IDbDataProps) {
+  constructor(scope: Construct, id: string, props: IDbDataProps) {
     super(scope, id, props);
 
     // const s3KmsKey: IKey = kms.Key.fromKeyArn(this, 's3-kms-key', props.s3KmsEncKeyArn);
 
     // create s3 bucket to hold db data
     const dbDataBucketInstNme = iname('db-data-bucket', props);
-    this.dbDataBucket = new s3.Bucket(this, dbDataBucketInstNme, {
+    this.dbDataBucket = new Bucket(this, dbDataBucketInstNme, {
       bucketName: dbDataBucketInstNme,
       // encryption: BucketEncryption.KMS, // a key will be auto created
       encryption: BucketEncryption.S3_MANAGED,
       // encryptionKey: s3KmsKey,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     // create db data lambda fn exec role
     const dbDataRoleInstNme = iname('db-data-role', props);
-    this.dbDataRole = new iam.Role(this, dbDataRoleInstNme, {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    this.dbDataRole = new Role(this, dbDataRoleInstNme, {
+      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
     this.dbDataRole.addManagedPolicy({
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
@@ -89,18 +87,18 @@ export class DbDataStack extends BaseStack {
 
     // lambda fn
     const dbDataFnInstNme = iname('db-data-fn', props);
-    this.dbDataFn = new lambda.Function(this, dbDataFnInstNme, {
+    this.dbDataFn = new Function(this, dbDataFnInstNme, {
       vpc: props.vpc,
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       securityGroup: props.dbDataSecGrp,
-      code: lambda.Code.fromAsset(
+      code: Code.fromAsset(
         path.join(__dirname, '../lambda/dbdata') // dir ref
       ),
       handler: 'dbdata.main',
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: Runtime.PYTHON_3_7,
       // functionName: 'db-data',
       memorySize: 512,
-      timeout: cdk.Duration.seconds(3 * 60),
+      timeout: Duration.seconds(3 * 60),
       role: this.dbDataRole,
       environment: {
         DbJsonSecretArn: props.dbJsonSecretArn,
@@ -110,18 +108,18 @@ export class DbDataStack extends BaseStack {
     // s3 object created event
     this.dbDataFn.addEventSource(
       new S3EventSource(this.dbDataBucket, {
-        events: [s3.EventType.OBJECT_CREATED],
+        events: [EventType.OBJECT_CREATED],
       })
     );
 
     // stack output
-    new cdk.CfnOutput(this, 'dbDataBucketName', { value: this.dbDataBucket.bucketName });
+    new CfnOutput(this, 'dbDataBucketName', { value: this.dbDataBucket.bucketName });
     /*
-    new cdk.CfnOutput(this, 'dbDataBucketEncryptionKeyArn', { value:
+    new CfnOutput(this, 'dbDataBucketEncryptionKeyArn', { value:
       this.dbDataBucket.encryptionKey!.keyArn
     });
     */
-    new cdk.CfnOutput(this, 'dbDataRoleName', { value: this.dbDataRole.roleName });
-    new cdk.CfnOutput(this, 'dbDataFnName', { value: this.dbDataFn.functionName });
+    new CfnOutput(this, 'dbDataRoleName', { value: this.dbDataRole.roleName });
+    new CfnOutput(this, 'dbDataFnName', { value: this.dbDataFn.functionName });
   }
 }

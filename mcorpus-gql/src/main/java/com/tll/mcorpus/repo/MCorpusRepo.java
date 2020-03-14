@@ -10,6 +10,7 @@ import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
+import static com.tll.repo.FetchResult.fetchrslt;
 
 import java.io.Closeable;
 import java.sql.Date;
@@ -168,14 +169,14 @@ public class MCorpusRepo implements Closeable {
       if(rec != null && rec.getMid() != null) {
         // login success
         final Mref mref = rec.into(Mref.class);
-        return new FetchResult<>(mref, null);
+        return fetchrslt(mref, null);
       }
     }
     catch(Throwable t) {
       log.error("Member login error: {}.", t.getMessage());
     }
     // default - login fail
-    return new FetchResult<>(null, "Member login failed.");
+    return fetchrslt(null, "Member login failed.");
   }
 
   /**
@@ -199,14 +200,14 @@ public class MCorpusRepo implements Closeable {
       final UUID rmid = mlogout.getReturnValue();
       if(rmid != null) {
         // logout successful - convey by returning the mid
-        return new FetchResult<>(rmid, null);
+        return fetchrslt(rmid, null);
       }
     }
     catch(Throwable t) {
       log.error("Member logout error: {}.", t.getMessage());
     }
     // default - logout failed
-    return new FetchResult<>(null, "Member logout failed.");
+    return fetchrslt(null, "Member logout failed.");
   }
 
   /**
@@ -216,7 +217,7 @@ public class MCorpusRepo implements Closeable {
    * @return newly created {@link FetchResult} wrapping a property map.
    */
   public FetchResult<Mref> fetchMRefByMid(final UUID mid) {
-    if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    if(mid == null) return fetchrslt(null, "No member id provided.");
     String emsg;
     try {
       final Record3<UUID, String, Location> mrefRec = dsl
@@ -228,7 +229,7 @@ public class MCorpusRepo implements Closeable {
       if(isNotNull(mrefRec)) {
         // success
         final Mref mref = mrefRec.into(Mref.class);
-        return new FetchResult<>(mref);
+        return fetchrslt(mref);
       } else {
         // in error
         emsg = "No mref found with provided mid.";
@@ -243,7 +244,7 @@ public class MCorpusRepo implements Closeable {
       emsg = "A technical error occurred fetching mref by mid.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -267,7 +268,7 @@ public class MCorpusRepo implements Closeable {
         if(isNotNull(mrefRec)) {
           // success
           final Mref mref = mrefRec.into(Mref.class);
-          return new FetchResult<>(mref);
+          return fetchrslt(mref);
         } else {
           // in error
           emsg = "No mref found with provided empId and location.";
@@ -286,7 +287,7 @@ public class MCorpusRepo implements Closeable {
       emsg = "Invalid emp id and/or location for mref fetch.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -297,7 +298,7 @@ public class MCorpusRepo implements Closeable {
    *          or wrapping an error message upon a fetch error.
    */
   public FetchResult<List<Mref>> fetchMRefsByEmpId(final String empId) {
-    if(empId == null) return new FetchResult<>(null, "No emp id provided.");
+    if(empId == null) return fetchrslt(null, "No emp id provided.");
     String emsg;
     try {
       final List<Mref> mref = dsl
@@ -305,7 +306,7 @@ public class MCorpusRepo implements Closeable {
         .from(MEMBER)
         .where(MEMBER.EMP_ID.eq(empId))
         .fetchInto(Mref.class);
-      return new FetchResult<>(mref, null);
+      return fetchrslt(mref, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -316,11 +317,11 @@ public class MCorpusRepo implements Closeable {
       emsg = "A technical error occurred fetching mrefs by emp id.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   public FetchResult<MemberAndMauth> fetchMember(final UUID mid) {
-    if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    if(mid == null) return fetchrslt(null, "No member id provided.");
     String emsg;
     try {
       final Map<String, Object> mmap = dsl
@@ -332,13 +333,13 @@ public class MCorpusRepo implements Closeable {
         .where(MEMBER.MID.eq(mid))
         .fetchOneMap();
 
-      if(isNull(mmap)) return new FetchResult<>(null, String.format("No member found with mid: '%s'.", mid));
+      if(isNull(mmap)) return fetchrslt(null, String.format("No member found with mid: '%s'.", mid));
 
       // map to pojo
       final MemberAndMauth manda = mapToMemberAndMauth(mmap);
 
       // success
-      return new FetchResult<>(manda, null);
+      return fetchrslt(manda, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -349,7 +350,7 @@ public class MCorpusRepo implements Closeable {
       emsg = "A technical error occurred fetching member.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -360,7 +361,7 @@ public class MCorpusRepo implements Closeable {
    *         or wrapping an error message upon a fetch error.
    */
   public FetchResult<MemberAndMaddresses> fetchMemberAndAddresses(final UUID mid) {
-    if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    if(mid == null) return fetchrslt(null, "No member id provided.");
     String emsg;
     try {
       final List<Map<String, Object>> mlist = dsl
@@ -373,13 +374,13 @@ public class MCorpusRepo implements Closeable {
         .where(MEMBER.MID.eq(mid))
         .fetchMaps();
 
-      if(isNullOrEmpty(mlist)) return new FetchResult<>(null, String.format("No member and addresses found with mid: '%s'.", mid));
+      if(isNullOrEmpty(mlist)) return fetchrslt(null, String.format("No member and addresses found with mid: '%s'.", mid));
 
       // map to pojo
       final MemberAndMaddresses mandaddresses = mapToOneMemberAndMaddresses(mlist);
 
       // success
-      return new FetchResult<>(mandaddresses, null);
+      return fetchrslt(mandaddresses, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -390,7 +391,7 @@ public class MCorpusRepo implements Closeable {
       emsg = "A technical error occurred fetching member and addresses.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -402,7 +403,7 @@ public class MCorpusRepo implements Closeable {
    *          error message when the fetch fails
    */
   public FetchResult<List<Maddress>> fetchMemberAddresses(final UUID mid) {
-    if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    if(mid == null) return fetchrslt(null, "No member id provided.");
     String emsg;
     try {
       final List<Maddress> maddressList = dsl
@@ -412,7 +413,7 @@ public class MCorpusRepo implements Closeable {
         .fetchInto(Maddress.class);
 
       // success
-      return new FetchResult<>(maddressList, null);
+      return fetchrslt(maddressList, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -423,7 +424,7 @@ public class MCorpusRepo implements Closeable {
       emsg = "A technical error occurred fetching member addresses.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -463,14 +464,14 @@ public class MCorpusRepo implements Closeable {
 
       if(isNullOrEmpty(mmap)) {
         // no matches
-        return new FetchResult<>(Collections.emptyList(), null);
+        return fetchrslt(Collections.emptyList(), null);
       }
 
       final List<MemberAndMauth> mlist = mmap.stream()
         .map(MCorpusRepo::mapToMemberAndMauth)
         .collect(Collectors.toList());
 
-      return new FetchResult<>(mlist, null);
+      return fetchrslt(mlist, null);
     }
     catch(DataAccessException dae) {
       log.error(dae.getMessage());
@@ -481,7 +482,7 @@ public class MCorpusRepo implements Closeable {
       emsg = "A technical error occurred fetching members by search.";
     }
     // error
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -493,7 +494,7 @@ public class MCorpusRepo implements Closeable {
    *         -OR- an error message otherwise.
    */
   public FetchResult<MemberAndMauth> addMember(final MemberAndMauth memberToAdd) {
-    if(isNull(memberToAdd)) return new FetchResult<>(null, "No member provided.");
+    if(isNull(memberToAdd)) return fetchrslt(null, "No member provided.");
 
     final List<String> emsgs = new ArrayList<>();
     final List<MemberAndMauth> rlist = new ArrayList<>(1);
@@ -566,11 +567,11 @@ public class MCorpusRepo implements Closeable {
     }
 
     final MemberAndMauth added = rlist.size() == 1 ? rlist.get(0) : null;
-    return new FetchResult<>(added, nflatten(emsgs, ","));
+    return fetchrslt(added, nflatten(emsgs, ","));
   }
 
   public FetchResult<MemberAndMauth> updateMember(final MemberAndMauth memberToUpdate) {
-    if(isNull(memberToUpdate)) return new FetchResult<>(null, "No member provided.");
+    if(isNull(memberToUpdate)) return fetchrslt(null, "No member provided.");
 
     final List<String> emsgs = new ArrayList<>();
 
@@ -666,7 +667,7 @@ public class MCorpusRepo implements Closeable {
 
     // success
     final MemberAndMauth updated = rlist.size() == 1 ? rlist.get(0) : null;
-    return new FetchResult<>(updated, nflatten(emsgs, ","));
+    return fetchrslt(updated, nflatten(emsgs, ","));
   }
 
   /**
@@ -677,7 +678,7 @@ public class MCorpusRepo implements Closeable {
    *                     otherwise an error message.
    */
   public FetchResult<Boolean> deleteMember(final UUID mid) {
-    if(mid == null) return new FetchResult<>(null, "No member id provided.");
+    if(mid == null) return fetchrslt(null, "No member id provided.");
 
     String emsg;
     try {
@@ -690,7 +691,7 @@ public class MCorpusRepo implements Closeable {
       if(numDeleted != 1) throw new DataAccessException("Invalid member delete return value.");
 
       // success
-      return new FetchResult<>(Boolean.TRUE, null);
+      return fetchrslt(Boolean.TRUE, null);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
@@ -702,7 +703,7 @@ public class MCorpusRepo implements Closeable {
     }
 
     // fail
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 
   /**
@@ -720,7 +721,7 @@ public class MCorpusRepo implements Closeable {
       sp.execute(dsl.configuration());
 
       // success
-      return new FetchResult<>(Boolean.TRUE, null);
+      return fetchrslt(Boolean.TRUE, null);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
@@ -732,11 +733,11 @@ public class MCorpusRepo implements Closeable {
     }
 
     // fail
-    return new FetchResult<>(Boolean.FALSE, emsg);
+    return fetchrslt(Boolean.FALSE, emsg);
   }
 
   public FetchResult<Maddress> addMemberAddress(final Maddress memberAddressToAdd) {
-    if(isNull(memberAddressToAdd)) return new FetchResult<>(null, "No member address provided.");
+    if(isNull(memberAddressToAdd)) return fetchrslt(null, "No member address provided.");
 
     final List<String> emsgs = new ArrayList<>();
 
@@ -774,7 +775,7 @@ public class MCorpusRepo implements Closeable {
         throw new DataAccessException("Invalid member address insert return value.");
 
       // success
-      return new FetchResult<>(maddress, null);
+      return fetchrslt(maddress, null);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
@@ -786,11 +787,11 @@ public class MCorpusRepo implements Closeable {
     }
 
     // fail
-    return new FetchResult<>(null, nflatten(emsgs, ","));
+    return fetchrslt(null, nflatten(emsgs, ","));
   }
 
   public FetchResult<Maddress> updateMemberAddress(final Maddress maddressToUpdate) {
-    if(isNull(maddressToUpdate)) return new FetchResult<>(null, "No member address provided.");
+    if(isNull(maddressToUpdate)) return fetchrslt(null, "No member address provided.");
 
     final List<String> emsgs = new ArrayList<>();
 
@@ -819,7 +820,7 @@ public class MCorpusRepo implements Closeable {
       if(isNotNull(maddressRec)) {
         // success
         final Maddress maddress = maddressRec.into(Maddress.class);
-        return new FetchResult<>(maddress, null);
+        return fetchrslt(maddress, null);
       } else {
         // in error
         final String emsg = String.format("No %s member address found to update.", addressname.getLiteral());
@@ -837,7 +838,7 @@ public class MCorpusRepo implements Closeable {
     }
 
     // fail
-    return new FetchResult<>(null, nflatten(emsgs, ","));
+    return fetchrslt(null, nflatten(emsgs, ","));
   }
 
   /**
@@ -848,8 +849,8 @@ public class MCorpusRepo implements Closeable {
    * @return FetchResult<TRUE> upon successful deletion, or an error message.
    */
   public FetchResult<Boolean> deleteMemberAddress(final UUID mid, Addressname addressname) {
-    if(mid == null) return new FetchResult<>(null, "No member id provided.");
-    if(addressname == null) return new FetchResult<>(null, "No address name provided.");
+    if(mid == null) return fetchrslt(null, "No member id provided.");
+    if(addressname == null) return fetchrslt(null, "No address name provided.");
     String emsg;
     try {
       final int numDeleted = dsl
@@ -860,7 +861,7 @@ public class MCorpusRepo implements Closeable {
       if(numDeleted != 1) throw new DataAccessException("Invalid member address delete return value.");
 
       // success
-      return new FetchResult<>(Boolean.TRUE);
+      return fetchrslt(Boolean.TRUE);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
@@ -872,6 +873,6 @@ public class MCorpusRepo implements Closeable {
     }
 
     // member delete fail
-    return new FetchResult<>(null, emsg);
+    return fetchrslt(null, emsg);
   }
 }

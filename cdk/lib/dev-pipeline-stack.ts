@@ -1,30 +1,33 @@
-import cdk = require('@aws-cdk/core');
-import iam = require('@aws-cdk/aws-iam');
-import ecr = require('@aws-cdk/aws-ecr');
-import ec2 = require('@aws-cdk/aws-ec2');
-import sns = require('@aws-cdk/aws-sns');
-import sns_sub = require('@aws-cdk/aws-sns-subscriptions');
-import event_targets = require('@aws-cdk/aws-events-targets');
-import codebuild = require('@aws-cdk/aws-codebuild');
-import codepipeline = require('@aws-cdk/aws-codepipeline');
-import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
-import { BuildSpec, ComputeType, LinuxBuildImage } from '@aws-cdk/aws-codebuild';
-import { SubnetType } from '@aws-cdk/aws-ec2';
+import { BuildSpec, ComputeType, LinuxBuildImage, PipelineProject } from '@aws-cdk/aws-codebuild';
+import { Artifact, Pipeline } from '@aws-cdk/aws-codepipeline';
+import {
+  CloudFormationCreateUpdateStackAction,
+  CodeBuildAction,
+  GitHubSourceAction,
+  GitHubTrigger,
+} from '@aws-cdk/aws-codepipeline-actions';
+import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
+import { IRepository } from '@aws-cdk/aws-ecr';
+import { SnsTopic } from '@aws-cdk/aws-events-targets';
+import { PolicyStatement } from '@aws-cdk/aws-iam';
+import { Topic } from '@aws-cdk/aws-sns';
+import { EmailSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { CfnOutput, Construct, SecretValue } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 import { PipelineContainerImage } from './pipeline-container-image';
 
 export interface IDevPipelineStackProps extends IStackProps {
-  readonly appRepository: ecr.IRepository;
+  readonly appRepository: IRepository;
   /**
    * The VPC ref
    */
-  readonly vpc: ec2.IVpc;
+  readonly vpc: IVpc;
 
   /**
    * The aws codebuild security group ref.
    */
-  readonly codebuildSecGrp: ec2.ISecurityGroup;
+  readonly codebuildSecGrp: ISecurityGroup;
 
   /**
    * The name of the S3 bucket holding the CDK JSON config.
@@ -89,34 +92,32 @@ export class DevPipelineStack extends BaseStack {
   public readonly imageTag: string;
   public readonly gitBranchName: string;
 
-  public readonly dockerBuildFailureEventTopic?: sns.Topic;
-  public readonly cdkBuildFailureEventTopic?: sns.Topic;
+  public readonly dockerBuildFailureEventTopic?: Topic;
+  public readonly cdkBuildFailureEventTopic?: Topic;
 
-  constructor(scope: cdk.Construct, id: string, props: IDevPipelineStackProps) {
+  constructor(scope: Construct, id: string, props: IDevPipelineStackProps) {
     super(scope, id, props);
 
     this.appBuiltImage = new PipelineContainerImage(props.appRepository);
 
     // source (github)
-    const sourceOutput = new codepipeline.Artifact();
-    const sourceAction = new codepipeline_actions.GitHubSourceAction({
+    const sourceOutput = new Artifact();
+    const sourceAction = new GitHubSourceAction({
       actionName: `GitHub-${props.gitBranchName}-branch`,
       owner: props.githubOwner,
       repo: props.githubRepo,
-      oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
+      oauthToken: SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
         jsonField: props.githubOauthTokenSecretJsonFieldName,
       }),
       branch: props.gitBranchName,
-      trigger: props.triggerOnCommit
-        ? codepipeline_actions.GitHubTrigger.WEBHOOK
-        : codepipeline_actions.GitHubTrigger.NONE,
+      trigger: props.triggerOnCommit ? GitHubTrigger.WEBHOOK : GitHubTrigger.NONE,
       output: sourceOutput,
     });
     this.gitBranchName = props.gitBranchName;
 
     // *** Docker (web app container) build ***
 
-    const dockerBuild = new codebuild.PipelineProject(this, 'DockerCodeBuildProject', {
+    const dockerBuild = new PipelineProject(this, 'DockerCodeBuildProject', {
       vpc: props.vpc,
       // projectName: codebuildInstNme,
       environment: {
@@ -198,13 +199,13 @@ export class DevPipelineStack extends BaseStack {
     });
     // codebuild/pipeline ssm access
     dockerBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         actions: ['ssm:GetParameters', 'ssm:GetParameter'],
         resources: [props.ssmJdbcUrl.parameterArn, props.ssmJdbcTestUrl.parameterArn],
       })
     );
     dockerBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         resources: ['arn:aws:ssm:*:*:parameter' + props.ssmImageTagParamName],
         actions: ['ssm:PutParameter'],
       })
@@ -215,24 +216,24 @@ export class DevPipelineStack extends BaseStack {
     if (props.onBuildFailureEmails && props.onBuildFailureEmails.length > 0) {
       const topicName = iname('docker-build-failure', props);
       const displayName = `${props.appName} ${props.appEnv} Docker/app build failure.`;
-      this.dockerBuildFailureEventTopic = new sns.Topic(this, topicName, {
+      this.dockerBuildFailureEventTopic = new Topic(this, topicName, {
         topicName: topicName,
         displayName: displayName,
       });
       props.onBuildFailureEmails.forEach(email =>
-        this.dockerBuildFailureEventTopic!.addSubscription(new sns_sub.EmailSubscription(email))
+        this.dockerBuildFailureEventTopic!.addSubscription(new EmailSubscription(email))
       );
       dockerBuild.onBuildFailed(topicName, {
-        target: new event_targets.SnsTopic(this.dockerBuildFailureEventTopic),
+        target: new SnsTopic(this.dockerBuildFailureEventTopic),
         description: displayName,
       });
     }
 
     // *** CDK build ***
 
-    const cdkBuild = new codebuild.PipelineProject(this, 'CdkBuildProject', {
+    const cdkBuild = new PipelineProject(this, 'CdkBuildProject', {
       environment: {
-        buildImage: codebuild.LinuxBuildImage.UBUNTU_14_04_NODEJS_10_14_1,
+        buildImage: LinuxBuildImage.UBUNTU_14_04_NODEJS_10_14_1,
       },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
@@ -255,14 +256,14 @@ export class DevPipelineStack extends BaseStack {
       }),
     });
     cdkBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         resources: ['*'],
         actions: ['ec2:DescribeAvailabilityZones'],
       })
     );
     // allow codebuild to pull cdk config file from s3
     cdkBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         resources: [`arn:aws:s3:::${props.appConfigCacheS3BucketName}/${props.appConfigFilename}`],
         actions: ['s3:GetObject', 'kms:Decrypt'],
       })
@@ -272,23 +273,23 @@ export class DevPipelineStack extends BaseStack {
     if (props.onBuildFailureEmails && props.onBuildFailureEmails.length > 0) {
       const topicName = iname('cdk-build-failure', props);
       const displayName = `${props.appName} ${props.appEnv} CDK build failure.`;
-      this.cdkBuildFailureEventTopic = new sns.Topic(this, topicName, {
+      this.cdkBuildFailureEventTopic = new Topic(this, topicName, {
         topicName: topicName,
         displayName: displayName,
       });
       props.onBuildFailureEmails.forEach(email =>
-        this.cdkBuildFailureEventTopic!.addSubscription(new sns_sub.EmailSubscription(email))
+        this.cdkBuildFailureEventTopic!.addSubscription(new EmailSubscription(email))
       );
       cdkBuild.onBuildFailed(topicName, {
-        target: new event_targets.SnsTopic(this.cdkBuildFailureEventTopic),
+        target: new SnsTopic(this.cdkBuildFailureEventTopic),
         description: displayName,
       });
     }
 
-    const dockerBuildOutput = new codepipeline.Artifact('DockerBuildOutput');
-    const cdkBuildOutput = new codepipeline.Artifact();
+    const dockerBuildOutput = new Artifact('DockerBuildOutput');
+    const cdkBuildOutput = new Artifact();
 
-    const devCicdPipeline = new codepipeline.Pipeline(this, 'Pipeline', {
+    const devCicdPipeline = new Pipeline(this, 'Pipeline', {
       pipelineName: iname('pipeline', props),
       stages: [
         {
@@ -298,13 +299,13 @@ export class DevPipelineStack extends BaseStack {
         {
           stageName: 'Build',
           actions: [
-            new codepipeline_actions.CodeBuildAction({
+            new CodeBuildAction({
               actionName: 'DockerBuild',
               project: dockerBuild,
               input: sourceOutput,
               outputs: [dockerBuildOutput],
             }),
-            new codepipeline_actions.CodeBuildAction({
+            new CodeBuildAction({
               actionName: 'CdkBuild',
               project: cdkBuild,
               input: sourceOutput,
@@ -315,14 +316,14 @@ export class DevPipelineStack extends BaseStack {
         {
           stageName: 'Deploy',
           actions: [
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_Lb',
               stackName: props.cdkDevLbStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevLbStackName}.template.json`),
               adminPermissions: true,
               runOrder: 1,
             }),
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_App',
               stackName: props.cdkDevAppStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevAppStackName}.template.json`),
@@ -333,7 +334,7 @@ export class DevPipelineStack extends BaseStack {
               extraInputs: [dockerBuildOutput],
               runOrder: 2,
             }),
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_Metrics',
               stackName: props.cdkDevMetricsStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevMetricsStackName}.template.json`),
@@ -348,8 +349,8 @@ export class DevPipelineStack extends BaseStack {
     this.imageTag = dockerBuildOutput.getParam('imageTag.json', 'imageTag');
 
     // stack output
-    new cdk.CfnOutput(this, 'DevCicdDockerBuildFailedEvent', { value: this.dockerBuildFailureEventTopic!.topicName });
-    new cdk.CfnOutput(this, 'DevCicdCdkBuildFailedEvent', { value: this.cdkBuildFailureEventTopic!.topicName });
+    new CfnOutput(this, 'DevCicdDockerBuildFailedEvent', { value: this.dockerBuildFailureEventTopic!.topicName });
+    new CfnOutput(this, 'DevCicdCdkBuildFailedEvent', { value: this.cdkBuildFailureEventTopic!.topicName });
     // new cdk.CfnOutput(this, 'DevCicdImageTag', { value: this.imageTag }); // WONT WORK!
   }
 }

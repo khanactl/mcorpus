@@ -2,6 +2,7 @@
 
 archive
 testoutput*
+loadtest-aws
 
 *local*.jmx
 *aws*.jmx

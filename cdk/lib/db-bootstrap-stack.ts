@@ -1,10 +1,10 @@
-import cdk = require('@aws-cdk/core');
+import { CustomResource, CustomResourceProvider } from '@aws-cdk/aws-cloudformation';
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
 import { PolicyStatement } from '@aws-cdk/aws-iam';
+import { Code, Runtime, SingletonFunction } from '@aws-cdk/aws-lambda';
 import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import cfn = require('@aws-cdk/aws-cloudformation');
-import lambda = require('@aws-cdk/aws-lambda');
 import ssm = require('@aws-cdk/aws-ssm');
 import iam = require('@aws-cdk/aws-iam');
 import path = require('path');
@@ -52,7 +52,7 @@ export class DbBootstrapStack extends BaseStack {
   public readonly ssmJdbcUrl: IStringParameter;
   public readonly ssmJdbcTestUrl: IStringParameter;
 
-  constructor(scope: cdk.Construct, id: string, props: IDbBootstrapProps) {
+  constructor(scope: Construct, id: string, props: IDbBootstrapProps) {
     super(scope, id, props);
 
     // db dbootstrap role
@@ -83,16 +83,16 @@ export class DbBootstrapStack extends BaseStack {
     // END db bootstrap role
 
     const lambdaProviderInstNme = iname('db-bootstrap-lambda', props);
-    const lambdaProvider = new lambda.SingletonFunction(this, lambdaProviderInstNme, {
+    const lambdaProvider = new SingletonFunction(this, lambdaProviderInstNme, {
       vpc: props.vpc,
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       securityGroup: props.dbBootstrapSecGrp,
       uuid: 'f8dfc6d4-d864-4f4f-8d65-63c2ea54f2ac', // one-time globaly unique
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: Runtime.PYTHON_3_7,
       // functionName: 'DbBootstrapLambda',
       memorySize: 128,
-      timeout: cdk.Duration.seconds(60),
-      code: lambda.Code.fromAsset(
+      timeout: Duration.seconds(60),
+      code: Code.fromAsset(
         path.join(__dirname, '../lambda/dbbootstrap') // dir ref
       ),
       handler: 'dbbootstrap.main',
@@ -100,8 +100,8 @@ export class DbBootstrapStack extends BaseStack {
     });
 
     const resourceInstNme = iname('db-bootstrap', props);
-    const resource = new cfn.CustomResource(this, resourceInstNme, {
-      provider: cfn.CustomResourceProvider.lambda(lambdaProvider),
+    const resource = new CustomResource(this, resourceInstNme, {
+      provider: CustomResourceProvider.lambda(lambdaProvider),
       properties: {
         DbJsonSecretArn: props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
         TargetRegion: props.targetRegion,
@@ -133,9 +133,9 @@ export class DbBootstrapStack extends BaseStack {
     });
 
     // stack output
-    new cdk.CfnOutput(this, 'dbBootstrapRoleArn', { value: this.dbBootstrapRole.roleArn });
-    new cdk.CfnOutput(this, 'dbBootstrapResponseMessage', { value: this.responseMessage });
-    new cdk.CfnOutput(this, 'ssmJdbcUrlArn', { value: this.ssmJdbcUrl.parameterArn });
-    new cdk.CfnOutput(this, 'ssmJdbcTestUrlArn', { value: this.ssmJdbcTestUrl.parameterArn });
+    new CfnOutput(this, 'dbBootstrapRoleArn', { value: this.dbBootstrapRole.roleArn });
+    new CfnOutput(this, 'dbBootstrapResponseMessage', { value: this.responseMessage });
+    new CfnOutput(this, 'ssmJdbcUrlArn', { value: this.ssmJdbcUrl.parameterArn });
+    new CfnOutput(this, 'ssmJdbcTestUrlArn', { value: this.ssmJdbcTestUrl.parameterArn });
   }
 }

@@ -1,11 +1,16 @@
-import cdk = require('@aws-cdk/core');
-import iam = require('@aws-cdk/aws-iam');
-import ecr = require('@aws-cdk/aws-ecr');
-import sns = require('@aws-cdk/aws-sns');
-import codebuild = require('@aws-cdk/aws-codebuild');
-import codepipeline = require('@aws-cdk/aws-codepipeline');
-import codepipeline_actions = require('@aws-cdk/aws-codepipeline-actions');
-import { BuildSpec } from '@aws-cdk/aws-codebuild';
+import { BuildSpec, LinuxBuildImage, PipelineProject } from '@aws-cdk/aws-codebuild';
+import { Artifact, Pipeline } from '@aws-cdk/aws-codepipeline';
+import {
+  CloudFormationCreateUpdateStackAction,
+  CodeBuildAction,
+  GitHubSourceAction,
+  GitHubTrigger,
+  ManualApprovalAction,
+} from '@aws-cdk/aws-codepipeline-actions';
+import { Repository } from '@aws-cdk/aws-ecr';
+import { PolicyStatement } from '@aws-cdk/aws-iam';
+import { Topic } from '@aws-cdk/aws-sns';
+import { Construct, SecretValue } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 import { PipelineContainerImage } from './pipeline-container-image';
 
@@ -14,7 +19,7 @@ export interface IStagingProdPipelineStackProps extends IStackProps {
    * The ECR repo from which docker web app images are pulled
    * for deployment into QA and PROD app environments.
    */
-  readonly appRepository: ecr.Repository;
+  readonly appRepository: Repository;
 
   /**
    * The name of the S3 bucket holding the CDK JSON config.
@@ -65,32 +70,30 @@ export class StagingProdPipelineStack extends BaseStack {
   // public readonly appBuiltImageStaging: PipelineContainerImage;
   public readonly appBuiltImageProd: PipelineContainerImage;
 
-  public readonly cfnDeployConfirmTopic?: sns.Topic;
+  public readonly cfnDeployConfirmTopic?: Topic;
 
-  constructor(scope: cdk.Construct, id: string, props: IStagingProdPipelineStackProps) {
+  constructor(scope: Construct, id: string, props: IStagingProdPipelineStackProps) {
     super(scope, id, props);
 
     this.appBuiltImageProd = new PipelineContainerImage(props.appRepository);
 
-    const sourceOutput = new codepipeline.Artifact();
+    const sourceOutput = new Artifact();
 
-    const sourceAction = new codepipeline_actions.GitHubSourceAction({
+    const sourceAction = new GitHubSourceAction({
       actionName: `GitHub-${props.gitBranchName}-branch`,
       owner: props.githubOwner,
       repo: props.githubRepo,
-      oauthToken: cdk.SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
+      oauthToken: SecretValue.secretsManager(props.githubOauthTokenSecretArn, {
         jsonField: props.githubOauthTokenSecretJsonFieldName,
       }),
       branch: props.gitBranchName,
-      trigger: props.triggerOnCommit
-        ? codepipeline_actions.GitHubTrigger.WEBHOOK
-        : codepipeline_actions.GitHubTrigger.NONE,
+      trigger: props.triggerOnCommit ? GitHubTrigger.WEBHOOK : GitHubTrigger.NONE,
       output: sourceOutput,
     });
 
-    const cdkBuild = new codebuild.PipelineProject(this, 'CdkBuildProject', {
+    const cdkBuild = new PipelineProject(this, 'CdkBuildProject', {
       environment: {
-        buildImage: codebuild.LinuxBuildImage.UBUNTU_14_04_NODEJS_10_14_1,
+        buildImage: LinuxBuildImage.UBUNTU_14_04_NODEJS_10_14_1,
       },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
@@ -119,33 +122,33 @@ export class StagingProdPipelineStack extends BaseStack {
       }),
     });
     cdkBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         resources: [`arn:aws:ssm:*:*:parameter${props.ssmImageTagParamName}`],
         actions: ['ssm:GetParameter'],
       })
     );
     cdkBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         resources: ['*'],
         actions: ['ec2:DescribeAvailabilityZones'],
       })
     );
     // allow codebuild to pull cdk config file from s3
     cdkBuild.addToRolePolicy(
-      new iam.PolicyStatement({
+      new PolicyStatement({
         resources: [`arn:aws:s3:::${props.appConfigCacheS3BucketName}/${props.appConfigFilename}`],
         actions: ['s3:GetObject'],
       })
     );
 
-    const cdkBuildOutput = new codepipeline.Artifact();
+    const cdkBuildOutput = new Artifact();
 
     const topicName = iname('confirm-cfn-deployment', props);
-    this.cfnDeployConfirmTopic = new sns.Topic(this, topicName, {
+    this.cfnDeployConfirmTopic = new Topic(this, topicName, {
       topicName: topicName,
     });
 
-    new codepipeline.Pipeline(this, 'Pipeline', {
+    new Pipeline(this, 'Pipeline', {
       pipelineName: iname('pipeline', props),
       stages: [
         {
@@ -155,7 +158,7 @@ export class StagingProdPipelineStack extends BaseStack {
         {
           stageName: 'Build',
           actions: [
-            new codepipeline_actions.CodeBuildAction({
+            new CodeBuildAction({
               actionName: 'CdkBuild',
               project: cdkBuild,
               input: sourceOutput,
@@ -192,7 +195,7 @@ export class StagingProdPipelineStack extends BaseStack {
         {
           stageName: 'Validation',
           actions: [
-            new codepipeline_actions.ManualApprovalAction({
+            new ManualApprovalAction({
               actionName: 'Confirm_Production_Deployment',
               runOrder: 1,
               notificationTopic: this.cfnDeployConfirmTopic,
@@ -203,14 +206,14 @@ export class StagingProdPipelineStack extends BaseStack {
         {
           stageName: 'Deploy_Production',
           actions: [
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_Lb',
               stackName: props.cdkPrdLbStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkPrdLbStackName}.template.json`),
               adminPermissions: true,
               runOrder: 1,
             }),
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_App',
               stackName: props.cdkPrdAppStackName,
               runOrder: 2,
@@ -221,7 +224,7 @@ export class StagingProdPipelineStack extends BaseStack {
               },
               extraInputs: [cdkBuildOutput],
             }),
-            new codepipeline_actions.CloudFormationCreateUpdateStackAction({
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_Metrics',
               stackName: props.cdkPrdMetricsStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkPrdMetricsStackName}.template.json`),

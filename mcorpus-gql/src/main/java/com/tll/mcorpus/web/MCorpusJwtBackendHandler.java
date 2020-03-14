@@ -1,6 +1,7 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.isNull;
+import static com.tll.repo.FetchResult.fetchrslt;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -54,7 +55,7 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
   public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
     final FetchResult<JwtStatus> fr = mcuserRepo.getBackendJwtStatus(jwtId);
     final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
-    return new FetchResult<>(jstat, fr.getErrorMsg());
+    return fetchrslt(jstat, fr.getErrorMsg());
   }
 
   @Override
@@ -71,9 +72,9 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
         requestInstant, clientOriginToken);
     if (loginResult.isSuccess()) {
       final McuserXfrm xfrm = new McuserXfrm();
-      return new FetchResult<>(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
+      return fetchrslt(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
     } else {
-      return new FetchResult<>(null, loginResult.getErrorMsg());
+      return fetchrslt(loginResult.getErrorMsg());
     }
   }
 
