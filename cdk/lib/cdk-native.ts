@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import os = require('os');
-import fs = require('fs');
+import { Construct, Stack, StackProps } from '@aws-cdk/core';
+import { S3 } from 'aws-sdk';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { homedir } from 'os';
 import cml = require('camelcase');
-import aws = require('aws-sdk');
-import cdk = require('@aws-cdk/core');
 
 /**
  * The supported application environments.
@@ -20,7 +20,7 @@ export enum AppEnv {
 /**
  * Native stack properties definition.
  */
-export interface IStackProps extends cdk.StackProps {
+export interface IStackProps extends StackProps {
   /**
    * The application name.
    */
@@ -34,7 +34,7 @@ export interface IStackProps extends cdk.StackProps {
 /**
  * Native base CDK stack class.
  */
-export abstract class BaseStack extends cdk.Stack {
+export abstract class BaseStack extends Stack {
   /**
    * Constructor.
    *
@@ -42,7 +42,7 @@ export abstract class BaseStack extends cdk.Stack {
    * @param id the name of this stack
    * @param props the stack properties
    */
-  constructor(scope: cdk.Construct, id: string, props: IStackProps) {
+  constructor(scope: Construct, id: string, props: IStackProps) {
     super(scope, id, props);
   }
 } // BaseStack class
@@ -58,13 +58,13 @@ export abstract class BaseStack extends cdk.Stack {
 export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketName?: string): Promise<any> {
   // first try local home dir
   try {
-    const config = fs.readFileSync(`${os.homedir()}/${appConfigFilename}`, 'utf-8');
+    const config = readFileSync(`${homedir()}/${appConfigFilename}`, 'utf-8');
     return Promise.resolve(JSON.parse(config));
   } catch (e) {
     if (s3ConfigCacheBucketName && s3ConfigCacheBucketName.length > 0) {
       // try to fetch from known s3
       try {
-        const s3 = new aws.S3();
+        const s3 = new S3();
         const configObj = await s3
           .getObject({
             Bucket: s3ConfigCacheBucketName,
@@ -76,9 +76,9 @@ export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketN
         const config = JSON.parse(configStr);
         if (config) {
           // cache in user home dir only if one not already present
-          if (!fs.existsSync(`${os.homedir()}/${appConfigFilename}`)) {
+          if (!existsSync(`${homedir()}/${appConfigFilename}`)) {
             // cache config file locally
-            fs.writeFileSync(`${os.homedir()}/${appConfigFilename}`, configStr, {
+            writeFileSync(`${homedir()}/${appConfigFilename}`, configStr, {
               encoding: 'utf-8',
             });
             // console.log("local config file created");

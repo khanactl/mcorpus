@@ -1,13 +1,11 @@
 import { CustomResource, CustomResourceProvider } from '@aws-cdk/aws-cloudformation';
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
-import { PolicyStatement } from '@aws-cdk/aws-iam';
+import { PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { Code, Runtime, SingletonFunction } from '@aws-cdk/aws-lambda';
-import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { IStringParameter, StringParameter } from '@aws-cdk/aws-ssm';
 import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
+import { join as pjoin } from 'path';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import ssm = require('@aws-cdk/aws-ssm');
-import iam = require('@aws-cdk/aws-iam');
-import path = require('path');
 
 export interface IDbBootstrapProps extends IStackProps {
   /**
@@ -39,7 +37,7 @@ export interface IDbBootstrapProps extends IStackProps {
  * 3. Creating the needed SSM db/jdbc secure param secrets for downstream use
  */
 export class DbBootstrapStack extends BaseStack {
-  public readonly dbBootstrapRole: iam.Role;
+  public readonly dbBootstrapRole: Role;
 
   public readonly ssmNameJdbcUrl: string;
   public readonly ssmVersionJdbcUrl: number;
@@ -57,8 +55,8 @@ export class DbBootstrapStack extends BaseStack {
 
     // db dbootstrap role
     const dbBootstrapRoleInstNme = iname('db-bootstrap-role', props);
-    this.dbBootstrapRole = new iam.Role(this, dbBootstrapRoleInstNme, {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    this.dbBootstrapRole = new Role(this, dbBootstrapRoleInstNme, {
+      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
     this.dbBootstrapRole.addManagedPolicy({
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
@@ -93,7 +91,7 @@ export class DbBootstrapStack extends BaseStack {
       memorySize: 128,
       timeout: Duration.seconds(60),
       code: Code.fromAsset(
-        path.join(__dirname, '../lambda/dbbootstrap') // dir ref
+        pjoin(__dirname, '../lambda/dbbootstrap') // dir ref
       ),
       handler: 'dbbootstrap.main',
       role: this.dbBootstrapRole,
@@ -120,13 +118,13 @@ export class DbBootstrapStack extends BaseStack {
 
     // obtain the just generated SSM jdbc url param refs
     const ssmJdbcUrlInstNme = iname('db-url', props);
-    this.ssmJdbcUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcUrlInstNme, {
+    this.ssmJdbcUrl = StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcUrlInstNme, {
       parameterName: this.ssmNameJdbcUrl,
       version: this.ssmVersionJdbcUrl,
       simpleName: false,
     });
     const ssmJdbcTestUrlInstNme = iname('test-db-url', props);
-    this.ssmJdbcTestUrl = ssm.StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcTestUrlInstNme, {
+    this.ssmJdbcTestUrl = StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcTestUrlInstNme, {
       parameterName: this.ssmNameJdbcTestUrl,
       version: this.ssmVersionJdbcTestUrl,
       simpleName: false,

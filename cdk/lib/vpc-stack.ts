@@ -25,20 +25,6 @@ export class VpcStack extends BaseStack {
       cidr: props.cidr,
       enableDnsHostnames: true,
       enableDnsSupport: true,
-      /*
-      subnetConfiguration: [
-        {
-          cidrMask: 26, // 64
-          name: 'Public',
-          subnetType: SubnetType.PUBLIC,
-        },
-        {
-          cidrMask: 26, // 64
-          name: 'Private',
-          subnetType: SubnetType.PRIVATE,
-        },
-      ],
-      */
     });
 
     const publicSubnetIds: string[] = [];
