@@ -36,7 +36,7 @@
 
     <jackson.version>2.10.3</jackson.version>
 
-    <netty.version>4.1.48.Final</netty.version>
+    <netty.version>4.1.37.Final</netty.version>
     <ratpack.version>1.7.6</ratpack.version>
 
     <dropwizard-metrics.version>4.1.5</dropwizard-metrics.version>
