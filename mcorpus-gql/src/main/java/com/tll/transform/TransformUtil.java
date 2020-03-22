@@ -6,6 +6,7 @@ import static com.tll.core.Util.isNull;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -16,12 +17,14 @@ import java.util.UUID;
 
 /**
  * G entity tranform utility methods.
- * 
+ *
  * @author jpk
  */
 public class TransformUtil {
 
-  protected static final ZoneOffset localToUtc = ZoneId.systemDefault().getRules().getOffset(Instant.MIN);
+  protected static final ZoneId localZoneId = ZoneId.systemDefault();
+
+  protected static final ZoneOffset localToUtc = localZoneId.getRules().getOffset(Instant.MIN);
 
   /**
    * RegEx filter that removes all NON-alphanumeric characters.
@@ -43,32 +46,32 @@ public class TransformUtil {
    * RegEx filter that removes all NON-digit characters.
    * <p>
    * Null input begets null output.
-   * 
+   *
    * @param s the string s
    * @return the filtered string -OR- null when the given string is null.
    */
   public static String digits(final String s) { return isNull(s) ? null : s.replaceAll("[\\D]", ""); }
-  
+
   /**
    * Converts a java.util.Date to a java.sql.Timestamp.
-   * 
+   *
    * @param d the java.util.Date object to convert
-   * @return newly created java.sql.Date instance<br> 
+   * @return newly created java.sql.Date instance<br>
    *         -OR- null if null or bad input.
    */
   public static Timestamp dateToTimestamp(final java.util.Date d) { return d == null ? null : new Timestamp(d.getTime()); }
 
   /**
    * Converts a java.util.Date to a java.sql.Date.
-   * 
+   *
    * @param o the generalized date input argument assumed to be a java.util.Date instance.
-   * @return newly created java.sql.Date instance<br> 
+   * @return newly created java.sql.Date instance<br>
    *         -OR- null if null or bad input.
    */
   public static java.sql.Date asSqlDate(final java.util.Date d) {
     return d == null ? null : new java.sql.Date(d.getTime());
   }
-  
+
   /**
    * Get the field value from a field name and value map.
    *
@@ -79,10 +82,10 @@ public class TransformUtil {
    */
   @SuppressWarnings("unchecked")
   public static <T> T fval(final String fname, final Map<String, Object> fmap) { return (T) fmap.get(fname); }
-  
+
   /**
    * Convert an {@link OffsetDateTime} to a {@link Date}.
-   * 
+   *
    * @param odt the offset date time object to convert
    * @return Newly created {@link Date} -OR- null if the input param is null
    */
@@ -92,7 +95,7 @@ public class TransformUtil {
 
   /**
    * Convert a {@link Date} to an {@link OffsetDateTime}.
-   * 
+   *
    * @param d the date to convert
    * @return Newly created {@link OffsetDateTime} -OR- null if the input param is null
    */
@@ -101,8 +104,28 @@ public class TransformUtil {
   }
 
   /**
-   * Converts a {@link UUID} to a URL-safe base64-encoded string of either 
-   * 22 characters in length when it ends with "==" -OR- 24 chars in length 
+   * Convert a {@link LocalDate} to a {@link Date}.
+   *
+   * @param ld the local date to convert
+   * @return {@link Date} -OR- null if input param is null
+   */
+  public static Date localDateToDate(final LocalDate ld) {
+    return ld == null ? null : Date.from(ld.atStartOfDay(localZoneId).toInstant());
+  }
+
+  /**
+   * Convert a {@link Date} to a {@link LocalDate}.
+   *
+   * @param d the {@link Date} to convert
+   * @return {@link LocalDate} -OR- null if input param is null
+   */
+  public static LocalDate dateToLocalDate(final Date d) {
+    return d == null ? null : d.toInstant().atZone(localZoneId).toLocalDate();
+  }
+
+  /**
+   * Converts a {@link UUID} to a URL-safe base64-encoded string of either
+   * 22 characters in length when it ends with "==" -OR- 24 chars in length
    * when it does NOT end in "==".
    *
    * @param uuid the uuid

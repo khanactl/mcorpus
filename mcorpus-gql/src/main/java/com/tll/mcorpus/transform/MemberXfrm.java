@@ -6,9 +6,10 @@ import static com.tll.core.Util.nclean;
 import static com.tll.core.Util.nechk;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.upper;
-import static com.tll.transform.TransformUtil.asSqlDate;
+import static com.tll.transform.TransformUtil.dateToLocalDate;
 import static com.tll.transform.TransformUtil.digits;
 import static com.tll.transform.TransformUtil.fval;
+import static com.tll.transform.TransformUtil.localDateToDate;
 import static com.tll.transform.TransformUtil.odtToDate;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 
@@ -115,7 +116,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
       clean(d.dbMember.getNameLast()),
       clean(d.dbMember.getDisplayName()),
       memberStatusToString(d.dbMember.getStatus()),
-      d.dbMauth.getDob(),
+      localDateToDate(d.dbMauth.getDob()),
       clean(d.dbMauth.getSsn()),
       clean(d.dbMauth.getEmailPersonal()),
       clean(d.dbMauth.getEmailWork()),
@@ -145,7 +146,7 @@ public class MemberXfrm extends BaseMcorpusTransformer<Member, MemberAndMauth> {
       new com.tll.mcorpus.db.tables.pojos.Mauth(
         g.getMid(),
         null, // modified
-        asSqlDate(g.getDob()),
+        dateToLocalDate(g.getDob()),
         digits(g.getSsn()),
         g.getPersonalEmail(),
         g.getWorkEmail(),

@@ -2,6 +2,7 @@ package com.tll.mcorpus.transform;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.nclean;
+import static com.tll.transform.TransformUtil.localDateToDate;
 import static com.tll.transform.TransformUtil.odtToDate;
 
 import java.util.stream.Collectors;
@@ -26,7 +27,7 @@ public class MemberAndAddressesXfrm extends BaseMcorpusTransformer<MemberAndAddr
       clean(d.member.dbMember.getNameLast()),
       clean(d.member.dbMember.getDisplayName()),
       MemberXfrm.memberStatusToString(d.member.dbMember.getStatus()),
-      d.member.dbMauth.getDob(),
+      localDateToDate(d.member.dbMauth.getDob()),
       clean(d.member.dbMauth.getSsn()),
       clean(d.member.dbMauth.getEmailPersonal()),
       clean(d.member.dbMauth.getEmailWork()),

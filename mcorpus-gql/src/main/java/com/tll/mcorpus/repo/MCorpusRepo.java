@@ -13,8 +13,8 @@ import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 import static com.tll.repo.FetchResult.fetchrslt;
 
 import java.io.Closeable;
-import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -49,8 +49,8 @@ import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.Record9;
 import org.jooq.SQLDialect;
-import org.jooq.conf.RenderKeywordStyle;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderKeywordCase;
+import org.jooq.conf.RenderNameCase;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -131,8 +131,8 @@ public class MCorpusRepo implements Closeable {
   public MCorpusRepo(DataSource ds) {
     Settings s = new Settings();
     s.setRenderSchema(false);
-    s.setRenderNameStyle(RenderNameStyle.LOWER);
-    s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
+    s.setRenderNameCase(RenderNameCase.LOWER);
+    s.setRenderKeywordCase(RenderKeywordCase.UPPER);
     this.dsl = DSL.using(ds, SQLDialect.POSTGRES, s);
   }
 
@@ -616,7 +616,7 @@ public class MCorpusRepo implements Closeable {
           mmap = mauthRec.intoMap();
         } else {
           // otherwise select mauth to get current snapshot
-          Record9<OffsetDateTime, Date, String, String, String, String, String, String, String> mauthRecFetch = trans
+          Record9<OffsetDateTime, LocalDate, String, String, String, String, String, String, String> mauthRecFetch = trans
                     .select(MAUTH.MODIFIED, MAUTH.DOB, MAUTH.SSN, MAUTH.EMAIL_PERSONAL, MAUTH.EMAIL_WORK, MAUTH.MOBILE_PHONE, MAUTH.HOME_PHONE, MAUTH.WORK_PHONE, MAUTH.USERNAME)
                     .from(MAUTH)
                     .where(MAUTH.MID.eq(mid))
