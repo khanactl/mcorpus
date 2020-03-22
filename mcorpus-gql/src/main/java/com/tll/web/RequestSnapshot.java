@@ -7,6 +7,7 @@ import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
+import java.util.regex.Pattern;
 
 /**
  * Immutable snapshot of the key 'auditable' attributes of an incoming http
@@ -15,6 +16,12 @@ import java.time.Instant;
  * @author jkirton
  */
 public class RequestSnapshot {
+
+  private static final Pattern STRIP_QS = Pattern.compile("^(.*?)\\?");
+
+  private static String stripQS(final String s) {
+    return STRIP_QS.matcher(s).group(1);
+  }
 
   private static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
@@ -252,11 +259,19 @@ public class RequestSnapshot {
         "hasRstCookie: %b, "+
         "hasRstHeader: %b, " +
         "hasJwtCookie: %b",
-      getShortRequestId(), getPath(),
-      getRemoteAddressHost(), getMethod(),
-      getHttpHost(), getHttpOrigin(), getHttpReferer(), getHttpForwarded(),
-      getXForwardedFor(), getXForwardedHost(), getXForwardedProto(),
-      hasRstCookie(), hasRstHeader(),
+      getShortRequestId(),
+      getPath(),
+      getRemoteAddressHost(),
+      getMethod(),
+      getHttpHost(),
+      stripQS(getHttpOrigin()),
+      stripQS(getHttpReferer()),
+      getHttpForwarded(),
+      getXForwardedFor(),
+      getXForwardedHost(),
+      getXForwardedProto(),
+      hasRstCookie(),
+      hasRstHeader(),
       hasJwtCookie()
     );
   }
