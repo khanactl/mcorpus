@@ -17,17 +17,16 @@ import java.util.regex.Pattern;
  */
 public class RequestSnapshot {
 
-  private static final Pattern STRIP_QS = Pattern.compile("^(.*)\\?|^(.*)");
-
-  private static String stripQS(final String s) {
-    return s == null ? null : s.indexOf("?") > 0 ? STRIP_QS.matcher(s).group(1) : s;
+  static String stripQS(final String s) {
+    final int i = s == null ? -1 : s.indexOf("?");
+    return i > 0 ? s.substring(0, i) : s;
   }
 
-  private static boolean isNullwiseOrEmpty(final String s) {
+  static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
   }
 
-  private static String nullif(final String s) {
+  static String nullif(final String s) {
     return isNullwiseOrEmpty(s) ? null : s;
   }
 
