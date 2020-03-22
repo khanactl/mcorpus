@@ -239,19 +239,19 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-      "\n\nHttp-Request[%s] /%s\n" +
-        "\tremoteAddrHost: %s\n" +
-        "\tmethod: %s\n" +
-        "\thost: %s\n" +
-        "\torigin: %s\n" +
-        "\treferer: %s\n" +
-        "\tforwarded: %s\n" +
-        "\tx-forwarded-for: %s\n" +
-        "\tx-forwarded-host: %s\n" +
-        "\tx-forwarded-proto: %s\n" +
-        "\thasRstCookie: %b\n"+
-        "\thasRstHeader: %b\n" +
-        "\thasJwtCookie: %b\n",
+      "Http-Request[%s] /%s - " +
+        "remoteAddrHost: %s, " +
+        "method: %s, " +
+        "host: %s, " +
+        "origin: %s, " +
+        "referer: %s, " +
+        "forwarded: %s, " +
+        "x-forwarded-for: %s, " +
+        "x-forwarded-host: %s, " +
+        "x-forwarded-proto: %s, " +
+        "hasRstCookie: %b, "+
+        "hasRstHeader: %b, " +
+        "hasJwtCookie: %b",
       getShortRequestId(), getPath(),
       getRemoteAddressHost(), getMethod(),
       getHttpHost(), getHttpOrigin(), getHttpReferer(), getHttpForwarded(),
