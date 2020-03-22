@@ -7,7 +7,6 @@ import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
-import java.util.regex.Pattern;
 
 /**
  * Immutable snapshot of the key 'auditable' attributes of an incoming http
