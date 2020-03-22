@@ -57,41 +57,40 @@ export abstract class BaseStack extends Stack {
  */
 export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketName?: string): Promise<any> {
   // first try local home dir
-  try {
-    const config = readFileSync(`${homedir()}/${appConfigFilename}`, 'utf-8');
-    return Promise.resolve(JSON.parse(config));
-  } catch (e) {
-    if (s3ConfigCacheBucketName && s3ConfigCacheBucketName.length > 0) {
-      // try to fetch from known s3
-      try {
-        const s3 = new S3();
-        const configObj = await s3
-          .getObject({
-            Bucket: s3ConfigCacheBucketName,
-            Key: appConfigFilename,
-          })
-          .promise();
-        // s3 case
-        const configStr = configObj.Body!.toString();
-        const config = JSON.parse(configStr);
-        if (config) {
-          // cache in user home dir only if one not already present
-          if (!existsSync(`${homedir()}/${appConfigFilename}`)) {
-            // cache config file locally
-            writeFileSync(`${homedir()}/${appConfigFilename}`, configStr, {
-              encoding: 'utf-8',
-            });
-            // console.log("local config file created");
-          }
-        }
-        return Promise.resolve(config);
-      } catch (err) {
-        throw new Error('Unable to get cdk app config from s3: ' + err);
+  if (existsSync(`${homedir()}/${appConfigFilename}`)) {
+    try {
+      const config = readFileSync(`${homedir()}/${appConfigFilename}`, 'utf-8');
+      return Promise.resolve(JSON.parse(config));
+    } catch (e) {
+      throw new Error('Unable to get cdk app config from local user dir: ' + e);
+    }
+  } else if (s3ConfigCacheBucketName && s3ConfigCacheBucketName.length > 0) {
+    // try to fetch from known s3
+    try {
+      const s3 = new S3();
+      const configObj = await s3
+        .getObject({
+          Bucket: s3ConfigCacheBucketName,
+          Key: appConfigFilename,
+        })
+        .promise();
+      // s3 case
+      const configStr = configObj.Body!.toString();
+      const config = JSON.parse(configStr);
+      if (config) {
+        // cache config file locally
+        writeFileSync(`${homedir()}/${appConfigFilename}`, configStr, {
+          encoding: 'utf-8',
+        });
       }
-    } else {
-      throw new Error('No local config file found and no cache config s3 bucket name provided.');
+      return Promise.resolve(config);
+    } catch (e) {
+      throw new Error('Unable to get cdk app config from s3: ' + e);
     }
   }
+  throw new Error(
+    'Unable to get cdk ap config: No local config file found and no cache config s3 bucket name provided.'
+  );
 }
 
 /**
