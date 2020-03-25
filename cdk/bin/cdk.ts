@@ -14,7 +14,6 @@ import { SecGrpStack } from '../lib/secgrp-stack';
 import { StagingProdPipelineStack } from '../lib/staging-prod-pipeline-stack';
 import { VpcStack } from '../lib/vpc-stack';
 import cdk = require('@aws-cdk/core');
-import { Vpc } from '@aws-cdk/aws-ec2';
 
 const app = new cdk.App();
 

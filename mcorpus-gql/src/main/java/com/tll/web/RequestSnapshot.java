@@ -16,11 +16,16 @@ import java.time.Instant;
  */
 public class RequestSnapshot {
 
-  private static boolean isNullwiseOrEmpty(final String s) {
+  static String stripQS(final String s) {
+    final int i = s == null ? -1 : s.indexOf("?");
+    return i > 0 ? s.substring(0, i) : s;
+  }
+
+  static boolean isNullwiseOrEmpty(final String s) {
     return isNullOrEmpty(s) || "null".equals(lower(s));
   }
 
-  private static String nullif(final String s) {
+  static String nullif(final String s) {
     return isNullwiseOrEmpty(s) ? null : s;
   }
 
@@ -239,24 +244,32 @@ public class RequestSnapshot {
   @Override
   public String toString() {
     return String.format(
-      "\n\nHttp-Request[%s] /%s\n" +
-        "\tremoteAddrHost: %s\n" +
-        "\tmethod: %s\n" +
-        "\thost: %s\n" +
-        "\torigin: %s\n" +
-        "\treferer: %s\n" +
-        "\tforwarded: %s\n" +
-        "\tx-forwarded-for: %s\n" +
-        "\tx-forwarded-host: %s\n" +
-        "\tx-forwarded-proto: %s\n" +
-        "\thasRstCookie: %b\n"+
-        "\thasRstHeader: %b\n" +
-        "\thasJwtCookie: %b\n",
-      getShortRequestId(), getPath(),
-      getRemoteAddressHost(), getMethod(),
-      getHttpHost(), getHttpOrigin(), getHttpReferer(), getHttpForwarded(),
-      getXForwardedFor(), getXForwardedHost(), getXForwardedProto(),
-      hasRstCookie(), hasRstHeader(),
+      "Http-Request[%s] /%s - " +
+        "remoteAddrHost: %s, " +
+        "method: %s, " +
+        "host: %s, " +
+        "origin: %s, " +
+        "referer: %s, " +
+        "forwarded: %s, " +
+        "x-forwarded-for: %s, " +
+        "x-forwarded-host: %s, " +
+        "x-forwarded-proto: %s, " +
+        "hasRstCookie: %b, "+
+        "hasRstHeader: %b, " +
+        "hasJwtCookie: %b",
+      getShortRequestId(),
+      getPath(),
+      getRemoteAddressHost(),
+      getMethod(),
+      getHttpHost(),
+      stripQS(getHttpOrigin()),
+      stripQS(getHttpReferer()),
+      getHttpForwarded(),
+      getXForwardedFor(),
+      getXForwardedHost(),
+      getXForwardedProto(),
+      hasRstCookie(),
+      hasRstHeader(),
       hasJwtCookie()
     );
   }

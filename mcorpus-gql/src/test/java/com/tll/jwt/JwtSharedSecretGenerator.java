@@ -2,20 +2,18 @@ package com.tll.jwt;
 
 import java.util.Arrays;
 
-import com.tll.jwt.JWT;
-
 /**
  * Generates a random hex-wise string to serve as a JWT shared secret (salt).
  * <p>
- * One may invoke this class' main method to generate a new shared secret 
+ * One may invoke this class' main method to generate a new shared secret
  * for use in generating JWTs used by the system.
- *  
+ *
  * @author jkirton
  */
 public class JwtSharedSecretGenerator {
-  
+
   private JwtSharedSecretGenerator() {}
-  
+
   public static void main(String[] args) {
     final byte[] randarr = JWT.generateJwtSharedSecret();
     final String s = JWT.serialize(randarr);

@@ -11,6 +11,7 @@ import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.transform.MemberXfrm.locationFromString;
 import static com.tll.mcorpus.transform.MemberXfrm.memberStatusFromString;
+import static com.tll.transform.TransformUtil.dateToLocalDate;
 import static com.tll.transform.TransformUtil.odtFromDate;
 import static java.util.Collections.singletonList;
 import static org.jooq.impl.DSL.not;
@@ -173,7 +174,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
     return isNotNullOrEmpty(orderBys) ? generateJooqSortFields(orderBys) : defaultJooqSorting;
   }
 
-  private static Condition datePredicateAsJooqCondition(final DatePredicate dp, final Field<java.sql.Date> f) {
+  private static Condition datePredicateAsJooqCondition(final DatePredicate dp, final Field<java.time.LocalDate> f) {
     final Condition c;
     switch(dp.getDateOp()) {
       case IS_NULL:
@@ -184,40 +185,40 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
         break;
       default:
       case EQUAL_TO:
-        c = f.eq(new java.sql.Date(dp.getA().getTime()));
+        c = f.eq(dateToLocalDate(dp.getA()));
         break;
       case NOT_EQUAL_TO:
-        c = f.notEqual(new java.sql.Date(dp.getA().getTime()));
+        c = f.notEqual(dateToLocalDate(dp.getA()));
         break;
       case LESS_THAN:
-        c = f.lessThan(new java.sql.Date(dp.getA().getTime()));
+        c = f.lessThan(dateToLocalDate(dp.getA()));
         break;
       case NOT_LESS_THAN:
-        c = not(f.lessThan(new java.sql.Date(dp.getA().getTime())));
+        c = not(f.lessThan(dateToLocalDate(dp.getA())));
         break;
       case LESS_THAN_OR_EQUAL_TO:
-        c = f.lessOrEqual(new java.sql.Date(dp.getA().getTime()));
+        c = f.lessOrEqual(dateToLocalDate(dp.getA()));
         break;
       case NOT_LESS_THAN_OR_EQUAL_TO:
-        c = not(f.lessOrEqual(new java.sql.Date(dp.getA().getTime())));
+        c = not(f.lessOrEqual(dateToLocalDate(dp.getA())));
         break;
       case GREATER_THAN:
-        c = f.greaterThan(new java.sql.Date(dp.getA().getTime()));
+        c = f.greaterThan(dateToLocalDate(dp.getA()));
         break;
       case NOT_GREATER_THAN:
-        c = not(f.greaterThan(new java.sql.Date(dp.getA().getTime())));
+        c = not(f.greaterThan(dateToLocalDate(dp.getA())));
         break;
       case GREATER_THAN_OR_EQUAL_TO:
-        c = f.greaterOrEqual(new java.sql.Date(dp.getA().getTime()));
+        c = f.greaterOrEqual(dateToLocalDate(dp.getA()));
         break;
       case NOT_GREATER_THAN_OR_EQUAL_TO:
-        c = not(f.greaterOrEqual(new java.sql.Date(dp.getA().getTime())));
+        c = not(f.greaterOrEqual(dateToLocalDate(dp.getA())));
         break;
       case BETWEEN:
-        c = f.between(new java.sql.Date(dp.getA().getTime()), new java.sql.Date(dp.getB().getTime()));
+        c = f.between(dateToLocalDate(dp.getA()), dateToLocalDate(dp.getB()));
         break;
       case NOT_BETWEEN:
-        c = not(f.between(new java.sql.Date(dp.getA().getTime()), new java.sql.Date(dp.getB().getTime())));
+        c = not(f.between(dateToLocalDate(dp.getA()), dateToLocalDate(dp.getB())));
         break;
     }
     return c;

@@ -18,30 +18,30 @@
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-    <log4j2.version>2.13.0</log4j2.version>
+    <log4j2.version>2.13.1</log4j2.version>
     <slf4j-api.version>1.7.30</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
-    <postgres-jdbc.version>42.2.9</postgres-jdbc.version>
+    <postgres-jdbc.version>42.2.11</postgres-jdbc.version>
 
-    <jooq.version>3.12.4</jooq.version>
+    <jooq.version>3.13.1</jooq.version>
     <hikari-cp.version>3.4.2</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>8.5</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>8.10</nimbus-jose-jwt.version>
 
     <guava.version>28.2-jre</guava.version>
-    <guice.version>4.2.2</guice.version>
+    <guice.version>4.2.3</guice.version>
 
     <caffeine.version>2.8.1</caffeine.version>
 
-    <jackson.version>2.10.2</jackson.version>
+    <jackson.version>2.10.3</jackson.version>
 
-    <netty.version>4.1.45.Final</netty.version>
+    <netty.version>4.1.48.Final</netty.version>
     <ratpack.version>1.7.6</ratpack.version>
 
-    <metrics.version>4.1.2</metrics.version>
+    <dropwizard-metrics.version>4.1.5</dropwizard-metrics.version>
 
-    <graphql-java.version>13.0</graphql-java.version>
+    <graphql-java.version>14.0</graphql-java.version>
 
     <junit.version>4.12</junit.version>
   </properties>
@@ -118,6 +118,26 @@
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-guava</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jdk8</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
 
       <!-- netty -->
       <dependency>
@@ -129,6 +149,28 @@
         <groupId>io.netty</groupId>
         <artifactId>netty-codec-http</artifactId>
         <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-buffer</artifactId>
+        <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-native-unix-common</artifactId>
+        <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-native-epoll</artifactId>
+        <classifier>linux-x86_64</classifier>
+        <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-tcnative</artifactId>
+        <classifier>linux-x86_64</classifier>
+        <version>2.0.30.Final</version>
       </dependency>
 
       <!-- ratpack -->
@@ -168,37 +210,37 @@
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-json</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-healthchecks</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-jvm</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-annotation</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-jmx</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-graphite</artifactId>
-        <version>${metrics.version}</version>
+        <version>${dropwizard-metrics.version}</version>
       </dependency>
 
       <!-- nimbus jwt -->

@@ -43,8 +43,8 @@ import org.jooq.Record4;
 import org.jooq.Record9;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
-import org.jooq.conf.RenderKeywordStyle;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderKeywordCase;
+import org.jooq.conf.RenderNameCase;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -71,8 +71,8 @@ public class MCorpusUserRepo implements Closeable {
   public MCorpusUserRepo(DataSource ds) {
     Settings s = new Settings();
     s.setRenderSchema(false);
-    s.setRenderNameStyle(RenderNameStyle.LOWER);
-    s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
+    s.setRenderNameCase(RenderNameCase.LOWER);
+    s.setRenderKeywordCase(RenderKeywordCase.UPPER);
     this.dsl = DSL.using(ds, SQLDialect.POSTGRES, s);
   }
 

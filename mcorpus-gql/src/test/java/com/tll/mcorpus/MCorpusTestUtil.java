@@ -16,8 +16,8 @@ import com.tll.repo.FetchResult;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
-import org.jooq.conf.RenderKeywordStyle;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderKeywordCase;
+import org.jooq.conf.RenderNameCase;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -69,8 +69,8 @@ public class MCorpusTestUtil {
     if(dslMcweb == null) {
       Settings s = new Settings();
       s.setRenderSchema(false);
-      s.setRenderNameStyle(RenderNameStyle.LOWER);
-      s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
+      s.setRenderNameCase(RenderNameCase.LOWER);
+      s.setRenderKeywordCase(RenderKeywordCase.UPPER);
       dslMcweb = DSL.using(ds_mcweb(), SQLDialect.POSTGRES, s);
     }
     return dslMcweb;
@@ -91,8 +91,8 @@ public class MCorpusTestUtil {
     if(dslMcwebtest == null) {
       Settings s = new Settings();
       s.setRenderSchema(false);
-      s.setRenderNameStyle(RenderNameStyle.LOWER);
-      s.setRenderKeywordStyle(RenderKeywordStyle.UPPER);
+      s.setRenderNameCase(RenderNameCase.LOWER);
+      s.setRenderKeywordCase(RenderKeywordCase.UPPER);
       dslMcwebtest = DSL.using(ds_mcwebtest(), SQLDialect.POSTGRES, s);
     }
     return dslMcwebtest;
