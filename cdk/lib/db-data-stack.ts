@@ -4,8 +4,8 @@ import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import { S3EventSource } from '@aws-cdk/aws-lambda-event-sources';
 import { BlockPublicAccess, Bucket, BucketEncryption, EventType } from '@aws-cdk/aws-s3';
 import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
+import { join as pjoin } from 'path';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import path = require('path');
 
 export interface IDbDataProps extends IStackProps {
   /**
@@ -92,7 +92,7 @@ export class DbDataStack extends BaseStack {
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       securityGroup: props.dbDataSecGrp,
       code: Code.fromAsset(
-        path.join(__dirname, '../lambda/dbdata') // dir ref
+        pjoin(__dirname, '../lambda/dbdata') // dir ref
       ),
       handler: 'dbdata.main',
       runtime: Runtime.PYTHON_3_7,

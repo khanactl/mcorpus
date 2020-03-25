@@ -1,7 +1,7 @@
 package com.tll.mcorpus.repo;
 
 
-import static com.tll.TestUtil.toSqlDate;
+import static com.tll.TestUtil.toLocalDate;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
@@ -11,7 +11,6 @@ import static com.tll.mcorpus.db.Tables.MADDRESS;
 import static com.tll.mcorpus.db.Tables.MAUTH;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static com.tll.mcorpus.db.Tables.MEMBER_AUDIT;
-import static com.tll.transform.TransformUtil.asSqlDate;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,7 +83,7 @@ public class MCorpusRepoTest {
   static final String           TEST_MEMBER_LAST_NAME_U = "McGidrichU";
   static final MemberStatus     TEST_MEMBER_STATUS_U = MemberStatus.INACTIVE;
 
-  static final java.sql.Date    TEST_MAUTH_DOB = toSqlDate("1977-09-04");
+  static final LocalDate        TEST_MAUTH_DOB = toLocalDate("1977-09-04");
   static final String           TEST_MAUTH_SSN = "101010101";
   static final String           TEST_MAUTH_EMAIL_HOME = "jam@ggl.com";
   static final String           TEST_MAUTH_EMAIL_WORK = "jam-work@ggl.com";
@@ -94,7 +94,7 @@ public class MCorpusRepoTest {
   static final String           TEST_MAUTH_USERNAME = "jamuser";
   static final String           TEST_MAUTH_PSWD = "nixem567ert";
 
-  static final java.sql.Date    TEST_MAUTH_DOB_U = toSqlDate("1977-09-05");
+  static final LocalDate        TEST_MAUTH_DOB_U = toLocalDate("1977-09-05");
   static final String           TEST_MAUTH_SSN_U = "101010102";
   static final String           TEST_MAUTH_EMAIL_HOME_U = "jamU@ggl.com";
   static final String           TEST_MAUTH_EMAIL_WORK_U = "jam-workU@ggl.com";
@@ -246,7 +246,7 @@ public class MCorpusRepoTest {
       )
       .values(
         mid,
-        asSqlDate(maa.dbMauth.getDob()),
+        maa.dbMauth.getDob(),
         maa.dbMauth.getSsn(),
         maa.dbMauth.getEmailPersonal(),
         maa.dbMauth.getEmailWork(),

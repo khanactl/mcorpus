@@ -1,5 +1,7 @@
 package com.tll;
 
+import static com.tll.transform.TransformUtil.dateToLocalDate;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,12 +10,13 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 public class TestUtil {
-  
+
   private static final DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");
 
   /**
@@ -76,15 +79,14 @@ public class TestUtil {
   }
 
   /**
-   * Convert a string date token of format: "yyyy-MM-dd" to a {@link java.sql.Date}.
+   * Convert a string date token of format: "yyyy-MM-dd" to a {@link LocalDate}.
    *
    * @param s the date token
-   * @return {@link java.sql.Date} instance
+   * @return {@link LocalDate} instance
    * @throws RuntimeException when the date parsing fails
    */
-  public static java.sql.Date toSqlDate(final String s) {
-    final Date d = toDate(s);
-    return new java.sql.Date(d.getTime());
+  public static LocalDate toLocalDate(final String s) {
+    return dateToLocalDate(toDate(s));
   }
 
   private TestUtil() {}

@@ -9,9 +9,9 @@ import {
 } from '@aws-cdk/aws-ec2';
 import { RetentionDays } from '@aws-cdk/aws-logs';
 import { DatabaseInstance, DatabaseInstanceEngine, OptionGroup, ParameterGroup } from '@aws-cdk/aws-rds';
+import { ISecret } from '@aws-cdk/aws-secretsmanager';
 import { CfnOutput, Construct, Duration, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
-import secrets = require('@aws-cdk/aws-secretsmanager');
 
 /**
  * Db Stack config properties.
@@ -56,7 +56,7 @@ export class DbStack extends BaseStack {
   /**
    * The db master user secret.
    */
-  public readonly dbInstanceJsonSecret: secrets.ISecret;
+  public readonly dbInstanceJsonSecret: ISecret;
 
   /**
    * The db this.dbInstance.
