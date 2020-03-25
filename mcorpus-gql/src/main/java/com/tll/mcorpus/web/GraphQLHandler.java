@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.reflect.TypeToken;
+import com.tll.gql.GraphQLDataFetchError;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.JWTUserGraphQLWebContext;
@@ -127,7 +128,11 @@ public class GraphQLHandler implements Handler {
         } else {
           log.error("graphql request {} execution error(s):\n\n{}\n", gqlWebCtx.getExecutionId(), executionResult.getErrors());
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
-            if(err.getErrorType() == ErrorType.ValidationError) {
+            if(err.getErrorType() == ErrorType.DataFetchingException && err instanceof GraphQLDataFetchError) {
+              // mcorpus-specific error (including validation errors)
+              return err;
+            }
+            else if(err.getErrorType() == ErrorType.ValidationError) {
               return GraphqlErrorBuilder.newError()
                 .errorType(err.getErrorType())
                 .locations(isNull(err.getLocations()) ? Collections.emptyList() : err.getLocations())
