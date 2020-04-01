@@ -1,5 +1,6 @@
 package com.tll.jwt;
 
+import java.net.InetAddress;
 import java.time.Instant;
 
 /**
@@ -16,9 +17,9 @@ public interface IJwtHttpRequestProvider {
   Instant getRequestInstant();
 
   /**
-   * @return the client origin of the sourcing http request.
+   * @return the ip address of the sourcing http request.
    */
-  String getClientOrigin();
+  InetAddress getRequestOrigin();
 
   /**
    * @return the JWT value held in the sourcing http request.
@@ -26,10 +27,10 @@ public interface IJwtHttpRequestProvider {
   String getJwt();
 
   /**
-   * Verify the client origin of the sourcing http request against the
+   * Verify the request origin of the sourcing http request against the
    * extracted JWT audience claim gotten from the JWT held in the same http request.
    * <p>
-   * This allows for the client origin definition to be owned and maintained in
+   * This allows for the request origin definition to be owned and maintained in
    * {@link IJwtHttpRequestProvider} instances rather than in the JWT business/processing object.
    *
    * @param jwtAudience the JWT audience claim extracted from the JWT held in the
@@ -37,5 +38,5 @@ public interface IJwtHttpRequestProvider {
    * @return true if the given JWT audience claim is verified against the
    *         client origin of the sourcing http request.  False otherwise.
    */
-  boolean verifyClientOrigin(final String jwtAudience);
+  boolean verifyRequestOrigin(final String jwtAudience);
 }

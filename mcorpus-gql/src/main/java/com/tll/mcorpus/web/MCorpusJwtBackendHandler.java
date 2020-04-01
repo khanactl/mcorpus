@@ -3,6 +3,7 @@ package com.tll.mcorpus.web;
 import static com.tll.core.Util.isNull;
 import static com.tll.repo.FetchResult.fetchrslt;
 
+import java.net.InetAddress;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -66,10 +67,10 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
 
   @Override
   public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
-      String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
+      InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
     log.debug("Authenticating mcuser '{}'..", username);
     final FetchResult<Mcuser> loginResult = mcuserRepo.login(username, pswd, pendingJwtId, jwtExpiration,
-        requestInstant, clientOriginToken);
+        requestInstant, requestOrigin);
     if (loginResult.isSuccess()) {
       final McuserXfrm xfrm = new McuserXfrm();
       return fetchrslt(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
@@ -79,15 +80,15 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
-  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
+  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
       Instant requestInstant) {
-    FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstant, clientOriginToken);
+    FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstant, requestOrigin);
     return fr;
   }
 
   @Override
-  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken, Instant requestInstant) {
-    return mcuserRepo.invalidateJwtsFor(jwtUserId, requestInstant, clientOriginToken);
+  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin, Instant requestInstant) {
+    return mcuserRepo.invalidateJwtsFor(jwtUserId, requestInstant, requestOrigin);
   }
 
 }

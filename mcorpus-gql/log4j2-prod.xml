@@ -15,6 +15,7 @@
     <Logger name="ratpack.util.internal.TransportDetector" level="info" />
     <Logger name="io.netty" level="info" />
     <Logger name="graphql" level="info" />
+    <Logger name="notprivacysafe" level="off" /><!-- part of graphql-java -->
 
     <Root level="INFO">
       <AppenderRef ref="Console"/>

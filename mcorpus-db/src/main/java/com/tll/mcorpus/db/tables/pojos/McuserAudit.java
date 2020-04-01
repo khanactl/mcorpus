@@ -8,6 +8,7 @@ import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -18,13 +19,13 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit implements Serializable {
 
-    private static final long serialVersionUID = -894314657;
+    private static final long serialVersionUID = -1372362375;
 
     private final UUID            uid;
     private final OffsetDateTime  created;
     private final McuserAuditType type;
     private final OffsetDateTime  requestTimestamp;
-    private final String          requestOrigin;
+    private final InetAddress     requestOrigin;
     private final OffsetDateTime  loginExpiration;
     private final UUID            jwtId;
     private final JwtIdStatus     jwtIdStatus;
@@ -45,7 +46,7 @@ public class McuserAudit implements Serializable {
         OffsetDateTime  created,
         McuserAuditType type,
         OffsetDateTime  requestTimestamp,
-        String          requestOrigin,
+        InetAddress     requestOrigin,
         OffsetDateTime  loginExpiration,
         UUID            jwtId,
         JwtIdStatus     jwtIdStatus
@@ -76,7 +77,7 @@ public class McuserAudit implements Serializable {
         return this.requestTimestamp;
     }
 
-    public String getRequestOrigin() {
+    public InetAddress getRequestOrigin() {
         return this.requestOrigin;
     }
 

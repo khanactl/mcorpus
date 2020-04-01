@@ -4,11 +4,13 @@
 package com.tll.mcorpus.db.tables;
 
 
+import com.tll.jooqbind.PostgresInetAddressBinding;
 import com.tll.mcorpus.db.Keys;
 import com.tll.mcorpus.db.Public;
 import com.tll.mcorpus.db.enums.MemberAuditType;
 import com.tll.mcorpus.db.tables.records.MemberAuditRecord;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit extends TableImpl<MemberAuditRecord> {
 
-    private static final long serialVersionUID = 1023355571;
+    private static final long serialVersionUID = 702374914;
 
     /**
      * The reference instance of <code>public.member_audit</code>
@@ -72,7 +74,7 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
     /**
      * The column <code>public.member_audit.request_origin</code>.
      */
-    public final TableField<MemberAuditRecord, String> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MemberAuditRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "", new PostgresInetAddressBinding());
 
     /**
      * Create a <code>public.member_audit</code> table reference
@@ -162,7 +164,7 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, String> fieldsRow() {
+    public Row5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> fieldsRow() {
         return (Row5) super.fieldsRow();
     }
 }

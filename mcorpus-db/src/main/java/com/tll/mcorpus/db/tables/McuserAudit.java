@@ -4,6 +4,7 @@
 package com.tll.mcorpus.db.tables;
 
 
+import com.tll.jooqbind.PostgresInetAddressBinding;
 import com.tll.mcorpus.db.Indexes;
 import com.tll.mcorpus.db.Keys;
 import com.tll.mcorpus.db.Public;
@@ -11,6 +12,7 @@ import com.tll.mcorpus.db.enums.JwtIdStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.tables.records.McuserAuditRecord;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +39,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = -1092748637;
+    private static final long serialVersionUID = -81595160;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -75,7 +77,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.request_origin</code>.
      */
-    public final TableField<McuserAuditRecord, String> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<McuserAuditRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "", new PostgresInetAddressBinding());
 
     /**
      * The column <code>public.mcuser_audit.login_expiration</code>.
@@ -185,7 +187,7 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, String, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
+    public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 }

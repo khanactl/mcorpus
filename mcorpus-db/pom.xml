@@ -12,11 +12,11 @@
   </parent>
 
   <artifactId>mcorpus-db</artifactId>
-  <version>1.4.11</version>
+  <version>1.4.12-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-db</name>
-  <description>The MCorpus jooQ generated db types and api.</description>
+  <description>The MCorpus jOOQ generated db types and api.</description>
 
   <build>
 
@@ -51,6 +51,13 @@
               <Build-Timestamp>${timestamp}</Build-Timestamp>
             </manifestEntries>
           </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <groups>com.tll.UnitTest</groups>
         </configuration>
       </plugin>
 
@@ -97,17 +104,26 @@
               <name>org.jooq.meta.postgres.PostgresDatabase</name>
               <inputSchema>public</inputSchema>
               <includes>.*</includes>
-              <!--<excludes></excludes>-->
+              <excludes>
+                  pgp_armor_headers
+                | pgp.*
+                | uuid.*
+                | hmac.*
+                | gen.*
+                | encrypt.*
+                | digest.*
+                | decrypt.*
+                | crypt
+                | dearmor
+                | armor.*
+                | _.*
+              </excludes>
               <forcedTypes>
                 <forcedType>
-                  <name>varchar</name>
-                  <expression>.*</expression>
-                  <types>JSONB</types>
-                </forcedType>
-                <forcedType>
-                  <name>varchar</name>
-                  <expression>.*</expression>
-                  <types>INET</types>
+                  <userType>java.net.InetAddress</userType>
+                  <binding>com.tll.jooqbind.PostgresInetAddressBinding</binding>
+                  <includeExpression>.*request_origin.*</includeExpression>
+                  <includeTypes>.*</includeTypes>
                 </forcedType>
               </forcedTypes>
             </database>

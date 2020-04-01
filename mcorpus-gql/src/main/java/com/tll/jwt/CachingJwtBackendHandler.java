@@ -2,6 +2,7 @@ package com.tll.jwt;
 
 import static com.tll.core.Util.isNotNull;
 
+import java.net.InetAddress;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Caching JWT backed status provider using a time-based cache policy.
- * 
+ *
  * @author jpk
  */
 public class CachingJwtBackendHandler implements IJwtBackendHandler {
@@ -28,7 +29,7 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
 
   /**
    * Constructor.
-   * 
+   *
    * @param jwtBackendHandler the sourcing {@link IJwtBackendHandler} this caching
    *                          instance encapsulates
    * @param minutesTolive     the number of minutes a JWT status object shall be
@@ -59,21 +60,21 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
 
   @Override
   public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
-      String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
-    return targetHandler.jwtBackendLogin(username, pswd, pendingJwtId, clientOriginToken, requestInstant,
+      InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
+    return targetHandler.jwtBackendLogin(username, pswd, pendingJwtId, requestOrigin, requestInstant,
         jwtExpiration);
   }
 
   @Override
-  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
+  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
       Instant requestInstant) {
-    return targetHandler.jwtBackendLogout(jwtUserId, jwtId, clientOriginToken, requestInstant);
+    return targetHandler.jwtBackendLogout(jwtUserId, jwtId, requestOrigin, requestInstant);
   }
 
   @Override
-  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken,
+  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin,
       Instant requestInstant) {
-    final FetchResult<Boolean> fr = targetHandler.jwtInvalidateAllForUser(jwtUserId, clientOriginToken, requestInstant);
+    final FetchResult<Boolean> fr = targetHandler.jwtInvalidateAllForUser(jwtUserId, requestOrigin, requestInstant);
     if(isNotNull(fr) && fr.isSuccess()) {
       jwtStatusCache.invalidate(jwtUserId);
     }

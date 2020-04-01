@@ -3,6 +3,7 @@ package com.tll.mcorpus.transform;
 import static com.tll.core.Util.isNull;
 import static com.tll.transform.TransformUtil.odtToDate;
 
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHist
       .map(b -> new McuserHistory.LoginEvent(
         b.jwtId,
         odtToDate(b.timestamp),
-        b.requestOrigin
+        fromInet(b.requestOrigin)
       ))
       .collect(Collectors.toList())
     ;
@@ -29,10 +30,14 @@ public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHist
       .map(b -> new McuserHistory.LogoutEvent(
         b.jwtId,
         odtToDate(b.timestamp),
-        b.requestOrigin
+        fromInet(b.requestOrigin)
       ))
       .collect(Collectors.toList())
     ;
+  }
+
+  private static String fromInet(final InetAddress ia) {
+    return ia == null ? null : ia.getHostAddress();
   }
 
   @Override

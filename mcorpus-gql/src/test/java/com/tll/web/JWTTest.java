@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -57,8 +58,10 @@ public class JWTTest {
 
     final IJwtHttpRequestProvider jwtRpPre = new IJwtHttpRequestProvider() {
 
+      final InetAddress ro = InetAddress.getByName("127.0.0.1");
+
       @Override
-      public boolean verifyClientOrigin(String clientOrigin) {
+      public boolean verifyRequestOrigin(String jwtAudience) {
         return true;
       }
 
@@ -73,8 +76,8 @@ public class JWTTest {
       }
 
       @Override
-      public String getClientOrigin() {
-        return "localhost|localhost";
+      public InetAddress getRequestOrigin() {
+        return ro;
       }
     };
 
@@ -85,8 +88,10 @@ public class JWTTest {
 
     final IJwtHttpRequestProvider jwtRpPost = new IJwtHttpRequestProvider(){
 
+      final InetAddress ro = InetAddress.getByName("127.0.0.1");
+
       @Override
-      public boolean verifyClientOrigin(String clientOrigin) {
+      public boolean verifyRequestOrigin(String jwtAudience) {
         return true;
       }
 
@@ -101,8 +106,8 @@ public class JWTTest {
       }
 
       @Override
-      public String getClientOrigin() {
-        return "localhost|localhost";
+      public InetAddress getRequestOrigin() {
+        return ro;
       }
     };
 

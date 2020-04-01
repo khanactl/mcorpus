@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -558,7 +559,7 @@ public class MCorpusUserRepoTest {
       uid = testMcuser.getUid();
 
       Instant requestInstant = Instant.now();
-      String clientOrigin = testRequestOrigin;
+      InetAddress clientOrigin = testRequestOrigin;
 
       FetchResult<Boolean> fr = repo.invalidateJwtsFor(uid, requestInstant, clientOrigin);
       assertNotNull(fr);

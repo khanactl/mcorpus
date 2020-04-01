@@ -7,6 +7,7 @@ package com.tll.mcorpus.db.tables.pojos;
 import com.tll.mcorpus.db.enums.MemberAuditType;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -17,13 +18,13 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit implements Serializable {
 
-    private static final long serialVersionUID = -2081979309;
+    private static final long serialVersionUID = -1559546921;
 
     private final UUID            mid;
     private final OffsetDateTime  created;
     private final MemberAuditType type;
     private final OffsetDateTime  requestTimestamp;
-    private final String          requestOrigin;
+    private final InetAddress     requestOrigin;
 
     public MemberAudit(MemberAudit value) {
         this.mid = value.mid;
@@ -38,7 +39,7 @@ public class MemberAudit implements Serializable {
         OffsetDateTime  created,
         MemberAuditType type,
         OffsetDateTime  requestTimestamp,
-        String          requestOrigin
+        InetAddress     requestOrigin
     ) {
         this.mid = mid;
         this.created = created;
@@ -63,7 +64,7 @@ public class MemberAudit implements Serializable {
         return this.requestTimestamp;
     }
 
-    public String getRequestOrigin() {
+    public InetAddress getRequestOrigin() {
         return this.requestOrigin;
     }
 

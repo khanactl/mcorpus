@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -88,9 +89,9 @@ public class MCorpusGraphQLTest {
         "origin",
         "https://mcorpus.d2d",
         "forwarded",
-        "X-Forwarded-For",
-        "X-Forwarded-Host",
-        "X-Forwarded-Proto",
+        "127.0.0.1",  // x-forwarded-for
+        "localhost",  // x-forwarded-host
+        "http",       // x-forwarded-proto
         null, // jwt cookie
         null, // rst cookie
         null, // rst header
@@ -111,15 +112,19 @@ public class MCorpusGraphQLTest {
   }
 
   static JWTUserGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
-    return new JWTUserGraphQLWebContext(
-      query,
-      null,
-      MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot),
-      jwtRequestStatus,
-      jwt(),
-      testJwtResponseProvider(),
-      "mclogin"
-    );
+    try {
+      return new JWTUserGraphQLWebContext(
+        query,
+        null,
+        MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot),
+        jwtRequestStatus,
+        jwt(),
+        testJwtResponseProvider(),
+        "mclogin"
+      );
+    } catch(UnknownHostException e) {
+      throw new Error(e);
+    }
   }
 
   /**

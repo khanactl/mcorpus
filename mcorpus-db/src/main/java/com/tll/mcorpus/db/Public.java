@@ -11,8 +11,6 @@ import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
 import com.tll.mcorpus.db.tables.Member;
 import com.tll.mcorpus.db.tables.MemberAudit;
-import com.tll.mcorpus.db.tables.PgpArmorHeaders;
-import com.tll.mcorpus.db.tables.records.PgpArmorHeadersRecord;
 import com.tll.mcorpus.db.udt.JwtMcuserStatus;
 import com.tll.mcorpus.db.udt.Mref;
 
@@ -20,9 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jooq.Catalog;
-import org.jooq.Configuration;
-import org.jooq.Field;
-import org.jooq.Result;
 import org.jooq.Table;
 import org.jooq.UDT;
 import org.jooq.impl.SchemaImpl;
@@ -34,7 +29,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 239498631;
+    private static final long serialVersionUID = -1447040988;
 
     /**
      * The reference instance of <code>public</code>
@@ -77,32 +72,6 @@ public class Public extends SchemaImpl {
     public final MemberAudit MEMBER_AUDIT = MemberAudit.MEMBER_AUDIT;
 
     /**
-     * The table <code>public.pgp_armor_headers</code>.
-     */
-    public final PgpArmorHeaders PGP_ARMOR_HEADERS = PgpArmorHeaders.PGP_ARMOR_HEADERS;
-
-    /**
-     * Call <code>public.pgp_armor_headers</code>.
-     */
-    public static Result<PgpArmorHeadersRecord> PGP_ARMOR_HEADERS(Configuration configuration, String __1) {
-        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.PgpArmorHeaders.PGP_ARMOR_HEADERS.call(__1)).fetch();
-    }
-
-    /**
-     * Get <code>public.pgp_armor_headers</code> as a table.
-     */
-    public static PgpArmorHeaders PGP_ARMOR_HEADERS(String __1) {
-        return com.tll.mcorpus.db.tables.PgpArmorHeaders.PGP_ARMOR_HEADERS.call(__1);
-    }
-
-    /**
-     * Get <code>public.pgp_armor_headers</code> as a table.
-     */
-    public static PgpArmorHeaders PGP_ARMOR_HEADERS(Field<String> __1) {
-        return com.tll.mcorpus.db.tables.PgpArmorHeaders.PGP_ARMOR_HEADERS.call(__1);
-    }
-
-    /**
      * No further instances allowed
      */
     private Public() {
@@ -124,8 +93,7 @@ public class Public extends SchemaImpl {
             Mcuser.MCUSER,
             McuserAudit.MCUSER_AUDIT,
             Member.MEMBER,
-            MemberAudit.MEMBER_AUDIT,
-            PgpArmorHeaders.PGP_ARMOR_HEADERS);
+            MemberAudit.MEMBER_AUDIT);
     }
 
     @Override

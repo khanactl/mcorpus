@@ -9,6 +9,7 @@ import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.repo.FetchResult.fetchrslt;
 
 import java.io.Closeable;
+import java.net.InetAddress;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -139,7 +140,7 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<McuserHistoryDomain> mcuserHistory(final UUID uid) {
     if(uid == null) return fetchrslt(null, "No mcuser id provided.");
     try {
-      final Result<Record4<UUID, OffsetDateTime, String, McuserAuditType>> result = dsl
+      final Result<Record4<UUID, OffsetDateTime, InetAddress, McuserAuditType>> result = dsl
         .select(MCUSER_AUDIT.JWT_ID, MCUSER_AUDIT.CREATED, MCUSER_AUDIT.REQUEST_ORIGIN, MCUSER_AUDIT.TYPE)
         .from(MCUSER_AUDIT)
         .where(MCUSER_AUDIT.UID.eq(uid))
@@ -148,12 +149,12 @@ public class MCorpusUserRepo implements Closeable {
       if(result.isNotEmpty()) {
         final List<LoginEventDomain> logins = new ArrayList<>();
         final List<LogoutEventDomain> logouts = new ArrayList<>();
-        final Iterator<Record4<UUID, OffsetDateTime, String, McuserAuditType>> itr = result.iterator();
+        final Iterator<Record4<UUID, OffsetDateTime, InetAddress, McuserAuditType>> itr = result.iterator();
         while(itr.hasNext()) {
-          Record4<UUID, OffsetDateTime, String, McuserAuditType> rec = itr.next();
+          Record4<UUID, OffsetDateTime, InetAddress, McuserAuditType> rec = itr.next();
           UUID jwtId = rec.get(MCUSER_AUDIT.JWT_ID);
           OffsetDateTime created = rec.get(MCUSER_AUDIT.CREATED);
-          String requestOrigin = rec.get(MCUSER_AUDIT.REQUEST_ORIGIN);
+          InetAddress requestOrigin = rec.get(MCUSER_AUDIT.REQUEST_ORIGIN);
           switch(rec.get(MCUSER_AUDIT.TYPE)) {
             case LOGIN:
               logins.add(new LoginEventDomain(jwtId, created, requestOrigin));
@@ -188,20 +189,20 @@ public class MCorpusUserRepo implements Closeable {
    * @param pendingJwtId the pending JWT id (the login must succeed first)
    * @param jwtExpiration the JWT expiration date
    * @param requestInstant the instant the sourcing http request reached the server
-   * @param clientOriginToken the client origin token gnerated from the sourcing http request
+   * @param requestOrigin the request origin ip address gotten from the sourcing http request
    *
    * @return Never null {@link FetchResult} object<br>
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, Instant jwtExpiration, Instant requestInstant, final String clientOriginToken) {
+  public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, Instant jwtExpiration, Instant requestInstant, final InetAddress requestOrigin) {
     try {
       final McuserLogin mcuserLogin = new McuserLogin();
       mcuserLogin.setMcuserUsername(username);
       mcuserLogin.setMcuserPassword(pswd);
       mcuserLogin.setInJwtId(pendingJwtId);
       mcuserLogin.setInLoginExpiration(OffsetDateTime.ofInstant(jwtExpiration, ZoneId.systemDefault()));
-      mcuserLogin.setInRequestOrigin(clientOriginToken);
+      mcuserLogin.setInRequestOrigin(requestOrigin);
       mcuserLogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
 
       mcuserLogin.execute(dsl.configuration());
@@ -227,18 +228,18 @@ public class MCorpusUserRepo implements Closeable {
    * @param mcuserId the mcuser id (jwt user id)
    * @param jwtId the JWT id
    * @param requestInstant the instant the sourcing http request reached the server
-   * @param clientOriginToken the client origin token gnerated from the sourcing http request
+   * @param requestOrigin the request origin ip address gotten from the sourcing http request
    *
    * @return Never null {@link FetchResult} object
    *         holding an error message if unsuccessful.
    */
-  public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, Instant requestInstant, final String clientOriginToken) {
+  public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, Instant requestInstant, final InetAddress requestOrigin) {
     try {
       final McuserLogout mcuserLogout = new McuserLogout();
       mcuserLogout.setMcuserUid(mcuserId);
       mcuserLogout.setJwtId(jwtId);
       mcuserLogout.setRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
-      mcuserLogout.setRequestOrigin(clientOriginToken);
+      mcuserLogout.setRequestOrigin(requestOrigin);
 
       mcuserLogout.execute(dsl.configuration());
       if(Boolean.TRUE.equals(mcuserLogout.getReturnValue())) {
@@ -475,15 +476,15 @@ public class MCorpusUserRepo implements Closeable {
    *
    * @param uid the mcuser id
    * @param requestInstant the sourcing request timestamp
-   * @param clientOrigin the sourcing request client origin token
+   * @param requestOrigin the request origin ip address gotten from the sourcing http request
    */
-  public FetchResult<Boolean> invalidateJwtsFor(final UUID uid, final Instant requestInstant, final String clientOrigin) {
+  public FetchResult<Boolean> invalidateJwtsFor(final UUID uid, final Instant requestInstant, final InetAddress requestOrigin) {
     String emsg = null;
     try {
       final BlacklistJwtIdsFor sp = new BlacklistJwtIdsFor();
       sp.setInUid(uid);
       sp.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
-      sp.setInRequestOrigin(clientOrigin);
+      sp.setInRequestOrigin(requestOrigin);
       sp.execute(dsl.configuration());
 
       // success

@@ -3,7 +3,6 @@ package com.tll.mcorpus.web;
 import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.not;
-import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 import static ratpack.jackson.Jackson.fromJson;
 import static ratpack.jackson.Jackson.json;
 
@@ -16,7 +15,6 @@ import com.tll.gql.GraphQLDataFetchError;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.JWTUserGraphQLWebContext;
-import com.tll.web.RequestSnapshot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,7 @@ public class GraphQLHandler implements Handler {
   public void handle(Context ctx) throws Exception {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
 
-      final RequestSnapshot rsnap = getOrCreateRequestSnapshot(ctx);
+      final MCorpusJwtRequestProvider jwtRequestProvider = ctx.getRequest().get(MCorpusJwtRequestProvider.class);
       final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
 
       // grab the http request info
@@ -69,7 +67,7 @@ public class GraphQLHandler implements Handler {
       final JWTUserGraphQLWebContext gqlWebCtx = new JWTUserGraphQLWebContext(
         query,
         vmap,
-        MCorpusJwtRequestProvider.fromRequestSnapshot(rsnap),
+        jwtRequestProvider,
         jwtRequestStatus,
         ctx.get(JWT.class),
         MCorpusJwtHttpResponseAction.fromRatpackContext(ctx),
