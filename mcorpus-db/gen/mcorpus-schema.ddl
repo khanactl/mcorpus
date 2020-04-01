@@ -55,12 +55,12 @@ SET search_path = public, pg_catalog;
  * NOTE: The TABLE name/ref is not explicitly called out here.
  */
 CREATE OR REPLACE FUNCTION set_modified() RETURNS TRIGGER
-    LANGUAGE plpgsql
-    AS $$
+LANGUAGE plpgsql AS
+$$
 BEGIN
   NEW.modified := CURRENT_TIMESTAMP;
   RETURN NEW;
-END;
+END
 $$;
 
 /*
@@ -73,13 +73,15 @@ Only store password hashes with a salt and *never* raw passwords.
 @return the generated hash of a text password
         with a randomly generated and self-contained salt.
 */
-create or replace function pass_hash(pswd text) returns text as $$
-  begin
-    -- NOTE: we use the blowfish algo for the salt
-    -- SEE: https://www.postgresql.org/docs/9.6/static/pgcrypto.html#PGCRYPTO-CRYPT-ALGORITHMS
-    return crypt(pswd, gen_salt('bf'));
-  end;
-$$ language plpgsql
+CREATE OR REPLACE FUNCTION pass_hash(pswd text) RETURNS text AS
+$$
+BEGIN
+  -- NOTE: we use the blowfish algo for the salt
+  -- SEE: https://www.postgresql.org/docs/9.6/static/pgcrypto.html#PGCRYPTO-CRYPT-ALGORITHMS
+  return crypt(pswd, gen_salt('bf'));
+END
+$$
+LANGUAGE plpgsql
 RETURNS NULL ON NULL INPUT;
 
 -- ********************************************************************
@@ -166,7 +168,8 @@ CREATE OR REPLACE FUNCTION insert_mcuser(
 ) RETURNS mcuser
 LANGUAGE plpgsql AS
 $_$
-DECLARE arec mcuser;
+DECLARE
+  arec mcuser;
 BEGIN
   INSERT INTO mcuser (name, email, username, pswd, status, roles)
   VALUES (in_name, in_email, in_username, pass_hash(in_pswd), in_status, in_roles)
@@ -175,7 +178,6 @@ BEGIN
   RETURN arec;
 END
 $_$;
-
 
 /**
  * trigger_mcuser_updated
@@ -194,7 +196,8 @@ CREATE TRIGGER trigger_mcuser_updated
 CREATE OR REPLACE FUNCTION get_num_active_logins(mcuser_id uuid) RETURNS int
 LANGUAGE plpgsql AS
 $_$
-DECLARE num_valid_logins int;
+DECLARE
+  num_valid_logins int;
 BEGIN
   select into num_valid_logins count(jwt_id)
   from mcuser_audit
@@ -234,16 +237,19 @@ CREATE TYPE jwt_status AS ENUM (
 comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.';
 
 /**
-  fetch_latest_jwt_mcuser_rec()
+  _fetch_latest_jwt_mcuser_rec()
+
+  ** PRIVATE fn **
 
   Fetch the most recently created mcuser audit record with the given jwt id
   of either login or logout type.
   This is the authoritive record for determining the jwt id's status.
  */
-CREATE OR REPLACE FUNCTION fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_mcuser_status
-  LANGUAGE plpgsql AS
+CREATE OR REPLACE FUNCTION _fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_mcuser_status
+LANGUAGE plpgsql AS
 $_$
-  DECLARE qrec jwt_mcuser_status;
+DECLARE
+  qrec jwt_mcuser_status;
 BEGIN
   SELECT INTO qrec a.type, a.jwt_id, a.jwt_id_status, a.login_expiration, m.uid, m.status
   FROM mcuser_audit a LEFT JOIN mcuser m ON a.uid = m.uid
@@ -266,13 +272,13 @@ $_$;
     3) The login expiration timestamp is in the future.
 */
 CREATE OR REPLACE FUNCTION get_jwt_status(jwt_id uuid) RETURNS jwt_status
-  LANGUAGE plpgsql AS
+LANGUAGE plpgsql AS
 $_$
-  DECLARE qrec jwt_mcuser_status;
-  DECLARE jstat jwt_status;
+DECLARE
+  qrec jwt_mcuser_status;
+  jstat jwt_status;
 BEGIN
-
-  qrec := fetch_latest_jwt_mcuser_rec(jwt_id);
+  qrec := _fetch_latest_jwt_mcuser_rec(jwt_id);
 
   IF qrec is null or qrec.jwt_id is null THEN
     -- the input jwt id was not found
@@ -342,6 +348,50 @@ END
 $_$;
 
 /**
+  _blacklist_jwt_ids_at_request_origin()
+
+  *** PRIVATE fn ***
+
+  Insert new mcuser_audit records for each jwt_id held
+  by the given mcuser id at the given request origin
+  so that subsequent jwt id status queries
+  will report them as blacklisted.
+
+  @param in_uid the mcuser id for whom the jwt ids apply
+  @param in_request_origin the target request origin for which
+         to blacklist any valid non-expired jwt ids
+ */
+CREATE OR REPLACE FUNCTION _blacklist_jwt_ids_at_request_origin(
+  in_uid uuid,
+  in_request_origin inet
+) RETURNS void
+LANGUAGE plpgsql AS
+$_$
+DECLARE
+  vnow timestamptz;
+BEGIN
+  vnow := now();
+  insert into mcuser_audit
+  (uid, type, request_timestamp, request_origin, jwt_id, jwt_id_status)
+  select $1, 'LOGOUT'::mcuser_audit_type, vnow, $2, adt.jwt_id, 'BLACKLISTED'::jwt_id_status
+  from mcuser_audit adt
+  where
+    adt.uid = $1
+    and adt.type = 'LOGIN'::mcuser_audit_type
+    and adt.login_expiration >= vnow
+    and adt.jwt_id_status = 'OK'::jwt_id_status
+    and adt.request_origin = $2 -- constrain to the given request origin
+    and adt.jwt_id not in (
+      select jwt_id
+      from mcuser_audit adtsub
+      where (adtsub.type != 'LOGIN'::mcuser_audit_type or adtsub.jwt_id_status != 'OK'::jwt_id_status)
+      and adtsub.uid = $1
+    )
+  ;
+END
+$_$;
+
+/**
   mcuser_pswd()
 
   @param in_uid the subject mcuser id
@@ -382,80 +432,80 @@ CREATE OR REPLACE FUNCTION mcuser_login(
   in_login_expiration timestamptz,
   in_jwt_id uuid
 ) RETURNS mcuser
-    LANGUAGE plpgsql
-    AS $_$
-  DECLARE
-    existing_jwt_id uuid;
-    passed BOOLEAN;
-    uid uuid;
-    rval mcuser%ROWTYPE;
-  BEGIN
-    -- verify the given in_jwt_id is unique against the existing jwt ids held
-    -- in the mcuser_audit table
-    select ma.jwt_id into existing_jwt_id from mcuser_audit ma where ma.jwt_id = in_jwt_id;
-    IF existing_jwt_id IS NOT NULL THEN
-      RAISE NOTICE 'Non-unique jwt id provided.';
-      RETURN NULL;
-    END IF;
+LANGUAGE plpgsql AS
+$_$
+DECLARE
+  existing_jwt_id uuid;
+  passed BOOLEAN;
+  uid uuid;
+  rval mcuser%ROWTYPE;
+BEGIN
+  -- verify the given in_jwt_id is unique against the existing jwt ids held
+  -- in the mcuser_audit table
+  select ma.jwt_id into existing_jwt_id from mcuser_audit ma where ma.jwt_id = in_jwt_id;
+  IF existing_jwt_id IS NOT NULL THEN
+    RAISE NOTICE 'Non-unique jwt id provided.';
+    RETURN NULL;
+  END IF;
 
-    -- verify the existence of a single mcuser record
-    -- by the given username and password
-    passed = false;
-    SELECT INTO uid, passed m.uid, (m.pswd = crypt(mcuser_password, m.pswd))
+  -- verify the existence of a single mcuser record
+  -- by the given username and password
+  passed = false;
+  SELECT (pswd = crypt(mcuser_password, pswd)) INTO passed
+  FROM mcuser
+  WHERE username = $1;
+
+  IF passed THEN
+    -- mcuser authenticated
+
+    -- fetch mcuser record and roles
+    SELECT
+      m.uid,
+      m.created,
+      m.modified,
+      m.name,
+      m.email,
+      m.username,
+      null,
+      m.status,
+      m.roles
+    INTO rval
     FROM mcuser m
     WHERE m.username = $1;
 
-    IF passed THEN
-      -- mcuser authenticated
+    -- ** RULE: only allow *one* active mcuser login per request origin **
+    -- blacklist existing valid and non-expired mcuser logins
+    -- for the mcuser logging in at the given request origin
+    perform _blacklist_jwt_ids_at_request_origin(rval.uid, in_request_origin);
 
-      -- blacklist existing valid and non-expired mcuser logins
-      -- for the mcuser logging in at the given request origin
-      -- I.e.: we only allow *one* active mcuser login per request origin
-      -- TODO
+    -- add mcuser_audit LOGIN record upon successful login
+    INSERT INTO mcuser_audit (
+      uid,
+      type,
+      request_timestamp,
+      request_origin,
+      login_expiration,
+      jwt_id,
+      jwt_id_status
+    )
+    VALUES (
+      rval.uid,
+      'LOGIN',
+      in_request_timestamp,
+      in_request_origin,
+      in_login_expiration,
+      in_jwt_id,
+      'OK'::jwt_id_status
+    );
+    -- return the mcuser and roles
+    RAISE NOTICE 'mcuser % logged in', rval.uid;
+    RETURN rval;
+  END IF;
 
-      -- fetch mcuser record and roles
-      SELECT
-        m.uid,
-        m.created,
-        m.modified,
-        m.name,
-        m.email,
-        m.username,
-        null,
-        m.status,
-        m.roles
-      INTO rval
-      FROM mcuser m
-      WHERE m.username = $1;
-
-      -- add mcuser_audit LOGIN record upon successful login
-      INSERT INTO mcuser_audit (
-        uid,
-        type,
-        request_timestamp,
-        request_origin,
-        login_expiration,
-        jwt_id,
-        jwt_id_status
-      )
-      VALUES (
-        rval.uid,
-        'LOGIN',
-        in_request_timestamp,
-        in_request_origin,
-        in_login_expiration,
-        in_jwt_id,
-        'OK'::jwt_id_status
-      );
-      -- return the mcuser and roles
-      RAISE NOTICE 'mcuser % logged in', rval.uid;
-      RETURN rval;
-    END IF;
-
-    -- default
-    RAISE NOTICE 'mcuser login failed';
-    RETURN null;
-  END
+  -- default
+  RAISE NOTICE 'mcuser login failed';
+  RETURN null;
+END
 $_$;
 
 /**
@@ -474,44 +524,45 @@ CREATE OR REPLACE FUNCTION mcuser_logout(
   request_timestamp timestamptz,
   request_origin inet
 ) RETURNS boolean
-    LANGUAGE plpgsql
-AS $_$
-  DECLARE jsi jwt_status;
+LANGUAGE plpgsql AS
+$_$
+DECLARE
+  jsi jwt_status;
 BEGIN
-    -- logout is predicated on finding a single mcuser_audit record with the
-    -- given mcuserId *and* jwtId.
-    IF EXISTS(SELECT uid FROM mcuser_audit m WHERE m.uid = $1 and m.jwt_id = $2 and m.type = 'LOGIN') THEN
-      -- at this point, we know a LOGIN record was created with the given jwt id and mcuser id.
+  -- logout is predicated on finding a single mcuser_audit record with the
+  -- given mcuserId *and* jwtId.
+  IF EXISTS(SELECT uid FROM mcuser_audit m WHERE m.uid = $1 and m.jwt_id = $2 and m.type = 'LOGIN') THEN
+    -- at this point, we know a LOGIN record was created with the given jwt id and mcuser id.
 
-      -- only allow mcuser logout when the latest jwt id status is valid
-      jsi := get_jwt_status($2);
+    -- only allow mcuser logout when the latest jwt id status is valid
+    jsi := get_jwt_status($2);
 
-      IF jsi = 'VALID'::jwt_status THEN
-        -- add a new LOGOUT type mcuser_audit record
-        INSERT INTO mcuser_audit (
-          uid,
-          type,
-          jwt_id,
-          jwt_id_status,
-          request_timestamp,
-          request_origin
-        )
-        VALUES (
-          $1,
-          'LOGOUT'::mcuser_audit_type,
-          $2,
-          'BLACKLISTED'::jwt_id_status,
-          $3,
-          $4
-        );
-        RAISE NOTICE 'mcuser % logged out', mcuser_uid;
-        return true;
-      END IF;
+    IF jsi = 'VALID'::jwt_status THEN
+      -- add a new LOGOUT type mcuser_audit record
+      INSERT INTO mcuser_audit (
+        uid,
+        type,
+        jwt_id,
+        jwt_id_status,
+        request_timestamp,
+        request_origin
+      )
+      VALUES (
+        $1,
+        'LOGOUT'::mcuser_audit_type,
+        $2,
+        'BLACKLISTED'::jwt_id_status,
+        $3,
+        $4
+      );
+      RAISE NOTICE 'mcuser % logged out', mcuser_uid;
+      return true;
     END IF;
+  END IF;
 
-    -- default
-    RAISE NOTICE 'mcuser % logout failed', mcuser_uid;
-    return false;
+  -- default
+  RAISE NOTICE 'mcuser % logout failed', mcuser_uid;
+  return false;
 END
 $_$;
 
@@ -723,50 +774,51 @@ CREATE OR REPLACE FUNCTION member_login(
   in_request_timestamp timestamptz,
   in_request_origin inet
 ) RETURNS public.mref
-    LANGUAGE plpgsql
-    AS $_$
-  DECLARE passed BOOLEAN;
-  DECLARE rec_mref mref;
-  BEGIN
-    passed = false;
+LANGUAGE plpgsql AS
+$_$
+DECLARE
+  passed BOOLEAN;
+  rec_mref mref;
+BEGIN
+  passed = false;
 
-    -- authenticate
-    SELECT (pswd = crypt(member_password, pswd)) INTO passed
-    FROM mauth
-    WHERE username = $1;
+  -- authenticate
+  SELECT (pswd = crypt(member_password, pswd)) INTO passed
+  FROM mauth
+  WHERE username = $1;
 
-    IF passed THEN
-      -- member login success
-      SELECT
-        m.mid,
-        m.emp_id,
-        m.location
-      INTO rec_mref
-      FROM
-        member m join mauth ma on m.mid = ma.mid
-      WHERE ma.username = $1;
-      -- add member_audit LOGIN record upon successful login
-      INSERT INTO member_audit (
-        mid,
-        type,
-        request_timestamp,
-        request_origin
-      )
-      VALUES (
-        rec_mref.mid,
-        'LOGIN',
-        in_request_timestamp,
-        in_request_origin
-      );
-      -- return the gotten mref
-      RAISE NOTICE 'member % logged in', rec_mref.mid;
-      RETURN rec_mref;
-    END IF;
+  IF passed THEN
+    -- member login success
+    SELECT
+      m.mid,
+      m.emp_id,
+      m.location
+    INTO rec_mref
+    FROM
+      member m join mauth ma on m.mid = ma.mid
+    WHERE ma.username = $1;
+    -- add member_audit LOGIN record upon successful login
+    INSERT INTO member_audit (
+      mid,
+      type,
+      request_timestamp,
+      request_origin
+    )
+    VALUES (
+      rec_mref.mid,
+      'LOGIN',
+      in_request_timestamp,
+      in_request_origin
+    );
+    -- return the gotten mref
+    RAISE NOTICE 'member % logged in', rec_mref.mid;
+    RETURN rec_mref;
+  END IF;
 
-    -- default
-    RAISE NOTICE 'member login failed';
-    RETURN null;
-  END
+  -- default
+  RAISE NOTICE 'member login failed';
+  RETURN null;
+END
 $_$;
 
 /*
@@ -786,32 +838,33 @@ CREATE OR REPLACE FUNCTION member_logout(
   in_request_timestamp timestamptz,
   in_request_origin inet
 ) RETURNS UUID
-    LANGUAGE plpgsql
-    AS $_$
-  DECLARE member_exists BOOLEAN;
-  BEGIN
-    member_exists = false;
-    SELECT EXISTS(SELECT m.mid FROM member m WHERE m.mid = $1) INTO member_exists;
-    IF member_exists THEN
-      INSERT INTO member_audit (
-        mid,
-        type,
-        request_timestamp,
-        request_origin
-      )
-      VALUES (
-        $1,
-        'LOGOUT',
-        in_request_timestamp,
-        in_request_origin
-      );
-      RAISE NOTICE 'member % logged out', $1;
-      return $1;
-    END IF;
-    -- default
-    RAISE NOTICE 'member logout failed';
-    return null;
-  END
+  LANGUAGE plpgsql
+AS $_$
+DECLARE
+  member_exists BOOLEAN;
+BEGIN
+  member_exists = false;
+  SELECT EXISTS(SELECT m.mid FROM member m WHERE m.mid = $1) INTO member_exists;
+  IF member_exists THEN
+    INSERT INTO member_audit (
+      mid,
+      type,
+      request_timestamp,
+      request_origin
+    )
+    VALUES (
+      $1,
+      'LOGOUT',
+      in_request_timestamp,
+      in_request_origin
+    );
+    RAISE NOTICE 'member % logged out', $1;
+    return $1;
+  END IF;
+  -- default
+  RAISE NOTICE 'member logout failed';
+  return null;
+END
 $_$;
 
 -- ******************************
