@@ -9,6 +9,7 @@
   <Loggers>
     <Logger name="com.zaxxer.hikari" level="warn" />
     <Logger name="graphql" level="off" /><!-- do NOT output raw graphql queries in error or otherwise! -->
+    <Logger name="notprivacysafe" level="off" /><!-- part of graphql-java -->
 
     <Root level="INFO">
       <AppenderRef ref="Console"/>
