@@ -4,8 +4,10 @@
 package com.tll.mcorpus.db.routines;
 
 
+import com.tll.jooqbind.PostgresInetAddressBinding;
 import com.tll.mcorpus.db.Public;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberLogout extends AbstractRoutine<UUID> {
 
-    private static final long serialVersionUID = -1837144987;
+    private static final long serialVersionUID = 1147598341;
 
     /**
      * The parameter <code>public.member_logout.RETURN_VALUE</code>.
@@ -41,7 +43,7 @@ public class MemberLogout extends AbstractRoutine<UUID> {
     /**
      * The parameter <code>public.member_logout.in_request_origin</code>.
      */
-    public static final Parameter<String> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
 
     /**
      * Create a new routine call instance
@@ -86,14 +88,14 @@ public class MemberLogout extends AbstractRoutine<UUID> {
     /**
      * Set the <code>in_request_origin</code> parameter IN value to the routine
      */
-    public void setInRequestOrigin(String value) {
+    public void setInRequestOrigin(InetAddress value) {
         setValue(IN_REQUEST_ORIGIN, value);
     }
 
     /**
      * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
      */
-    public void setInRequestOrigin(Field<String> field) {
+    public void setInRequestOrigin(Field<InetAddress> field) {
         setField(IN_REQUEST_ORIGIN, field);
     }
 }

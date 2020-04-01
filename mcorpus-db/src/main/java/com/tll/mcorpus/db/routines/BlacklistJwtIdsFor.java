@@ -4,8 +4,10 @@
 package com.tll.mcorpus.db.routines;
 
 
+import com.tll.jooqbind.PostgresInetAddressBinding;
 import com.tll.mcorpus.db.Public;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -20,7 +22,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = -1620486859;
+    private static final long serialVersionUID = 1663555712;
 
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_uid</code>.
@@ -35,7 +37,7 @@ public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_request_origin</code>.
      */
-    public static final Parameter<String> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
 
     /**
      * Create a new routine call instance
@@ -65,7 +67,7 @@ public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
     /**
      * Set the <code>in_request_origin</code> parameter IN value to the routine
      */
-    public void setInRequestOrigin(String value) {
+    public void setInRequestOrigin(InetAddress value) {
         setValue(IN_REQUEST_ORIGIN, value);
     }
 }

@@ -3,9 +3,9 @@
 -----------------------------------------------------
 -- Author               jkirton
 -- Created:             10/15/17
--- Modified:            02/26/19
+-- Modified:            3/30/20
 -- Description:         Prototype member corpus db
--- PostgreSQL Version   11.2
+-- PostgreSQL Version   12.2
 -----------------------------------------------------
 
 -- NOTE: a postgres db must already exist for this script to work
@@ -44,9 +44,9 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public VERSION "1.3";
 
 SET search_path = public, pg_catalog;
 
----------------------------------------------------------------------------
--- mcorpus user and audit (those who access and mutate this corpus of data)
----------------------------------------------------------------------------
+---------------------------------------
+-- schema-agnostic utility functions --
+---------------------------------------
 
 /**
  * set_modified()
@@ -81,6 +81,10 @@ create or replace function pass_hash(pswd text) returns text as $$
   end;
 $$ language plpgsql
 RETURNS NULL ON NULL INPUT;
+
+-- ********************************************************************
+-- mcuser sub-schema (those who access and mutate this corpus of data)
+-- ********************************************************************
 
 create type mcuser_role as enum (
   -- mcorpus - full read and write over all members
@@ -118,10 +122,39 @@ create table mcuser (
 );
 comment on type mcuser is 'The user table holding authentication credentials for access to the public mcorpus schema.';
 
+create type jwt_id_status as enum (
+  'OK',
+  'BLACKLISTED'
+);
+comment on type jwt_id_status is 'The allowed JWT ID status values.';
+
+create type mcuser_audit_type as enum (
+  'LOGIN',
+  'LOGOUT'
+);
+comment on type mcuser_audit_type is 'The allowed mcuser audit types.';
+
+create table mcuser_audit (
+  uid                     uuid not null REFERENCES mcuser ON DELETE CASCADE,
+  created                 timestamptz not null default now(),
+  type                    mcuser_audit_type not null,
+  request_timestamp       timestamptz not null,
+  request_origin          inet not null,
+  login_expiration        timestamptz,
+  jwt_id                  uuid not null,
+  jwt_id_status           jwt_id_status not null,
+
+  primary key (uid, created, type, jwt_id)
+);
+create index mcuser_audit__jwt_id on mcuser_audit (jwt_id);
+comment on type mcuser_audit is 'Log of when mcusers login/out and access the api.';
+
 /**
- * insert an mcuser record.
- *
- * @return the inserted mcuser record.
+  insert_mcuser()
+
+  Insert an mcuser record.
+
+  @return the inserted mcuser record.
  */
 CREATE OR REPLACE FUNCTION insert_mcuser(
     in_name text,
@@ -143,6 +176,7 @@ BEGIN
 END
 $_$;
 
+
 /**
  * trigger_mcuser_updated
  */
@@ -151,39 +185,12 @@ CREATE TRIGGER trigger_mcuser_updated
   FOR EACH ROW
   EXECUTE PROCEDURE set_modified();
 
-create type jwt_id_status as enum (
-  'OK',
-  'BLACKLISTED'
-);
-comment on type jwt_id_status is 'The allowed JWT ID status values.';
-
-create type mcuser_audit_type as enum (
-  'LOGIN',
-  'LOGOUT'
-);
-comment on type mcuser_audit_type is 'The allowed mcuser audit types.';
-
-create table mcuser_audit (
-  uid                     uuid not null REFERENCES mcuser ON DELETE CASCADE,
-  created                 timestamptz not null default now(),
-  type                    mcuser_audit_type not null,
-  request_timestamp       timestamptz not null,
-  request_origin          text not null,
-  login_expiration        timestamptz,
-  jwt_id                  uuid not null,
-  jwt_id_status           jwt_id_status not null,
-
-  primary key (uid, created, type, jwt_id)
-);
-create index mcuser_audit__jwt_id on mcuser_audit (jwt_id);
-comment on type mcuser_audit is 'Log of when mcusers login/out and access the api.';
-
 /**
   get_num_active_logins()
 
   Calculate the current number of active non-expired JWT IDs
   held in the mcuser_audit table for a given mcuser.
-**/
+ */
 CREATE OR REPLACE FUNCTION get_num_active_logins(mcuser_id uuid) RETURNS int
 LANGUAGE plpgsql AS
 $_$
@@ -227,10 +234,12 @@ CREATE TYPE jwt_status AS ENUM (
 comment on type jwt_status is 'Convey the state of a JWT ID held in the mcuser_audit table.';
 
 /**
- * Fetch the most recently created mcuser audit record with the given jwt id
- * of either login or logout type.
- * This is the authoritive record for determining the jwt id's status.
-*/
+  fetch_latest_jwt_mcuser_rec()
+
+  Fetch the most recently created mcuser audit record with the given jwt id
+  of either login or logout type.
+  This is the authoritive record for determining the jwt id's status.
+ */
 CREATE OR REPLACE FUNCTION fetch_latest_jwt_mcuser_rec(jwt_id uuid) RETURNS jwt_mcuser_status
   LANGUAGE plpgsql AS
 $_$
@@ -295,20 +304,20 @@ END
 $_$;
 
 /**
- * blacklist_jwt_ids_for
- *
- * Insert new mcuser_audit records for each jwt_id held
- * by the given mcuser id so that subsequent jwt id status queries
- * will report them as blacklisted.
- *
- * @param in_uid the mcuser id for whom the jwt ids apply
- * @param in_request_timestamp the instigating http request timestamp
- * @param in_request_origin the instigating http request origin
+  blacklist_jwt_ids_for()
+
+  Insert new mcuser_audit records for each jwt_id held
+  by the given mcuser id so that subsequent jwt id status queries
+  will report them as blacklisted.
+
+  @param in_uid the mcuser id for whom the jwt ids apply
+  @param in_request_timestamp the instigating http request timestamp
+  @param in_request_origin the instigating http request origin
  */
 CREATE OR REPLACE FUNCTION blacklist_jwt_ids_for(
   in_uid uuid,
   in_request_timestamp timestamptz,
-  in_request_origin text
+  in_request_origin inet
 ) RETURNS void
 LANGUAGE plpgsql AS
 $_$
@@ -333,10 +342,10 @@ END
 $_$;
 
 /**
- * mcuser_pswd
- *
- * @param in_uid the subject mcuser id
- * @param in_pswd the pswd to set
+  mcuser_pswd()
+
+  @param in_uid the subject mcuser id
+  @param in_pswd the pswd to set
  */
 CREATE OR REPLACE FUNCTION mcuser_pswd(
   in_uid uuid,
@@ -350,34 +359,36 @@ END
 $_$;
 
 /*
-mcuser_login
+  mcuser_login()
 
-Call this function to authenticate mcuser users
-by username and password along with
-http request context information.
+  Call this function to authenticate mcuser users
+  by username and password along with
+  http request context information.
 
-When an mcuser authentication is successful,
-a LOGIN-type mcuser_audit record is created
-and the associated mcuser record is returned.
+  When an mcuser authentication is successful,
+  a LOGIN-type mcuser_audit record is created
+  and the associated mcuser record is returned.
 
-@return:
-  the matching mcuser record upon successful login
-  -OR-
-  NULL when login fails for any reason.
-*/
+  @return:
+    the matching mcuser record upon successful login
+    -OR-
+    NULL when login fails for any reason.
+ */
 CREATE OR REPLACE FUNCTION mcuser_login(
   mcuser_username text,
   mcuser_password text,
   in_request_timestamp timestamptz,
-  in_request_origin text,
+  in_request_origin inet,
   in_login_expiration timestamptz,
   in_jwt_id uuid
 ) RETURNS mcuser
     LANGUAGE plpgsql
     AS $_$
-  DECLARE existing_jwt_id uuid;
-  DECLARE passed BOOLEAN;
-  DECLARE rval mcuser%ROWTYPE;
+  DECLARE
+    existing_jwt_id uuid;
+    passed BOOLEAN;
+    uid uuid;
+    rval mcuser%ROWTYPE;
   BEGIN
     -- verify the given in_jwt_id is unique against the existing jwt ids held
     -- in the mcuser_audit table
@@ -390,12 +401,17 @@ CREATE OR REPLACE FUNCTION mcuser_login(
     -- verify the existence of a single mcuser record
     -- by the given username and password
     passed = false;
-    SELECT (pswd = crypt(mcuser_password, pswd)) INTO passed
-    FROM mcuser
-    WHERE username = $1;
+    SELECT INTO uid, passed m.uid, (m.pswd = crypt(mcuser_password, m.pswd))
+    FROM mcuser m
+    WHERE m.username = $1;
 
     IF passed THEN
       -- mcuser authenticated
+
+      -- blacklist existing valid and non-expired mcuser logins
+      -- for the mcuser logging in at the given request origin
+      -- I.e.: we only allow *one* active mcuser login per request origin
+      -- TODO
 
       -- fetch mcuser record and roles
       SELECT
@@ -443,20 +459,20 @@ CREATE OR REPLACE FUNCTION mcuser_login(
 $_$;
 
 /**
- * mcuser_logout
- *
- * Logs an mcuser out.
- *
- * mcuser logout is only allowed when the bound jwt id and mcuser id
- * are found to be currently logged in.
- *
- * An mcuser_audit record is created of LOGOUT type.
+  mcuser_logout()
+
+  Logs an mcuser out.
+
+  mcuser logout is only allowed when the bound jwt id and mcuser id
+  are found to be currently logged in.
+
+  An mcuser_audit record is created of LOGOUT type.
  */
 CREATE OR REPLACE FUNCTION mcuser_logout(
   mcuser_uid uuid,
   jwt_id uuid,
   request_timestamp timestamptz,
-  request_origin text
+  request_origin inet
 ) RETURNS boolean
     LANGUAGE plpgsql
 AS $_$
@@ -500,9 +516,9 @@ END
 $_$;
 
 
--- ***************
--- *** mcorpus ***
--- ***************
+-- **************************
+-- *** mcorpus sub-schema ***
+-- **************************
 
 create type Location as enum (
   '01',
@@ -683,7 +699,7 @@ create table member_audit (
   created                 timestamptz not null default now(),
   type                    member_audit_type not null,
   request_timestamp       timestamptz not null,
-  request_origin          text not null,
+  request_origin          inet not null,
 
   primary key (mid, created, type),
   foreign key ("mid") references member ("mid") on delete cascade
@@ -705,7 +721,7 @@ CREATE OR REPLACE FUNCTION member_login(
   member_username text,
   member_password text,
   in_request_timestamp timestamptz,
-  in_request_origin text
+  in_request_origin inet
 ) RETURNS public.mref
     LANGUAGE plpgsql
     AS $_$
@@ -754,21 +770,21 @@ CREATE OR REPLACE FUNCTION member_login(
 $_$;
 
 /*
-member_logout
+  member_logout()
 
-Logs a member out.
+  Logs a member out.
 
-A member_audit record is created of LOGOUT type.
+  A member_audit record is created of LOGOUT type.
 
-@return:
-  the member id of the member that was logged out upon success
-  -OR-
-  NULL when member logout fails for any reason.
+  @return:
+    the member id of the member that was logged out upon success
+    -OR-
+    NULL when member logout fails for any reason.
 */
 CREATE OR REPLACE FUNCTION member_logout(
   mid uuid,
   in_request_timestamp timestamptz,
-  in_request_origin text
+  in_request_origin inet
 ) RETURNS UUID
     LANGUAGE plpgsql
     AS $_$
