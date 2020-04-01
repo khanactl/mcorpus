@@ -10,7 +10,6 @@ import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
-import com.tll.mcorpus.db.routines.FetchLatestJwtMcuserRec;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
 import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.InsertMcuser;
@@ -23,7 +22,6 @@ import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.routines.MemberPswd;
 import com.tll.mcorpus.db.routines.PassHash;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
-import com.tll.mcorpus.db.udt.records.JwtMcuserStatusRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
 import java.net.InetAddress;
@@ -51,37 +49,6 @@ public class Routines {
         p.setInRequestOrigin(inRequestOrigin);
 
         p.execute(configuration);
-    }
-
-    /**
-     * Call <code>public.fetch_latest_jwt_mcuser_rec</code>
-     */
-    public static JwtMcuserStatusRecord fetchLatestJwtMcuserRec(Configuration configuration, UUID jwtId) {
-        FetchLatestJwtMcuserRec f = new FetchLatestJwtMcuserRec();
-        f.setJwtId(jwtId);
-
-        f.execute(configuration);
-        return f.getReturnValue();
-    }
-
-    /**
-     * Get <code>public.fetch_latest_jwt_mcuser_rec</code> as a field.
-     */
-    public static Field<JwtMcuserStatusRecord> fetchLatestJwtMcuserRec(UUID jwtId) {
-        FetchLatestJwtMcuserRec f = new FetchLatestJwtMcuserRec();
-        f.setJwtId(jwtId);
-
-        return f.asField();
-    }
-
-    /**
-     * Get <code>public.fetch_latest_jwt_mcuser_rec</code> as a field.
-     */
-    public static Field<JwtMcuserStatusRecord> fetchLatestJwtMcuserRec(Field<UUID> jwtId) {
-        FetchLatestJwtMcuserRec f = new FetchLatestJwtMcuserRec();
-        f.setJwtId(jwtId);
-
-        return f.asField();
     }
 
     /**
