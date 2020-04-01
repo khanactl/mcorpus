@@ -13,6 +13,7 @@ import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 import static com.tll.repo.FetchResult.fetchrslt;
 
 import java.io.Closeable;
+import java.net.InetAddress;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -154,16 +155,16 @@ public class MCorpusRepo implements Closeable {
    * @param username the member username
    * @param pswd the member password
    * @param requestInstant the sourcing request timestamp
-   * @param clientOrigin the sourcing request client origin token
+   * @param requestOrigin the request origin ip address gotten from the sourcing http request
    * @return Never null {@link FetchResult} object holding the {@link Mref} ref if successful.
    */
-  public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final String clientOrigin) {
+  public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final InetAddress requestOrigin) {
     try {
       final MemberLogin mlogin = new MemberLogin();
       mlogin.setMemberUsername(username);
       mlogin.setMemberPassword(pswd);
       mlogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
-      mlogin.setInRequestOrigin(clientOrigin);
+      mlogin.setInRequestOrigin(requestOrigin);
       mlogin.execute(dsl.configuration());
       final MrefRecord rec = mlogin.getReturnValue();
       if(rec != null && rec.getMid() != null) {
@@ -186,16 +187,16 @@ public class MCorpusRepo implements Closeable {
    *
    * @param mid the member id of the member to log out
    * @param requestInstant the sourcing request timestamp
-   * @param clientOrigin the sourcing request client origin token
+   * @param requestOrigin the request origin ip address gotten from the sourcing http request
    * @return Never null {@link FetchResult} object holding the given member id upon successful member logout
    *          -OR- a null member id and a non-null error message if unsuccessful.
    */
-  public FetchResult<UUID> memberLogout(final UUID mid, final Instant requestInstant, final String clientOrigin) {
+  public FetchResult<UUID> memberLogout(final UUID mid, final Instant requestInstant, final InetAddress requestOrigin) {
     try {
       final MemberLogout mlogout = new MemberLogout();
       mlogout.setMid(mid);
       mlogout.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
-      mlogout.setInRequestOrigin(clientOrigin);
+      mlogout.setInRequestOrigin(requestOrigin);
       mlogout.execute(dsl.configuration());
       final UUID rmid = mlogout.getReturnValue();
       if(rmid != null) {

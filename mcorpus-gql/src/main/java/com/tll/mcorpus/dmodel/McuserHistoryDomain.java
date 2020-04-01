@@ -1,5 +1,6 @@
 package com.tll.mcorpus.dmodel;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -10,9 +11,9 @@ public class McuserHistoryDomain {
   public static class LoginEventDomain {
     public final UUID jwtId;
     public final OffsetDateTime timestamp;
-    public final String requestOrigin;
+    public final InetAddress requestOrigin;
 
-    public LoginEventDomain(UUID jwtId, OffsetDateTime timestamp, String requestOrigin) {
+    public LoginEventDomain(UUID jwtId, OffsetDateTime timestamp, InetAddress requestOrigin) {
       this.jwtId = jwtId;
       this.timestamp = timestamp;
       this.requestOrigin = requestOrigin;
@@ -22,9 +23,9 @@ public class McuserHistoryDomain {
   public static class LogoutEventDomain {
     public final UUID jwtId;
     public final OffsetDateTime timestamp;
-    public final String requestOrigin;
+    public final InetAddress requestOrigin;
 
-    public LogoutEventDomain(UUID jwtId, OffsetDateTime timestamp, String requestOrigin) {
+    public LogoutEventDomain(UUID jwtId, OffsetDateTime timestamp, InetAddress requestOrigin) {
       this.jwtId = jwtId;
       this.timestamp = timestamp;
       this.requestOrigin = requestOrigin;
@@ -37,7 +38,7 @@ public class McuserHistoryDomain {
 
   /**
    * Constructor.
-   * 
+   *
    * @param uid
    * @param logins
    * @param logouts
@@ -50,7 +51,7 @@ public class McuserHistoryDomain {
 
   /**
    * Constructor - When no mcuser history exists.
-   * 
+   *
    * @param uid
    */
   public McuserHistoryDomain(UUID uid) {

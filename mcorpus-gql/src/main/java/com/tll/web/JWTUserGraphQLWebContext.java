@@ -6,6 +6,7 @@ import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.not;
 
+import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -189,7 +190,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     }
 
     final UUID pendingJwtID = UUID.randomUUID();
-    final String clientOriginToken = jwtRequest.getClientOrigin();
+    final InetAddress requestOrigin = jwtRequest.getRequestOrigin();
     final Instant requestInstant = jwtRequest.getRequestInstant();
     final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
 
@@ -199,7 +200,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       username,
       pswd,
       pendingJwtID,
-      clientOriginToken,
+      requestOrigin,
       requestInstant,
       loginExpiration
     );
@@ -250,7 +251,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     final FetchResult<Boolean> fetchResult = jwtbiz.getBackendHandler().jwtBackendLogout(
       jwtStatus.userId(),
       jwtStatus.jwtId(),
-      jwtRequest.getClientOrigin(),
+      jwtRequest.getRequestOrigin(),
       jwtRequest.getRequestInstant()
     );
     if(fetchResult.isSuccess()) {
@@ -277,7 +278,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   public boolean jwtInvalidateAllForUser(final UUID jwtUserId) {
     final FetchResult<Boolean> fr = jwtbiz.getBackendHandler().jwtInvalidateAllForUser(
       jwtUserId,
-      jwtRequest.getClientOrigin(),
+      jwtRequest.getRequestOrigin(),
       jwtRequest.getRequestInstant()
     );
     if(fr.isSuccess()) {

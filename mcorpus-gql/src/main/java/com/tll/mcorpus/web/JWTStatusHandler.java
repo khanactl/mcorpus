@@ -33,13 +33,15 @@ public class JWTStatusHandler implements Handler {
 
   @Override
   public void handle(Context ctx) throws Exception {
-    Blocking.get(() ->
-      ctx.get(JWT.class).jwtHttpRequestStatus(
-        MCorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx))
-      )
-    ).then(jwtStatus -> {
+
+    // create jwt request provider and cache in request for downstream access
+    final MCorpusJwtRequestProvider rp = MCorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx));
+    ctx.getRequest().add(rp);
+    log.debug("JWT request provider cached in request (Request origin: {}).", rp.getRequestOrigin());
+
+    Blocking.get(() -> ctx.get(JWT.class).jwtHttpRequestStatus(rp)).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);
-      log.info("{} cached for incoming request.", jwtStatus);
+      log.info("{} cached in request.", jwtStatus);
       ctx.next();
     });
   }

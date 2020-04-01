@@ -1,5 +1,6 @@
 package com.tll.mcorpus;
 
+import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
@@ -24,13 +25,21 @@ import org.postgresql.ds.PGSimpleDataSource;
 
 public class MCorpusTestUtil {
 
-  public static final String testRequestOrigin = "localhost|localhost";
+  public static final InetAddress testRequestOrigin;
 
   public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
   private static DSLContext dslMcweb = null;
 
   private static DSLContext dslMcwebtest = null;
+
+  static {
+    try {
+      testRequestOrigin = InetAddress.getByName("127.0.0.1");
+    } catch(Exception e) {
+      throw new Error(e);
+    }
+  }
 
   /**
    * @return A newly created {@link DataSource} to the test database intended for
@@ -119,20 +128,20 @@ public class MCorpusTestUtil {
       final IJwtUser jwtUser = mockJwtUser();
 
       @Override
-      public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, String clientOriginToken,
+      public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin,
           Instant requestInstant) {
         return FetchResult.fetchrslt(Boolean.TRUE);
       }
 
       @Override
-      public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, String clientOriginToken,
+      public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
           Instant requestInstant) {
           return FetchResult.fetchrslt(Boolean.TRUE);
       }
 
       @Override
       public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
-          String clientOriginToken, Instant requestInstant, Instant jwtExpiration) {
+          InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
         return FetchResult.fetchrslt(jwtUser);
       }
 

@@ -132,7 +132,7 @@ public class JWT {
       throws Exception {
         final Instant requestInstant = httpreq.getRequestInstant();
         final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
-        final String audience = httpreq.getClientOrigin();
+        final String audience = httpreq.getRequestOrigin().getHostAddress();
 
     // create signed jwt object
     final SignedJWT signedJWT = new SignedJWT(
@@ -263,14 +263,14 @@ public class JWT {
     }
 
     // verify audience (client origin)
-    if(not(httpreq.verifyClientOrigin(jwtAudience))) {
+    if(not(httpreq.verifyRequestOrigin(jwtAudience))) {
       log.error(
         "JWT {} client origin mis-match (JwtAudience: {} (current request: {}).",
-        jwtId, jwtAudience, httpreq.getClientOrigin()
+        jwtId, jwtAudience, httpreq.getRequestOrigin().getHostAddress()
       );
       return JWTHttpRequestStatus.create(JWTStatus.BAD_CLAIMS);
     }
-    log.info("JWT audience {} verified against http request client origin {}.", jwtAudience, httpreq.getClientOrigin());
+    log.info("JWT audience {} verified against http request client origin {}.", jwtAudience, httpreq.getRequestOrigin().getHostAddress());
 
     // expired? (check for exp. time in the past)
     if(Instant.now().isAfter(expires)) {
