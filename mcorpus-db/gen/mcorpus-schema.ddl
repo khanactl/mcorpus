@@ -386,6 +386,7 @@ BEGIN
       from mcuser_audit adtsub
       where (adtsub.type != 'LOGIN'::mcuser_audit_type or adtsub.jwt_id_status != 'OK'::jwt_id_status)
       and adtsub.uid = $1
+      and adtsub.request_origin = $2 -- constrain to the given request origin
     )
   ;
 END
