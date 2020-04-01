@@ -116,6 +116,7 @@
                 | crypt
                 | dearmor
                 | armor.*
+                | _.*
               </excludes>
               <forcedTypes>
                 <forcedType>
