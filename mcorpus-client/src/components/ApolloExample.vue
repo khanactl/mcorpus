@@ -40,8 +40,8 @@
       :mutation="require('../graphql/AddMessage.gql')"
       :variables="{
         input: {
-          text: newMessage
-        }
+          text: newMessage,
+        },
       }"
       class="form"
       @done="newMessage = ''"
@@ -75,24 +75,24 @@ export default {
   data() {
     return {
       name: "Anne",
-      newMessage: ""
+      newMessage: "",
     };
   },
 
   apollo: {
-    files: FILES
+    files: FILES,
   },
 
   computed: {
     formValid() {
       return this.newMessage;
-    }
+    },
   },
 
   methods: {
     onMessageAdded(previousResult, { subscriptionData }) {
       return {
-        messages: [...previousResult.messages, subscriptionData.data.messageAdded]
+        messages: [...previousResult.messages, subscriptionData.data.messageAdded],
       };
     },
 
@@ -101,16 +101,16 @@ export default {
       await this.$apollo.mutate({
         mutation: UPLOAD_FILE,
         variables: {
-          file: target.files[0]
+          file: target.files[0],
         },
         update: (store, { data: { singleUpload } }) => {
           const data = store.readQuery({ query: FILES });
           data.files.push(singleUpload);
           store.writeQuery({ query: FILES, data });
-        }
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

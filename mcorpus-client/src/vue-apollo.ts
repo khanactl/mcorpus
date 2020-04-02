@@ -18,7 +18,7 @@ export type VueApolloClient = ApolloClient<InMemoryCache> & {
 const AUTH_TOKEN = "apollo-token";
 
 // Http endpoint
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || "https://mcorpusgql-dev.net/graphql";
+const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || "http://mcorpus.d2d:5150/graphql";
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf("/graphql"));
 
@@ -46,6 +46,12 @@ const defaultOptions = {
   // note: don't override httpLink here, specify httpLink options in the
   // httpLinkOptions property of defaultOptions.
   // link: myLink
+  httpLinkOptions: {
+    useGETForQueries: true,
+    fetchOptions: {
+      method: "POST",
+    },
+  },
 
   // Override default cache
   // cache: myCache

@@ -1,0 +1,3 @@
+mutation mcuserLogin ($username: String!, $pswd: String!) {
+  mcuserLogin(username: $username, pswd: $pswd)
+}
