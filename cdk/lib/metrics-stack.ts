@@ -138,16 +138,18 @@ export class MetricsStack extends BaseStack {
     this.dashboard = new Dashboard(this, 'metrics', {
       dashboardName: dashboardName,
     });
+    // lb row
+    this.dashboard.addWidgets(this.buildGraphWidget('lb-request-count', metricsLbRequestCount));
+    // ecs row
     this.dashboard.addWidgets(
-      // db
-      this.buildAlarmWidget('db-cpu', this.dbCpuAlarm),
-      this.buildAlarmWidget('db-disk-space', this.dbFreeStorageSpaceAlarm),
-      this.buildGraphWidget('db-num-connections', metricDbNumConnections),
-      // ecs
-      this.buildAlarmWidget('ecs-cpu', this.ecsCpuAlarm),
       this.buildAlarmWidget('ecs-memory', this.ecsMemoryAlarm),
-      // lb
-      this.buildGraphWidget('lb-request-count', metricsLbRequestCount)
+      this.buildAlarmWidget('ecs-cpu', this.ecsCpuAlarm)
+    );
+    // db row
+    this.dashboard.addWidgets(
+      this.buildGraphWidget('db-num-connections', metricDbNumConnections),
+      this.buildAlarmWidget('db-disk-space', this.dbFreeStorageSpaceAlarm),
+      this.buildAlarmWidget('db-cpu', this.dbCpuAlarm)
     );
     // *** END cloudwatch dashboard ***
 
