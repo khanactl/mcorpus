@@ -4,6 +4,7 @@
 package com.tll.mcorpus.db;
 
 
+import com.tll.mcorpus.db.tables.GetActiveLogins;
 import com.tll.mcorpus.db.tables.Maddress;
 import com.tll.mcorpus.db.tables.Mauth;
 import com.tll.mcorpus.db.tables.Mbenefits;
@@ -11,6 +12,13 @@ import com.tll.mcorpus.db.tables.Mcuser;
 import com.tll.mcorpus.db.tables.McuserAudit;
 import com.tll.mcorpus.db.tables.Member;
 import com.tll.mcorpus.db.tables.MemberAudit;
+import com.tll.mcorpus.db.tables.records.GetActiveLoginsRecord;
+
+import java.util.UUID;
+
+import org.jooq.Configuration;
+import org.jooq.Field;
+import org.jooq.Result;
 
 
 /**
@@ -18,6 +26,32 @@ import com.tll.mcorpus.db.tables.MemberAudit;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>public.get_active_logins</code>.
+     */
+    public static final GetActiveLogins GET_ACTIVE_LOGINS = GetActiveLogins.GET_ACTIVE_LOGINS;
+
+    /**
+     * Call <code>public.get_active_logins</code>.
+     */
+    public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(Configuration configuration, UUID mcuserId) {
+        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId)).fetch();
+    }
+
+    /**
+     * Get <code>public.get_active_logins</code> as a table.
+     */
+    public static GetActiveLogins GET_ACTIVE_LOGINS(UUID mcuserId) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    }
+
+    /**
+     * Get <code>public.get_active_logins</code> as a table.
+     */
+    public static GetActiveLogins GET_ACTIVE_LOGINS(Field<UUID> mcuserId) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    }
 
     /**
      * The table <code>public.maddress</code>.

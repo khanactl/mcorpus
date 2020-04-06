@@ -11,7 +11,6 @@ import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.enums.MemberStatus;
 import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
-import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.InsertMcuser;
 import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.routines.McuserLogin;
@@ -21,6 +20,8 @@ import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.routines.MemberPswd;
 import com.tll.mcorpus.db.routines.PassHash;
+import com.tll.mcorpus.db.tables.GetActiveLogins;
+import com.tll.mcorpus.db.tables.records.GetActiveLoginsRecord;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.db.udt.records.MrefRecord;
 
@@ -31,6 +32,7 @@ import java.util.UUID;
 
 import org.jooq.Configuration;
 import org.jooq.Field;
+import org.jooq.Result;
 
 
 /**
@@ -78,37 +80,6 @@ public class Routines {
     public static Field<JwtStatus> getJwtStatus(Field<UUID> jwtId) {
         GetJwtStatus f = new GetJwtStatus();
         f.setJwtId(jwtId);
-
-        return f.asField();
-    }
-
-    /**
-     * Call <code>public.get_num_active_logins</code>
-     */
-    public static Integer getNumActiveLogins(Configuration configuration, UUID mcuserId) {
-        GetNumActiveLogins f = new GetNumActiveLogins();
-        f.setMcuserId(mcuserId);
-
-        f.execute(configuration);
-        return f.getReturnValue();
-    }
-
-    /**
-     * Get <code>public.get_num_active_logins</code> as a field.
-     */
-    public static Field<Integer> getNumActiveLogins(UUID mcuserId) {
-        GetNumActiveLogins f = new GetNumActiveLogins();
-        f.setMcuserId(mcuserId);
-
-        return f.asField();
-    }
-
-    /**
-     * Get <code>public.get_num_active_logins</code> as a field.
-     */
-    public static Field<Integer> getNumActiveLogins(Field<UUID> mcuserId) {
-        GetNumActiveLogins f = new GetNumActiveLogins();
-        f.setMcuserId(mcuserId);
 
         return f.asField();
     }
@@ -400,5 +371,26 @@ public class Routines {
         f.setPswd(pswd);
 
         return f.asField();
+    }
+
+    /**
+     * Call <code>public.get_active_logins</code>.
+     */
+    public static Result<GetActiveLoginsRecord> getActiveLogins(Configuration configuration, UUID mcuserId) {
+        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId)).fetch();
+    }
+
+    /**
+     * Get <code>public.get_active_logins</code> as a table.
+     */
+    public static GetActiveLogins getActiveLogins(UUID mcuserId) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    }
+
+    /**
+     * Get <code>public.get_active_logins</code> as a table.
+     */
+    public static GetActiveLogins getActiveLogins(Field<UUID> mcuserId) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
     }
 }
