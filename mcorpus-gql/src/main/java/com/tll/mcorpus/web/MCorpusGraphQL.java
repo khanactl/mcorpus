@@ -1,10 +1,9 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.clean;
+import static com.tll.repo.FetchResult.fetchrslt;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
-import static com.tll.repo.FetchResult.fetchrslt;
-
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -12,14 +11,15 @@ import java.util.stream.Collectors;
 
 import com.tll.gql.GraphQLDate;
 import com.tll.gql.GraphQLRequestProcessor;
+import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUserStatus;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 import com.tll.mcorpus.gmodel.Member;
 import com.tll.mcorpus.gmodel.MemberAddress;
-import com.tll.mcorpus.gmodel.MemberAndAddresses;
 import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
+import com.tll.mcorpus.gmodel.MemberAndAddresses;
 import com.tll.mcorpus.gmodel.MemberIdAndPswdKey;
 import com.tll.mcorpus.gmodel.Mlogin;
 import com.tll.mcorpus.gmodel.Mlogout;
@@ -435,8 +435,31 @@ public class MCorpusGraphQL {
 
       // mcuser types
 
+      // JwtInfo
+      .type("JwtInfo", typeWiring -> typeWiring
+        .dataFetcher("jwtId", env -> {
+          final IJwtInfo ji = env.getSource();
+          return uuidToToken(ji.getJwtId());
+        })
+        .dataFetcher("created", env -> {
+          final IJwtInfo ji = env.getSource();
+          return ji.created();
+        })
+        .dataFetcher("expires", env -> {
+          final IJwtInfo ji = env.getSource();
+          return ji.expires();
+        })
+        .dataFetcher("clientOrigin", env -> {
+          final IJwtInfo ji = env.getSource();
+          return ji.clientOrigin();
+        })
+      )
       // IJwtUserStatus
       .type("Mcstatus", typeWiring -> typeWiring
+        .dataFetcher("currentJwtId", env -> {
+          final IJwtUserStatus jwtus = env.getSource();
+          return uuidToToken(jwtus.getJwtId());
+        })
         .dataFetcher("uid", env -> {
           final IJwtUserStatus jwtus = env.getSource();
           return uuidToToken(jwtus.getJwtUserId());
@@ -449,9 +472,13 @@ public class MCorpusGraphQL {
           final IJwtUserStatus jwtus = env.getSource();
           return jwtus.getExpires();
         })
-        .dataFetcher("numActiveJWTs", env -> {
+        .dataFetcher("roles", env -> {
           final IJwtUserStatus jwtus = env.getSource();
-          return jwtus.getNumActiveJWTs();
+          return jwtus.getRoles();
+        })
+        .dataFetcher("activeJWTs", env -> {
+          final IJwtUserStatus jwtus = env.getSource();
+          return jwtus.getActiveJWTs();
         })
       )
 

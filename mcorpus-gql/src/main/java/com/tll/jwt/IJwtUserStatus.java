@@ -1,14 +1,20 @@
 package com.tll.jwt;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Contract for conveying the status of a logged in JWT user.
- * 
+ *
  * @author jpk
  */
 public interface IJwtUserStatus {
+
+  /**
+   * @return the actve JWT id.
+   */
+  UUID getJwtId();
 
   /**
    * @return the id of the user bound to a target JWT.
@@ -21,12 +27,17 @@ public interface IJwtUserStatus {
   Date getSince();
 
   /**
-   * @return when the JWT expires.
+   * @return the JWT expires claim.
    */
   Date getExpires();
 
   /**
-   * @return the number of active JWTs bound to the logged in JWT user.
+   * @return the JWT roles claim.
    */
-  int getNumActiveJWTs();
+  String getRoles();
+
+  /**
+   * @return the current active JWT details bound to the logged in JWT user.
+   */
+  List<IJwtInfo> getActiveJWTs();
 }

@@ -2,6 +2,7 @@ package com.tll.jwt;
 
 import java.net.InetAddress;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import com.tll.repo.FetchResult;
@@ -62,7 +63,7 @@ public interface IJwtBackendHandler {
    * @return Fetch result holding the the number of currently active JWTs for the
    *         given user id.
    */
-  FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId);
+  FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId);
 
   /**
    * Do a JWT login in the backend system.

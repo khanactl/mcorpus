@@ -1,5 +1,6 @@
 package com.tll.mcorpus.repo;
 
+import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
@@ -19,6 +20,7 @@ import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import com.tll.UnitTest;
@@ -29,6 +31,8 @@ import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.routines.InsertMcuser;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.pojos.McuserAudit;
+import com.tll.mcorpus.dmodel.ActiveLoginDomain;
+import com.tll.mcorpus.dmodel.McuserHistoryDomain;
 import com.tll.repo.FetchResult;
 
 import org.junit.AfterClass;
@@ -567,6 +571,71 @@ public class MCorpusUserRepoTest {
       assertTrue(fr.get());
     }
     catch(Exception e) {
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        if(uid != null) deleteTestMcuser(uid);
+        repo.close();
+      }
+    }
+  }
+
+  @Test
+  public void testGetActiveLogins() throws Exception {
+    MCorpusUserRepo repo = null;
+    UUID uid = null;
+    try {
+      // establish the condition that a target test mcuser is validly logged in on the backend
+      final Mcuser mar = insertTestMcuser();
+      uid = mar.getUid();
+
+      addTestMcuserAuditRecord(uid);
+
+      repo = mcuserRepo();
+      FetchResult<List<ActiveLoginDomain>> fr = repo.getActiveLogins(uid);
+
+      assertNotNull(fr);
+      assertTrue(fr.isSuccess());
+      assertTrue(isNotNullOrEmpty(fr.get()));
+      assertNull(fr.getErrorMsg());
+      assertFalse(fr.hasErrorMsg());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) {
+        if(uid != null) deleteTestMcuser(uid);
+        repo.close();
+      }
+    }
+  }
+
+  @Test
+  public void testMcuserHistory() throws Exception {
+    MCorpusUserRepo repo = null;
+    UUID uid = null;
+    try {
+      // establish the condition that a target test mcuser is validly logged in on the backend
+      final Mcuser mar = insertTestMcuser();
+      uid = mar.getUid();
+      addTestMcuserAuditRecord(uid);
+
+      repo = mcuserRepo();
+      FetchResult<McuserHistoryDomain> fr = repo.mcuserHistory(uid);
+
+      assertNotNull(fr);
+      assertTrue(fr.isSuccess());
+      assertTrue(fr.get() != null);
+      assertNotNull(fr.get().logins);
+      assertTrue(fr.get().logins.size() == 1);
+      assertNull(fr.getErrorMsg());
+      assertFalse(fr.hasErrorMsg());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
       fail(e.getMessage());
     }
     finally {

@@ -2,9 +2,52 @@ package com.tll.web;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.Instant;
+import java.util.UUID;
+
 import org.junit.Test;
 
 public class RequestSnapshotTest {
+
+  static RequestSnapshot testRequestSnapshot_single() {
+    return new RequestSnapshot(
+        Instant.now(),
+        "127.0.0.1",
+        "path",
+        "POST",
+        "host",
+        "origin",
+        "https://mcorpus.d2d",
+        "forwarded",
+        "127.0.0.1",  // x-forwarded-for
+        "localhost",  // x-forwarded-host
+        "http",       // x-forwarded-proto
+        null, // jwt cookie
+        null, // rst cookie
+        null, // rst header
+        UUID.randomUUID().toString()
+    );
+  }
+
+  static RequestSnapshot testRequestSnapshot_multi() {
+    return new RequestSnapshot(
+        Instant.now(),
+        "127.0.0.1, 88.44.33.22, 1.1.1.1",
+        "path",
+        "POST",
+        "host",
+        "origin",
+        "https://mcorpus.d2d",
+        "forwarded",
+        "127.0.0.1",  // x-forwarded-for
+        "localhost",  // x-forwarded-host
+        "http",       // x-forwarded-proto
+        null, // jwt cookie
+        null, // rst cookie
+        null, // rst header
+        UUID.randomUUID().toString()
+    );
+  }
 
   @Test
   public void stringQSTest() {
@@ -14,5 +57,14 @@ public class RequestSnapshotTest {
     assertEquals("domain.com", RequestSnapshot.stripQS("domain.com"));
     assertEquals("domain.com", RequestSnapshot.stripQS("domain.com?"));
     assertEquals("domain.com", RequestSnapshot.stripQS("domain.com?a=b&c=d"));
+  }
+
+  @Test
+  public void testXForwardedForClientIp() {
+    RequestSnapshot rs;
+    rs = testRequestSnapshot_multi();
+    assertEquals("127.0.0.1", rs.getXForwardedForClientIp());
+    rs = testRequestSnapshot_single();
+    assertEquals("127.0.0.1", rs.getXForwardedForClientIp());
   }
 }

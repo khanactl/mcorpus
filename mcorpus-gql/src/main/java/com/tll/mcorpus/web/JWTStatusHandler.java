@@ -2,6 +2,8 @@ package com.tll.mcorpus.web;
 
 import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
 
+import java.net.UnknownHostException;
+
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.RequestSnapshot;
@@ -33,11 +35,19 @@ public class JWTStatusHandler implements Handler {
 
   @Override
   public void handle(Context ctx) throws Exception {
+    final RequestSnapshot rs = getOrCreateRequestSnapshot(ctx);
 
     // create jwt request provider and cache in request for downstream access
-    final MCorpusJwtRequestProvider rp = MCorpusJwtRequestProvider.fromRequestSnapshot(getOrCreateRequestSnapshot(ctx));
-    ctx.getRequest().add(rp);
-    log.debug("JWT request provider cached in request (Request origin: {}).", rp.getRequestOrigin());
+    final MCorpusJwtRequestProvider rp;
+    try {
+      rp = MCorpusJwtRequestProvider.fromRequestSnapshot(rs);
+      ctx.getRequest().add(rp);
+      log.debug("JWT request provider cached in request (Request origin: {}).", rp.getRequestOrigin());
+    } catch(UnknownHostException e) {
+      log.error("Un-resolvable http request origin: {}", rs);
+      ctx.clientError(401); // unauthorized
+      return;
+    }
 
     Blocking.get(() -> ctx.get(JWT.class).jwtHttpRequestStatus(rp)).then(jwtStatus -> {
       ctx.getRequest().add(jwtStatus);

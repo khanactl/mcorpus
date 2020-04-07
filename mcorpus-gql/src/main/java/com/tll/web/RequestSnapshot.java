@@ -1,6 +1,7 @@
 package com.tll.web;
 
 import static com.tll.core.Util.isNotNull;
+import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 import static com.tll.transform.TransformUtil.uuidFromToken;
@@ -173,6 +174,15 @@ public class RequestSnapshot {
    */
   public String getXForwardedFor() {
     return xForwardedFor;
+  }
+
+  /**
+   * @return the left-most ip of the x-forwarded-for header value
+   */
+  public String getXForwardedForClientIp() {
+    return isNotNull(xForwardedFor) && xForwardedFor.indexOf(",") > 0 ?
+      neclean(xForwardedFor.split(",")[0]) :
+      xForwardedFor;
   }
 
   /**

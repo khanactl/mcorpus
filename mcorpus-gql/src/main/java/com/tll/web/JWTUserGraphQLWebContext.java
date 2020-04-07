@@ -10,12 +10,14 @@ import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.jwt.IJwtHttpResponseAction;
+import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUser;
 import com.tll.jwt.IJwtUserStatus;
 import com.tll.jwt.JWT;
@@ -32,17 +34,24 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
   private static class JWTUserStatus implements IJwtUserStatus {
 
+    private final UUID jwtId;
     private final UUID jwtUserId;
     private final Date since;
     private final Date expires;
-    private final int numActiveJWTs;
+    private final String roles;
+    private final List<IJwtInfo> activeJWTs;
 
-    public JWTUserStatus(UUID jwtUserId, Date since, Date expires, int numActiveJWTs) {
+    public JWTUserStatus(UUID jwtId, UUID jwtUserId, Date since, Date expires, String roles, List<IJwtInfo> activeJWTs) {
+      this.jwtId = jwtId;
       this.jwtUserId = jwtUserId;
       this.since = since;
       this.expires = expires;
-      this.numActiveJWTs = numActiveJWTs;
+      this.roles = roles;
+      this.activeJWTs = activeJWTs;
     }
+
+    @Override
+    public UUID getJwtId() { return jwtId; }
 
     @Override
     public UUID getJwtUserId() { return jwtUserId; }
@@ -54,7 +63,10 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     public Date getExpires() { return expires; }
 
     @Override
-    public int getNumActiveJWTs() { return numActiveJWTs; }
+    public String getRoles() { return roles; }
+
+    @Override
+    public List<IJwtInfo> getActiveJWTs() { return activeJWTs; }
 
   }
 
@@ -139,18 +151,19 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    *         null when no JWT is present or is not valid.
    */
   public IJwtUserStatus jwtUserStatus() {
-    final JWTHttpRequestStatus jwtRequestStatus = getJwtStatus();
-    final UUID jwtId = jwtRequestStatus.jwtId();
-    if(jwtRequestStatus.status().isValid()) {
-      final UUID jwtUserId = jwtRequestStatus.userId();
-      FetchResult<Integer> fr = jwtbiz.getBackendHandler().getNumActiveJwtLogins(jwtUserId);
+    final UUID jwtId = jwtStatus.jwtId();
+    if(jwtStatus.status().isValid()) {
+      final UUID jwtUserId = jwtStatus.userId();
+      FetchResult<List<IJwtInfo>> fr = jwtbiz.getBackendHandler().getActiveJwtLogins(jwtUserId);
       if(fr.isSuccess()) {
         // success
         final JWTUserStatus jus = new JWTUserStatus(
+          jwtId,
           jwtUserId,
-          Date.from(jwtRequestStatus.issued()),
-          Date.from(jwtRequestStatus.expires()),
-          fr.get().intValue()
+          Date.from(jwtStatus.issued()),
+          Date.from(jwtStatus.expires()),
+          jwtStatus.roles(),
+          fr.get()
         );
         return jus;
       } else {
@@ -222,7 +235,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
           isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
             Arrays.stream(jwtUser.getJwtUserRoles())
             .collect(Collectors.joining(",")),
-            jwtRequest
+          jwtRequest
       );
 
       // jwt cookie
