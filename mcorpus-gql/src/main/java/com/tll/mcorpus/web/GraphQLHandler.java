@@ -71,7 +71,7 @@ public class GraphQLHandler implements Handler {
         jwtRequestStatus,
         ctx.get(JWT.class),
         MCorpusJwtHttpResponseAction.fromRatpackContext(ctx),
-        "mclogin"
+        "jwtLogin"
       );
       log.info("graphql query pending: {}.", gqlWebCtx);
 
@@ -85,7 +85,7 @@ public class GraphQLHandler implements Handler {
       switch(jwtRequestStatus.status()) {
       case NOT_PRESENT_IN_REQUEST:
       case EXPIRED:
-        // only mclogin and introspection queries are allowed when no valid JWT present
+        // only jwtLogin and introspection queries are allowed when no valid JWT present
         if(gqlWebCtx.isJwtUserLoginOrIntrospectionQuery()) {
           // allowed - you may proceed
           break;

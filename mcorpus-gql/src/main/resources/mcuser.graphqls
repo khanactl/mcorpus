@@ -1,11 +1,11 @@
 # mcuser queries
 extend type Query {
 
-  # fetch an mcuser and assigned roles
-  fetchMcuser(uid: ID!): Mcuser @auth(role: "admin")
+  # jwt login status
+  jwtStatus: JwtStatus!
 
-  # mcuser login status
-  mcstatus: Mcstatus!
+  # get an mcuser and assigned roles
+  getMcuser(uid: ID!): Mcuser @auth(role: "admin")
 
   # mcuser history of activity
   mchistory(uid: ID!): McuserHistory @auth(role: "admin")
@@ -14,11 +14,17 @@ extend type Query {
 # mcuser mutation methods
 extend type Mutation {
 
-  # mcuser login - Generate a JWT and send to client upon successful mcuser login
-  mclogin(username: String!, pswd: String!): Boolean!
+  # JWT login - upon successful login a new jwt is issued
+  jwtLogin(username: String!, pswd: String!): Boolean!
 
-  # mcuser logout - Invalidate a valid JWT bound to the logged in mcuser
-  mclogout: Boolean!
+  # JWT logout - invalidate the active jwt
+  jwtLogout: Boolean!
+
+  # invalidate all active JWTs issued to a the given user
+  invalidateJwts(jwtUserId: ID!): Boolean @auth(role: "admin")
+
+  # set/reset an mucser pswd by mcuser id
+  mcpswd(uid: ID!, pswd: String!): Boolean @auth(role: "admin")
 
   # add a new mcuser to the system
   addMcuser(mcuser: McuserToAdd!): Mcuser @auth(role: "admin")
@@ -28,17 +34,39 @@ extend type Mutation {
 
   # physically remove an mcuser entirely from the system
   deleteMcuser(uid: ID!): Boolean @auth(role: "admin")
+}
 
-  # set/reset an mucser pswd by mcuser id
-  mcpswd(uid: ID!, pswd: String!): Boolean @auth(role: "admin")
+# details of a single JWT
+type JwtInfo {
+  # the JWT id
+  jwtId: ID
+  # when the JWT was created
+  created: Date
+  # when the JWT expires
+  expires: Date
+  # the resolved ip address of the sourcing http request that created the JWT
+  clientOrigin: String
+}
 
-  # invalidate all active JWTs issued to an mcuser
-  invalidateJwtsFor(uid: ID!): Boolean @auth(role: "admin")
+# the status of the active JWT
+type JwtStatus {
+  # the JWT id
+  jwtId: ID
+  # the JWT user id
+  jwtUserId: ID
+  # when the JWT was created
+  created: Date
+  # when the JWT expires
+  expires: Date
+  # the JWT roles claim
+  roles: String
+  # list of all valid and non-expired JWTs presently issued to the bound jwt user (mcuser)
+  activeJWTs: [JwtInfo]
 }
 
 # mcuser - those granted access to the mcorpus graphql api
 type Mcuser {
-  # the mcuser id
+  # the mcuser id (jwt id)
   uid: ID
   # mcuser creation date
   created: Date
@@ -86,18 +114,6 @@ type McuserLogoutEvent {
   clientOrigin: String
 }
 
-# details of a single JWT
-type JwtInfo {
-  # the JWT id
-  jwtId: ID
-  # when the JWT was created
-  created: Date
-  # when the JWT expires
-  expires: Date
-  # the resolved ip address of the sourcing http request that created the JWT
-  clientOrigin: String
-}
-
 # mcuser status
 enum McuserStatus {
   # mcuser active
@@ -116,22 +132,6 @@ enum McuserRole {
   MPII
   # admin - only an mcuser admininstrator may invoke the bound operation
   ADMIN
-}
-
-# mcuser JWT login status
-type Mcstatus {
-  # id of the current (in-use) JWT
-  currentJwtId: ID
-  # id of the bound mcuser
-  uid: ID
-  # when the bound mcuser logged in
-  since: Date
-  # when the issued mcorpus JWT expires
-  expires: Date
-  # the roles granted to the JWT
-  roles: String
-  # list of all valid and non-expired JWTs presently issued to the bound mcuser
-  activeJWTs: [JwtInfo]
 }
 
 # required properties for adding a new mcuser

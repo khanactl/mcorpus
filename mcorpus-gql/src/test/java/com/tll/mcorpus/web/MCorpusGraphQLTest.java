@@ -120,7 +120,7 @@ public class MCorpusGraphQLTest {
         jwtRequestStatus,
         jwt(),
         testJwtResponseProvider(),
-        "mclogin"
+        "jwtLogin"
       );
     } catch(UnknownHostException e) {
       throw new Error(e);
