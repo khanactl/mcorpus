@@ -19,7 +19,6 @@ import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUser;
-import com.tll.jwt.IJwtUserStatus;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.repo.FetchResult;
@@ -32,7 +31,7 @@ import com.tll.repo.FetchResult;
  */
 public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
-  private static class JWTUserStatus implements IJwtUserStatus {
+  public static class JWTUserStatus {
 
     private final UUID jwtId;
     private final UUID jwtUserId;
@@ -50,24 +49,17 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       this.activeJWTs = activeJWTs;
     }
 
-    @Override
     public UUID getJwtId() { return jwtId; }
 
-    @Override
     public UUID getJwtUserId() { return jwtUserId; }
 
-    @Override
     public Date getSince() { return since; }
 
-    @Override
     public Date getExpires() { return expires; }
 
-    @Override
     public String getRoles() { return roles; }
 
-    @Override
     public List<IJwtInfo> getActiveJWTs() { return activeJWTs; }
-
   }
 
   private final JWTHttpRequestStatus jwtStatus;
@@ -146,11 +138,11 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * <p>
    * Blocking - Db call is issued.
    *
-   * @return Newly created {@link IJwtUserStatus} when the http client presents a valid and
+   * @return Newly created {@link JWTUserStatus} when the http client presents a valid and
    *         non-expired JWT -OR-<br>
    *         null when no JWT is present or is not valid.
    */
-  public IJwtUserStatus jwtUserStatus() {
+  public JWTUserStatus jwtUserStatus() {
     final UUID jwtId = jwtStatus.jwtId();
     if(jwtStatus.status().isValid()) {
       final UUID jwtUserId = jwtStatus.userId();

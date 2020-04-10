@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import com.tll.gql.GraphQLDate;
 import com.tll.gql.GraphQLRequestProcessor;
 import com.tll.jwt.IJwtInfo;
-import com.tll.jwt.IJwtUserStatus;
 import com.tll.mcorpus.db.tables.pojos.Maddress;
 import com.tll.mcorpus.dmodel.MemberAndMauth;
 import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
@@ -46,6 +45,7 @@ import com.tll.mcorpus.validate.McuserValidator;
 import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
 import com.tll.web.JWTUserGraphQLWebContext;
+import com.tll.web.JWTUserGraphQLWebContext.JWTUserStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -457,27 +457,27 @@ public class MCorpusGraphQL {
       // JwtStatus
       .type("JwtStatus", typeWiring -> typeWiring
         .dataFetcher("jwtId", env -> {
-          final IJwtUserStatus jwtus = env.getSource();
+          final JWTUserStatus jwtus = env.getSource();
           return uuidToToken(jwtus.getJwtId());
         })
         .dataFetcher("jwtUserId", env -> {
-          final IJwtUserStatus jwtus = env.getSource();
+          final JWTUserStatus jwtus = env.getSource();
           return uuidToToken(jwtus.getJwtUserId());
         })
         .dataFetcher("created", env -> {
-          final IJwtUserStatus jwtus = env.getSource();
+          final JWTUserStatus jwtus = env.getSource();
           return jwtus.getSince();
         })
         .dataFetcher("expires", env -> {
-          final IJwtUserStatus jwtus = env.getSource();
+          final JWTUserStatus jwtus = env.getSource();
           return jwtus.getExpires();
         })
         .dataFetcher("roles", env -> {
-          final IJwtUserStatus jwtus = env.getSource();
+          final JWTUserStatus jwtus = env.getSource();
           return jwtus.getRoles();
         })
         .dataFetcher("activeJWTs", env -> {
-          final IJwtUserStatus jwtus = env.getSource();
+          final JWTUserStatus jwtus = env.getSource();
           return jwtus.getActiveJWTs();
         })
       )
