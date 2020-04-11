@@ -3,10 +3,9 @@ package com.tll.mcorpus.gmodel;
 import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
-import com.tll.gmodel.IKey;
 import com.tll.gmodel.UUIDKey;
 
-public class Mref extends BaseEntity<Mref, IKey> {
+public class Mref extends BaseEntity<Mref, UUIDKey> {
 
   public final UUIDKey memberPk;
   public final String empId;

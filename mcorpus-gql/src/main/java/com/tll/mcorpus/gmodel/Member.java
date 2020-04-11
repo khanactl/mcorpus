@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
-import com.tll.gmodel.IKey;
 import com.tll.gmodel.UUIDKey;
 
 /**
@@ -14,7 +13,7 @@ import com.tll.gmodel.UUIDKey;
  *
  * @author jpk
  */
-public class Member extends BaseEntity<Member, IKey> {
+public class Member extends BaseEntity<Member, UUIDKey> {
 
   private final UUIDKey pk;
 
