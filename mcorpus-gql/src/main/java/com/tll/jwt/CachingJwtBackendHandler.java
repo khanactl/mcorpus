@@ -4,6 +4,7 @@ import static com.tll.core.Util.isNotNull;
 
 import java.net.InetAddress;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -54,8 +55,8 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
-  public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
-    return targetHandler.getNumActiveJwtLogins(jwtUserId);
+  public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
+    return targetHandler.getActiveJwtLogins(jwtUserId);
   }
 
   @Override

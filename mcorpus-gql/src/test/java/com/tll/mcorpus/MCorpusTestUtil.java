@@ -3,12 +3,15 @@ package com.tll.mcorpus;
 import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
 import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.IJwtHttpResponseAction;
+import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUser;
 import com.tll.jwt.JWT;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
@@ -146,8 +149,8 @@ public class MCorpusTestUtil {
       }
 
       @Override
-      public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
-        return FetchResult.fetchrslt(2);
+      public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
+        return FetchResult.fetchrslt(Collections.emptyList());
       }
 
       @Override

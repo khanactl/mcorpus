@@ -8,11 +8,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
-import com.tll.gmodel.IKey;
 import com.tll.gmodel.UUIDKey;
 import com.tll.jwt.IJwtUser;
 
-public class Mcuser extends BaseEntity<Mcuser, IKey> implements IJwtUser {
+public class Mcuser extends BaseEntity<Mcuser, UUIDKey> implements IJwtUser {
 
   private final UUIDKey      pk;
   private final Date         created;
@@ -55,7 +54,7 @@ public class Mcuser extends BaseEntity<Mcuser, IKey> implements IJwtUser {
   }
 
   @Override
-  public IKey getPk() { return pk; }
+  public UUIDKey getPk() { return pk; }
 
   public UUID getUid() {
     return pk.getUUID();

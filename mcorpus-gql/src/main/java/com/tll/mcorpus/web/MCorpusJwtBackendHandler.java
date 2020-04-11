@@ -2,15 +2,21 @@ package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.isNull;
 import static com.tll.repo.FetchResult.fetchrslt;
+import static com.tll.transform.TransformUtil.odtToDate;
 
 import java.net.InetAddress;
 import java.time.Instant;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.tll.jwt.IJwtBackendHandler;
+import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUser;
 import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
+import com.tll.mcorpus.dmodel.ActiveLoginDomain;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.transform.McuserXfrm;
 import com.tll.repo.FetchResult;
@@ -44,6 +50,31 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     }
   }
 
+  private static IJwtInfo map(final ActiveLoginDomain al) {
+    return new IJwtInfo() {
+
+      @Override
+      public UUID getJwtId() {
+        return al.jwtId;
+      }
+
+      @Override
+      public Date expires() {
+        return odtToDate(al.expires);
+      }
+
+      @Override
+      public Date created() {
+        return odtToDate(al.requestTimestamp);
+      }
+
+      @Override
+      public String clientOrigin() {
+        return al.requestOrigin.getHostAddress();
+      }
+    };
+  }
+
   private final Logger log = LoggerFactory.getLogger(MCorpusJwtBackendHandler.class);
 
   private final MCorpusUserRepo mcuserRepo;
@@ -60,9 +91,16 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
-  public FetchResult<Integer> getNumActiveJwtLogins(UUID jwtUserId) {
-    FetchResult<Integer> fr = mcuserRepo.getNumActiveLogins(jwtUserId);
-    return fr;
+  public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
+    FetchResult<List<ActiveLoginDomain>> fr = mcuserRepo.getActiveLogins(jwtUserId);
+    if (fr.isSuccess()) {
+      final List<IJwtInfo> jlist = fr.get().stream()
+        .map(al -> map(al))
+        .collect(Collectors.toList());
+        return fetchrslt(jlist, null);
+    } else {
+      return fetchrslt(fr.getErrorMsg());
+    }
   }
 
   @Override

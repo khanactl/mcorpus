@@ -130,9 +130,9 @@ public class JWT {
    */
   public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq)
       throws Exception {
-        final Instant requestInstant = httpreq.getRequestInstant();
-        final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
-        final String audience = httpreq.getRequestOrigin().getHostAddress();
+    final Instant requestInstant = httpreq.getRequestInstant();
+    final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
+    final String audience = httpreq.getRequestOrigin().getHostAddress();
 
     // create signed jwt object
     final SignedJWT signedJWT = new SignedJWT(

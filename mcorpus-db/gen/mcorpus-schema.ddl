@@ -187,35 +187,6 @@ CREATE TRIGGER trigger_mcuser_updated
   FOR EACH ROW
   EXECUTE PROCEDURE set_modified();
 
-/**
-  get_num_active_logins()
-
-  Calculate the current number of active non-expired JWT IDs
-  held in the mcuser_audit table for a given mcuser.
- */
-CREATE OR REPLACE FUNCTION get_num_active_logins(mcuser_id uuid) RETURNS int
-LANGUAGE plpgsql AS
-$_$
-DECLARE
-  num_valid_logins int;
-BEGIN
-  select into num_valid_logins count(jwt_id)
-  from mcuser_audit
-  where
-    type = 'LOGIN'
-    and jwt_id_status = 'OK'
-    and login_expiration >= now()
-    and uid = $1
-    and jwt_id not in (
-      select jwt_id
-      from mcuser_audit
-      where (type != 'LOGIN' or jwt_id_status != 'OK')
-      and uid = $1
-    );
-    return num_valid_logins;
-END
-$_$;
-
 CREATE TYPE jwt_mcuser_status AS (
   mcuser_audit_record_type mcuser_audit_type,
   jwt_id uuid,
@@ -306,6 +277,42 @@ BEGIN
   END IF;
 
   return jstat;
+END
+$_$;
+
+/**
+  get_active_logins()
+
+  Return a table of active login records for a given mcuser.
+ */
+CREATE OR REPLACE FUNCTION get_active_logins(mcuser_id uuid) RETURNS TABLE (
+  jwt_id uuid,
+  login_expiration timestamptz,
+  request_timestamp timestamptz,
+  request_origin inet
+)
+LANGUAGE plpgsql AS
+$_$
+BEGIN
+  return query
+    select
+      ma.jwt_id,
+      ma.login_expiration,
+      ma.request_timestamp,
+      ma.request_origin
+    from
+      mcuser_audit ma
+    where
+      ma.uid = $1
+      and ma.type = 'LOGIN'
+      and ma.jwt_id_status = 'OK'
+      and ma.login_expiration >= now()
+      and ma.jwt_id not in (
+        select ma2.jwt_id
+        from mcuser_audit ma2
+        where (ma2.type != 'LOGIN' or ma2.jwt_id_status != 'OK')
+        and ma2.uid = $1
+      );
 END
 $_$;
 

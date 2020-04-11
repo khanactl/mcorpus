@@ -5,6 +5,7 @@ import static com.tll.core.Util.isNotNull;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.web.RequestSnapshot;
@@ -14,20 +15,28 @@ import com.tll.web.RequestSnapshot;
  */
 public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
 
+  /**
+   * Create a new {@link MCorpusJwtRequestProvider} instance from a given {@link RequestSnapshot}.
+   *
+   * @param rs the request snapshot
+   * @return Newly created {@link MCorpusJwtRequestProvider} instance.
+   *
+   * @throws UnknownHostException when the http request client origin is un-resolvable.
+   */
   public static MCorpusJwtRequestProvider fromRequestSnapshot(final RequestSnapshot rs) throws UnknownHostException {
     return new MCorpusJwtRequestProvider(
       rs.getJwtCookie(),
-      rs.getRequestInstant(),
+      rs.getRequestInstant().truncatedTo(ChronoUnit.SECONDS), // so that conversion to/from Date are equal!
       resolveRequestOrigin(rs)
     );
   }
 
   private static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
     final String sro;
-    // prefer x-forwarded-for http header
+    // primary: x-forwarded-for http header
     if(isNotNull(rs.getXForwardedFor()))
       sro = rs.getXForwardedFor();
-    // 2nd-choice: remote address host
+    // fallback: remote address host
     else if(isNotNull(rs.getRemoteAddressHost()))
       sro = rs.getRemoteAddressHost();
     else
@@ -62,10 +71,6 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
 
   @Override
   public boolean verifyRequestOrigin(final String jwtAudience) {
-    if(isNotNull(requestOrigin)) {
-      return requestOrigin.getHostAddress().equals(jwtAudience);
-    }
-    // denied
-    return false;
+    return requestOrigin.getHostAddress().equals(jwtAudience);
   }
 }

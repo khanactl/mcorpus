@@ -6,10 +6,10 @@ import static com.tll.mcorpus.MCorpusTestUtil.jwt;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.testJwtResponseProvider;
 import static com.tll.mcorpus.db.Tables.MEMBER;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 import java.time.Instant;
@@ -120,7 +120,7 @@ public class MCorpusGraphQLTest {
         jwtRequestStatus,
         jwt(),
         testJwtResponseProvider(),
-        "mclogin"
+        "jwtLogin"
       );
     } catch(UnknownHostException e) {
       throw new Error(e);

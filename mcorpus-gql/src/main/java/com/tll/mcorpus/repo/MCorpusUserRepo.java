@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,18 +23,20 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import com.tll.mcorpus.db.Routines;
 import com.tll.mcorpus.db.enums.JwtStatus;
 import com.tll.mcorpus.db.enums.McuserAuditType;
 import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.enums.McuserStatus;
 import com.tll.mcorpus.db.routines.BlacklistJwtIdsFor;
 import com.tll.mcorpus.db.routines.GetJwtStatus;
-import com.tll.mcorpus.db.routines.GetNumActiveLogins;
 import com.tll.mcorpus.db.routines.InsertMcuser;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
+import com.tll.mcorpus.db.tables.records.GetActiveLoginsRecord;
+import com.tll.mcorpus.dmodel.ActiveLoginDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain.LoginEventDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain.LogoutEventDomain;
@@ -87,23 +90,32 @@ public class MCorpusUserRepo implements Closeable {
   }
 
   /**
-   * Call the backend to get the number of valid, non-expired JWT IDs issued for
+   * Call the backend to get the the list of the current active login details for
    * the given mcuser id.
    *
    * @param uid the mcuser id
    * @return the number of valid, non-expired JWT IDs held in the backend system
    */
-  public FetchResult<Integer> getNumActiveLogins(final UUID uid) {
+  public FetchResult<List<ActiveLoginDomain>> getActiveLogins(final UUID uid) {
     if(uid == null) return fetchrslt(null, "No mcuser id provided.");
     try {
-      final GetNumActiveLogins backend = new GetNumActiveLogins();
-      backend.setMcuserId(uid);
-      backend.execute(dsl.configuration());
-      return fetchrslt(backend.getReturnValue(), null);
+      final Result<GetActiveLoginsRecord> rslt = Routines.getActiveLogins(dsl.configuration(), uid);
+      final List<ActiveLoginDomain> rlist;
+      if(rslt.isNotEmpty()) {
+        rlist = rslt.map(rec -> new ActiveLoginDomain(
+            rec.getJwtId(),
+            rec.getLoginExpiration(),
+            rec.getRequestTimestamp(),
+            rec.getRequestOrigin())
+        );
+      } else {
+        rlist = Collections.emptyList();
+      }
+      return fetchrslt(rlist, null);
     }
     catch(Throwable e) {
-      log.info("JWT number of active logins call error: {}", e.getMessage());
-      return fetchrslt(null, "JWT number of active logins call failed.");
+      log.info("active logins call error: {}", e.getMessage());
+      return fetchrslt(null, "active logins call failed.");
     }
   }
 

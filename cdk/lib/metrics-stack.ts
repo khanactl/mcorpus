@@ -1,4 +1,4 @@
-import { Alarm, AlarmWidget, Dashboard, GraphWidget, Metric } from '@aws-cdk/aws-cloudwatch';
+import { Alarm, AlarmWidget, ComparisonOperator, Dashboard, GraphWidget, Metric } from '@aws-cdk/aws-cloudwatch';
 import { SnsAction } from '@aws-cdk/aws-cloudwatch-actions';
 import { Cluster, FargateService } from '@aws-cdk/aws-ecs';
 import { ApplicationLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
@@ -9,8 +9,6 @@ import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 
 export interface IMetricsStackProps extends IStackProps {
-  // readonly vpc: ec2.IVpc;
-
   readonly dbInstanceRef: IDatabaseInstance;
 
   readonly ecsClusterRef: Cluster;
@@ -26,6 +24,9 @@ export class MetricsStack extends BaseStack {
   public readonly dbCpuAlarm: Alarm;
   public readonly dbCpuAlarmTopic: Topic;
 
+  public readonly dbFreeStorageSpaceAlarm: Alarm;
+  public readonly dbFresStorageSpaceAlarmTopic: Topic;
+
   public readonly ecsCpuAlarm: Alarm;
   public readonly ecsCpuAlarmTopic: Topic;
 
@@ -40,8 +41,8 @@ export class MetricsStack extends BaseStack {
     // *** metrics ***
     // db
     const metricDbCpuUtilization = props.dbInstanceRef.metricCPUUtilization();
-    const metricDbFreeableMemory = props.dbInstanceRef.metricFreeableMemory();
     const metricDbNumConnections = props.dbInstanceRef.metricDatabaseConnections();
+    const metricDbFreeStorageSpace = props.dbInstanceRef.metricFreeStorageSpace();
     // ecs
     const metricEcsCpu = props.ecsClusterRef.metric('CPUUtilization', {
       dimensions: {
@@ -65,7 +66,7 @@ export class MetricsStack extends BaseStack {
     this.dbCpuAlarmTopic = new Topic(this, dbCpuAlarmTopicName, {
       topicName: dbCpuAlarmTopicName,
     });
-    const alarmDbHighCpuName = iname(`db-high-cpu`, props, false);
+    const alarmDbHighCpuName = iname('db-high-cpu', props, false);
     this.dbCpuAlarm = new Alarm(this, alarmDbHighCpuName, {
       metric: metricDbCpuUtilization,
       threshold: 90,
@@ -73,6 +74,21 @@ export class MetricsStack extends BaseStack {
       alarmName: alarmDbHighCpuName,
     });
     this.dbCpuAlarm.addAlarmAction(new SnsAction(this.dbCpuAlarmTopic));
+
+    // db free storage space
+    const dbFreeStoreageSpaceAlarmTopicName = iname('db-low-disk-space-alarm', props);
+    this.dbFresStorageSpaceAlarmTopic = new Topic(this, dbFreeStoreageSpaceAlarmTopicName, {
+      topicName: dbFreeStoreageSpaceAlarmTopicName,
+    });
+    const alarmDbFreeStorageSpaceName = iname('db-low-disk-space', props, false);
+    this.dbFreeStorageSpaceAlarm = new Alarm(this, alarmDbFreeStorageSpaceName, {
+      metric: metricDbFreeStorageSpace,
+      comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+      threshold: 500 * 1000 * 1000, // 500MB
+      evaluationPeriods: 1,
+      alarmName: alarmDbFreeStorageSpaceName,
+    });
+    this.dbFreeStorageSpaceAlarm.addAlarmAction(new SnsAction(this.dbFresStorageSpaceAlarmTopic));
 
     // ecs high cpu
     const ecsCpuAlarmTopicName = iname('ecs-high-cpu-alarm', props);
@@ -111,6 +127,7 @@ export class MetricsStack extends BaseStack {
         .map(email => new EmailSubscription(email))
         .forEach(sub => {
           this.dbCpuAlarmTopic.addSubscription(sub);
+          this.dbFresStorageSpaceAlarmTopic.addSubscription(sub);
           this.ecsCpuAlarmTopic.addSubscription(sub);
           this.ecsMemoryAlarmTopic.addSubscription(sub);
         });
@@ -122,21 +139,24 @@ export class MetricsStack extends BaseStack {
       dashboardName: dashboardName,
     });
     this.dashboard.addWidgets(
-      // db
-      this.buildAlarmWidget('db-cpu', this.dbCpuAlarm),
-      this.buildGraphWidget('db-freeable-memory', metricDbFreeableMemory),
-      this.buildGraphWidget('db-num-connections', metricDbNumConnections),
-      // ecs
-      this.buildAlarmWidget('ecs-cpu', this.ecsCpuAlarm),
-      this.buildAlarmWidget('ecs-memory', this.ecsMemoryAlarm),
       // lb
-      this.buildGraphWidget('lb-request-count', metricsLbRequestCount)
+      this.buildGraphWidget('lb-request-count', metricsLbRequestCount),
+      // ecs
+      this.buildAlarmWidget('ecs-memory', this.ecsMemoryAlarm),
+      this.buildAlarmWidget('ecs-cpu', this.ecsCpuAlarm),
+      // db
+      this.buildGraphWidget('db-num-connections', metricDbNumConnections),
+      this.buildAlarmWidget('db-disk-space', this.dbFreeStorageSpaceAlarm),
+      this.buildAlarmWidget('db-cpu', this.dbCpuAlarm),
     );
     // *** END cloudwatch dashboard ***
 
     // stack output
     new CfnOutput(this, 'dbHighCpuAlarmName', {
       value: this.dbCpuAlarm.alarmName,
+    });
+    new CfnOutput(this, 'dbFreeStorageSpaceAlarmName', {
+      value: this.dbFreeStorageSpaceAlarm.alarmName,
     });
     new CfnOutput(this, 'ecsHighCpuAlarmName', {
       value: this.ecsCpuAlarm.alarmName,

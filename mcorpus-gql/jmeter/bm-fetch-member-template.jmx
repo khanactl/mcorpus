@@ -268,7 +268,7 @@ for(int i = 0; i &lt; cm.getCookieCount(); i++) {
   if(&quot;rst&quot;.equals(cookie.getName())) {
     props.put(&quot;rst&quot;, cookie.getValue());
     vars.put(&quot;rst&quot;, cookie.getValue());
-    log.info(&quot;Initial rst set (mclogin).&quot;);
+    log.info(&quot;Initial rst set (jwtLogin).&quot;);
   }
 }
 </stringProp>
@@ -282,7 +282,7 @@ for(int i = 0; i &lt; cm.getCookieCount(); i++) {
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  mclogin(username: \&quot;${mcusername}\&quot;, pswd: \&quot;${mcuserpswd}\&quot;) }&quot;,&quot;variables&quot;:null}</stringProp>
+                <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  jwtLogin(username: \&quot;${mcusername}\&quot;, pswd: \&quot;${mcuserpswd}\&quot;) }&quot;,&quot;variables&quot;:null}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -739,7 +739,7 @@ for(int i = 0; i &lt; cm.getCookieCount(); i++) {
   if(&quot;rst&quot;.equals(cookie.getName())) {
     props.put(&quot;rst&quot;, cookie.getValue());
     vars.put(&quot;rst&quot;, cookie.getValue());
-    log.info(&quot;Initial rst set (mclogout).&quot;);
+    log.info(&quot;Initial rst set (jwtLogout).&quot;);
   }
 }
 </stringProp>
@@ -753,7 +753,7 @@ for(int i = 0; i &lt; cm.getCookieCount(); i++) {
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  mclogout }&quot;,&quot;variables&quot;:null}</stringProp>
+                <stringProp name="Argument.value">{&quot;query&quot;:&quot;mutation {\n  jwtLogout }&quot;,&quot;variables&quot;:null}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>

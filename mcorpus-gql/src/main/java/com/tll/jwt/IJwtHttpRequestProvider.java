@@ -17,7 +17,7 @@ public interface IJwtHttpRequestProvider {
   Instant getRequestInstant();
 
   /**
-   * @return the ip address of the sourcing http request.
+   * @return the resolved ip address of the sourcing http request.
    */
   InetAddress getRequestOrigin();
 

@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
-import com.tll.gmodel.IKey;
 import com.tll.gmodel.UUIDKey;
 
-public class McuserHistory extends BaseEntity<McuserHistory, IKey> {
+public class McuserHistory extends BaseEntity<McuserHistory, UUIDKey> {
 
   public static class LoginEvent {
     public final UUID jwtId;
