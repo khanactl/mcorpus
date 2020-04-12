@@ -9,6 +9,7 @@ import static ratpack.handling.Handlers.redirect;
 
 import com.tll.mcorpus.repo.MCorpusRepoModule;
 import com.tll.mcorpus.web.CommonHttpHeaders;
+import com.tll.mcorpus.web.CorsHttpHeaders;
 import com.tll.mcorpus.web.CsrfGuardHandler;
 import com.tll.mcorpus.web.GraphQLHandler;
 import com.tll.mcorpus.web.JWTRequireAdminHandler;
@@ -94,6 +95,7 @@ public class Main {
 
         // graphql/
         .prefix("graphql", chainsub -> chainsub
+          .all(CorsHttpHeaders.class) // CORS support
 
           // the mcorpus GraphQL api (post only)
           .post(JWTStatusHandler.class)

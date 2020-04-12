@@ -29,6 +29,7 @@ public class MCorpusWebModule extends AbstractModule {
   protected void configure() {
     bind(WebFileRenderer.class);
     bind(CommonHttpHeaders.class);
+    bind(CorsHttpHeaders.class);
     bind(JWTRequireAdminHandler.class);
     bind(JWTStatusHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
