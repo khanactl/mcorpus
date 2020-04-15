@@ -70,4 +70,11 @@ public class MCorpusServerConfig {
    * The default is <code>true</code>.
    */
   public boolean metricsOn = true;
+
+  /**
+   * Serve GraphiQL requests?
+   * <p>
+   * The default is <code>false</code> (production mode).
+   */
+  public boolean graphiql = false;
 }

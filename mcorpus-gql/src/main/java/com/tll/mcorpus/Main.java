@@ -101,12 +101,22 @@ public class Main {
           .post(JWTStatusHandler.class)
           .post(GraphQLHandler.class)
 
-          // the GraphiQL developer interface (get only)
-          .get("index", ctx -> ctx.render(htmlNoCache(
-            ctx.file("public/graphql/index.html"),
-            singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst))
-          ))
-          .files(f -> f.dir("public/graphql"))
+          // the GraphiQL developer interface
+          .prefix("index", chainsub2 -> chainsub2
+            .all(ctx -> {
+              if(not(ctx.getServerConfig().get(MCorpusServerConfig.class).graphiql)) {
+                // graphiql is OFF
+                ctx.clientError(400); // bad request
+              } else {
+                ctx.next();
+              }
+            })
+            .get(ctx -> ctx.render(htmlNoCache(
+              ctx.file("public/graphiql/index.html"),
+              singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst)
+            )))
+            .files(f -> f.dir("public/graphiql"))
+          )
         )
 
         .prefix("admin", chainsub -> chainsub
@@ -114,7 +124,8 @@ public class Main {
           .all(JWTRequireAdminHandler.class)
           .all(ctx -> {
             if(not(ctx.getServerConfig().get(MCorpusServerConfig.class).metricsOn)) {
-              ctx.render("metrics is off.");
+              // metrics is OFF
+              ctx.clientError(400); // bad request
             } else {
               ctx.next();
             }
