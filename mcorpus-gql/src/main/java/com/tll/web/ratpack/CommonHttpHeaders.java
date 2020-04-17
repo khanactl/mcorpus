@@ -1,11 +1,13 @@
-package com.tll.mcorpus.web;
+package com.tll.web.ratpack;
 
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
  * Add HTTP response headers suitable for all
- * http responses in the application.
+ * http responses in the application Ratpack style.
+ *
+ * @author jpk
  */
 public class CommonHttpHeaders implements Handler {
 

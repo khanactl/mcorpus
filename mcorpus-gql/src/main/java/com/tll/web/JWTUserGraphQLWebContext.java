@@ -224,6 +224,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       final String jwt = jwtbiz.jwtGenerate(
           pendingJwtID,
           jwtUser.getJwtUserId(),
+          jwtUser.isAdministrator(),
           isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
             Arrays.stream(jwtUser.getJwtUserRoles())
             .collect(Collectors.joining(",")),

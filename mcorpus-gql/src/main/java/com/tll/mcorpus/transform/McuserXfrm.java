@@ -66,6 +66,13 @@ public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.d
         ;
   }
 
+  public static String[] mcuserRolesArrayToStringArray(final McuserRole[] roles) {
+    return isNullOrEmpty(roles) ? new String[0] : Arrays.stream(roles)
+        .map(role -> mcuserRoleToString(role))
+        .filter(mr -> isNotNull(mr))
+        .toArray(String[]::new);
+  }
+
   public static Set<String> rolesListToSet(final List<String> rlist) {
     return isNull(rlist) ? null : new HashSet<>(rlist);
   }

@@ -173,7 +173,7 @@ public class MCorpusGraphQL {
     return RuntimeWiring.newRuntimeWiring()
 
       .scalar(new GraphQLDate())
-      .directive("auth", new AuthorizationDirective())
+      .directive("auth", new MCorpusAuthorizationDirective())
 
       // Query
       .type("Query", typeWiring -> typeWiring

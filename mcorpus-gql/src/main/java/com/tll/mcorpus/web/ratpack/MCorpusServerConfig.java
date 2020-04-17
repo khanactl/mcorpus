@@ -1,4 +1,4 @@
-package com.tll.mcorpus;
+package com.tll.mcorpus.web.ratpack;
 
 /**
  * The MCorpus GraphQL server config properties.
@@ -77,4 +77,18 @@ public class MCorpusServerConfig {
    * The default is <code>false</code> (production mode).
    */
   public boolean graphiql = false;
+
+  /**
+   * The optional http client origin enabling CORS functionality.
+   * <p>
+   * When this property is specified,
+   * CORS will be configured to allow http communication between
+   * this graphql server and the http client origin specified by this property.
+   * <p>
+   * E.g.:  <code>https://clientAppDomain.net</code>
+   *        <code>http://localhost:8080</code>
+   * <p>
+   * The default is null (not specified) and NO CORS http headers will be issued.
+   */
+  public String httpClientOrigin;
 }

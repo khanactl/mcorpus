@@ -1,4 +1,4 @@
-package com.tll.mcorpus.web;
+package com.tll.web.ratpack;
 
 import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNull;
@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import com.google.common.reflect.TypeToken;
 import com.tll.gql.GraphQLDataFetchError;
+import com.tll.jwt.IJwtHttpRequestProvider;
+import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.JWT;
 import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.web.JWTUserGraphQLWebContext;
@@ -28,7 +30,7 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Handles graphql query requests.
+ * Graphql request handler Ratpack style.
  *
  * @author jkirton
  */
@@ -38,13 +40,17 @@ public class GraphQLHandler implements Handler {
 
   private final GraphQL graphQL;
 
+  private final String jwtUserLoginQueryMethodName;
+
   /**
    * Constructor.
    *
    * @param graphQL the app scoped {@link GraphQL} instance.
+   * @param jwtUserLoginQueryMethodName the graphql query method name for JWT login.
    */
-  public GraphQLHandler( final GraphQL graphQL) {
+  public GraphQLHandler(final GraphQL graphQL, String jwtUserLoginQueryMethodName) {
     this.graphQL = graphQL;
+    this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
   }
 
   @SuppressWarnings("serial")
@@ -54,8 +60,10 @@ public class GraphQLHandler implements Handler {
   public void handle(Context ctx) throws Exception {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
 
-      final MCorpusJwtRequestProvider jwtRequestProvider = ctx.getRequest().get(MCorpusJwtRequestProvider.class);
+      final JWT jwtbiz = ctx.get(JWT.class);
+      final IJwtHttpRequestProvider jwtRequestProvider = ctx.getRequest().get(IJwtHttpRequestProvider.class);
       final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
+      final IJwtHttpResponseAction jwtResponseAction = ctx.get(IJwtHttpResponseAction.class);
 
       // grab the http request info
       final String query = ((String) qmap.get("query"));
@@ -69,9 +77,9 @@ public class GraphQLHandler implements Handler {
         vmap,
         jwtRequestProvider,
         jwtRequestStatus,
-        ctx.get(JWT.class),
-        MCorpusJwtHttpResponseAction.fromRatpackContext(ctx),
-        "jwtLogin"
+        jwtbiz,
+        jwtResponseAction,
+        jwtUserLoginQueryMethodName
       );
       log.info("graphql query pending: {}.", gqlWebCtx);
 

@@ -1,20 +1,21 @@
-package com.tll.mcorpus;
+package com.tll.mcorpus.web.ratpack;
 
+import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.not;
-import static com.tll.mcorpus.web.WebFileRenderer.TRefAndData.htmlNoCache;
+import static com.tll.mcorpus.web.ratpack.MCorpusWebModule.RST_TOKEN_NAME;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
+import static com.tll.web.ratpack.WebFileRenderer.TRefAndData.htmlNoCache;
 import static java.util.Collections.singletonMap;
 import static ratpack.handling.Handlers.redirect;
 
 import com.tll.mcorpus.repo.MCorpusRepoModule;
-import com.tll.mcorpus.web.CommonHttpHeaders;
-import com.tll.mcorpus.web.CorsHttpHeaders;
-import com.tll.mcorpus.web.CsrfGuardHandler;
-import com.tll.mcorpus.web.GraphQLHandler;
-import com.tll.mcorpus.web.JWTRequireAdminHandler;
-import com.tll.mcorpus.web.JWTStatusHandler;
-import com.tll.mcorpus.web.MCorpusWebModule;
+import com.tll.web.ratpack.CommonHttpHeaders;
+import com.tll.web.ratpack.CorsHandler;
+import com.tll.web.ratpack.CsrfGuardHandler;
+import com.tll.web.ratpack.GraphQLHandler;
+import com.tll.web.ratpack.JWTRequireAdminHandler;
+import com.tll.web.ratpack.JWTStatusHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,12 @@ public class Main {
           bindings.module(DropwizardMetricsModule.class);
         }
         glog().info("metrics is {}", config.metricsOn ? "ON" : "OFF");
+        glog().info("GraphiQL is {}", config.graphiql ? "ON" : "OFF");
+        glog().info("CORS is {}",
+          isNotBlank(config.httpClientOrigin) ?
+            "ENABLED for " + config.httpClientOrigin :
+            "DISABLED"
+        );
         bindings.module(HikariModule.class, hikariConfig -> {
           hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
           hikariConfig.addDataSourceProperty("URL", config.dbUrl);
@@ -95,7 +102,7 @@ public class Main {
 
         // graphql/
         .prefix("graphql", chainsub -> chainsub
-          .all(CorsHttpHeaders.class) // CORS support
+          .all(CorsHandler.class) // CORS support
 
           // the mcorpus GraphQL api (post only)
           .post(JWTStatusHandler.class)
@@ -106,14 +113,14 @@ public class Main {
             .all(ctx -> {
               if(not(ctx.getServerConfig().get(MCorpusServerConfig.class).graphiql)) {
                 // graphiql is OFF
-                ctx.clientError(400); // bad request
+                ctx.clientError(404); // not found
               } else {
                 ctx.next();
               }
             })
             .get(ctx -> ctx.render(htmlNoCache(
               ctx.file("public/graphiql/index.html"),
-              singletonMap("rst", ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst)
+              singletonMap(RST_TOKEN_NAME, ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst)
             )))
             .files(f -> f.dir("public/graphiql"))
           )
@@ -125,7 +132,7 @@ public class Main {
           .all(ctx -> {
             if(not(ctx.getServerConfig().get(MCorpusServerConfig.class).metricsOn)) {
               // metrics is OFF
-              ctx.clientError(400); // bad request
+              ctx.clientError(404); // not found
             } else {
               ctx.next();
             }

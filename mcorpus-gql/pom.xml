@@ -22,6 +22,7 @@
 
   <properties>
     <mcorpus-db.version>1.4.12-SNAPSHOT</mcorpus-db.version>
+    <main-class>com.tll.mcorpus.web.ratpack.Main</main-class>
   </properties>
 
   <profiles>
@@ -83,11 +84,11 @@
           <archive>
             <index>true</index>
             <manifest>
-              <mainClass>com.tll.mcorpus.Main</mainClass>
+              <mainClass>${main-class}</mainClass>
               <addClasspath>true</addClasspath>
             </manifest>
             <manifestEntries>
-              <Main-Class>com.tll.mcorpus.Main</Main-Class>
+              <Main-Class>${main-class}</Main-Class>
               <App-Version>${project.version}</App-Version>
               <Build-Timestamp>${timestamp}</Build-Timestamp>
             </manifestEntries>
@@ -160,9 +161,9 @@
               </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.tll.mcorpus.Main</mainClass>
+                  <mainClass>${main-class}</mainClass>
                   <manifestEntries>
-                    <Main-Class>com.tll.mcorpus.Main</Main-Class>
+                    <Main-Class>${main-class}</Main-Class>
                     <Build-Number>${project.version}</Build-Number>
                     <Build-Timestamp>${timestamp}</Build-Timestamp>
                   </manifestEntries>

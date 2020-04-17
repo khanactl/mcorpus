@@ -2,8 +2,6 @@ package com.tll.web;
 
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.neclean;
-import static com.tll.core.Util.isNullOrEmpty;
-import static com.tll.core.Util.lower;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 
@@ -20,14 +18,6 @@ public class RequestSnapshot {
   static String stripQS(final String s) {
     final int i = s == null ? -1 : s.indexOf("?");
     return i > 0 ? s.substring(0, i) : s;
-  }
-
-  static boolean isNullwiseOrEmpty(final String s) {
-    return isNullOrEmpty(s) || "null".equals(lower(s));
-  }
-
-  static String nullif(final String s) {
-    return isNullwiseOrEmpty(s) ? null : s;
   }
 
   private final Instant requestInstant;
@@ -93,22 +83,22 @@ public class RequestSnapshot {
   ) {
     super();
     this.requestInstant = requestInstant;
-    this.remoteAddressHost = nullif(remoteAddressHost);
-    this.path = nullif(path);
-    this.method = nullif(method);
+    this.remoteAddressHost = remoteAddressHost;
+    this.path = path;
+    this.method = method;
 
-    this.httpHost = nullif(httpHost);
-    this.httpOrigin = nullif(httpOrigin);
-    this.httpReferer = nullif(httpReferer);
-    this.httpForwarded = nullif(httpForwarded);
+    this.httpHost = httpHost;
+    this.httpOrigin = httpOrigin;
+    this.httpReferer = httpReferer;
+    this.httpForwarded = httpForwarded;
 
-    this.xForwardedFor = nullif(xForwardedFor);
-    this.xForwardedHost = nullif(xForwardedHost);
-    this.xForwardedProto = nullif(xForwardedProto);
+    this.xForwardedFor = xForwardedFor;
+    this.xForwardedHost = xForwardedHost;
+    this.xForwardedProto = xForwardedProto;
 
-    this.jwtCookie = nullif(jwtCookie);
-    this.rstCookie = nullif(rstCookie);
-    this.rstHeader = nullif(rstHeader);
+    this.jwtCookie = jwtCookie;
+    this.rstCookie = rstCookie;
+    this.rstHeader = rstHeader;
 
     this.requestId = requestId;
   }

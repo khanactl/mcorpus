@@ -1,4 +1,4 @@
-package com.tll.mcorpus.web;
+package com.tll.mcorpus.web.ratpack;
 
 import java.time.Duration;
 
@@ -8,9 +8,19 @@ import com.google.inject.Singleton;
 import com.tll.jwt.CachingJwtBackendHandler;
 import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
-import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.mcorpus.web.MCorpusGraphQL;
+import com.tll.mcorpus.web.MCorpusJwtBackendHandler;
+import com.tll.web.ratpack.CommonHttpHeaders;
+import com.tll.web.ratpack.CorsHandler;
+import com.tll.web.ratpack.CsrfGuardHandler;
+import com.tll.web.ratpack.GraphQLHandler;
+import com.tll.web.ratpack.JWTRequireAdminHandler;
+import com.tll.web.ratpack.JWTStatusHandler;
+import com.tll.web.ratpack.RequestSnapshotFactory;
+import com.tll.web.ratpack.WebErrorHandler;
+import com.tll.web.ratpack.WebFileRenderer;
 
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
@@ -25,21 +35,39 @@ import ratpack.server.ServerConfig;
  */
 public class MCorpusWebModule extends AbstractModule {
 
+  public static final String JWT_TOKEN_NAME = "jwt";
+  public static final String RST_TOKEN_NAME = "rst";
+
   @Override
   protected void configure() {
     bind(WebFileRenderer.class);
     bind(CommonHttpHeaders.class);
-    bind(CorsHttpHeaders.class);
     bind(JWTRequireAdminHandler.class);
-    bind(JWTStatusHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
   }
 
   @Provides
   @Singleton
+  RequestSnapshotFactory requestSnapshotFactory(MCorpusServerConfig config) {
+    return new RequestSnapshotFactory(RST_TOKEN_NAME, JWT_TOKEN_NAME);
+  }
+
+  @Provides
+  @Singleton
+  CorsHandler corsHandler(MCorpusServerConfig config) {
+    return new CorsHandler(config.httpClientOrigin);
+  }
+
+  @Provides
+  @Singleton
   CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
-    return new CsrfGuardHandler(config.rstTtlInSeconds);
+    return new CsrfGuardHandler(
+      RST_TOKEN_NAME,
+      "^(graphql\\/index|graphql)\\/?$",
+      config.rstTtlInSeconds,
+      config.cookieSecure
+    );
   }
 
   @Provides
@@ -48,8 +76,15 @@ public class MCorpusWebModule extends AbstractModule {
     final MCorpusGraphQL mcorpusGraphQL = new MCorpusGraphQL(mcuserRepo, mcorpusRepo);
     final GraphQLSchema schema = mcorpusGraphQL.getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL);
+    final String jwtUserLoginQueryMethodName = "jwtLogin";
+    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL, jwtUserLoginQueryMethodName);
     return gqlHandler;
+  }
+
+  @Provides
+  @Singleton
+  JWTStatusHandler jwtStatusHandler(MCorpusServerConfig config) {
+    return new JWTStatusHandler(config.cookieSecure, JWT_TOKEN_NAME);
   }
 
   @Provides

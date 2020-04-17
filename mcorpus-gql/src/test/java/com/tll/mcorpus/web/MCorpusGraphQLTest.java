@@ -23,6 +23,7 @@ import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.web.JWTRequestProvider;
 import com.tll.web.JWTUserGraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
@@ -105,9 +106,10 @@ public class MCorpusGraphQLTest {
       jwtStatus,
       UUID.randomUUID(),
       UUID.randomUUID(),
-      roles,
       lnow,
-      lnow
+      lnow,
+      false,
+      roles
     );
   }
 
@@ -116,7 +118,7 @@ public class MCorpusGraphQLTest {
       return new JWTUserGraphQLWebContext(
         query,
         null,
-        MCorpusJwtRequestProvider.fromRequestSnapshot(requestSnapshot),
+        JWTRequestProvider.fromRequestSnapshot(requestSnapshot),
         jwtRequestStatus,
         jwt(),
         testJwtResponseProvider(),

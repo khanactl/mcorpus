@@ -1,4 +1,4 @@
-package com.tll.mcorpus.web;
+package com.tll.web;
 
 import static com.tll.core.Util.isNotNull;
 
@@ -8,23 +8,24 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import com.tll.jwt.IJwtHttpRequestProvider;
-import com.tll.web.RequestSnapshot;
 
 /**
- * Mcorpus specific implementation of {@link IJwtHttpRequestProvider}.
+ * JWT request provider Ratpack style.
+ *
+ * @author jpk
  */
-public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
+public class JWTRequestProvider implements IJwtHttpRequestProvider {
 
   /**
-   * Create a new {@link MCorpusJwtRequestProvider} instance from a given {@link RequestSnapshot}.
+   * Create a new {@link JWTRequestProvider} instance from a given {@link RequestSnapshot}.
    *
    * @param rs the request snapshot
-   * @return Newly created {@link MCorpusJwtRequestProvider} instance.
+   * @return Newly created {@link JWTRequestProvider} instance.
    *
    * @throws UnknownHostException when the http request client origin is un-resolvable.
    */
-  public static MCorpusJwtRequestProvider fromRequestSnapshot(final RequestSnapshot rs) throws UnknownHostException {
-    return new MCorpusJwtRequestProvider(
+  public static JWTRequestProvider fromRequestSnapshot(final RequestSnapshot rs) throws UnknownHostException {
+    return new JWTRequestProvider(
       rs.getJwtCookie(),
       rs.getRequestInstant().truncatedTo(ChronoUnit.SECONDS), // so that conversion to/from Date are equal!
       resolveRequestOrigin(rs)
@@ -34,8 +35,8 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   private static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
     final String sro;
     // primary: x-forwarded-for http header
-    if(isNotNull(rs.getXForwardedFor()))
-      sro = rs.getXForwardedFor();
+    if(isNotNull(rs.getXForwardedForClientIp()))
+      sro = rs.getXForwardedForClientIp();
     // fallback: remote address host
     else if(isNotNull(rs.getRemoteAddressHost()))
       sro = rs.getRemoteAddressHost();
@@ -48,7 +49,7 @@ public class MCorpusJwtRequestProvider implements IJwtHttpRequestProvider {
   private final Instant requestInstant;
   private final InetAddress requestOrigin;
 
-  private MCorpusJwtRequestProvider(String jwt, Instant requestInstant, InetAddress requestOrigin) {
+  private JWTRequestProvider(String jwt, Instant requestInstant, InetAddress requestOrigin) {
     this.jwt = jwt;
     this.requestInstant = requestInstant;
     this.requestOrigin = requestOrigin;

@@ -122,6 +122,11 @@ public class MCorpusTestUtil {
       public UUID getJwtUserId() {
         return UUID.randomUUID();
       }
+
+      @Override
+      public boolean isAdministrator() {
+        return true;
+      }
     };
   }
 
