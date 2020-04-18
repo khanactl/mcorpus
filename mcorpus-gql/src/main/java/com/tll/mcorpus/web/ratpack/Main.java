@@ -2,7 +2,6 @@ package com.tll.mcorpus.web.ratpack;
 
 import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.not;
-import static com.tll.mcorpus.web.ratpack.MCorpusWebModule.RST_TOKEN_NAME;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 import static com.tll.web.ratpack.WebFileRenderer.TRefAndData.htmlNoCache;
@@ -39,16 +38,6 @@ import ratpack.server.RatpackServer;
  */
 public class Main {
 
-  /**
-   * The app-wide global logger.
-   * <p>
-   * Use this sole static logger to issue application level logging
-   * when logging at class/global level (i.e. inside static methods).
-   *
-   * @return the global app logger.
-   */
-  public static final Logger glog() { return glog; }
-
   private static final Logger glog = LoggerFactory.getLogger("mcorpus-gql");
 
   public static void main(final String... args) throws Exception {
@@ -67,9 +56,9 @@ public class Main {
         if(config.metricsOn) {
           bindings.module(DropwizardMetricsModule.class);
         }
-        glog().info("metrics is {}", config.metricsOn ? "ON" : "OFF");
-        glog().info("GraphiQL is {}", config.graphiql ? "ON" : "OFF");
-        glog().info("CORS is {}",
+        glog.info("metrics is {}", config.metricsOn ? "ON" : "OFF");
+        glog.info("GraphiQL is {}", config.graphiql ? "ON" : "OFF");
+        glog.info("CORS is {}",
           isNotBlank(config.httpClientOrigin) ?
             "ENABLED for " + config.httpClientOrigin :
             "DISABLED"
@@ -120,7 +109,10 @@ public class Main {
             })
             .get(ctx -> ctx.render(htmlNoCache(
               ctx.file("public/graphiql/index.html"),
-              singletonMap(RST_TOKEN_NAME, ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst)
+              singletonMap(
+                ctx.getServerConfig().get(MCorpusServerConfig.class).rstTokenName,
+                ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst
+              )
             )))
             .files(f -> f.dir("public/graphiql"))
           )

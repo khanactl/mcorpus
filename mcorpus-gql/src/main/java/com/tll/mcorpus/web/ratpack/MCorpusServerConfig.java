@@ -18,11 +18,21 @@ public class MCorpusServerConfig {
   public String dbUrl;
 
   /**
-   * The Request Sync Token (anti-CSRF) time to live in seconds.
+   * The Request Sync Token name to use (http cookie name  and http header name).
+   */
+  public String rstTokenName = "rst";
+
+  /**
+   * The Request Sync Token time to live in seconds on the client browser.
    * <p>
    * Default is 30 minutes (1800 seconds).
    */
   public long rstTtlInSeconds = 1800L;
+
+  /**
+   * RegEx that identified the http request paths subject to RST server handling.
+   */
+  public String rstRegExRequestPaths = "^(graphql\\/index|graphql)\\/?$";
 
   /**
    * The JWT salt value.
@@ -35,6 +45,16 @@ public class MCorpusServerConfig {
    * Default is 2 days (172800 seconds).
    */
   public long jwtTtlInSeconds = 172800L;
+
+  /**
+   * The name to use for generated JWTs.
+   */
+  public String jwtTokenName = "jwt";
+
+  /**
+   * The GraphQL schema method name for JWT-based user logins.
+   */
+  public String jwtUserLoginGraphqlMethodName = "jwtLogin";
 
   /**
    * The number of minutes the status of JWTs should be held in-memory

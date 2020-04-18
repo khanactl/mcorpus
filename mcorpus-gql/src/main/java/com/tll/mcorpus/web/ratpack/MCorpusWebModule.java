@@ -35,9 +35,6 @@ import ratpack.server.ServerConfig;
  */
 public class MCorpusWebModule extends AbstractModule {
 
-  public static final String JWT_TOKEN_NAME = "jwt";
-  public static final String RST_TOKEN_NAME = "rst";
-
   @Override
   protected void configure() {
     bind(WebFileRenderer.class);
@@ -50,7 +47,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   RequestSnapshotFactory requestSnapshotFactory(MCorpusServerConfig config) {
-    return new RequestSnapshotFactory(RST_TOKEN_NAME, JWT_TOKEN_NAME);
+    return new RequestSnapshotFactory(config.rstTokenName, config.jwtTokenName);
   }
 
   @Provides
@@ -63,8 +60,8 @@ public class MCorpusWebModule extends AbstractModule {
   @Singleton
   CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
     return new CsrfGuardHandler(
-      RST_TOKEN_NAME,
-      "^(graphql\\/index|graphql)\\/?$",
+      config.rstTokenName,
+      config.rstRegExRequestPaths,
       config.rstTtlInSeconds,
       config.cookieSecure
     );
@@ -72,19 +69,18 @@ public class MCorpusWebModule extends AbstractModule {
 
   @Provides
   @Singleton
-  GraphQLHandler gqlHandler(MCorpusUserRepo mcuserRepo, MCorpusRepo mcorpusRepo) {
+  GraphQLHandler gqlHandler(MCorpusServerConfig config, MCorpusUserRepo mcuserRepo, MCorpusRepo mcorpusRepo) {
     final MCorpusGraphQL mcorpusGraphQL = new MCorpusGraphQL(mcuserRepo, mcorpusRepo);
     final GraphQLSchema schema = mcorpusGraphQL.getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final String jwtUserLoginQueryMethodName = "jwtLogin";
-    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL, jwtUserLoginQueryMethodName);
+    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL, config.jwtUserLoginGraphqlMethodName);
     return gqlHandler;
   }
 
   @Provides
   @Singleton
   JWTStatusHandler jwtStatusHandler(MCorpusServerConfig config) {
-    return new JWTStatusHandler(config.cookieSecure, JWT_TOKEN_NAME);
+    return new JWTStatusHandler(config.cookieSecure, config.jwtTokenName);
   }
 
   @Provides
