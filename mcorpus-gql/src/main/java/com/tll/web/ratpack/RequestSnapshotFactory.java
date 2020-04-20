@@ -50,7 +50,7 @@ public class RequestSnapshotFactory {
    * @return Never-null {@link RequestSnapshot} instance.
    */
   public RequestSnapshot getOrCreateRequestSnapshot(final Context ctx) {
-    return ctx.maybeGet(RequestSnapshot.class).orElseGet(() -> {
+    return ctx.getRequest().maybeGet(RequestSnapshot.class).orElseGet(() -> {
       final Request req = ctx.getRequest();
       final RequestSnapshot rs = new RequestSnapshot(
         req.getTimestamp(),

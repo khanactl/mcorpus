@@ -61,9 +61,9 @@ public class GraphQLHandler implements Handler {
     ctx.parse(fromJson(strObjMapTypeRef)).then(qmap -> {
 
       final JWT jwtbiz = ctx.get(JWT.class);
-      final IJwtHttpRequestProvider jwtRequestProvider = ctx.getRequest().get(IJwtHttpRequestProvider.class);
       final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
-      final IJwtHttpResponseAction jwtResponseAction = ctx.get(IJwtHttpResponseAction.class);
+      final IJwtHttpRequestProvider jwtRequestProvider = ctx.getRequest().get(IJwtHttpRequestProvider.class);
+      final IJwtHttpResponseAction jwtResponseAction = ctx.getRequest().get(IJwtHttpResponseAction.class);
 
       // grab the http request info
       final String query = ((String) qmap.get("query"));
@@ -135,7 +135,7 @@ public class GraphQLHandler implements Handler {
           log.error("graphql request {} execution error(s):\n\n{}\n", gqlWebCtx.getExecutionId(), executionResult.getErrors());
           ctx.render(json(executionResult.getErrors().stream().map(err -> {
             if(err.getErrorType() == ErrorType.DataFetchingException && err instanceof GraphQLDataFetchError) {
-              // mcorpus-specific error (including validation errors)
+              // native type graphql error (no need to sanitize)
               return err;
             }
             else if(err.getErrorType() == ErrorType.ValidationError) {

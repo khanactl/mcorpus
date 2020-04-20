@@ -4,14 +4,14 @@ import static com.tll.TestUtil.cpr;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.jwt;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
-import static com.tll.mcorpus.MCorpusTestUtil.testJwtResponseProvider;
+import static com.tll.mcorpus.MCorpusTestUtil.testJwtRequestProvider;
+import static com.tll.mcorpus.MCorpusTestUtil.testJwtResponseAction;
 import static com.tll.mcorpus.db.Tables.MEMBER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -23,7 +23,6 @@ import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.web.JWTRequestProvider;
 import com.tll.web.JWTUserGraphQLWebContext;
 import com.tll.web.RequestSnapshot;
 
@@ -113,20 +112,16 @@ public class MCorpusGraphQLTest {
     );
   }
 
-  static JWTUserGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
-    try {
-      return new JWTUserGraphQLWebContext(
-        query,
-        null,
-        JWTRequestProvider.fromRequestSnapshot(requestSnapshot),
-        jwtRequestStatus,
-        jwt(),
-        testJwtResponseProvider(),
-        "jwtLogin"
-      );
-    } catch(UnknownHostException e) {
-      throw new Error(e);
-    }
+  public static JWTUserGraphQLWebContext gqlWebContext(String query, RequestSnapshot requestSnapshot, JWTHttpRequestStatus jwtRequestStatus) {
+    return new JWTUserGraphQLWebContext(
+      query,
+      null,
+      testJwtRequestProvider(requestSnapshot),
+      jwtRequestStatus,
+      jwt(),
+      testJwtResponseAction(),
+      "jwtLogin"
+    );
   }
 
   /**

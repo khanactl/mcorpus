@@ -31,7 +31,7 @@ public class Cookie {
     log.debug("{} cookie expired.", cookieName);
   }
 
-  public static void setCookieImp(
+  private static void setCookieImp(
     final Context ctx,
     final String cookieName,
     final String cookieValue,
