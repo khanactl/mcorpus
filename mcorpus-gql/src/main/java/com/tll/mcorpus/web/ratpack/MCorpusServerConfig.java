@@ -18,7 +18,7 @@ public class MCorpusServerConfig {
   public String dbUrl;
 
   /**
-   * The Request Sync Token name to use (http cookie name  and http header name).
+   * The Request Sync Token name to use (http cookie name and http header name).
    */
   public String rstTokenName = "rst";
 
@@ -30,7 +30,7 @@ public class MCorpusServerConfig {
   public long rstTtlInSeconds = 1800L;
 
   /**
-   * RegEx that identified the http request paths subject to RST server handling.
+   * RegEx that identifies the http request paths subject to RST server handling.
    */
   public String rstRegExRequestPaths = "^(graphql\\/index|graphql)\\/?$";
 
@@ -70,9 +70,9 @@ public class MCorpusServerConfig {
   /**
    * The max number of JWT status instances to cache at any one time.
    * <p>
-   * The default is 50.
+   * The default is 5.
    */
-  public int jwtStatusCacheMaxSize = 50;
+  public int jwtStatusCacheMaxSize = 5;
 
   /**
    * Flag for whether to send http cookies in the clear (http) or only over https.

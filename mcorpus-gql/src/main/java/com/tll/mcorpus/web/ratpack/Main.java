@@ -81,6 +81,7 @@ public class Main {
 
         .all(CommonHttpHeaders.class) // always add common http response headers for good security
 
+        // - temp disble CSRF guarding
         .all(CsrfGuardHandler.class) // CSRF protection
 
         // redirect to /index if coming in under /

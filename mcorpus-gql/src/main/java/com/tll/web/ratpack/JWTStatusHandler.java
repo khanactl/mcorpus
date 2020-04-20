@@ -41,6 +41,7 @@ public class JWTStatusHandler implements Handler {
    * Constructor.
    *
    * @param cookieSecure the cookie secure flag (https or http)
+   * @param jwtTokenName the name to use for generated JWTs
    */
   public JWTStatusHandler(boolean cookieSecure, String jwtTokenName) {
     this.cookieSecure = cookieSecure;

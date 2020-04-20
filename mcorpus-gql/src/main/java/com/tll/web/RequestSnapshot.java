@@ -8,8 +8,8 @@ import static com.tll.transform.TransformUtil.uuidToToken;
 import java.time.Instant;
 
 /**
- * Immutable snapshot of the key 'auditable' attributes of an incoming http
- * request.
+ * Immutable snapshot of the key 'auditable' attributes
+ * of an incoming http request.
  *
  * @author jkirton
  */
@@ -228,7 +228,7 @@ public class RequestSnapshot {
   /**
    * @return Opaque id associated with this request.
    *         <p>
-   *         This is mainly intended to correlate log statements.
+   *         This is mainly intended to correlate server log output.
    */
   public String getRequestId() {
     return requestId;
