@@ -159,13 +159,20 @@ public class MCorpusRepo implements Closeable {
    * @return Never null {@link FetchResult} object holding the {@link Mref} ref if successful.
    */
   public FetchResult<Mref> memberLogin(final String username, final String pswd, final Instant requestInstant, final InetAddress requestOrigin) {
+    if(isNull(username) || isNull(pswd) || isNull(requestInstant) || isNull(requestOrigin))
+      return fetchrslt(null, "Invalid member login argument(s) provided.");
+
     try {
       final MemberLogin mlogin = new MemberLogin();
       mlogin.setMemberUsername(username);
       mlogin.setMemberPassword(pswd);
       mlogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mlogin.setInRequestOrigin(requestOrigin);
-      mlogin.execute(dsl.configuration());
+
+      dsl.transaction(trans -> {
+        mlogin.execute(DSL.using(trans).configuration());
+      });
+
       final MrefRecord rec = mlogin.getReturnValue();
       if(rec != null && rec.getMid() != null) {
         // login success
@@ -176,6 +183,7 @@ public class MCorpusRepo implements Closeable {
     catch(Throwable t) {
       log.error("Member login error: {}.", t.getMessage());
     }
+
     // default - login fail
     return fetchrslt(null, "Member login failed.");
   }
@@ -192,12 +200,19 @@ public class MCorpusRepo implements Closeable {
    *          -OR- a null member id and a non-null error message if unsuccessful.
    */
   public FetchResult<UUID> memberLogout(final UUID mid, final Instant requestInstant, final InetAddress requestOrigin) {
+    if(isNull(mid) || isNull(requestInstant) || isNull(requestOrigin))
+      return fetchrslt(null, "Invalid member logout argument(s) provided.");
+
     try {
       final MemberLogout mlogout = new MemberLogout();
       mlogout.setMid(mid);
       mlogout.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mlogout.setInRequestOrigin(requestOrigin);
-      mlogout.execute(dsl.configuration());
+
+      dsl.transaction(trans -> {
+        mlogout.execute(DSL.using(trans).configuration());
+      });
+
       final UUID rmid = mlogout.getReturnValue();
       if(rmid != null) {
         // logout successful - convey by returning the mid
