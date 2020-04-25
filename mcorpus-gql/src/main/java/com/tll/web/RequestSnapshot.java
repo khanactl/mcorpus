@@ -1,5 +1,6 @@
 package com.tll.web;
 
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.neclean;
 import static com.tll.transform.TransformUtil.uuidFromToken;
@@ -33,6 +34,7 @@ public class RequestSnapshot {
   private final String httpForwarded;
 
   private final String xForwardedFor;
+  private final String xForwardedForClientIp;
   private final String xForwardedHost;
   private final String xForwardedProto;
 
@@ -93,6 +95,10 @@ public class RequestSnapshot {
     this.httpForwarded = httpForwarded;
 
     this.xForwardedFor = xForwardedFor;
+    this.xForwardedForClientIp =
+      isNotNull(xForwardedFor) && xForwardedFor.indexOf(",") > 0 ?
+        neclean(xForwardedFor.split(",")[0]) :
+        xForwardedFor;
     this.xForwardedHost = xForwardedHost;
     this.xForwardedProto = xForwardedProto;
 
@@ -167,12 +173,11 @@ public class RequestSnapshot {
   }
 
   /**
-   * @return the left-most ip of the x-forwarded-for header value
+   * @return the left-most token of the comma-delimeted X-Forwarded-For header value -OR-
+   *         the x-forwarded-for header value in full when it is not comma-delimited
    */
   public String getXForwardedForClientIp() {
-    return isNotNull(xForwardedFor) && xForwardedFor.indexOf(",") > 0 ?
-      neclean(xForwardedFor.split(",")[0]) :
-      xForwardedFor;
+    return xForwardedForClientIp;
   }
 
   /**
@@ -254,9 +259,9 @@ public class RequestSnapshot {
         "x-forwarded-for: %s, " +
         "x-forwarded-host: %s, " +
         "x-forwarded-proto: %s, " +
-        "hasRstCookie: %b, "+
-        "hasRstHeader: %b, " +
-        "hasJwtCookie: %b",
+        "rstCookie: %s, "+
+        "rstHeader: %s, " +
+        "jwtCookieLen: %d",
       getShortRequestId(),
       getPath(),
       getRemoteAddressHost(),
@@ -268,9 +273,9 @@ public class RequestSnapshot {
       getXForwardedFor(),
       getXForwardedHost(),
       getXForwardedProto(),
-      hasRstCookie(),
-      hasRstHeader(),
-      hasJwtCookie()
+      getRstCookie(),
+      getRstHeader(),
+      clean(getJwtCookie()).length()
     );
   }
 }

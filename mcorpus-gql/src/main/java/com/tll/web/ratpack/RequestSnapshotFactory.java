@@ -1,5 +1,6 @@
 package com.tll.web.ratpack;
 
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 
@@ -22,14 +23,15 @@ import ratpack.http.Request;
 public class RequestSnapshotFactory {
 
   static boolean isNullwiseOrEmpty(final String s) {
-    return isNullOrEmpty(s) || "null".equals(lower(s));
+    final String sc = lower(clean(s));
+    return isNullOrEmpty(sc) || "null".equals(sc) || "undefined".equals(sc);
   }
 
   static String nullif(final String s) {
     return isNullwiseOrEmpty(s) ? null : s;
   }
 
-  private final Logger log = LoggerFactory.getLogger(RequestSnapshotFactory.class);
+  private final Logger log = LoggerFactory.getLogger("RequestSnapshot");
 
   private final String rstTokenName;
   private final String jwtTokenName;
