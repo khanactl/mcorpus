@@ -46,7 +46,7 @@ import ratpack.handling.Handler;
  */
 public class JWTStatusHandler implements Handler {
 
-  public static class JwtHttpRequestProviderImpl implements IJwtHttpRequestProvider {
+  static class JwtHttpRequestProviderImpl implements IJwtHttpRequestProvider {
 
     private final String jwt;
     private final Instant requestInstant;
@@ -79,7 +79,7 @@ public class JWTStatusHandler implements Handler {
     }
   }
 
-  public static class JwtHttpResponseActionImpl implements IJwtHttpResponseAction {
+  static class JwtHttpResponseActionImpl implements IJwtHttpResponseAction {
 
     private final boolean cookieSecure;
     private final String jwtTokenName;
@@ -106,7 +106,7 @@ public class JWTStatusHandler implements Handler {
    * Resolve the incoming http request's originating IP address by interrogating
    * the http request headers.
    */
-  public static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
+  static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
     final String sro;
     // primary: x-forwarded-for http header
     if (isNotNull(rs.getXForwardedForClientIp()))
