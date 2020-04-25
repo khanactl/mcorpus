@@ -335,6 +335,8 @@ CREATE OR REPLACE FUNCTION blacklist_jwt_ids_for(
 LANGUAGE plpgsql AS
 $_$
 BEGIN
+  LOCK TABLE mcuser_audit IN ACCESS EXCLUSIVE MODE;
+
   insert into mcuser_audit
   (uid, type, request_timestamp, request_origin, jwt_id, jwt_id_status)
   select $1, 'LOGOUT'::mcuser_audit_type, $2, $3, adt.jwt_id, 'BLACKLISTED'::jwt_id_status
@@ -448,6 +450,8 @@ DECLARE
   uid uuid;
   rval mcuser%ROWTYPE;
 BEGIN
+  LOCK TABLE mcuser_audit IN ACCESS EXCLUSIVE MODE;
+
   -- verify the given in_jwt_id is unique against the existing jwt ids held
   -- in the mcuser_audit table
   select ma.jwt_id into existing_jwt_id from mcuser_audit ma where ma.jwt_id = in_jwt_id;
@@ -537,6 +541,8 @@ $_$
 DECLARE
   jsi jwt_status;
 BEGIN
+  LOCK TABLE mcuser_audit IN ACCESS EXCLUSIVE MODE;
+
   -- logout is predicated on finding a single mcuser_audit record with the
   -- given mcuserId *and* jwtId.
   IF EXISTS(SELECT uid FROM mcuser_audit m WHERE m.uid = $1 and m.jwt_id = $2 and m.type = 'LOGIN') THEN
@@ -788,6 +794,8 @@ DECLARE
   passed BOOLEAN;
   rec_mref mref;
 BEGIN
+  LOCK TABLE member_audit IN ACCESS EXCLUSIVE MODE;
+
   passed = false;
 
   -- authenticate
@@ -851,6 +859,8 @@ AS $_$
 DECLARE
   member_exists BOOLEAN;
 BEGIN
+  LOCK TABLE member_audit IN ACCESS EXCLUSIVE MODE;
+
   member_exists = false;
   SELECT EXISTS(SELECT m.mid FROM member m WHERE m.mid = $1) INTO member_exists;
   IF member_exists THEN
