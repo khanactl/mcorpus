@@ -53,7 +53,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   CorsHandler corsHandler(MCorpusServerConfig config) {
-    return new CorsHandler(config.httpClientOrigin);
+    return new CorsHandler(config.httpClientOrigin, config.rstTokenName);
   }
 
   @Provides

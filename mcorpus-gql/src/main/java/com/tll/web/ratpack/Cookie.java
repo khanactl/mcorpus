@@ -22,12 +22,16 @@ public class Cookie {
     final long maxAge,
     final boolean secure
   ) {
-    setCookieImp(ctx, cookieName, cookieValue, path, maxAge, secure);
+    setCookieImp(ctx, cookieName, cookieValue, path, maxAge, secure, "None");
     log.debug("{} cookie set (path: {}, maxAge: {}).", cookieName, path, maxAge);
   }
 
-  public static void expireCookie(final Context ctx, final String cookieName, final String path, final boolean secure) {
-    setCookieImp(ctx, cookieName, "", path, 0, secure);
+  public static void expireCookie(
+    final Context ctx,
+    final String cookieName,
+    final String path,
+    final boolean secure) {
+    setCookieImp(ctx, cookieName, "", path, 0, secure, "None");
     log.debug("{} cookie expired.", cookieName);
   }
 
@@ -37,17 +41,19 @@ public class Cookie {
     final String cookieValue,
     final String path,
     final long maxAge,
-    final boolean secure
+    final boolean secure,
+    final String sameSiteVal
   ) {
     ctx.getResponse().getHeaders().add(
       "Set-Cookie",
-      String.format("%s=%s; Domain=%s; Path=%s; Max-Age=%d; %sHttpOnly; SameSite=Strict;",
+      String.format("%s=%s; Domain=%s; Path=%s; Max-Age=%d; %sHttpOnly; SameSite=%s;",
         cookieName,
         cookieValue,
         getServerDomainName(ctx),
         path,
         maxAge,
-        secure ? "Secure; " : ""
+        secure ? "Secure; " : "",
+        sameSiteVal
       )
     );
   }

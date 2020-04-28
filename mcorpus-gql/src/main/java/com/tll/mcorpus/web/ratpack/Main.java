@@ -77,12 +77,17 @@ public class Main {
         ));
       }))
       .handlers(chain -> chain
-        .all(RequestLogger.ncsa(glog)) // log all incoming requests
+        // log all incoming requests
+        .all(RequestLogger.ncsa(glog))
 
-        .all(CommonHttpHeaders.class) // always add common http response headers for good security
+        // always add common http response headers for good security
+        .all(CommonHttpHeaders.class)
 
-        // - temp disble CSRF guarding
-        .all(CsrfGuardHandler.class) // CSRF protection
+        // CORS support
+        .all(CorsHandler.class)
+
+        // CSRF protection
+        .all(CsrfGuardHandler.class)
 
         // redirect to /index if coming in under /
         .path(redirect(301, "index"))
@@ -92,7 +97,6 @@ public class Main {
 
         // graphql/
         .prefix("graphql", chainsub -> chainsub
-          .all(CorsHandler.class) // CORS support
 
           // the mcorpus GraphQL api (post only)
           .post(JWTStatusHandler.class)
