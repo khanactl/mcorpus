@@ -1,29 +1,21 @@
 <template>
   <div class="login">
     <ApolloMutation
-      :mutation="require('../graphql/McuserLogin.gql')"
+      :mutation="require('../graphql/JWTLogin.gql')"
       :variables="{
-        input: {
-          username: username,
-          pswd: pswd,
-        },
-      }"
-      :context="{
-        useGETForQueries: true,
-        fetchOptions: {
-          method: 'POST',
-        },
+        username: username,
+        pswd: pswd,
       }"
       @done="onLoginResponse"
       @error="onLoginError"
     >
-      <template slot-scope="{ mutate, error }">
-        <form v-on:submit.prevent="mutate()">
+      <template slot-scope="{ mutate, loading, error }">
+        <form>
           <label for="username" class="label">Username</label>
           <input v-model="username" placeholder="username" class="input" id="username" />
           <label for="password" class="label">Password</label>
           <input type="password" v-model="pswd" placeholder="password" class="input" id="password" />
-          <button @click="mutate()">Submit</button>
+          <button :disabled="loading" @click="mutate()">Submit</button>
         </form>
         <p v-if="error">An error occurred: {{ error }}</p>
       </template>
@@ -44,20 +36,18 @@ export default {
     // files: FILES
   },
 
-  computed: {
-    /*
-    formValid() {
-      return this.newMessage;
-    }
-    */
-  },
+  computed: {},
 
   methods: {
     onLoginError(err) {
       console.log(err);
     },
     onLoginResponse(resp) {
+      // login successful?
       console.log(resp);
+      const loginSuccess = resp && resp.data && resp.data.jwtLogin ? resp.data.jwtLogin : false;
+      console.log("login success? " + loginSuccess);
+      // setLocalRst(resp.)
     },
   },
 };

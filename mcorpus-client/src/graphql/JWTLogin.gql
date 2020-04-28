@@ -1,0 +1,3 @@
+mutation jwtLogin ($username: String!, $pswd: String!) {
+  jwtLogin(username: $username, pswd: $pswd)
+}

@@ -1,17 +1,17 @@
 <template>
   <div class="">
-    <MCorpusLogin />
+    <JWTLogin />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import MCorpusLogin from "@/components/MCorpusLogin.vue";
+import JWTLogin from "@/components/JWTLogin.vue";
 
 export default {
   name: "login",
   components: {
-    MCorpusLogin,
+    JWTLogin,
   },
 };
 </script>

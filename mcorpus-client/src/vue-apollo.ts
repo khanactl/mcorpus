@@ -4,8 +4,12 @@ import { createApolloClient, restartWebsockets } from "vue-cli-plugin-apollo/gra
 
 // add module import and define apolloClient type
 import { ApolloClient } from "apollo-client";
+import { ApolloLink } from "apollo-link";
+import { onError } from "apollo-link-error";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { ServerError, ServerParseError } from "apollo-link-http-common";
+import { setContext } from "apollo-link-context";
 
 // Install the vue plugin
 Vue.use(VueApollo);
@@ -18,11 +22,79 @@ export type VueApolloClient = ApolloClient<InMemoryCache> & {
 const AUTH_TOKEN = "apollo-token";
 
 // Http endpoint
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || "http://mcorpus.d2d:5150/graphql";
+const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || "http://localhost:5150/graphql";
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf("/graphql"));
 
 Vue.prototype.$filesRoot = filesRoot;
+
+export function isServerError(err: Error | ServerError | ServerParseError): err is ServerError {
+  return (err as ServerError).statusCode !== undefined;
+}
+
+export function isServerParseError(err: Error | ServerError | ServerParseError): err is ServerParseError {
+  return (err as ServerParseError).statusCode !== undefined;
+}
+
+export function getLocalRst(): string | null {
+  const rst = localStorage.getItem("rst");
+  console.log("getLocalRst - rst: " + rst);
+  return rst;
+}
+
+export function setLocalRst(rst: string): void {
+  localStorage.setItem("rst", rst);
+  console.log("setLocalRst - rst: " + rst);
+}
+
+const rstSyncLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  if (networkError) {
+    console.log(`rstSyncLink - network error: ${networkError}`);
+    if (isServerError(networkError) || isServerParseError(networkError)) {
+      console.log("networkError.statusCode: " + networkError.statusCode);
+      if (networkError.statusCode == 205) {
+        // grab rst from response and put in request before re-fetch
+        const rst = networkError.response.headers.get("rst");
+        console.log("rstSyncLink - rst: " + rst);
+        if (rst) {
+          // localStorage.setItem("rst", rst);
+          const oldHeaders = operation.getContext().headers;
+          console.log(`oldHeaders: ${oldHeaders}`);
+          operation.setContext({
+            credentials: "include",
+            headers: {
+              ...oldHeaders,
+              rst: rst,
+            },
+          });
+          return forward(operation); // retry
+        }
+      }
+    }
+  }
+});
+
+const rstUpdateLink = setContext((request, previousContext) => ({
+  headers: { rst: getLocalRst() },
+}));
+
+// after processing link for rst syncing
+const afterwareLink = new ApolloLink((operation, forward) => {
+  console.log("afterware link");
+  return forward(operation).map((response) => {
+    const context = operation.getContext();
+    const {
+      response: { headers },
+    } = context;
+    if (headers) {
+      const rst = headers.get("rst");
+      console.log("rst (afterware): " + rst);
+      if (rst) setLocalRst(rst);
+    }
+
+    return response;
+  });
+});
 
 // Config
 const defaultOptions = {
@@ -45,12 +117,9 @@ const defaultOptions = {
   // Override default apollo link
   // note: don't override httpLink here, specify httpLink options in the
   // httpLinkOptions property of defaultOptions.
-  // link: myLink
+  link: rstUpdateLink.concat(rstSyncLink).concat(afterwareLink),
   httpLinkOptions: {
-    useGETForQueries: true,
-    fetchOptions: {
-      method: "POST",
-    },
+    credentials: "include",
   },
 
   // Override default cache
@@ -58,6 +127,10 @@ const defaultOptions = {
 
   // Override the way the Authorization header is set
   // getAuth: (tokenName) => ...
+  // since JWT is sent via cookies, getAuth() does not need to get a token from the authorization header
+  getAuth: () => {
+    return undefined;
+  },
 
   // Additional ApolloClient options
   // apollo: { ... }
@@ -98,6 +171,7 @@ export function createProvider(options = {}) {
 
 // Manually call this when user log in
 export async function onLogin(apolloClient: VueApolloClient, token: string) {
+  console.log("onLogin");
   if (typeof localStorage !== "undefined" && token) {
     localStorage.setItem(AUTH_TOKEN, token);
   }
@@ -112,6 +186,7 @@ export async function onLogin(apolloClient: VueApolloClient, token: string) {
 
 // Manually call this when user log out
 export async function onLogout(apolloClient: VueApolloClient) {
+  console.log("onLogout");
   if (typeof localStorage !== "undefined") {
     localStorage.removeItem(AUTH_TOKEN);
   }
