@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { onLogin } from "../vue-apollo";
 export default {
   data() {
     return {
@@ -47,7 +48,9 @@ export default {
       console.log(resp);
       const loginSuccess = resp && resp.data && resp.data.jwtLogin ? resp.data.jwtLogin : false;
       console.log("login success? " + loginSuccess);
-      // setLocalRst(resp.)
+      if (loginSuccess) {
+        onLogin(this.$apollo.provider.defaultClient, "TODO-authToken");
+      }
     },
   },
 };
