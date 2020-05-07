@@ -56,6 +56,14 @@ public interface IJwtBackendHandler {
   FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId);
 
   /**
+   * Get the jwt user info for a given user.
+   *
+   * @param jwtUserId the user id
+   * @return Fetch result holding the jwt user info.
+   */
+  FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId);
+
+  /**
    * Get a list of JWT info objects for each active JWTs in play for a known jwt user.
    *
    * @param jwtUserId the id of a known user - someone who logged successfully

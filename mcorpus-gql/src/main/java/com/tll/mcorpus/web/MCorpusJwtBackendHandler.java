@@ -82,6 +82,26 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     return new IJwtUser() {
 
       @Override
+      public UUID getJwtUserId() {
+        return mc.getUid();
+      }
+
+      @Override
+      public String getJwtUserName() {
+        return mc.getName();
+      }
+
+      @Override
+      public String getJwtUserUsername() {
+        return mc.getUsername();
+      }
+
+      @Override
+      public String getJwtUserEmail() {
+        return mc.getEmail();
+      }
+
+      @Override
       public boolean isAdministrator() {
         return isNullOrEmpty(mc.getRoles()) ?
           false : Arrays.stream(mc.getRoles()).anyMatch(McuserRole.ADMIN::equals);
@@ -90,11 +110,6 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
       @Override
       public String[] getJwtUserRoles() {
         return mcuserRolesArrayToStringArray(mc.getRoles());
-      }
-
-      @Override
-      public UUID getJwtUserId() {
-        return mc.getUid();
       }
     };
   }
@@ -112,6 +127,17 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     final FetchResult<JwtStatus> fr = mcuserRepo.getBackendJwtStatus(jwtId);
     final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
     return fetchrslt(jstat, fr.getErrorMsg());
+  }
+
+  @Override
+  public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+    FetchResult<Mcuser> fr = mcuserRepo.fetchMcuser(jwtUserId);
+    if (fr.isSuccess()) {
+      final IJwtUser jwtUser = map(fr.get());
+      return fetchrslt(jwtUser);
+    } else {
+      return fetchrslt(fr.getErrorMsg());
+    }
   }
 
   @Override

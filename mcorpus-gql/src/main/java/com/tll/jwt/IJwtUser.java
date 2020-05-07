@@ -15,6 +15,21 @@ public interface IJwtUser {
   UUID getJwtUserId();
 
   /**
+   * @return the JWT user name.
+   */
+  String getJwtUserName();
+
+  /**
+   * @return the JWT user username.
+   */
+  String getJwtUserUsername();
+
+  /**
+   * @return the JWT user email address.
+   */
+  String getJwtUserEmail();
+
+  /**
    * @return <code>true</code> when the JWT user has administrative privileges.
    */
   boolean isAdministrator();

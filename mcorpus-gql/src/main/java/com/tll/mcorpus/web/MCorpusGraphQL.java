@@ -45,7 +45,7 @@ import com.tll.mcorpus.validate.McuserValidator;
 import com.tll.mcorpus.validate.MemberAddressValidator;
 import com.tll.mcorpus.validate.MemberValidator;
 import com.tll.web.JWTUserGraphQLWebContext;
-import com.tll.web.JWTUserGraphQLWebContext.JWTUserStatus;
+import com.tll.web.JWTUserGraphQLWebContext.CurrentJwtInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,10 +180,16 @@ public class MCorpusGraphQL {
 
         // mcuser
 
-        // mcuser status
-        .dataFetcher("jwtStatus", env -> processor.process(
+        // current jwt login info
+        .dataFetcher("currentJwt", env -> processor.process(
           env,
-          () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserStatus())
+          () -> ((JWTUserGraphQLWebContext) env.getContext()).currentJwt())
+        )
+
+        // active jwts
+        .dataFetcher("activeJwts", env -> processor.process(
+          env,
+          () -> ((JWTUserGraphQLWebContext) env.getContext()).activeJwts())
         )
 
         // mcuser history
@@ -269,8 +275,11 @@ public class MCorpusGraphQL {
             clean(env.getArgument("username")),
             clean(env.getArgument("pswd"))
           ),
-          key -> fetchrslt(((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd())),
-          b -> b)
+          key -> fetchrslt(
+            ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd()),
+            true
+          ),
+          cji -> cji)
         )
 
         // jwt logout
@@ -454,31 +463,27 @@ public class MCorpusGraphQL {
           return ji.clientOrigin();
         })
       )
-      // JwtStatus
-      .type("JwtStatus", typeWiring -> typeWiring
+      // CurrentJwtInfo
+      .type("CurrentJwtInfo", typeWiring -> typeWiring
         .dataFetcher("jwtId", env -> {
-          final JWTUserStatus jwtus = env.getSource();
+          final CurrentJwtInfo jwtus = env.getSource();
           return uuidToToken(jwtus.getJwtId());
         })
-        .dataFetcher("jwtUserId", env -> {
-          final JWTUserStatus jwtus = env.getSource();
-          return uuidToToken(jwtus.getJwtUserId());
+        .dataFetcher("uid", env -> {
+          final CurrentJwtInfo jwtus = env.getSource();
+          return uuidToToken(jwtus.getUserId());
         })
-        .dataFetcher("created", env -> {
-          final JWTUserStatus jwtus = env.getSource();
-          return jwtus.getSince();
+        .dataFetcher("jwtUserName", env -> {
+          final CurrentJwtInfo jwtus = env.getSource();
+          return jwtus.getJwtUserName();
         })
-        .dataFetcher("expires", env -> {
-          final JWTUserStatus jwtus = env.getSource();
-          return jwtus.getExpires();
+        .dataFetcher("jwtUserUsername", env -> {
+          final CurrentJwtInfo jwtus = env.getSource();
+          return jwtus.getJwtUserUsername();
         })
-        .dataFetcher("roles", env -> {
-          final JWTUserStatus jwtus = env.getSource();
-          return jwtus.getRoles();
-        })
-        .dataFetcher("activeJWTs", env -> {
-          final JWTUserStatus jwtus = env.getSource();
-          return jwtus.getActiveJWTs();
+        .dataFetcher("jwtUserEmail", env -> {
+          final CurrentJwtInfo jwtus = env.getSource();
+          return jwtus.getJwtUserEmail();
         })
       )
 

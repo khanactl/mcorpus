@@ -140,7 +140,7 @@ class MCorpusAuthorizationDirective implements SchemaDirectiveWiring {
       @Override
       public Object get(DataFetchingEnvironment environment) throws Exception {
         final JWTUserGraphQLWebContext webContext = environment.getContext();
-        final List<GraphQLRole> requestingRoles = GraphQLRole.fromCommaDelimitedString(webContext.getJwtStatus().roles());
+        final List<GraphQLRole> requestingRoles = GraphQLRole.fromCommaDelimitedString(webContext.getJwtRequestStatus().roles());
         // log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
         if(targetRole.isAuthorized(requestingRoles)) {
           // authorized

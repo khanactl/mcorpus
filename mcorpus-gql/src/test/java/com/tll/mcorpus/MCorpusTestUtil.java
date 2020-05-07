@@ -119,18 +119,33 @@ public class MCorpusTestUtil {
     return new IJwtUser() {
 
       @Override
-      public String[] getJwtUserRoles() {
-        return new String[] { "ADMIN" };
-      }
-
-      @Override
       public UUID getJwtUserId() {
         return UUID.randomUUID();
       }
 
       @Override
+      public String getJwtUserName() {
+        return "name";
+      }
+
+      @Override
+      public String getJwtUserUsername() {
+        return "username";
+      }
+
+      @Override
+      public String getJwtUserEmail() {
+        return "email@domain.com";
+      }
+
+      @Override
       public boolean isAdministrator() {
         return true;
+      }
+
+      @Override
+      public String[] getJwtUserRoles() {
+        return new String[] { "ADMIN" };
       }
     };
   }
@@ -166,6 +181,11 @@ public class MCorpusTestUtil {
       @Override
       public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
         return FetchResult.fetchrslt(JwtBackendStatus.NOT_PRESENT);
+      }
+
+      @Override
+      public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+        return FetchResult.fetchrslt(jwtUser);
       }
     };
   }
