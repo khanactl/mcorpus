@@ -1,3 +1,9 @@
 mutation jwtLogin ($username: String!, $pswd: String!) {
-  jwtLogin(username: $username, pswd: $pswd)
+  jwtLogin(username: $username, pswd: $pswd) {
+    jwtId
+    uid
+    jwtUserName
+    jwtUserUsername
+    jwtUserEmail
+  }
 }

@@ -1,15 +1,14 @@
-import Vue from "vue";
-import VueApollo from "vue-apollo";
-import { createApolloClient, restartWebsockets } from "vue-cli-plugin-apollo/graphql-client";
-
+import { InMemoryCache } from "apollo-cache-inmemory";
 // add module import and define apolloClient type
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
-import { onError } from "apollo-link-error";
-import { SubscriptionClient } from "subscriptions-transport-ws";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { ServerError, ServerParseError } from "apollo-link-http-common";
 import { setContext } from "apollo-link-context";
+import { onError } from "apollo-link-error";
+import { ServerError, ServerParseError } from "apollo-link-http-common";
+import { SubscriptionClient } from "subscriptions-transport-ws";
+import Vue from "vue";
+import VueApollo from "vue-apollo";
+import { createApolloClient, restartWebsockets } from "vue-cli-plugin-apollo/graphql-client";
 
 // Install the vue plugin
 Vue.use(VueApollo);
@@ -47,28 +46,35 @@ export function setLocalRst(rst: string): void {
   console.log("setLocalRst - rst: " + rst);
 }
 
-const rstSyncLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+const errLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (networkError) {
-    console.log(`rstSyncLink - network error: ${networkError}`);
+    console.log(`errLink - network error: ${networkError}`);
     if (isServerError(networkError) || isServerParseError(networkError)) {
-      console.log("networkError.statusCode: " + networkError.statusCode);
-      if (networkError.statusCode == 205) {
-        // grab rst from response and put in request before re-fetch
-        const rst = networkError.response.headers.get("rst");
-        console.log("rstSyncLink - rst: " + rst);
-        if (rst) {
-          // localStorage.setItem("rst", rst);
-          const oldHeaders = operation.getContext().headers;
-          console.log(`oldHeaders: ${oldHeaders}`);
-          operation.setContext({
-            credentials: "include",
-            headers: {
-              ...oldHeaders,
-              rst: rst,
-            },
-          });
-          return forward(operation); // retry
-        }
+      console.log("errLink http statusCode: " + networkError.statusCode);
+      switch (networkError.statusCode) {
+        // rst sync
+        case 205:
+          // grab rst from response and put in request before re-fetch
+          const rst = networkError.response.headers.get("rst");
+          if (rst) {
+            const oldHeaders = operation.getContext().headers;
+            operation.setContext({
+              credentials: "include",
+              headers: {
+                ...oldHeaders,
+                rst: rst,
+              },
+            });
+            return forward(operation); // retry
+          }
+          break;
+        // unauthorized (assume jwt expired or not present)
+        case 401:
+          // TODO verify
+          window.location.href = "/logout";
+          break;
+        default:
+          break;
       }
     }
   }
@@ -91,7 +97,6 @@ const afterwareLink = new ApolloLink((operation, forward) => {
       console.log("rst (afterware): " + rst);
       if (rst) setLocalRst(rst);
     }
-
     return response;
   });
 });
@@ -117,7 +122,7 @@ const defaultOptions = {
   // Override default apollo link
   // note: don't override httpLink here, specify httpLink options in the
   // httpLinkOptions property of defaultOptions.
-  link: rstUpdateLink.concat(rstSyncLink).concat(afterwareLink),
+  link: rstUpdateLink.concat(errLink).concat(afterwareLink),
   httpLinkOptions: {
     credentials: "include",
   },
@@ -139,13 +144,21 @@ const defaultOptions = {
   // clientState: { resolvers: { ... }, defaults: { ... } }
 };
 
+// Create apollo client
+export const { apolloClient, wsClient } = createApolloClient({
+  ...defaultOptions,
+  // ...options,
+});
+
 // Call this in the Vue app file
-export function createProvider(options = {}) {
+export function createProvider(options = {}): VueApollo {
+  /*
   // Create apollo client
   const { apolloClient, wsClient } = createApolloClient({
     ...defaultOptions,
     ...options,
   });
+  */
   apolloClient.wsClient = wsClient;
 
   // Create vue apollo provider
@@ -153,7 +166,7 @@ export function createProvider(options = {}) {
     defaultClient: apolloClient,
     defaultOptions: {
       $query: {
-        // fetchPolicy: 'cache-and-network',
+        fetchPolicy: "cache-first",
       },
     },
     errorHandler(error) {
@@ -170,7 +183,7 @@ export function createProvider(options = {}) {
 }
 
 // Manually call this when user log in
-export async function onLogin(apolloClient: VueApolloClient, token: string) {
+export async function onLogin(apolloClient: VueApolloClient, token: string): Promise<void> {
   console.log("onLogin");
   if (typeof localStorage !== "undefined" && token) {
     localStorage.setItem(AUTH_TOKEN, token);
@@ -185,7 +198,7 @@ export async function onLogin(apolloClient: VueApolloClient, token: string) {
 }
 
 // Manually call this when user log out
-export async function onLogout(apolloClient: VueApolloClient) {
+export async function onLogout(apolloClient: VueApolloClient): Promise<void> {
   console.log("onLogout");
   if (typeof localStorage !== "undefined") {
     localStorage.removeItem(AUTH_TOKEN);
