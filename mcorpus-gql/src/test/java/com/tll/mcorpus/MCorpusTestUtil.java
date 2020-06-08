@@ -1,6 +1,9 @@
 package com.tll.mcorpus;
 
+import static com.tll.core.Util.isNotNull;
+
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -10,6 +13,7 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import com.tll.jwt.IJwtBackendHandler;
+import com.tll.jwt.IJwtHttpRequestProvider;
 import com.tll.jwt.IJwtHttpResponseAction;
 import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUser;
@@ -17,6 +21,7 @@ import com.tll.jwt.JWT;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
 import com.tll.mcorpus.web.MCorpusJwtBackendHandler;
 import com.tll.repo.FetchResult;
+import com.tll.web.RequestSnapshot;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -114,13 +119,33 @@ public class MCorpusTestUtil {
     return new IJwtUser() {
 
       @Override
-      public String[] getJwtUserRoles() {
-        return new String[] { "ADMIN" };
+      public UUID getJwtUserId() {
+        return UUID.randomUUID();
       }
 
       @Override
-      public UUID getJwtUserId() {
-        return UUID.randomUUID();
+      public String getJwtUserName() {
+        return "name";
+      }
+
+      @Override
+      public String getJwtUserUsername() {
+        return "username";
+      }
+
+      @Override
+      public String getJwtUserEmail() {
+        return "email@domain.com";
+      }
+
+      @Override
+      public boolean isAdministrator() {
+        return true;
+      }
+
+      @Override
+      public String[] getJwtUserRoles() {
+        return new String[] { "ADMIN" };
       }
     };
   }
@@ -157,7 +182,25 @@ public class MCorpusTestUtil {
       public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
         return FetchResult.fetchrslt(JwtBackendStatus.NOT_PRESENT);
       }
+
+      @Override
+      public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+        return FetchResult.fetchrslt(jwtUser);
+      }
     };
+  }
+
+  public static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
+    final String sro;
+    // primary: x-forwarded-for http header
+    if (isNotNull(rs.getXForwardedForClientIp()))
+      sro = rs.getXForwardedForClientIp();
+    // fallback: remote address host
+    else if (isNotNull(rs.getRemoteAddressHost()))
+      sro = rs.getRemoteAddressHost();
+    else
+      throw new UnknownHostException();
+    return InetAddress.getByName(sro);
   }
 
   /**
@@ -176,11 +219,40 @@ public class MCorpusTestUtil {
     return new MCorpusJwtBackendHandler(new MCorpusUserRepo(ds_mcweb()));
   }
 
+  public static IJwtHttpRequestProvider testJwtRequestProvider(RequestSnapshot rs) {
+    return new IJwtHttpRequestProvider(){
+
+      @Override
+      public boolean verifyRequestOrigin(String jwtAudience) {
+        return true;
+      }
+
+      @Override
+      public InetAddress getRequestOrigin() {
+        try {
+          return InetAddress.getByName("127.0.0.1");
+        } catch(UnknownHostException e) {
+          throw new Error();
+        }
+      }
+
+      @Override
+      public Instant getRequestInstant() {
+        return Instant.now();
+      }
+
+      @Override
+      public String getJwt() {
+        return "TODO";
+      }
+    };
+  }
+
   /**
    * @return Newly created {@link IJwtHttpResponseAction} instance
    *         whose implementation methods are no-ops (they do nothing).
    */
-  public static IJwtHttpResponseAction testJwtResponseProvider() {
+  public static IJwtHttpResponseAction testJwtResponseAction() {
     return new IJwtHttpResponseAction(){
 
       @Override

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.tll.UnitTest;
-import com.tll.web.JWTUserGraphQLWebContext;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

@@ -159,9 +159,15 @@ export class AppStack extends BaseStack {
         MCORPUS_COOKIE_SECURE: 'true',
         MCORPUS_DB_DATA_SOURCE_CLASS_NAME: 'org.postgresql.ds.PGSimpleDataSource',
         MCORPUS_RST_TTL_IN_SECONDS: '1800',
-        MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: '10',
+
+        MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: '5',
         MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES: '5',
         MCORPUS_JWT_TTL_IN_SECONDS: '172800',
+
+        MCORPUS_METRICS_ON: 'true',
+        MCORPUS_GRAPHIQL: 'true',
+        MCORPUS_HTTP_CLIENT_ORIGIN: '',
+
         MCORPUS_SERVER__DEVELOPMENT: 'false',
         MCORPUS_SERVER__PORT: `${props.lbToEcsPort}`,
         MCORPUS_SERVER__PUBLIC_ADDRESS: props.webAppUrl,

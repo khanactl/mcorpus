@@ -1,11 +1,10 @@
-package com.tll.mcorpus.web;
+package com.tll.web.ratpack;
 
 import static com.tll.core.Util.emptyIfNull;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.neclean;
 import static com.tll.core.Util.not;
-import static com.tll.mcorpus.web.RequestUtil.getOrCreateRequestSnapshot;
-import static com.tll.mcorpus.web.RequestUtil.setRstCookie;
+import static com.tll.web.ratpack.Cookie.setCookie;
 
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -22,8 +21,8 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Anti-CSRF statelessly by comparing the http header 'rst' (request sync token)
- * value to the rst cookie value both contained in a received http request.
+ * Anti-CSRF statelessly by comparing the http header request-sync-token
+ * value to the request-sync-token cookie value both contained in a received http request.
  * <p>
  * This is a variant of the double submit cookie method to thwart CSRF attacks.
  *
@@ -36,81 +35,69 @@ public class CsrfGuardHandler implements Handler {
     public RST(final String rst) { this.rst = rst; }
   }
 
-  public static final String RST_TOKEN_NAME = "rst";
-
   @SuppressWarnings("serial")
   public static final TypeToken<RST> RST_TYPE = new TypeToken<RST>() {};
 
-  /**
-   * Whitelist request paths subject to either checking (request)
-   * or issuing (response) an RST.  Case-sensitive.
-   * <p>
-   * I.e. the pages subject to CSRF gurading.
-   * <p>
-   * For mcorpus app, we guard
-   * <code>graphql[/]</code> and <code>graphql/index[/]</code>
-   * request paths only.
-   */
-  static final Pattern PTRN_GEN_RST = Pattern.compile("^(graphql\\/index|graphql)\\/?$");
-
-  private static final SecureRandom RND = new SecureRandom();
-
-  static boolean doRstCheck(final Context ctx) {
-    return ctx.getRequest().getMethod().isPost();
-  }
-
-  static boolean doNextRst(final Context ctx) {
-    return PTRN_GEN_RST.matcher(emptyIfNull(ctx.getRequest().getPath())).matches();
-  }
-
-  /**
-   * Generate an RST.
-   *
-   * @return Newly generated RST
-   */
-  static String genRst() {
-    final byte[] buffer = new byte[40];
-    RND.nextBytes(buffer);
-    return Base64.getUrlEncoder().encodeToString(buffer);
-  }
-
   private final Logger log = LoggerFactory.getLogger(CsrfGuardHandler.class);
 
+  private final String rstTokenName;
+  /**
+   * The http request paths subject to CSRF guarding by way of either
+   * checking (request) or issuing (response) a request-sync-token.
+   * Case-sensitive.
+   */
+  private final Pattern rstPattern;
   private final long rstTtlInSeconds;
+  private final boolean cookieSecureFlag;
+  private final SecureRandom random;
 
   /**
    * Constructor.
    *
-   * @param rstTtlInSeconds the time to live for an RST in seconds
+   * @param rstTokenName          the name to use for request-sync-tokens held in the
+   *                              http request and response objects
+   * @param rstRegexRequestPaths  the regex pattern to use against incoming http request paths
+   *                              to assess when request-sync-token checking is performed
+   * @param rstTtlInSeconds       the time to live for a request-sync-token in seconds
+   * @param cookieSecureFlag      send request-sync-token cookies securely over https
+   *                              or unsecurely over http
    */
-  public CsrfGuardHandler(long rstTtlInSeconds) {
+  public CsrfGuardHandler(
+    String rstTokenName,
+    String rstRegexRequestPaths,
+    long rstTtlInSeconds,
+    boolean cookieSecureFlag
+  ) {
+    this.rstTokenName = rstTokenName;
+    this.rstPattern = Pattern.compile(rstRegexRequestPaths);
     this.rstTtlInSeconds = rstTtlInSeconds;
-    log.info("Request sync token configured with Time-to-live: {} seconds.", rstTtlInSeconds);
+    this.cookieSecureFlag = cookieSecureFlag;
+    this.random = new SecureRandom();
   }
 
   @Override
   public void handle(final Context ctx) throws Exception {
 
     if(doRstCheck(ctx)) {
-      final RequestSnapshot requestSnapshot = getOrCreateRequestSnapshot(ctx);
+      final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
 
       // require either http Origin or Referer header be present (assume https)
-      if(isNull(requestSnapshot.getHttpOrigin()) && isNull(requestSnapshot.getHttpReferer())) {
+      if(isNull(rs.getHttpOrigin()) && isNull(rs.getHttpReferer())) {
         log.error("Origin and Referer http headers missing.");
         ctx.clientError(400); // bad request
         return;
       }
 
-      final String cookieRst = neclean(requestSnapshot.getRstCookie());
-      final String headerRst = neclean(requestSnapshot.getRstHeader());
+      final String cookieRst = neclean(rs.getRstCookie());
+      final String headerRst = neclean(rs.getRstHeader());
 
       // send a no content response if *both* the cookie and header rst are not present
       // this serves as a way for the clients to sync up and issue a valid subsequent request
       if(isNull(cookieRst) && isNull(headerRst)) {
         final String nextRst = genRst();
         log.warn("No request sync tokens present in request.  Re-setting with short-lived token.");
-        setRstCookie(ctx, nextRst, "/", 120); // you got 2 mins to re-request
-        ctx.getResponse().getHeaders().add(RST_TOKEN_NAME, nextRst);
+        setCookie(ctx, rstTokenName, nextRst, "/", 120, cookieSecureFlag); // you got 2 mins to re-request
+        ctx.getResponse().getHeaders().add(rstTokenName, nextRst);
         ctx.clientError(205); // 205 - Reset Content
         return;
       }
@@ -135,8 +122,8 @@ public class CsrfGuardHandler implements Handler {
 
     if(doNextRst(ctx)) {
       final String nextRst = genRst();
-      setRstCookie(ctx, nextRst, "/", rstTtlInSeconds);
-      ctx.getResponse().getHeaders().add(RST_TOKEN_NAME, nextRst);
+      setCookie(ctx, rstTokenName, nextRst, "/", rstTtlInSeconds, cookieSecureFlag);
+      ctx.getResponse().getHeaders().add(rstTokenName, nextRst);
       ctx.getRequest().add(RST_TYPE, new RST(nextRst)); // make next rst available downstream
       log.info("Request sync token added to http response.");
     }
@@ -144,4 +131,17 @@ public class CsrfGuardHandler implements Handler {
     ctx.next();
   }
 
+  private boolean doRstCheck(final Context ctx) {
+    return ctx.getRequest().getMethod().isPost();
+  }
+
+  private boolean doNextRst(final Context ctx) {
+    return rstPattern.matcher(emptyIfNull(ctx.getRequest().getPath())).matches();
+  }
+
+  private String genRst() {
+    final byte[] buffer = new byte[40];
+    random.nextBytes(buffer);
+    return Base64.getUrlEncoder().encodeToString(buffer);
+  }
 }

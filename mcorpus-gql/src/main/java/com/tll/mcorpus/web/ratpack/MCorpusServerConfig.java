@@ -1,4 +1,4 @@
-package com.tll.mcorpus;
+package com.tll.mcorpus.web.ratpack;
 
 /**
  * The MCorpus GraphQL server config properties.
@@ -18,11 +18,21 @@ public class MCorpusServerConfig {
   public String dbUrl;
 
   /**
-   * The Request Sync Token (anti-CSRF) time to live in seconds.
+   * The Request Sync Token name to use (http cookie name and http header name).
+   */
+  public String rstTokenName = "rst";
+
+  /**
+   * The Request Sync Token time to live in seconds on the client browser.
    * <p>
    * Default is 30 minutes (1800 seconds).
    */
   public long rstTtlInSeconds = 1800L;
+
+  /**
+   * RegEx that identifies the http request paths subject to RST server handling.
+   */
+  public String rstRegExRequestPaths = "^(graphql\\/index|graphql)\\/?$";
 
   /**
    * The JWT salt value.
@@ -35,6 +45,16 @@ public class MCorpusServerConfig {
    * Default is 2 days (172800 seconds).
    */
   public long jwtTtlInSeconds = 172800L;
+
+  /**
+   * The name to use for generated JWTs.
+   */
+  public String jwtTokenName = "jwt";
+
+  /**
+   * The GraphQL schema method name for JWT-based user logins.
+   */
+  public String jwtUserLoginGraphqlMethodName = "jwtLogin";
 
   /**
    * The number of minutes the status of JWTs should be held in-memory
@@ -50,9 +70,9 @@ public class MCorpusServerConfig {
   /**
    * The max number of JWT status instances to cache at any one time.
    * <p>
-   * The default is 50.
+   * The default is 5.
    */
-  public int jwtStatusCacheMaxSize = 50;
+  public int jwtStatusCacheMaxSize = 5;
 
   /**
    * Flag for whether to send http cookies in the clear (http) or only over https.
@@ -70,4 +90,25 @@ public class MCorpusServerConfig {
    * The default is <code>true</code>.
    */
   public boolean metricsOn = true;
+
+  /**
+   * Serve GraphiQL requests?
+   * <p>
+   * The default is <code>false</code> (production mode).
+   */
+  public boolean graphiql = false;
+
+  /**
+   * The optional http client origin enabling CORS functionality.
+   * <p>
+   * When this property is specified,
+   * CORS will be configured to allow http communication between
+   * this graphql server and the http client origin specified by this property.
+   * <p>
+   * E.g.:  <code>https://clientAppDomain.net</code>
+   *        <code>http://localhost:8080</code>
+   * <p>
+   * The default is null (not specified) and NO CORS http headers will be issued.
+   */
+  public String httpClientOrigin;
 }

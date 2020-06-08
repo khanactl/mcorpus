@@ -123,12 +123,13 @@ public class JWT {
    *
    * @param jwtId the unique and strongly random jwtid to use in generating the JWT
    * @param userId id of the associated user to use in generating the JWT
+   * @param adminUser is the associated user an administrator?
    * @param roles the optional roles of the <code>userId</code>
    * @param httpreq the provider for the needed incoming http request parameter values
    * @return newly created, never null encrypted and signed JWT.
    * @throws Exception upon any unexpected error generating the JWT
    */
-  public String jwtGenerate(final UUID jwtId, final UUID userId, String roles, final IJwtHttpRequestProvider httpreq)
+  public String jwtGenerate(final UUID jwtId, final UUID userId, final boolean adminUser, final String roles, final IJwtHttpRequestProvider httpreq)
       throws Exception {
     final Instant requestInstant = httpreq.getRequestInstant();
     final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
@@ -144,6 +145,7 @@ public class JWT {
         .subject(userId.toString())
         .issueTime(Date.from(requestInstant))
         .expirationTime(Date.from(loginExpiration))
+        .claim("admin", adminUser)
         .claim("roles", roles)
         .build());
 
@@ -225,6 +227,7 @@ public class JWT {
     final Instant expires;
     final String issuer;
     final String jwtAudience;
+    final boolean admin;
     final String roles; // bound to the user
     try {
       final JWTClaimsSet claims = sjwt.getJWTClaimsSet();
@@ -235,6 +238,7 @@ public class JWT {
       expires = isNull(claims.getExpirationTime()) ? null : claims.getExpirationTime().toInstant();
       issuer = claims.getIssuer();
       jwtAudience = isNullOrEmpty(claims.getAudience()) ? "" : claims.getAudience().get(0);
+      admin = (boolean) claims.getClaim("admin");
       roles = (String) claims.getClaim("roles");
 
       if(
@@ -275,7 +279,7 @@ public class JWT {
     // expired? (check for exp. time in the past)
     if(Instant.now().isAfter(expires)) {
       log.info("JWT {} expired.", jwtId);
-      return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, null, issued, expires);
+      return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, issued, expires, false, null);
     }
 
     // [Default] Backend verification behavior:
@@ -287,7 +291,7 @@ public class JWT {
         jwtId,
         isNull(fr) ? "UNKNOWN" : fr.getErrorMsg()
       );
-      return JWTHttpRequestStatus.create(JWTStatus.ERROR, jwtId, userId, null, issued, expires);
+      return JWTHttpRequestStatus.create(JWTStatus.ERROR, jwtId, userId, issued, expires, false, null);
     }
     final JwtBackendStatus jwtBackendStatus = fr.get();
     final JWTStatus jwtRequestStatus;
@@ -329,6 +333,6 @@ public class JWT {
       break;
     }
 
-    return JWTHttpRequestStatus.create(jwtRequestStatus, jwtId, userId, roles, issued, expires);
+    return JWTHttpRequestStatus.create(jwtRequestStatus, jwtId, userId, issued, expires, admin, roles);
   }
 }

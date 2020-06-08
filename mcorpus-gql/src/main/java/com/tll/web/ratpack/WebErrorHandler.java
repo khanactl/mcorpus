@@ -1,4 +1,4 @@
-package com.tll.mcorpus.web;
+package com.tll.web.ratpack;
 
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
@@ -48,7 +48,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
     log.error("Client error {} response sent for request: {} - {}",
       statusCode,
       ctx.getRequest().getPath(),
-      RequestUtil.getOrCreateRequestSnapshot(ctx)
+      ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx)
     );
   }
 
@@ -66,7 +66,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
     log.error("Server error '{}' for request: {} - {}",
         emsg,
         ctx.getRequest().getPath(),
-        RequestUtil.getOrCreateRequestSnapshot(ctx)
+        ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx)
     );
     if(ctx.getServerConfig().isDevelopment()) {
       log.error("StackTrace:\n\n{}\n", error);

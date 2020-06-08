@@ -2,6 +2,7 @@ package com.tll.mcorpus.repo;
 
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.nflatten;
 import static com.tll.mcorpus.db.Tables.MCUSER;
 import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
@@ -36,6 +37,7 @@ import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.records.GetActiveLoginsRecord;
+import com.tll.mcorpus.db.tables.records.McuserRecord;
 import com.tll.mcorpus.dmodel.ActiveLoginDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain;
 import com.tll.mcorpus.dmodel.McuserHistoryDomain.LoginEventDomain;
@@ -97,7 +99,7 @@ public class MCorpusUserRepo implements Closeable {
    * @return the number of valid, non-expired JWT IDs held in the backend system
    */
   public FetchResult<List<ActiveLoginDomain>> getActiveLogins(final UUID uid) {
-    if(uid == null) return fetchrslt(null, "No mcuser id provided.");
+    if(isNull(uid )) return fetchrslt(null, "No mcuser id provided.");
     try {
       final Result<GetActiveLoginsRecord> rslt = Routines.getActiveLogins(dsl.configuration(), uid);
       final List<ActiveLoginDomain> rlist;
@@ -130,7 +132,7 @@ public class MCorpusUserRepo implements Closeable {
    * @return fetch result for the JWT status and mcuser role
    */
   public FetchResult<JwtStatus> getBackendJwtStatus(final UUID jwtId) {
-    if(jwtId == null) return fetchrslt(null, "JWT status check failed: bad input.");
+    if(isNull(jwtId)) return fetchrslt(null, "No jwt id provided.");
     try {
       final GetJwtStatus backend = new GetJwtStatus();
       backend.setJwtId(jwtId);
@@ -150,7 +152,7 @@ public class MCorpusUserRepo implements Closeable {
    * @param uid the mcuser id
    */
   public FetchResult<McuserHistoryDomain> mcuserHistory(final UUID uid) {
-    if(uid == null) return fetchrslt(null, "No mcuser id provided.");
+    if(isNull(uid)) return fetchrslt(null, "No mcuser id provided.");
     try {
       final Result<Record4<UUID, OffsetDateTime, InetAddress, McuserAuditType>> result = dsl
         .select(MCUSER_AUDIT.JWT_ID, MCUSER_AUDIT.CREATED, MCUSER_AUDIT.REQUEST_ORIGIN, MCUSER_AUDIT.TYPE)
@@ -207,7 +209,19 @@ public class MCorpusUserRepo implements Closeable {
    *         holding the {@link Mcuser} ref if successful<br>
    *         -OR- a null Mcuser ref and a non-null error message if unsuccessful.
    */
-  public FetchResult<Mcuser> login(final String username, final String pswd, final UUID pendingJwtId, Instant jwtExpiration, Instant requestInstant, final InetAddress requestOrigin) {
+  public FetchResult<Mcuser> login(
+    final String username,
+    final String pswd,
+    final UUID pendingJwtId,
+    Instant jwtExpiration,
+    Instant requestInstant,
+    final InetAddress requestOrigin
+  ) {
+    if(isNull(username) || isNull(pswd) || isNull(pendingJwtId) ||
+        isNull(jwtExpiration) || isNull(requestInstant) || isNull(requestOrigin))
+      return fetchrslt(null, "Invalid mcuser login argument(s) provided.");
+
+    final List<Mcuser> rlist = new ArrayList<>(1);
     try {
       final McuserLogin mcuserLogin = new McuserLogin();
       mcuserLogin.setMcuserUsername(username);
@@ -217,21 +231,23 @@ public class MCorpusUserRepo implements Closeable {
       mcuserLogin.setInRequestOrigin(requestOrigin);
       mcuserLogin.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
 
-      mcuserLogin.execute(dsl.configuration());
-      final Mcuser rval = mcuserLogin.getReturnValue().into(Mcuser.class);
-      if(rval != null && rval.getUid() != null) {
-        // login success
-        return fetchrslt(rval, null);
-      } else {
-        // login fail - no record returned
-        return fetchrslt(null, "Mcuser login unsuccessful.");
+      dsl.transaction(trans -> {
+        mcuserLogin.execute(DSL.using(trans).configuration());
+      });
+
+      final McuserRecord mrec = mcuserLogin.getReturnValue();
+      if(isNotNull(mrec) && isNotNull(mrec.getUid())) {
+        final Mcuser rval = mrec.into(Mcuser.class);
+        rlist.add(rval);
       }
     }
     catch(Throwable t) {
       log.error("mcuser login error: {}.", t.getMessage());
     }
-    // default - login fail
-    return fetchrslt(null, "Mcuser login failed.");
+
+    final Mcuser rval = rlist.size() == 1 && isNotNull(rlist.get(0)) ? rlist.get(0) : null;
+    final String emsg = isNull(rval) ? "Login failed." : null;
+    return fetchrslt(rval, emsg);
   }
 
   /**
@@ -246,6 +262,10 @@ public class MCorpusUserRepo implements Closeable {
    *         holding an error message if unsuccessful.
    */
   public FetchResult<Boolean> logout(final UUID mcuserId, final UUID jwtId, Instant requestInstant, final InetAddress requestOrigin) {
+    if(isNull(mcuserId) || isNull(jwtId) || isNull(requestInstant) || isNull(requestOrigin))
+      return fetchrslt(Boolean.FALSE, "Invalid mcuser logout argument(s) provided.");
+
+    final List<Boolean> rlist = new ArrayList<>(1);
     try {
       final McuserLogout mcuserLogout = new McuserLogout();
       mcuserLogout.setMcuserUid(mcuserId);
@@ -253,17 +273,19 @@ public class MCorpusUserRepo implements Closeable {
       mcuserLogout.setRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       mcuserLogout.setRequestOrigin(requestOrigin);
 
-      mcuserLogout.execute(dsl.configuration());
-      if(Boolean.TRUE.equals(mcuserLogout.getReturnValue())) {
-        // logout success
-        return fetchrslt(Boolean.TRUE, null);
-      }
+      dsl.transaction(trans -> {
+        mcuserLogout.execute(DSL.using(trans).configuration());
+      });
+
+      rlist.add(mcuserLogout.getReturnValue());
     }
     catch(Throwable t) {
-      log.error("Logout error: {}.", t.getMessage());
+      log.error("mcuser logout error: {}.", t.getMessage());
     }
-    // default - logout failed
-    return fetchrslt(Boolean.FALSE, "Logout failed.");
+
+    final Boolean rval = rlist.size() == 1 && isNotNull(rlist.get(0)) ? rlist.get(0) : Boolean.FALSE;
+    final String emsg = Boolean.FALSE.equals(rval) ? "Logout failed." : null;
+    return fetchrslt(rval, emsg);
   }
 
   /**
@@ -274,7 +296,7 @@ public class MCorpusUserRepo implements Closeable {
    *         {@link Mcuser} or an error message if unsuccessful.
    */
   public FetchResult<Mcuser> fetchMcuser(final UUID uid) {
-    if(uid == null) return fetchrslt(null, "No mcuser id provided.");
+    if(isNull(uid)) return fetchrslt(null, "No mcuser id provided.");
     String emsg;
     try {
       final Mcuser mcuser = dsl
@@ -321,26 +343,26 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<Mcuser> addMcuser(final Mcuser mcuserToAdd) {
     if(isNull(mcuserToAdd)) return fetchrslt(null, "No mcuser provided.");
 
-    final List<String> emsgs = new ArrayList<>();
+    final List<String> emsgs = new ArrayList<>(2);
     final List<Mcuser> rlist = new ArrayList<>(1);
 
     try {
-      dsl.transaction(configuration -> {
-        final DSLContext trans = DSL.using(configuration);
+      final InsertMcuser routine = new InsertMcuser();
+      routine.setInName(mcuserToAdd.getName());
+      routine.setInEmail(mcuserToAdd.getEmail());
+      routine.setInUsername(mcuserToAdd.getUsername());
+      routine.setInPswd(mcuserToAdd.getPswd());
+      routine.setInStatus(mcuserToAdd.getStatus());
+      routine.setInRoles(mcuserToAdd.getRoles());
 
-        final InsertMcuser routine = new InsertMcuser();
-        routine.setInName(mcuserToAdd.getName());
-        routine.setInEmail(mcuserToAdd.getEmail());
-        routine.setInUsername(mcuserToAdd.getUsername());
-        routine.setInPswd(mcuserToAdd.getPswd());
-        routine.setInStatus(mcuserToAdd.getStatus());
-        routine.setInRoles(mcuserToAdd.getRoles());
-        routine.execute(trans.configuration());
-        final Mcuser addedMcuser = routine.getReturnValue().into(Mcuser.class);
-        if(isNull(addedMcuser) || isNull(addedMcuser.getUid()))
-          throw new DataAccessException("No post-insert mcuser record returned.");
-        rlist.add(addedMcuser);
+      dsl.transaction(trans -> {
+        routine.execute(DSL.using(trans).configuration());
       });
+
+      final Mcuser addedMcuser = routine.getReturnValue().into(Mcuser.class);
+      if(isNull(addedMcuser) || isNull(addedMcuser.getUid()))
+        throw new DataAccessException("No post-insert mcuser record returned.");
+      rlist.add(addedMcuser);
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
@@ -367,7 +389,7 @@ public class MCorpusUserRepo implements Closeable {
   public FetchResult<Mcuser> updateMcuser(final Mcuser mcuserToUpdate) {
     if(isNull(mcuserToUpdate)) return fetchrslt(null, "No mcuser provided.");
 
-    final List<String> emsgs = new ArrayList<>();
+    final List<String> emsgs = new ArrayList<>(2);
     final List<Mcuser> rlist = new ArrayList<>(1);
 
     // create update map of fields that are present only
@@ -379,13 +401,12 @@ public class MCorpusUserRepo implements Closeable {
     fputWhenNotNull(MCUSER.ROLES, mcuserToUpdate.getRoles(), fmap);
 
     try {
-      dsl.transaction(configuration -> {
-
-        final DSLContext trans = DSL.using(configuration);
+      dsl.transaction(trans -> {
+        final DSLContext transctx = DSL.using(trans);
 
         // update mcuser
         final Record9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]>
-        mcuserUpatedRec = trans
+        mcuserUpatedRec = transctx
           .update(MCUSER)
           .set(fmap)
           .where(MCUSER.UID.eq(mcuserToUpdate.getUid()))
@@ -401,7 +422,7 @@ public class MCorpusUserRepo implements Closeable {
             MCUSER.ROLES
           ).fetchOne();
 
-        if(isNotNull(mcuserUpatedRec)) {
+        if(isNotNull(mcuserUpatedRec) && isNotNull(mcuserUpatedRec.get(MCUSER.UID))) {
           // successful update at this point
           final Mcuser mcuserUpdated = mcuserUpatedRec.into(Mcuser.class);
           rlist.add(mcuserUpdated);
@@ -433,24 +454,28 @@ public class MCorpusUserRepo implements Closeable {
    * @return Never null fetch result containing the status of the deletion.
    */
   public FetchResult<Boolean> deleteMcuser(final UUID uid) {
-    String emsg = null;
+    if(isNull(uid)) return fetchrslt("No mcuser id provided.");
+
+    final List<String> emsgs = new ArrayList<>(2);
+
     try {
-      final int numd = dsl.delete(MCUSER).where(MCUSER.UID.eq(uid)).execute();
-      if(numd != 1) return fetchrslt(Boolean.FALSE, "Invalid mcuser record delete count: " + Integer.toString(numd));
-      // success
-      return fetchrslt(Boolean.TRUE, null);
+      dsl.transaction(trans -> {
+        final int numd = DSL.using(trans).delete(MCUSER).where(MCUSER.UID.eq(uid)).execute();
+        if(numd != 1) emsgs.add("Invalid delete return count.");
+      });
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsg = "A data access exception occurred deleting mcuser.";
+      emsgs.add("A data access exception occurred deleting mcuser.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
-      emsg = "A technical error occurred deleting mcuser.";
+      emsgs.add("A technical error occurred deleting mcuser.");
     }
 
-    // fail
-    return fetchrslt(Boolean.FALSE, emsg);
+    final String emsg = nflatten(emsgs, ",");
+    final boolean rval = isNull(emsg);
+    return fetchrslt(rval, emsg);
   }
 
   /**
@@ -460,27 +485,31 @@ public class MCorpusUserRepo implements Closeable {
    * @param pswd the pswd to set
    */
   public FetchResult<Boolean> setPswd(final UUID uid, final String pswd) {
-    String emsg = null;
+    if(isNull(uid) || isNullOrEmpty(pswd))
+      return fetchrslt(Boolean.FALSE, "Invalid set pswd arguments provided.");
+
+    final List<String> emsgs = new ArrayList<>(2);
     try {
       final McuserPswd sp = new McuserPswd();
       sp.setInUid(uid);
       sp.setInPswd(pswd);
-      sp.execute(dsl.configuration());
 
-      // success
-      return fetchrslt(Boolean.TRUE, null);
+      dsl.transaction(trans -> {
+        sp.execute(DSL.using(trans).configuration());
+      });
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsg = "A data access exception occurred setting mcuser pswd.";
+      emsgs.add("A data access exception occurred setting mcuser pswd.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
-      emsg = "A technical error occurred setting mcuser pswd.";
+      emsgs.add("A technical error occurred setting mcuser pswd.");
     }
 
-    // fail
-    return fetchrslt(Boolean.FALSE, emsg);
+    final String emsg = nflatten(emsgs, ",");
+    final boolean rval = isNull(emsg);
+    return fetchrslt(Boolean.valueOf(rval), emsg);
   }
 
   /**
@@ -491,27 +520,31 @@ public class MCorpusUserRepo implements Closeable {
    * @param requestOrigin the request origin ip address gotten from the sourcing http request
    */
   public FetchResult<Boolean> invalidateJwtsFor(final UUID uid, final Instant requestInstant, final InetAddress requestOrigin) {
-    String emsg = null;
+    if(isNull(uid) || isNull(requestInstant) || isNull(requestOrigin))
+      return fetchrslt(Boolean.FALSE, "Invalid argument(s) provided.");
+
+    final List<String> emsgs = new ArrayList<>(2);
     try {
       final BlacklistJwtIdsFor sp = new BlacklistJwtIdsFor();
       sp.setInUid(uid);
       sp.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
       sp.setInRequestOrigin(requestOrigin);
-      sp.execute(dsl.configuration());
 
-      // success
-      return fetchrslt(Boolean.TRUE, null);
+      dsl.transaction(trans -> {
+        sp.execute(DSL.using(trans).configuration());
+      });
     }
     catch(DataAccessException e) {
       log.error(e.getMessage());
-      emsg = "A data access exception occurred invalidating jwts.";
+      emsgs.add("A data access exception occurred invalidating jwts.");
     }
     catch(Throwable t) {
       log.error(t.getMessage());
-      emsg = "A technical error occurred invalidating jwts.";
+      emsgs.add("A technical error occurred invalidating jwts.");
     }
 
-    // fail
-    return fetchrslt(Boolean.FALSE, emsg);
+    final String emsg = nflatten(emsgs, ",");
+    final boolean rval = isNull(emsg);
+    return fetchrslt(Boolean.valueOf(rval), emsg);
   }
 }

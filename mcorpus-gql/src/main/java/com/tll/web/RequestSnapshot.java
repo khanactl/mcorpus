@@ -1,17 +1,16 @@
 package com.tll.web;
 
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNull;
 import static com.tll.core.Util.neclean;
-import static com.tll.core.Util.isNullOrEmpty;
-import static com.tll.core.Util.lower;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
 
 /**
- * Immutable snapshot of the key 'auditable' attributes of an incoming http
- * request.
+ * Immutable snapshot of the key 'auditable' attributes
+ * of an incoming http request.
  *
  * @author jkirton
  */
@@ -20,14 +19,6 @@ public class RequestSnapshot {
   static String stripQS(final String s) {
     final int i = s == null ? -1 : s.indexOf("?");
     return i > 0 ? s.substring(0, i) : s;
-  }
-
-  static boolean isNullwiseOrEmpty(final String s) {
-    return isNullOrEmpty(s) || "null".equals(lower(s));
-  }
-
-  static String nullif(final String s) {
-    return isNullwiseOrEmpty(s) ? null : s;
   }
 
   private final Instant requestInstant;
@@ -43,6 +34,7 @@ public class RequestSnapshot {
   private final String httpForwarded;
 
   private final String xForwardedFor;
+  private final String xForwardedForClientIp;
   private final String xForwardedHost;
   private final String xForwardedProto;
 
@@ -93,22 +85,26 @@ public class RequestSnapshot {
   ) {
     super();
     this.requestInstant = requestInstant;
-    this.remoteAddressHost = nullif(remoteAddressHost);
-    this.path = nullif(path);
-    this.method = nullif(method);
+    this.remoteAddressHost = remoteAddressHost;
+    this.path = path;
+    this.method = method;
 
-    this.httpHost = nullif(httpHost);
-    this.httpOrigin = nullif(httpOrigin);
-    this.httpReferer = nullif(httpReferer);
-    this.httpForwarded = nullif(httpForwarded);
+    this.httpHost = httpHost;
+    this.httpOrigin = httpOrigin;
+    this.httpReferer = httpReferer;
+    this.httpForwarded = httpForwarded;
 
-    this.xForwardedFor = nullif(xForwardedFor);
-    this.xForwardedHost = nullif(xForwardedHost);
-    this.xForwardedProto = nullif(xForwardedProto);
+    this.xForwardedFor = xForwardedFor;
+    this.xForwardedForClientIp =
+      isNotNull(xForwardedFor) && xForwardedFor.indexOf(",") > 0 ?
+        neclean(xForwardedFor.split(",")[0]) :
+        xForwardedFor;
+    this.xForwardedHost = xForwardedHost;
+    this.xForwardedProto = xForwardedProto;
 
-    this.jwtCookie = nullif(jwtCookie);
-    this.rstCookie = nullif(rstCookie);
-    this.rstHeader = nullif(rstHeader);
+    this.jwtCookie = jwtCookie;
+    this.rstCookie = rstCookie;
+    this.rstHeader = rstHeader;
 
     this.requestId = requestId;
   }
@@ -177,12 +173,11 @@ public class RequestSnapshot {
   }
 
   /**
-   * @return the left-most ip of the x-forwarded-for header value
+   * @return the left-most token of the comma-delimeted X-Forwarded-For header value -OR-
+   *         the x-forwarded-for header value in full when it is not comma-delimited
    */
   public String getXForwardedForClientIp() {
-    return isNotNull(xForwardedFor) && xForwardedFor.indexOf(",") > 0 ?
-      neclean(xForwardedFor.split(",")[0]) :
-      xForwardedFor;
+    return xForwardedForClientIp;
   }
 
   /**
@@ -238,7 +233,7 @@ public class RequestSnapshot {
   /**
    * @return Opaque id associated with this request.
    *         <p>
-   *         This is mainly intended to correlate log statements.
+   *         This is mainly intended to correlate server log output.
    */
   public String getRequestId() {
     return requestId;
@@ -264,9 +259,9 @@ public class RequestSnapshot {
         "x-forwarded-for: %s, " +
         "x-forwarded-host: %s, " +
         "x-forwarded-proto: %s, " +
-        "hasRstCookie: %b, "+
-        "hasRstHeader: %b, " +
-        "hasJwtCookie: %b",
+        "rstCookie: %s, "+
+        "rstHeader: %s, " +
+        "jwtCookieLen: %d",
       getShortRequestId(),
       getPath(),
       getRemoteAddressHost(),
@@ -278,9 +273,9 @@ public class RequestSnapshot {
       getXForwardedFor(),
       getXForwardedHost(),
       getXForwardedProto(),
-      hasRstCookie(),
-      hasRstHeader(),
-      hasJwtCookie()
+      getRstCookie(),
+      getRstHeader(),
+      clean(getJwtCookie()).length()
     );
   }
 }

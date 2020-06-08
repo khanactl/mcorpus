@@ -1,4 +1,4 @@
-package com.tll.mcorpus.web;
+package com.tll.web.ratpack;
 
 import static com.tll.transform.TransformUtil.uuidToToken;
 
@@ -11,12 +11,12 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 /**
- * Require a valid JWT with ADMIN role in order to proceed.
+ * Require a valid JWT with an administrator role in order to proceed.
  * <p>
  * <b>IMPT: </b>
  * A {@link JWTHttpRequestStatus} is expected to already be cached in the request.
  *
- * @see JWTStatusHandler for caching the inbound http request JWT status
+ * @see <code>JWTStatusHandler</code> for caching the inbound http request JWT status
  * @author jkirton
  */
 public class JWTRequireAdminHandler implements Handler {
@@ -26,17 +26,11 @@ public class JWTRequireAdminHandler implements Handler {
   @Override
   public void handle(Context ctx) throws Exception {
     final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
-    switch(jwtRequestStatus.status()) {
-      case VALID:
-        // valid mcuser logged in by jwt - now verify admin role
-        if(GraphQLRole.hasAdminRole(jwtRequestStatus.roles())) {
-          log.info("JWT {} of user {} deemed as ADMIN.", uuidToToken(jwtRequestStatus.jwtId()), uuidToToken(jwtRequestStatus.userId()));
-          ctx.next(); // you may proceed
-          return;
-        }
-        // fall through when not authorized
-      default:
-        ctx.clientError(403); // forbidden
+    if(jwtRequestStatus.status().isValid() && jwtRequestStatus.isAdmin()) {
+      log.info("JWT {} of user {} deemed as ADMIN.", uuidToToken(jwtRequestStatus.jwtId()), uuidToToken(jwtRequestStatus.userId()));
+      ctx.next(); // you may proceed
+    } else {
+      ctx.clientError(403); // forbidden
     }
   }
 

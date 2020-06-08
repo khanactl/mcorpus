@@ -55,6 +55,11 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
+  public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+    return targetHandler.getJwtUserInfo(jwtUserId);
+  }
+
+  @Override
   public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
     return targetHandler.getActiveJwtLogins(jwtUserId);
   }

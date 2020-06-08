@@ -1,4 +1,4 @@
-package com.tll.mcorpus.web;
+package com.tll.mcorpus.web.ratpack;
 
 import java.time.Duration;
 
@@ -8,9 +8,19 @@ import com.google.inject.Singleton;
 import com.tll.jwt.CachingJwtBackendHandler;
 import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.JWT;
-import com.tll.mcorpus.MCorpusServerConfig;
 import com.tll.mcorpus.repo.MCorpusRepo;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
+import com.tll.mcorpus.web.MCorpusGraphQL;
+import com.tll.mcorpus.web.MCorpusJwtBackendHandler;
+import com.tll.web.ratpack.CommonHttpHeaders;
+import com.tll.web.ratpack.CorsHandler;
+import com.tll.web.ratpack.CsrfGuardHandler;
+import com.tll.web.ratpack.GraphQLHandler;
+import com.tll.web.ratpack.JWTRequireAdminHandler;
+import com.tll.web.ratpack.JWTStatusHandler;
+import com.tll.web.ratpack.RequestSnapshotFactory;
+import com.tll.web.ratpack.WebErrorHandler;
+import com.tll.web.ratpack.WebFileRenderer;
 
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
@@ -29,27 +39,48 @@ public class MCorpusWebModule extends AbstractModule {
   protected void configure() {
     bind(WebFileRenderer.class);
     bind(CommonHttpHeaders.class);
-    bind(CorsHttpHeaders.class);
     bind(JWTRequireAdminHandler.class);
-    bind(JWTStatusHandler.class);
     bind(ClientErrorHandler.class).to(WebErrorHandler.class);
     bind(ServerErrorHandler.class).to(WebErrorHandler.class);
   }
 
   @Provides
   @Singleton
-  CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
-    return new CsrfGuardHandler(config.rstTtlInSeconds);
+  RequestSnapshotFactory requestSnapshotFactory(MCorpusServerConfig config) {
+    return new RequestSnapshotFactory(config.rstTokenName, config.jwtTokenName);
   }
 
   @Provides
   @Singleton
-  GraphQLHandler gqlHandler(MCorpusUserRepo mcuserRepo, MCorpusRepo mcorpusRepo) {
+  CorsHandler corsHandler(MCorpusServerConfig config) {
+    return new CorsHandler(config.httpClientOrigin, config.rstTokenName);
+  }
+
+  @Provides
+  @Singleton
+  CsrfGuardHandler csrfHandler(MCorpusServerConfig config) {
+    return new CsrfGuardHandler(
+      config.rstTokenName,
+      config.rstRegExRequestPaths,
+      config.rstTtlInSeconds,
+      config.cookieSecure
+    );
+  }
+
+  @Provides
+  @Singleton
+  GraphQLHandler gqlHandler(MCorpusServerConfig config, MCorpusUserRepo mcuserRepo, MCorpusRepo mcorpusRepo) {
     final MCorpusGraphQL mcorpusGraphQL = new MCorpusGraphQL(mcuserRepo, mcorpusRepo);
     final GraphQLSchema schema = mcorpusGraphQL.getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL);
+    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL, config.jwtUserLoginGraphqlMethodName);
     return gqlHandler;
+  }
+
+  @Provides
+  @Singleton
+  JWTStatusHandler jwtStatusHandler(MCorpusServerConfig config) {
+    return new JWTStatusHandler(config.cookieSecure, config.jwtTokenName);
   }
 
   @Provides

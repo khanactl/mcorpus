@@ -1,7 +1,6 @@
-package com.tll.web;
+package com.tll.jwt;
 
-import static com.tll.mcorpus.MCorpusTestUtil.*;
-
+import static com.tll.mcorpus.MCorpusTestUtil.mockJwtBackendHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -13,9 +12,6 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import com.tll.UnitTest;
-import com.tll.jwt.IJwtHttpRequestProvider;
-import com.tll.jwt.JWT;
-import com.tll.jwt.JWTHttpRequestStatus;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 
 import org.junit.Test;
@@ -82,7 +78,7 @@ public class JWTTest {
     };
 
     // generate jwt
-    String jwt = jwti.jwtGenerate(jwtId, jwtUserId, roles, jwtRpPre);
+    String jwt = jwti.jwtGenerate(jwtId, jwtUserId, false, roles, jwtRpPre);
     assertNotNull(jwt);
     log.info("JWT generated: {}", jwt);
 

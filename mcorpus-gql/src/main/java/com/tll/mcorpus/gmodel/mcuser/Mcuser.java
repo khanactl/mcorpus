@@ -1,7 +1,6 @@
 package com.tll.mcorpus.gmodel.mcuser;
 
 import static com.tll.core.Util.copy;
-import static com.tll.core.Util.isNull;
 
 import java.util.Date;
 import java.util.Set;
@@ -9,9 +8,8 @@ import java.util.UUID;
 
 import com.tll.gmodel.BaseEntity;
 import com.tll.gmodel.UUIDKey;
-import com.tll.jwt.IJwtUser;
 
-public class Mcuser extends BaseEntity<Mcuser, UUIDKey> implements IJwtUser {
+public class Mcuser extends BaseEntity<Mcuser, UUIDKey> /*implements IJwtUser*/ {
 
   private final UUIDKey      pk;
   private final Date         created;
@@ -45,6 +43,7 @@ public class Mcuser extends BaseEntity<Mcuser, UUIDKey> implements IJwtUser {
       this.roles = roles;
   }
 
+  /*
   @Override
   public UUID getJwtUserId() { return pk.getUUID(); }
 
@@ -52,6 +51,7 @@ public class Mcuser extends BaseEntity<Mcuser, UUIDKey> implements IJwtUser {
   public String[] getJwtUserRoles() {
     return isNull(roles) ? new String[0] : roles.toArray(new String[0]);
   }
+  */
 
   @Override
   public UUIDKey getPk() { return pk; }

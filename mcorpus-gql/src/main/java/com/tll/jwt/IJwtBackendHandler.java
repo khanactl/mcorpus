@@ -56,11 +56,19 @@ public interface IJwtBackendHandler {
   FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId);
 
   /**
-   * Get the number of active JWTs in play for a known jwt user.
+   * Get the jwt user info for a given user.
+   *
+   * @param jwtUserId the user id
+   * @return Fetch result holding the jwt user info.
+   */
+  FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId);
+
+  /**
+   * Get a list of JWT info objects for each active JWTs in play for a known jwt user.
    *
    * @param jwtUserId the id of a known user - someone who logged successfully
    *                  and was issued a JWT at least once sometime in the recent past
-   * @return Fetch result holding the the number of currently active JWTs for the
+   * @return Fetch result holding the the list of currently active JWTs for the
    *         given user id.
    */
   FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId);

@@ -1,11 +1,14 @@
 package com.tll.mcorpus.web;
 
 import static com.tll.core.Util.isNull;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.mcorpus.transform.McuserXfrm.mcuserRolesArrayToStringArray;
 import static com.tll.repo.FetchResult.fetchrslt;
 import static com.tll.transform.TransformUtil.odtToDate;
 
 import java.net.InetAddress;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -15,10 +18,10 @@ import com.tll.jwt.IJwtBackendHandler;
 import com.tll.jwt.IJwtInfo;
 import com.tll.jwt.IJwtUser;
 import com.tll.mcorpus.db.enums.JwtStatus;
+import com.tll.mcorpus.db.enums.McuserRole;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.dmodel.ActiveLoginDomain;
 import com.tll.mcorpus.repo.MCorpusUserRepo;
-import com.tll.mcorpus.transform.McuserXfrm;
 import com.tll.repo.FetchResult;
 
 import org.slf4j.Logger;
@@ -75,6 +78,42 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     };
   }
 
+  private static IJwtUser map(final Mcuser mc) {
+    return new IJwtUser() {
+
+      @Override
+      public UUID getJwtUserId() {
+        return mc.getUid();
+      }
+
+      @Override
+      public String getJwtUserName() {
+        return mc.getName();
+      }
+
+      @Override
+      public String getJwtUserUsername() {
+        return mc.getUsername();
+      }
+
+      @Override
+      public String getJwtUserEmail() {
+        return mc.getEmail();
+      }
+
+      @Override
+      public boolean isAdministrator() {
+        return isNullOrEmpty(mc.getRoles()) ?
+          false : Arrays.stream(mc.getRoles()).anyMatch(McuserRole.ADMIN::equals);
+      }
+
+      @Override
+      public String[] getJwtUserRoles() {
+        return mcuserRolesArrayToStringArray(mc.getRoles());
+      }
+    };
+  }
+
   private final Logger log = LoggerFactory.getLogger(MCorpusJwtBackendHandler.class);
 
   private final MCorpusUserRepo mcuserRepo;
@@ -88,6 +127,17 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     final FetchResult<JwtStatus> fr = mcuserRepo.getBackendJwtStatus(jwtId);
     final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
     return fetchrslt(jstat, fr.getErrorMsg());
+  }
+
+  @Override
+  public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+    FetchResult<Mcuser> fr = mcuserRepo.fetchMcuser(jwtUserId);
+    if (fr.isSuccess()) {
+      final IJwtUser jwtUser = map(fr.get());
+      return fetchrslt(jwtUser);
+    } else {
+      return fetchrslt(fr.getErrorMsg());
+    }
   }
 
   @Override
@@ -110,8 +160,7 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
     final FetchResult<Mcuser> loginResult = mcuserRepo.login(username, pswd, pendingJwtId, jwtExpiration,
         requestInstant, requestOrigin);
     if (loginResult.isSuccess()) {
-      final McuserXfrm xfrm = new McuserXfrm();
-      return fetchrslt(xfrm.fromBackend(loginResult.get()), loginResult.getErrorMsg());
+      return fetchrslt(map(loginResult.get()), loginResult.getErrorMsg());
     } else {
       return fetchrslt(loginResult.getErrorMsg());
     }

@@ -1,8 +1,10 @@
 # mcuser queries
 extend type Query {
+  # the jwt login info of the JWT used to login -OR- null if no valid jwt currently exists
+  currentJwt: CurrentJwtInfo
 
-  # jwt login status
-  jwtStatus: JwtStatus!
+  # the list of currently active JWTs for a given user
+  activeJwts(uid: ID!): [JwtInfo]!
 
   # get an mcuser and assigned roles
   getMcuser(uid: ID!): Mcuser @auth(role: "admin")
@@ -13,15 +15,14 @@ extend type Query {
 
 # mcuser mutation methods
 extend type Mutation {
-
   # JWT login - upon successful login a new jwt is issued
-  jwtLogin(username: String!, pswd: String!): Boolean!
+  jwtLogin(username: String!, pswd: String!): CurrentJwtInfo
 
   # JWT logout - invalidate the active jwt
   jwtLogout: Boolean!
 
   # invalidate all active JWTs issued to a the given user
-  invalidateJwts(jwtUserId: ID!): Boolean @auth(role: "admin")
+  invalidateJwts(uid: ID!): Boolean @auth(role: "admin")
 
   # set/reset an mucser pswd by mcuser id
   mcpswd(uid: ID!, pswd: String!): Boolean @auth(role: "admin")
@@ -48,20 +49,18 @@ type JwtInfo {
   clientOrigin: String
 }
 
-# the status of the active JWT
-type JwtStatus {
+# the active JWT and bound user info
+type CurrentJwtInfo {
   # the JWT id
   jwtId: ID
   # the JWT user id
-  jwtUserId: ID
-  # when the JWT was created
-  created: Date
-  # when the JWT expires
-  expires: Date
-  # the JWT roles claim
-  roles: String
-  # list of all valid and non-expired JWTs presently issued to the bound jwt user (mcuser)
-  activeJWTs: [JwtInfo]
+  uid: ID
+  # the assigned name of the bound user
+  jwtUserName: String
+  # the username of the bound user
+  jwtUserUsername: String
+  # the email address of the bound user
+  jwtUserEmail: String
 }
 
 # mcuser - those granted access to the mcorpus graphql api
