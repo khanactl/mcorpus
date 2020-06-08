@@ -34,6 +34,7 @@
     "aws-sdk": "^2.692.0",
     "camelcase": "^6.0.0",
     "git-branch": "^2.0.1",
+    "jsonschema": "^1.2.6",
     "npm-check-updates": "^6.0.1",
     "source-map-support": "^0.5.19"
   },
