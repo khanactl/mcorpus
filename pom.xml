@@ -22,12 +22,12 @@
     <slf4j-api.version>1.7.30</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
-    <postgres-jdbc.version>42.2.12</postgres-jdbc.version>
+    <postgres-jdbc.version>42.2.14</postgres-jdbc.version>
 
     <jooq.version>3.13.2</jooq.version>
     <hikari-cp.version>3.4.5</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>8.18</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>8.19</nimbus-jose-jwt.version>
 
     <guava.version>29.0-jre</guava.version>
     <guice.version>4.2.3</guice.version>
