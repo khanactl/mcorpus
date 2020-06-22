@@ -86,7 +86,7 @@ export class DbStack extends BaseStack {
       databaseName: props.dbName,
       masterUsername: props.dbMasterUsername,
       engine: DatabaseInstanceEngine.POSTGRES,
-      instanceClass: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
+      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
       optionGroup: optionGroup,
       parameterGroup: parameterGroup,
       enablePerformanceInsights: false,
