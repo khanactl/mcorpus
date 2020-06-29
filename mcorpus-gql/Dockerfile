@@ -1,6 +1,6 @@
-FROM openjdk:8-jre-alpine
+FROM openjdk:11.0.7-jre
 
-RUN apk --no-cache add curl
+# RUN apk --no-cache add curl
 
 EXPOSE 5150/tcp 5432/tcp
 

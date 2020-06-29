@@ -12,8 +12,8 @@ echo "Building docker image with tag: $DOCKER_TAG.."
 docker build -t $REPOSITORY_URI:$DOCKER_TAG .
 
 # docker push to AWS
-echo "Pushing docker image to AWS.."
-$(aws ecr get-login --region ${AWS_DEFAULT_REGION:=us-west-2} --no-include-email)
-docker push $REPOSITORY_URI:$DOCKER_TAG
+# echo "Pushing docker image to AWS.."
+# $(aws ecr get-login --region ${AWS_DEFAULT_REGION:=us-west-2} --no-include-email)
+# docker push $REPOSITORY_URI:$DOCKER_TAG
 
 echo "Done."

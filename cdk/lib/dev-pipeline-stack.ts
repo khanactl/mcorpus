@@ -141,7 +141,7 @@ export class DevPipelineStack extends BaseStack {
         phases: {
           install: {
             'runtime-versions': {
-              java: 'openjdk8',
+              java: 'openjdk11',
               docker: 18,
             },
             commands: ['pip install --upgrade awscli'],
@@ -220,7 +220,7 @@ export class DevPipelineStack extends BaseStack {
         topicName: topicName,
         displayName: displayName,
       });
-      props.onBuildFailureEmails.forEach(email =>
+      props.onBuildFailureEmails.forEach((email) =>
         this.dockerBuildFailureEventTopic!.addSubscription(new EmailSubscription(email))
       );
       dockerBuild.onBuildFailed(topicName, {
@@ -277,7 +277,7 @@ export class DevPipelineStack extends BaseStack {
         topicName: topicName,
         displayName: displayName,
       });
-      props.onBuildFailureEmails.forEach(email =>
+      props.onBuildFailureEmails.forEach((email) =>
         this.cdkBuildFailureEventTopic!.addSubscription(new EmailSubscription(email))
       );
       cdkBuild.onBuildFailed(topicName, {
