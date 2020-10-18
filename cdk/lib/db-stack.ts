@@ -129,6 +129,6 @@ export class DbStack extends BaseStack {
     new CfnOutput(this, 'dbEndpoint', {
       value: this.dbInstance.dbInstanceEndpointAddress + ':' + this.dbInstance.dbInstanceEndpointPort,
     });
-    new CfnOutput(this, 'dbInstanceJsonSecretArn', { value: this.dbInstanceJsonSecret!.secretArn });
+    new CfnOutput(this, 'dbInstanceJsonSecretArn', { value: this.dbInstanceJsonSecret.secretArn });
   }
 }
