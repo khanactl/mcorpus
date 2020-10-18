@@ -5,10 +5,10 @@ import {
   ISecurityGroup,
   IVpc,
   SecurityGroup,
-  SubnetType,
+  SubnetType
 } from '@aws-cdk/aws-ec2';
 import { RetentionDays } from '@aws-cdk/aws-logs';
-import { DatabaseInstance, DatabaseInstanceEngine, OptionGroup, ParameterGroup } from '@aws-cdk/aws-rds';
+import { DatabaseInstance, DatabaseInstanceEngine, OptionGroup, ParameterGroup, PostgresEngineVersion } from '@aws-cdk/aws-rds';
 import { ISecret } from '@aws-cdk/aws-secretsmanager';
 import { CfnOutput, Construct, Duration, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
@@ -84,8 +84,12 @@ export class DbStack extends BaseStack {
       vpc: props.vpc,
       instanceIdentifier: dbInstNme,
       databaseName: props.dbName,
-      masterUsername: props.dbMasterUsername,
-      engine: DatabaseInstanceEngine.POSTGRES,
+      credentials: {
+        username: props.dbMasterUsername
+      },
+      engine: DatabaseInstanceEngine.postgres({
+        version: PostgresEngineVersion.VER_11_5,
+      }),
       instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
       optionGroup: optionGroup,
       parameterGroup: parameterGroup,
@@ -115,7 +119,9 @@ export class DbStack extends BaseStack {
     this.dbInstance.connections.allowDefaultPortFrom(props.codebuildSecGrp, 'from codebuild');
 
     // Rotate the master user password every 30 days
-    const rdsSecretRotation = this.dbInstance.addRotationSingleUser(Duration.days(30));
+    this.dbInstance.addRotationSingleUser({
+      automaticallyAfter: Duration.days(30)
+    });
 
     this.dbInstanceJsonSecret = this.dbInstance.secret!;
 

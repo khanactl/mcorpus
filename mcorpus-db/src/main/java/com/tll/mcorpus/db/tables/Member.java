@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Member extends TableImpl<MemberRecord> {
 
-    private static final long serialVersionUID = 515446999;
+    private static final long serialVersionUID = -1240238580;
 
     /**
      * The reference instance of <code>public.member</code>
@@ -53,7 +53,7 @@ public class Member extends TableImpl<MemberRecord> {
     /**
      * The column <code>public.member.mid</code>.
      */
-    public final TableField<MemberRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("gen_random_uuid()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<MemberRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("public.gen_random_uuid()", org.jooq.impl.SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.member.created</code>.
