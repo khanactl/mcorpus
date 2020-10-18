@@ -10,7 +10,7 @@ import {
 import { RetentionDays } from '@aws-cdk/aws-logs';
 import { DatabaseInstance, DatabaseInstanceEngine, OptionGroup, ParameterGroup, PostgresEngineVersion } from '@aws-cdk/aws-rds';
 import { ISecret } from '@aws-cdk/aws-secretsmanager';
-import { CfnOutput, Construct, Duration, Tag } from '@aws-cdk/core';
+import { Aspects, CfnOutput, Construct, Duration, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 
 /**
@@ -74,7 +74,7 @@ export class DbStack extends BaseStack {
       allowAllOutbound: true,
       securityGroupName: sgDbInstNme,
     });
-    this.dbSecGrp.node.applyAspect(new Tag('Name', sgDbInstNme));
+    Aspects.of(this.dbSecGrp).add(new Tag('Name', sgDbInstNme));
 
     const optionGroup = OptionGroup.fromOptionGroupName(this, 'dbOptionGroup', 'default:postgres-11');
     const parameterGroup = ParameterGroup.fromParameterGroupName(this, 'dbParameterGroup', 'default.postgres11');
