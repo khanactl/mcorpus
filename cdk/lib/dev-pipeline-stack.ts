@@ -233,7 +233,8 @@ export class DevPipelineStack extends BaseStack {
 
     const cdkBuild = new PipelineProject(this, 'CdkBuildProject', {
       environment: {
-        buildImage: LinuxBuildImage.UBUNTU_14_04_NODEJS_10_14_1,
+        buildImage: LinuxBuildImage.STANDARD_2_0,
+        computeType: ComputeType.SMALL,
       },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',

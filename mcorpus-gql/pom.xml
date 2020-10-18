@@ -22,6 +22,7 @@
 
   <properties>
     <mcorpus-db.version>1.4.12-SNAPSHOT</mcorpus-db.version>
+    <main-class>com.tll.mcorpus.web.ratpack.Main</main-class>
   </properties>
 
   <profiles>
