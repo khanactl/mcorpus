@@ -43,7 +43,7 @@
 
     <graphql-java.version>14.0</graphql-java.version>
 
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
   </properties>
 
   <modules>
