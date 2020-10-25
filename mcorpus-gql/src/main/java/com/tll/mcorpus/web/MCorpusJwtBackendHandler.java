@@ -123,7 +123,7 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
-  public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
+  public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId) {
     final FetchResult<JwtStatus> fr = mcuserRepo.getBackendJwtStatus(jwtId);
     final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
     return fetchrslt(jstat, fr.getErrorMsg());

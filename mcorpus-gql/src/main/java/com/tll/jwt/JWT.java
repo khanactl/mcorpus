@@ -285,7 +285,7 @@ public class JWT {
     // [Default] Backend verification behavior:
     // 1) the jwt id is *known* and *not blacklisted*
     // 2) the associated user has a valid status
-    final FetchResult<JwtBackendStatus> fr = backendHandler.getBackendJwtStatus(jwtId);
+    final FetchResult<JwtBackendStatus> fr = backendHandler.getBackendJwtStatus(jwtId, userId);
     if(isNull(fr) || isNull(fr.get())) {
       log.error("JWT {} fetch backend status error: {}.",
         jwtId,

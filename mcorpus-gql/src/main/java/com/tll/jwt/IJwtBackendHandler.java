@@ -48,12 +48,13 @@ public interface IJwtBackendHandler {
 
   /**
    * Get the status of a known JWT from a remotely held datastore (the backend)
-   * given its jwt id.
+   * given its jwt id and bound user id.
    *
    * @param jwtId id of the target JWT
+   * @param jwtUserId id of the bound jwt user
    * @return Fetch result holding the backend JWT status
    */
-  FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId);
+  FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId);
 
   /**
    * Get the jwt user info for a given user.

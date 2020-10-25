@@ -179,7 +179,7 @@ public class MCorpusTestUtil {
       }
 
       @Override
-      public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId) {
+      public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId) {
         return FetchResult.fetchrslt(JwtBackendStatus.NOT_PRESENT);
       }
 
