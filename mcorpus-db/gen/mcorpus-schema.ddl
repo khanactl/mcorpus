@@ -419,6 +419,101 @@ END
 $_$;
 
 /*
+  mcuser_refresh_login()
+
+  Login w/out mcuser login credentials.
+  Here we assume the web app has done due diligence to verify the user.
+  UNSAFE!
+*/
+CREATE OR REPLACE FUNCTION mcuser_refresh_login(
+  in_request_timestamp timestamptz,
+  in_request_origin inet,
+  in_login_expiration timestamptz,
+  in_old_jwt_id uuid,
+  in_new_jwt_id uuid
+) RETURNS mcuser
+LANGUAGE plpgsql AS
+$_$
+DECLARE
+  passed BOOLEAN;
+  uid uuid;
+  qrec jwt_mcuser_status;
+  mcuser_row mcuser%ROWTYPE;
+BEGIN
+  LOCK TABLE mcuser_audit IN ACCESS EXCLUSIVE MODE;
+
+  qrec := _fetch_latest_jwt_mcuser_rec(in_old_jwt_id);
+
+  IF qrec is null or qrec.jwt_id is null THEN
+    -- the input jwt id was not found
+    RAISE NOTICE 'JWT id not found: %', in_old_jwt_id;
+    return null;
+  ELSEIF qrec.jwt_id_status = 'BLACKLISTED'::jwt_id_status THEN
+    -- jwt id is marked as blacklisted (jwt_status is set to blacklisted upon logout)
+    RAISE NOTICE 'JWT id is blacklisted: %', in_old_jwt_id;
+    return null;
+  ELSEIF qrec.mcuser_status != 'ACTIVE'::mcuser_status THEN
+    -- mcuser is not active
+    RAISE NOTICE 'mcuser is not active: %', in_old_jwt_id;
+    return null;
+  ELSEIF qrec.mcuser_audit_record_type != 'LOGIN'::mcuser_audit_type THEN
+    -- not a login mcuser audit record! (shouldn't happen but we check to be sure)
+    RAISE NOTICE 'Expected LOGIN type mcuser_audit record';
+    return null;
+  ELSEIF qrec.jwt_id_status = 'OK' THEN
+    --jstat := 'VALID'::jwt_status;
+    -- fetch mcuser record and roles
+    SELECT
+      m.uid,
+      m.created,
+      m.modified,
+      m.name,
+      m.email,
+      m.username,
+      null,
+      m.status,
+      m.roles
+    INTO mcuser_row
+    FROM mcuser m
+    WHERE m.uid = qrec.uid;
+
+    -- ** RULE: only allow *one* active mcuser login per request origin **
+    -- blacklist existing valid and non-expired mcuser logins
+    -- for the mcuser logging in at the given request origin
+    perform _blacklist_jwt_ids_at_request_origin(mcuser_row.uid, in_request_origin);
+
+    -- add mcuser_audit LOGIN record upon successful login
+    INSERT INTO mcuser_audit (
+      uid,
+      type,
+      request_timestamp,
+      request_origin,
+      login_expiration,
+      jwt_id,
+      jwt_id_status
+    )
+    VALUES (
+      mcuser_row.uid,
+      'LOGIN',
+      in_request_timestamp,
+      in_request_origin,
+      in_login_expiration,
+      in_new_jwt_id,
+      'OK'::jwt_id_status
+    );
+
+    -- return the mcuser and roles
+    RAISE NOTICE 'mcuser % refresh login successful', mcuser_row.uid;
+    RETURN mcuser_row;
+  ELSE
+    -- error: unresolved jwt status
+    RAISE NOTICE 'JWT id known but indeterminate state: %', jwt_id;
+    return null;
+  END IF;
+END
+$_$;
+
+/*
   mcuser_login()
 
   Call this function to authenticate mcuser users

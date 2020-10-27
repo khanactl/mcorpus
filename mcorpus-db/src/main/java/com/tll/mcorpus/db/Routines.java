@@ -16,6 +16,7 @@ import com.tll.mcorpus.db.routines.InsertMember;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
+import com.tll.mcorpus.db.routines.McuserRefreshLogin;
 import com.tll.mcorpus.db.routines.MemberLogin;
 import com.tll.mcorpus.db.routines.MemberLogout;
 import com.tll.mcorpus.db.routines.MemberPswd;
@@ -252,6 +253,49 @@ public class Routines {
         p.setInPswd(inPswd);
 
         p.execute(configuration);
+    }
+
+    /**
+     * Call <code>public.mcuser_refresh_login</code>
+     */
+    public static McuserRecord mcuserRefreshLogin(Configuration configuration, OffsetDateTime inRequestTimestamp, InetAddress inRequestOrigin, OffsetDateTime inLoginExpiration, UUID inOldJwtId, UUID inNewJwtId) {
+        McuserRefreshLogin f = new McuserRefreshLogin();
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+        f.setInLoginExpiration(inLoginExpiration);
+        f.setInOldJwtId(inOldJwtId);
+        f.setInNewJwtId(inNewJwtId);
+
+        f.execute(configuration);
+        return f.getReturnValue();
+    }
+
+    /**
+     * Get <code>public.mcuser_refresh_login</code> as a field.
+     */
+    public static Field<McuserRecord> mcuserRefreshLogin(OffsetDateTime inRequestTimestamp, InetAddress inRequestOrigin, OffsetDateTime inLoginExpiration, UUID inOldJwtId, UUID inNewJwtId) {
+        McuserRefreshLogin f = new McuserRefreshLogin();
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+        f.setInLoginExpiration(inLoginExpiration);
+        f.setInOldJwtId(inOldJwtId);
+        f.setInNewJwtId(inNewJwtId);
+
+        return f.asField();
+    }
+
+    /**
+     * Get <code>public.mcuser_refresh_login</code> as a field.
+     */
+    public static Field<McuserRecord> mcuserRefreshLogin(Field<OffsetDateTime> inRequestTimestamp, Field<InetAddress> inRequestOrigin, Field<OffsetDateTime> inLoginExpiration, Field<UUID> inOldJwtId, Field<UUID> inNewJwtId) {
+        McuserRefreshLogin f = new McuserRefreshLogin();
+        f.setInRequestTimestamp(inRequestTimestamp);
+        f.setInRequestOrigin(inRequestOrigin);
+        f.setInLoginExpiration(inLoginExpiration);
+        f.setInOldJwtId(inOldJwtId);
+        f.setInNewJwtId(inNewJwtId);
+
+        return f.asField();
     }
 
     /**
