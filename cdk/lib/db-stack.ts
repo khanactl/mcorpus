@@ -88,7 +88,7 @@ export class DbStack extends BaseStack {
         username: props.dbMasterUsername
       },
       engine: DatabaseInstanceEngine.postgres({
-        version: PostgresEngineVersion.VER_11_5,
+        version: PostgresEngineVersion.VER_11_8,
       }),
       instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
       optionGroup: optionGroup,
