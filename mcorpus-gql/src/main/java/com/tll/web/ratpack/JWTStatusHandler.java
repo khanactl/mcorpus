@@ -49,11 +49,13 @@ public class JWTStatusHandler implements Handler {
   static class JwtHttpRequestProviderImpl implements IJwtHttpRequestProvider {
 
     private final String jwt;
+    private final String refreshToken;
     private final Instant requestInstant;
     private final InetAddress requestOrigin;
 
-    public JwtHttpRequestProviderImpl(String jwt, Instant requestInstant, InetAddress requestOrigin) {
+    public JwtHttpRequestProviderImpl(String jwt, String refreshToken, Instant requestInstant, InetAddress requestOrigin) {
       this.jwt = jwt;
+      this.refreshToken = refreshToken;
       this.requestInstant = requestInstant;
       this.requestOrigin = requestOrigin;
     }
@@ -66,6 +68,11 @@ public class JWTStatusHandler implements Handler {
     @Override
     public String getJwt() {
       return jwt;
+    }
+
+    @Override
+    public String getJwtRefreshToken() {
+      return refreshToken;
     }
 
     @Override
@@ -82,23 +89,25 @@ public class JWTStatusHandler implements Handler {
   static class JwtHttpResponseActionImpl implements IJwtHttpResponseAction {
 
     private final boolean cookieSecure;
-    private final String jwtTokenName;
+    private final String jwtRefreshTokenName;
     private final Context ctx;
 
-    public JwtHttpResponseActionImpl(final boolean cookieSecure, final String jwtTokenName, final Context ctx) {
+    public JwtHttpResponseActionImpl(final boolean cookieSecure, final String jwtRefreshTokenName, final Context ctx) {
       this.cookieSecure = cookieSecure;
-      this.jwtTokenName = jwtTokenName;
+      this.jwtRefreshTokenName = jwtRefreshTokenName;
       this.ctx = ctx;
     }
 
     @Override
     public void expireJwtClientside() {
-      expireCookie(ctx, jwtTokenName, "/", cookieSecure);
+      ctx.getResponse().getHeaders().set("Authorization", "");
+      expireCookie(ctx, jwtRefreshTokenName, "/", cookieSecure);
     }
 
     @Override
-    public void setJwtClientside(String jwt, Duration jwtTimeToLive) {
-      setCookie(ctx, jwtTokenName, jwt, "/", jwtTimeToLive.getSeconds(), cookieSecure);
+    public void setJwtClientside(String jwt, String refreshToken, Duration refreshTokenTimeToLive) {
+      ctx.getResponse().getHeaders().set("Authorization", "Bearer " + jwt);
+      setCookie(ctx, jwtRefreshTokenName, refreshToken, "/", refreshTokenTimeToLive.getSeconds(), cookieSecure);
     }
   }
 
@@ -122,7 +131,7 @@ public class JWTStatusHandler implements Handler {
   private final Logger log = LoggerFactory.getLogger(JWTStatusHandler.class);
 
   private final boolean cookieSecure;
-  private final String jwtTokenName;
+  private final String jwtRefreshTokenName;
 
   /**
    * Constructor.
@@ -130,9 +139,9 @@ public class JWTStatusHandler implements Handler {
    * @param cookieSecure the cookie secure flag (https or http)
    * @param jwtTokenName the name to use for generated JWTs
    */
-  public JWTStatusHandler(boolean cookieSecure, String jwtTokenName) {
+  public JWTStatusHandler(boolean cookieSecure, String jwtRefreshTokenName) {
     this.cookieSecure = cookieSecure;
-    this.jwtTokenName = jwtTokenName;
+    this.jwtRefreshTokenName = jwtRefreshTokenName;
   }
 
   @Override
@@ -145,7 +154,8 @@ public class JWTStatusHandler implements Handler {
       // NOTE: the http request instant is truncated to seconds
       // so that conversion to/from <code>java.util.Date</code> objects are equal!
       rp = new JwtHttpRequestProviderImpl(
-        rs.getJwtCookie(),
+        rs.getAuthBearer(),
+        rs.getJwtRefreshTokenCookie(),
         rs.getRequestInstant().truncatedTo(ChronoUnit.SECONDS),
         resolveRequestOrigin(rs)
       );
@@ -160,7 +170,7 @@ public class JWTStatusHandler implements Handler {
     // create jwt response action and cache in request for downstream access
     final IJwtHttpResponseAction ra = new JwtHttpResponseActionImpl(
       cookieSecure,
-      jwtTokenName,
+      jwtRefreshTokenName,
       ctx
     );
     ctx.getRequest().add(ra);

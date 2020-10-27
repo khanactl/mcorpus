@@ -73,7 +73,15 @@ public class JWTHttpRequestStatus {
     /**
      * JWT has valid signature and claims but is expired.
      */
-    EXPIRED,
+    JWT_EXPIRED,
+    /**
+     * Missing refresh token value mis-match between jwt refresh token claim vs. refresh token cookie value.
+     */
+    BAD_REFRESH_TOKEN,
+    /**
+     * JWT refresh token has expired.
+     */
+    REFRESH_TOKEN_EXPIRED,
     /**
      * The JWT signature and claims are valid but either the jwt id or
      * associated user are logically blocked by way of backend check.
@@ -103,7 +111,12 @@ public class JWTHttpRequestStatus {
     /**
      * @return true if the JWT is expired.
      */
-    public boolean isExpired() { return this == EXPIRED; }
+    public boolean isJwtExpired() { return this == JWT_EXPIRED; }
+
+    /**
+     * @return true if the refresh token is expired.
+     */
+    public boolean isRefreshTokenExpired() { return this == REFRESH_TOKEN_EXPIRED; }
 
     /**
      * @return true if the JWT is invalid for any reason.
@@ -152,7 +165,7 @@ public class JWTHttpRequestStatus {
    *         false otherwise.
    */
   public boolean isJWTStatusExpiredOrNotPresent() {
-    return not(status.isPresent()) || status.isExpired();
+    return not(status.isPresent()) || status.isJwtExpired() || status.isRefreshTokenExpired();
   }
 
   /**

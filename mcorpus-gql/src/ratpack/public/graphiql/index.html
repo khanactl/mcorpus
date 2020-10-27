@@ -49,6 +49,7 @@
    * various React params to enable interesting integrations.
    */
   // Parse the search string to get url parameters.
+  var jwt = '${jwt}';
   var rst = '${rst}';
   var search = window.location.search;
   var parameters = {};
@@ -98,19 +99,28 @@
   function graphQLFetcher(graphQLParams) {
     // This example expects a GraphQL server at the path /graphql.
     // Change this to point wherever you host your GraphQL server.
+    var headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'rst': rst
+    };
+    if(jwt && jwt.length() > 0) {
+      headers['Authorization'] = 'Bearer ' + jwt;
+    }
     return fetch('/graphql', {
       method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'rst': rst
-      },
+      headers: headers,
       body: JSON.stringify(graphQLParams),
       credentials: 'include',
     }).then(function (response) {
       // grab the updated RST token
       try {
         rst = response.headers.get('rst');
+        var auth = response.headers.get('Authorization');
+        if(auth && auth.startsWith('Bearer ')) {
+          jwt = auth.substring(7);
+          console.log('jwt: ' + jwt);
+        }
       } catch (error) { }
       ///
       return response.text();

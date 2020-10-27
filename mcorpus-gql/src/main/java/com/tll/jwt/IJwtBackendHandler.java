@@ -88,6 +88,18 @@ public interface IJwtBackendHandler {
   FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId, InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration);
 
   /**
+   * Do a JWT login *refresh* in the backend system.
+   *
+   * @param oldJwtId the current/existing id of the jwt presumed to be held in backend
+   * @param pendingJwtId the generated jwt id that will be valid upon successful backend login
+   * @param requestOrigin the request origin ip address gotten from the sourcing http request
+   * @param requestInstant the instant the sourcing http request hit the server
+   * @param jwtExpiration the instant the pending JWT is set to expire
+   * @return Fetch result holding the JWT user entity object.
+   */
+  FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId, InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration);
+
+  /**
    * Do a JWT logout in the backend system.
    *
    * @param jwtUserid

@@ -1,12 +1,15 @@
 package com.tll.mcorpus.web.ratpack;
 
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.not;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 import static com.tll.web.ratpack.WebFileRenderer.TRefAndData.htmlNoCache;
-import static java.util.Collections.singletonMap;
 import static ratpack.handling.Handlers.redirect;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import com.tll.mcorpus.repo.MCorpusRepoModule;
 import com.tll.web.ratpack.CommonHttpHeaders;
@@ -15,6 +18,7 @@ import com.tll.web.ratpack.CsrfGuardHandler;
 import com.tll.web.ratpack.GraphQLHandler;
 import com.tll.web.ratpack.JWTRequireAdminHandler;
 import com.tll.web.ratpack.JWTStatusHandler;
+import com.tll.web.ratpack.RequestSnapshotFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,13 +116,21 @@ public class Main {
                 ctx.next();
               }
             })
-            .get(ctx -> ctx.render(htmlNoCache(
-              ctx.file("public/graphiql/index.html"),
-              singletonMap(
+            .get(ctx -> {
+              final Map<String, Object> dmap = new HashMap<>(2);
+              dmap.put(
+                "jwt",
+                clean(ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx).getAuthBearer())
+              );
+              dmap.put(
                 ctx.getServerConfig().get(MCorpusServerConfig.class).rstTokenName,
                 ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst
-              )
-            )))
+              );
+              ctx.render(htmlNoCache(
+                ctx.file("public/graphiql/index.html"),
+                dmap
+              ));
+            })
             .files(f -> f.dir("public/graphiql"))
           )
         )

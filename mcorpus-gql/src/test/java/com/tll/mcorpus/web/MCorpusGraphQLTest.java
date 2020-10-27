@@ -92,7 +92,8 @@ public class MCorpusGraphQLTest {
         "127.0.0.1",  // x-forwarded-for
         "localhost",  // x-forwarded-host
         "http",       // x-forwarded-proto
-        null, // jwt cookie
+        null, // auth header
+        null, // refresh token
         null, // rst cookie
         null, // rst header
         UUID.randomUUID().toString()

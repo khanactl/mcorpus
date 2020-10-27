@@ -38,7 +38,9 @@ public class RequestSnapshot {
   private final String xForwardedHost;
   private final String xForwardedProto;
 
-  private final String jwtCookie;
+  // private final String jwtCookie;
+  private final String authHeader;
+  private final String jwtRefreshTokenCookie;
 
   private final String rstCookie;
   private final String rstHeader;
@@ -61,7 +63,8 @@ public class RequestSnapshot {
    * @param xForwardedFor the X-Forwarded-For http header value
    * @param xForwardedHost the X-Forwarded-Host http header value
    * @param xForwardedProto the X-Forwarded-Proto http header value
-   * @param jwtCookie the http JWT cookie value
+   * @param authHeader the http Authrorization header value
+   * @param jwtRefreshTokenCookie the jwt refresh token cookie value
    * @param rstCookie the http request sync token cookie value
    * @param rstHeader the http request sync token http header value
    * @param requestId the server generated unique request id for tracking purposes
@@ -78,35 +81,40 @@ public class RequestSnapshot {
       String xForwardedFor,
       String xForwardedHost,
       String xForwardedProto,
-      String jwtCookie,
+      // String jwtCookie,
+      String authHeader,
+      String jwtRefreshTokenCookie,
       String rstCookie,
       String rstHeader,
       String requestId
   ) {
     super();
     this.requestInstant = requestInstant;
-    this.remoteAddressHost = remoteAddressHost;
-    this.path = path;
-    this.method = method;
+    this.remoteAddressHost = neclean(remoteAddressHost);
+    this.path = neclean(path);
+    this.method = neclean(method);
 
-    this.httpHost = httpHost;
-    this.httpOrigin = httpOrigin;
-    this.httpReferer = httpReferer;
-    this.httpForwarded = httpForwarded;
+    this.httpHost = neclean(httpHost);
+    this.httpOrigin = neclean(httpOrigin);
+    this.httpReferer = neclean(httpReferer);
+    this.httpForwarded = neclean(httpForwarded);
 
-    this.xForwardedFor = xForwardedFor;
+    this.xForwardedFor = neclean(xForwardedFor);
     this.xForwardedForClientIp =
       isNotNull(xForwardedFor) && xForwardedFor.indexOf(",") > 0 ?
         neclean(xForwardedFor.split(",")[0]) :
         xForwardedFor;
-    this.xForwardedHost = xForwardedHost;
-    this.xForwardedProto = xForwardedProto;
+    this.xForwardedHost = neclean(xForwardedHost);
+    this.xForwardedProto = neclean(xForwardedProto);
 
-    this.jwtCookie = jwtCookie;
-    this.rstCookie = rstCookie;
-    this.rstHeader = rstHeader;
+    // this.jwtCookie = jwtCookie;
+    this.authHeader = neclean(authHeader);
+    this.jwtRefreshTokenCookie = neclean(jwtRefreshTokenCookie);
 
-    this.requestId = requestId;
+    this.rstCookie = neclean(rstCookie);
+    this.rstHeader = neclean(rstHeader);
+
+    this.requestId = neclean(requestId);
   }
 
   /**
@@ -194,17 +202,26 @@ public class RequestSnapshot {
     return xForwardedProto;
   }
 
-  /**
-   * @return true if a JWT cookie value is present, false otherwise
-   */
+  /*
   public boolean hasJwtCookie() { return isNotNull(jwtCookie); }
 
-  /**
-   * @return the JWT cookie value.
-   */
   public String getJwtCookie() {
     return jwtCookie;
   }
+  */
+
+  public boolean hasAuthHeader() { return isNotNull(authHeader); }
+
+  public String getAuthHeader() { return authHeader; }
+
+  public String getAuthBearer() {
+    return (hasAuthHeader() && authHeader.startsWith("Bearer ")) ?
+              authHeader.substring(7) : null;
+  }
+
+  public boolean hasJwtRefreshTokenCookie() { return isNotNull(jwtRefreshTokenCookie); }
+
+  public String getJwtRefreshTokenCookie() { return jwtRefreshTokenCookie; }
 
   /**
    * @return true if a Request Sync Token is present, false otherwise.
@@ -261,7 +278,8 @@ public class RequestSnapshot {
         "x-forwarded-proto: %s, " +
         "rstCookie: %s, "+
         "rstHeader: %s, " +
-        "jwtCookieLen: %d",
+        "authHeader: %s" +
+        "jwtCookieRefreshTokenLen: %d",
       getShortRequestId(),
       getPath(),
       getRemoteAddressHost(),
@@ -275,7 +293,9 @@ public class RequestSnapshot {
       getXForwardedProto(),
       getRstCookie(),
       getRstHeader(),
-      clean(getJwtCookie()).length()
+      // clean(getJwtCookie()).length()
+      getAuthHeader(),
+      clean(getJwtRefreshTokenCookie()).length()
     );
   }
 }

@@ -167,6 +167,19 @@ public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
+  public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId,
+      InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
+    log.debug("Authenticating mcuser for refresh with old jwt id '{}'..", oldJwtId);
+    final FetchResult<Mcuser> loginResult = mcuserRepo.loginRefresh(oldJwtId, pendingJwtId, jwtExpiration,
+        requestInstant, requestOrigin);
+    if (loginResult.isSuccess()) {
+      return fetchrslt(map(loginResult.get()), loginResult.getErrorMsg());
+    } else {
+      return fetchrslt(loginResult.getErrorMsg());
+    }
+  }
+
+  @Override
   public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
       Instant requestInstant) {
     FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstant, requestOrigin);

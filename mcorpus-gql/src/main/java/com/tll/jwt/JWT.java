@@ -48,6 +48,16 @@ import org.slf4j.LoggerFactory;
  */
 public class JWT {
 
+  public static class GeneratedJwt {
+    public final Instant jwtExpiration;
+    public final String jwt;
+
+    public GeneratedJwt(Instant jwtExpiration, String jwt) {
+      this.jwtExpiration = jwtExpiration;
+      this.jwt = jwt;
+    }
+  }
+
   /**
    * Generate a new JWT shared secret for use server-side to both encrypt
    * newly created JWTs and decrypt incoming JWTs.
@@ -87,6 +97,7 @@ public class JWT {
 
   private final IJwtBackendHandler backendHandler;
   private final Duration jwtTimeToLive;
+  private final Duration jwtRefreshTokenTimeToLive;
   private final SecretKey jkey;
   private final String serverIssuer;
 
@@ -94,15 +105,17 @@ public class JWT {
    * Constructor.
    *
    * @param backendHandler the jwt backend handler.  Required.
-   * @param jwtTimeToLive the amount of time a JWT shall live clientside
+   * @param jwtTimeToLive the amount of time a JWT is valid
+   * @param jwtRefreshTokenTimeToLive the amount of time a jwt refresh token is valid
    * @param jwtSharedSecret the cryptographically strong secret to be used for
    *                        signing and verifying JWTs.  Required.
    * @param serverIssuer the expected JWT issuer used to verify received JWTs.  Required.
    */
-  public JWT(IJwtBackendHandler backendHandler, Duration jwtTimeToLive, byte[] jwtSharedSecret, String serverIssuer) {
+  public JWT(IJwtBackendHandler backendHandler, Duration jwtTimeToLive, Duration jwtRefreshTokenTimeToLive, byte[] jwtSharedSecret, String serverIssuer) {
     super();
     this.backendHandler = Objects.requireNonNull(backendHandler);
     this.jwtTimeToLive = jwtTimeToLive;
+    this.jwtRefreshTokenTimeToLive = jwtRefreshTokenTimeToLive;
     this.jkey = new SecretKeySpec(Objects.requireNonNull(jwtSharedSecret), 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = Objects.requireNonNull(serverIssuer);
     log.info("JWT configured with Time-to-live: {} hours, Issuer: {}.", jwtTimeToLive.toHours(), serverIssuer);
@@ -119,9 +132,15 @@ public class JWT {
   public Duration jwtTimeToLive() { return jwtTimeToLive; }
 
   /**
+   * @return the configured amount of time a JWT refresh token is considered valid.
+   */
+  public Duration jwtRefreshTokenTimeToLive() { return jwtRefreshTokenTimeToLive; }
+
+  /**
    * Generate an encrypted and signed JWT.
    *
    * @param jwtId the unique and strongly random jwtid to use in generating the JWT
+   * @param refreshToken the associated jwt refresh token to include as a claim in the generated jwt
    * @param userId id of the associated user to use in generating the JWT
    * @param adminUser is the associated user an administrator?
    * @param roles the optional roles of the <code>userId</code>
@@ -129,11 +148,14 @@ public class JWT {
    * @return newly created, never null encrypted and signed JWT.
    * @throws Exception upon any unexpected error generating the JWT
    */
-  public String jwtGenerate(final UUID jwtId, final UUID userId, final boolean adminUser, final String roles, final IJwtHttpRequestProvider httpreq)
+  public GeneratedJwt jwtGenerate(final UUID jwtId, final String refreshToken, final UUID userId, final boolean adminUser, final String roles, final IJwtHttpRequestProvider httpreq)
       throws Exception {
     final Instant requestInstant = httpreq.getRequestInstant();
     final Instant loginExpiration = requestInstant.plus(jwtTimeToLive);
     final String audience = httpreq.getRequestOrigin().getHostAddress();
+
+    // generate refresh token
+    final Instant refreshTokenExpiration = requestInstant.plus(jwtRefreshTokenTimeToLive);
 
     // create signed jwt object
     final SignedJWT signedJWT = new SignedJWT(
@@ -147,6 +169,8 @@ public class JWT {
         .expirationTime(Date.from(loginExpiration))
         .claim("admin", adminUser)
         .claim("roles", roles)
+        .claim("refreshToken", refreshToken)
+        .claim("refreshTokenExpiration", refreshTokenExpiration.toEpochMilli())
         .build());
 
     try {
@@ -159,7 +183,8 @@ public class JWT {
               .build(),
           new Payload(signedJWT));
       jweObject.encrypt(new DirectEncrypter(jkey.getEncoded()));
-      return jweObject.serialize();
+      final String jwt = jweObject.serialize();
+      return new GeneratedJwt(loginExpiration, jwt);
     } catch (Exception e) {
       throw new Exception(String.format("JWT signing/encryption error: %s.",  e.getMessage()));
     }
@@ -229,6 +254,8 @@ public class JWT {
     final String jwtAudience;
     final boolean admin;
     final String roles; // bound to the user
+    final String refreshToken;
+    final Instant refreshTokenExpiration;
     try {
       final JWTClaimsSet claims = sjwt.getJWTClaimsSet();
 
@@ -240,6 +267,8 @@ public class JWT {
       jwtAudience = isNullOrEmpty(claims.getAudience()) ? "" : claims.getAudience().get(0);
       admin = (boolean) claims.getClaim("admin");
       roles = (String) claims.getClaim("roles");
+      refreshToken = (String) claims.getClaim("refreshToken");
+      refreshTokenExpiration = Instant.ofEpochMilli((long) claims.getClaim("refreshTokenExpiration"));
 
       if(
         isNull(jwtId)
@@ -248,6 +277,8 @@ public class JWT {
         || isNull(expires)
         || isNullOrEmpty(issuer)
         || isNullOrEmpty(jwtAudience)
+        || isNull(refreshToken)
+        || isNull(refreshTokenExpiration)
         // NOTE: roles claim is optional
       ) {
         throw new Exception(String.format("JWT one or more missing required claims."));
@@ -279,7 +310,17 @@ public class JWT {
     // expired? (check for exp. time in the past)
     if(Instant.now().isAfter(expires)) {
       log.info("JWT {} expired.", jwtId);
-      return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, issued, expires, false, null);
+      return JWTHttpRequestStatus.create(JWTStatus.JWT_EXPIRED, jwtId, userId, issued, expires, false, null);
+    }
+
+    // verify refresh token
+    if(not(Objects.equals(httpreq.getJwtRefreshToken(), refreshToken))) {
+      log.info("JWT {} missing or mis-matched refresh token {} (jwt refresh token claim value: {}).", jwtId, httpreq.getJwtRefreshToken(), refreshToken);
+      return JWTHttpRequestStatus.create(JWTStatus.BAD_REFRESH_TOKEN, jwtId, userId, issued, expires, false, null);
+    }
+    if(Instant.now().isAfter(refreshTokenExpiration)) {
+      log.info("JWT {} refresh token {} expired.", jwtId, refreshToken);
+      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_EXPIRED, jwtId, userId, issued, expires, false, null);
     }
 
     // [Default] Backend verification behavior:
@@ -319,7 +360,7 @@ public class JWT {
     case EXPIRED:
       // jwt (login) expired
       log.warn("JWT {} expired.", jwtId);
-      jwtRequestStatus = JWTStatus.EXPIRED;
+      jwtRequestStatus = JWTStatus.JWT_EXPIRED;
       break;
     case VALID:
       // valid - provide roles

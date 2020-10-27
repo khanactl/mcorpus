@@ -1,6 +1,7 @@
 package com.tll.jwt;
 
 import static com.tll.mcorpus.MCorpusTestUtil.mockJwtBackendHandler;
+import static com.tll.transform.TransformUtil.uuidToToken;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import com.tll.UnitTest;
+import com.tll.jwt.JWT.GeneratedJwt;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
 
 import org.junit.Test;
@@ -43,12 +45,20 @@ public class JWTTest {
 
     final byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
     final String serverIssuer = "testhost.com";
-    final Duration jwtTtl = Duration.ofDays(2);
-    final JWT jwti = new JWT(mockJwtBackendHandler(), jwtTtl, jwtSharedSecret, serverIssuer);
+    final Duration jwtTtl = Duration.ofMinutes(15);
+    final Duration refreshTokenTtl = Duration.ofDays(14);
+    final JWT jwti = new JWT(
+      mockJwtBackendHandler(),
+      jwtTtl,
+      refreshTokenTtl,
+      jwtSharedSecret,
+      serverIssuer
+    );
 
     final Instant instantA = Instant.now();
     final Instant instantB = Instant.now().plus(Duration.ofSeconds(120));
     final UUID jwtId = UUID.randomUUID();
+    final String refreshToken = uuidToToken(UUID.randomUUID());
     final String roles = "AROLE";
     final UUID jwtUserId = UUID.randomUUID();
 
@@ -75,12 +85,18 @@ public class JWTTest {
       public InetAddress getRequestOrigin() {
         return ro;
       }
+
+      @Override
+      public String getJwtRefreshToken() {
+        return null;
+      }
     };
 
     // generate jwt
-    String jwt = jwti.jwtGenerate(jwtId, jwtUserId, false, roles, jwtRpPre);
-    assertNotNull(jwt);
-    log.info("JWT generated: {}", jwt);
+    GeneratedJwt genjwt = jwti.jwtGenerate(jwtId, refreshToken, jwtUserId, false, roles, jwtRpPre);
+    assertNotNull(genjwt);
+    assertNotNull(genjwt.jwt);
+    log.info("JWT generated: {}", genjwt.jwt);
 
     final IJwtHttpRequestProvider jwtRpPost = new IJwtHttpRequestProvider(){
 
@@ -98,12 +114,17 @@ public class JWTTest {
 
       @Override
       public String getJwt() {
-        return jwt;
+        return genjwt.jwt;
       }
 
       @Override
       public InetAddress getRequestOrigin() {
         return ro;
+      }
+
+      @Override
+      public String getJwtRefreshToken() {
+        return refreshToken;
       }
     };
 

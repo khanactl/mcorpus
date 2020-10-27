@@ -40,16 +40,23 @@ public class MCorpusServerConfig {
   public String jwtSalt;
 
   /**
-   * The JWT time to live in seconds.
+   * The JWT time to live in minutes.
    * <p>
-   * Default is 2 days (172800 seconds).
+   * Default is 15 minutes.
    */
-  public long jwtTtlInSeconds = 172800L;
+  public int jwtTtlInMinutes = 15;
 
   /**
-   * The name to use for generated JWTs.
+   * The name to use for jwt refresh token cookies.
    */
-  public String jwtTokenName = "jwt";
+  public String jwtRefreshTokenName = "jrt";
+
+  /**
+   * The JWT refresh token time to live in minutes.
+   * <p>
+   * Default is 2 weeks.
+   */
+  public int jwtRefreshTokenTtlInMinutes = 20160;
 
   /**
    * The GraphQL schema method name for JWT-based user logins.

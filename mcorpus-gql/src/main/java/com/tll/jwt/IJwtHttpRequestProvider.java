@@ -27,6 +27,11 @@ public interface IJwtHttpRequestProvider {
   String getJwt();
 
   /**
+   * @return the JWT refresh token held in the sourcing http request.
+   */
+  String getJwtRefreshToken();
+
+  /**
    * Verify the request origin of the sourcing http request against the
    * extracted JWT audience claim gotten from the JWT held in the same http request.
    * <p>

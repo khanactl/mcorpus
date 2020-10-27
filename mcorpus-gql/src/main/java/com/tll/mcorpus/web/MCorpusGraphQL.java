@@ -282,6 +282,16 @@ public class MCorpusGraphQL {
           cji -> cji)
         )
 
+        // jwt refresh
+        .dataFetcher("jwtRefresh", env -> processor.mutate(
+          env,
+          () -> fetchrslt(
+            ((JWTUserGraphQLWebContext) env.getContext()).jwtRefresh(),
+            true
+          ),
+          cji -> cji)
+        )
+
         // jwt logout
         .dataFetcher("jwtLogout", env -> processor.process(
           env,

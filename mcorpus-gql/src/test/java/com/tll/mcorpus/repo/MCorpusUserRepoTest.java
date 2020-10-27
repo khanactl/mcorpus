@@ -205,13 +205,26 @@ public class MCorpusUserRepoTest {
     );
   }
 
-  static FetchResult<Mcuser> mcuserLogin(MCorpusUserRepo repo, String username, String pswd) {
+  static FetchResult<Mcuser> mcuserLogin(MCorpusUserRepo repo, String username, String pswd, UUID pendingJwtId) {
     final Instant lnow = Instant.now();
     final Instant expiry = lnow.plus(Duration.ofMinutes(30));
     FetchResult<Mcuser> fr = repo.login(
       username,
       pswd,
-      UUID.randomUUID(),
+      pendingJwtId,
+      expiry,
+      lnow,
+      testRequestOrigin
+    );
+    return fr;
+  }
+
+  static FetchResult<Mcuser> mcuserRefresh(MCorpusUserRepo repo, UUID oldJwtId, UUID newJwtId) {
+    final Instant lnow = Instant.now();
+    final Instant expiry = lnow.plus(Duration.ofMinutes(30));
+    FetchResult<Mcuser> fr = repo.loginRefresh(
+      oldJwtId,
+      newJwtId,
       expiry,
       lnow,
       testRequestOrigin
@@ -242,7 +255,9 @@ public class MCorpusUserRepoTest {
       uid = mar.getUid();
       repo = mcuserRepo();
 
-      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_PSWD);
+      UUID pendingJwtId = UUID.randomUUID();
+
+      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_PSWD, pendingJwtId);
       log.info("mcorpus LOGIN WITH AUTH SUCCESS TEST result: {}", loginResult);
 
       Mcuser mcuser = loginResult.get();
@@ -281,7 +296,8 @@ public class MCorpusUserRepoTest {
     MCorpusUserRepo repo = null;
     try {
       repo = mcuserRepo();
-      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_BAD_PSWD);
+      UUID pendingJwtId = UUID.randomUUID();
+      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME, TEST_MCUSER_BAD_PSWD, pendingJwtId);
       log.info("mcorpus LOGIN WITH BAD PASSWORD TEST result: {}", loginResult);
 
       assertNotNull(loginResult);
@@ -311,7 +327,8 @@ public class MCorpusUserRepoTest {
     MCorpusUserRepo repo = null;
     try {
       repo = mcuserRepo();
-      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME_UNKNOWN, TEST_MCUSER_BAD_PSWD);
+      UUID pendingJwtId = UUID.randomUUID();
+      FetchResult<Mcuser> loginResult = mcuserLogin(repo, TEST_MCUSER_USERNAME_UNKNOWN, TEST_MCUSER_BAD_PSWD, pendingJwtId);
       log.info("mcorpus LOGIN WITH UNKNOWN USERNAME TEST result: {}", loginResult);
 
       assertNotNull(loginResult);
@@ -319,6 +336,30 @@ public class MCorpusUserRepoTest {
       assertTrue(loginResult.hasErrorMsg());
       assertNotNull(loginResult.getErrorMsg());
       assertNull(loginResult.get());
+    }
+    catch(Exception e) {
+      log.error(e.getMessage());
+      fail(e.getMessage());
+    }
+    finally {
+      if(repo != null) repo.close();
+    }
+  }
+
+  @Test
+  public void testMcuserLoginRefresh() {
+    MCorpusUserRepo repo = null;
+    try {
+      repo = mcuserRepo();
+      UUID oldJwtId = UUID.randomUUID();
+      UUID newJwtId = UUID.randomUUID();
+      mcuserLogin(repo, TEST_MCUSER_USERNAME_UNKNOWN, TEST_MCUSER_BAD_PSWD, oldJwtId);
+      FetchResult<Mcuser> loginRefreshResult = mcuserRefresh(repo, oldJwtId, newJwtId);
+      assertNotNull(loginRefreshResult);
+      assertFalse(loginRefreshResult.isSuccess());
+      assertTrue(loginRefreshResult.hasErrorMsg());
+      assertNotNull(loginRefreshResult.getErrorMsg());
+      assertNull(loginRefreshResult.get());
     }
     catch(Exception e) {
       log.error(e.getMessage());

@@ -15,11 +15,14 @@ extend type Query {
 
 # mcuser mutation methods
 extend type Mutation {
-  # JWT login - upon successful login a new jwt is issued
-  jwtLogin(username: String!, pswd: String!): CurrentJwtInfo
+  # JWT login - upon successful login a new jwt is issued otherwise an error message will be provided
+  jwtLogin(username: String!, pswd: String!): JwtLoginResponse!
 
   # JWT logout - invalidate the active jwt
   jwtLogout: Boolean!
+
+  # JWT refresh - refresh current jwt session and issue a fresh jwt and refresh token
+  jwtRefresh: JwtLoginResponse!
 
   # invalidate all active JWTs issued to a the given user
   invalidateJwts(uid: ID!): Boolean @auth(role: "admin")
@@ -35,6 +38,16 @@ extend type Mutation {
 
   # physically remove an mcuser entirely from the system
   deleteMcuser(uid: ID!): Boolean @auth(role: "admin")
+}
+
+# JWT login response
+type JwtLoginResponse {
+  # the JWT (base64 encoded)
+  jwt: String
+  # when the contained jwt will expire
+  jwtExpires: Date
+  # login error message
+  errorMsg: String
 }
 
 # details of a single JWT

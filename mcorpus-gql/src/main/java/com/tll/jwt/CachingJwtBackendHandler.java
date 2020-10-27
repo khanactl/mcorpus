@@ -8,9 +8,9 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -114,6 +114,13 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
   }
 
   @Override
+  public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId, InetAddress requestOrigin,
+      Instant requestInstant, Instant jwtExpiration) {
+        return targetHandler.jwtBackendLoginRefresh(oldJwtId, pendingJwtId, requestOrigin, requestInstant,
+          jwtExpiration);
+  }
+
+  @Override
   public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
       Instant requestInstant) {
     final FetchResult<Boolean> fr = targetHandler.jwtBackendLogout(jwtUserId, jwtId, requestOrigin, requestInstant);
@@ -140,5 +147,4 @@ public class CachingJwtBackendHandler implements IJwtBackendHandler {
     }
     return fr;
   }
-
 }

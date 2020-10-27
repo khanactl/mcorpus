@@ -4,6 +4,7 @@ import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNullOrEmpty;
 import static com.tll.core.Util.lower;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import com.tll.web.RequestSnapshot;
@@ -34,11 +35,11 @@ public class RequestSnapshotFactory {
   private final Logger log = LoggerFactory.getLogger("RequestSnapshot");
 
   private final String rstTokenName;
-  private final String jwtTokenName;
+  private final String jwtRefreshTokenName;
 
-  public RequestSnapshotFactory(String rstTokenName, String jwtTokenName) {
-    this.rstTokenName = rstTokenName;
-    this.jwtTokenName = jwtTokenName;
+  public RequestSnapshotFactory(String rstTokenName, String jwtRefreshTokenName) {
+    this.rstTokenName = Objects.requireNonNull(rstTokenName);
+    this.jwtRefreshTokenName = Objects.requireNonNull(jwtRefreshTokenName);
   }
 
   /**
@@ -56,9 +57,11 @@ public class RequestSnapshotFactory {
       final Request req = ctx.getRequest();
       final RequestSnapshot rs = new RequestSnapshot(
         req.getTimestamp(),
+
         nullif(req.getRemoteAddress().getHost()),
         nullif(req.getPath()),
         nullif(req.getMethod().getName()),
+
         nullif(req.getHeaders().get("Host")),
         nullif(req.getHeaders().get("Origin")),
         nullif(req.getHeaders().get("Referer")),
@@ -66,7 +69,11 @@ public class RequestSnapshotFactory {
         nullif(req.getHeaders().get("X-Forwarded-For")),
         nullif(req.getHeaders().get("X-Forwarded-Host")),
         nullif(req.getHeaders().get("X-Forwarded-Proto")),
-        nullif(req.oneCookie(jwtTokenName)),
+
+        // nullif(req.oneCookie(jwtTokenName)),
+        nullif(req.getHeaders().get("Authorization")),
+        nullif(req.oneCookie(jwtRefreshTokenName)),
+
         nullif(req.oneCookie(rstTokenName)),
         nullif(req.getHeaders().get(rstTokenName)),
         req.maybeGet(RequestId.class).orElse(RequestId.of(UUID.randomUUID().toString())).toString()

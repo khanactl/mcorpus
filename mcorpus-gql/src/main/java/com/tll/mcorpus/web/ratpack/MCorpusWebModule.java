@@ -47,7 +47,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   RequestSnapshotFactory requestSnapshotFactory(MCorpusServerConfig config) {
-    return new RequestSnapshotFactory(config.rstTokenName, config.jwtTokenName);
+    return new RequestSnapshotFactory(config.rstTokenName, config.jwtRefreshTokenName);
   }
 
   @Provides
@@ -80,7 +80,7 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   JWTStatusHandler jwtStatusHandler(MCorpusServerConfig config) {
-    return new JWTStatusHandler(config.cookieSecure, config.jwtTokenName);
+    return new JWTStatusHandler(config.cookieSecure, config.jwtRefreshTokenName);
   }
 
   @Provides
@@ -96,7 +96,8 @@ public class MCorpusWebModule extends AbstractModule {
       );
     return new JWT(
       backendHandler,
-      Duration.ofSeconds(config.jwtTtlInSeconds),
+      Duration.ofMinutes(config.jwtTtlInMinutes),
+      Duration.ofMinutes(config.jwtRefreshTokenTtlInMinutes),
       JWT.deserialize(config.jwtSalt),
       serverConfig.getPublicAddress().toString()
     );

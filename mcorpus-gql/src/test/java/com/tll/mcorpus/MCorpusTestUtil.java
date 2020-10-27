@@ -174,6 +174,12 @@ public class MCorpusTestUtil {
       }
 
       @Override
+      public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId, InetAddress requestOrigin,
+          Instant requestInstant, Instant jwtExpiration) {
+        return null;
+      }
+
+      @Override
       public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
         return FetchResult.fetchrslt(Collections.emptyList());
       }
@@ -208,8 +214,15 @@ public class MCorpusTestUtil {
    */
   public static JWT jwt() {
     byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
-    Duration jwtTtl = Duration.ofDays(2);
-    return new JWT(mockJwtBackendHandler(), jwtTtl, jwtSharedSecret, testServerPublicAddress);
+    Duration jwtTtl = Duration.ofMinutes(15);
+    Duration refreshTokenTtl = Duration.ofDays(14);
+    return new JWT(
+      mockJwtBackendHandler(),
+      jwtTtl,
+      refreshTokenTtl,
+      jwtSharedSecret,
+      testServerPublicAddress
+    );
   }
 
   /**
@@ -245,6 +258,11 @@ public class MCorpusTestUtil {
       public String getJwt() {
         return "TODO";
       }
+
+      @Override
+      public String getJwtRefreshToken() {
+        return "TODO";
+      }
     };
   }
 
@@ -256,7 +274,7 @@ public class MCorpusTestUtil {
     return new IJwtHttpResponseAction(){
 
       @Override
-      public void setJwtClientside(String jwt, Duration jwtTimeToLive) {
+      public void setJwtClientside(String jwt, String refreshToken, Duration refreshTokenTimeToLive) {
         // testing no-op
       }
 

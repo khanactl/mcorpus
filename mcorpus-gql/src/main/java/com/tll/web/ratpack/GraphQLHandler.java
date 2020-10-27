@@ -92,7 +92,8 @@ public class GraphQLHandler implements Handler {
 
       switch(jwtRequestStatus.status()) {
       case NOT_PRESENT_IN_REQUEST:
-      case EXPIRED:
+      case JWT_EXPIRED:
+      case REFRESH_TOKEN_EXPIRED:
         // only jwtLogin and introspection queries are allowed when no valid JWT present
         if(gqlWebCtx.isJwtUserLoginOrIntrospectionQuery()) {
           // allowed - you may proceed

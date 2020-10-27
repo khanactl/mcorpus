@@ -181,6 +181,37 @@ public class GraphQLRequestProcessor {
   }
 
   /**
+   * Process a GraphQL mutation request with no required input from graphql context.
+   *
+   * @param <D>
+   * @param <GR>
+   * @param env
+   * @param persistOp
+   * @param trfmToFront
+   * @return the returned entity from the backend persist operation
+   *         which should be considered to be the post-mutation
+   *         current state of the entity.
+   */
+  public <D, GR> DataFetcherResult<GR> mutate(
+    final DataFetchingEnvironment env,
+    final Supplier<FetchResult<D>> persistOp,
+    final Function<D, GR> trfmToFront
+  ) {
+    try {
+      final FetchResult<D> fr = persistOp.get();
+      final GR gpost = isNull(fr.get()) ? null : trfmToFront.apply(fr.get());
+      if(fr.isSuccess()) {
+        return dfr(gpost);
+      }
+      return dfr(env, gpost, fr.getErrorMsg());
+    } catch(Exception e) {
+      // mutation processing error
+      log.error("Mutation (persist, transform) processing error: {}", e.getMessage());
+      return dfr(env, e);
+    }
+  }
+
+  /**
    * Do a backend entity deletion for the case of a signle key
    * input argument and a boolean return value.
    *

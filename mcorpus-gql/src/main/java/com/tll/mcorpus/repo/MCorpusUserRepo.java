@@ -35,6 +35,7 @@ import com.tll.mcorpus.db.routines.InsertMcuser;
 import com.tll.mcorpus.db.routines.McuserLogin;
 import com.tll.mcorpus.db.routines.McuserLogout;
 import com.tll.mcorpus.db.routines.McuserPswd;
+import com.tll.mcorpus.db.routines.McuserRefreshLogin;
 import com.tll.mcorpus.db.tables.pojos.Mcuser;
 import com.tll.mcorpus.db.tables.records.GetActiveLoginsRecord;
 import com.tll.mcorpus.db.tables.records.McuserRecord;
@@ -247,6 +248,45 @@ public class MCorpusUserRepo implements Closeable {
 
     final Mcuser rval = rlist.size() == 1 && isNotNull(rlist.get(0)) ? rlist.get(0) : null;
     final String emsg = isNull(rval) ? "Login failed." : null;
+    return fetchrslt(rval, emsg);
+  }
+
+  public FetchResult<Mcuser> loginRefresh(
+    final UUID currentJwtId,
+    final UUID pendingJwtId,
+    Instant jwtExpiration,
+    Instant requestInstant,
+    final InetAddress requestOrigin
+  ) {
+    if(isNull(currentJwtId) || isNull(pendingJwtId) ||
+        isNull(jwtExpiration) || isNull(requestInstant) || isNull(requestOrigin))
+      return fetchrslt(null, "Invalid mcuser login refresh argument(s) provided.");
+
+    final List<Mcuser> rlist = new ArrayList<>(1);
+    try {
+      final McuserRefreshLogin mcuserLoginRefresh = new McuserRefreshLogin();
+      mcuserLoginRefresh.setInOldJwtId(currentJwtId);
+      mcuserLoginRefresh.setInNewJwtId(pendingJwtId);
+      mcuserLoginRefresh.setInLoginExpiration(OffsetDateTime.ofInstant(jwtExpiration, ZoneId.systemDefault()));
+      mcuserLoginRefresh.setInRequestOrigin(requestOrigin);
+      mcuserLoginRefresh.setInRequestTimestamp(OffsetDateTime.ofInstant(requestInstant, ZoneId.systemDefault()));
+
+      dsl.transaction(trans -> {
+        mcuserLoginRefresh.execute(DSL.using(trans).configuration());
+      });
+
+      final McuserRecord mrec = mcuserLoginRefresh.getReturnValue();
+      if(isNotNull(mrec) && isNotNull(mrec.getUid())) {
+        final Mcuser rval = mrec.into(Mcuser.class);
+        rlist.add(rval);
+      }
+    }
+    catch(Throwable t) {
+      log.error("mcuser login refresh error: {}.", t.getMessage());
+    }
+
+    final Mcuser rval = rlist.size() == 1 && isNotNull(rlist.get(0)) ? rlist.get(0) : null;
+    final String emsg = isNull(rval) ? "Login refresh failed." : null;
     return fetchrslt(rval, emsg);
   }
 
