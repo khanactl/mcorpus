@@ -121,7 +121,8 @@ public class MCorpusGraphQLTest {
       jwtRequestStatus,
       jwt(),
       testJwtResponseAction(),
-      "jwtLogin"
+      "jwtLogin",
+      "jwtRefresh"
     );
   }
 

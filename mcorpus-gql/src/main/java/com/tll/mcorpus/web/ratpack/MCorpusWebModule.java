@@ -73,7 +73,7 @@ public class MCorpusWebModule extends AbstractModule {
     final MCorpusGraphQL mcorpusGraphQL = new MCorpusGraphQL(mcuserRepo, mcorpusRepo);
     final GraphQLSchema schema = mcorpusGraphQL.getGraphQLSchema();
     final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL, config.jwtUserLoginGraphqlMethodName);
+    final GraphQLHandler gqlHandler = new GraphQLHandler(graphQL, config.jwtUserLoginGraphqlMethodName, config.jwtUserLoginRefreshGraphqlMethodName);
     return gqlHandler;
   }
 

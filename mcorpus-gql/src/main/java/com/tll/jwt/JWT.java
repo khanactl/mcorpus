@@ -254,8 +254,8 @@ public class JWT {
     final String jwtAudience;
     final boolean admin;
     final String roles; // bound to the user
-    final String refreshToken;
-    final Instant refreshTokenExpiration;
+    final String refreshTokenClaim;
+    final Instant refreshTokenExpirationClaim;
     try {
       final JWTClaimsSet claims = sjwt.getJWTClaimsSet();
 
@@ -267,8 +267,8 @@ public class JWT {
       jwtAudience = isNullOrEmpty(claims.getAudience()) ? "" : claims.getAudience().get(0);
       admin = (boolean) claims.getClaim("admin");
       roles = (String) claims.getClaim("roles");
-      refreshToken = (String) claims.getClaim("refreshToken");
-      refreshTokenExpiration = Instant.ofEpochMilli((long) claims.getClaim("refreshTokenExpiration"));
+      refreshTokenClaim = (String) claims.getClaim("refreshToken");
+      refreshTokenExpirationClaim = Instant.ofEpochMilli((long) claims.getClaim("refreshTokenExpiration"));
 
       if(
         isNull(jwtId)
@@ -277,8 +277,8 @@ public class JWT {
         || isNull(expires)
         || isNullOrEmpty(issuer)
         || isNullOrEmpty(jwtAudience)
-        || isNull(refreshToken)
-        || isNull(refreshTokenExpiration)
+        || isNullOrEmpty(refreshTokenClaim)
+        || isNull(refreshTokenExpirationClaim)
         // NOTE: roles claim is optional
       ) {
         throw new Exception(String.format("JWT one or more missing required claims."));
@@ -314,14 +314,19 @@ public class JWT {
     }
 
     // verify refresh token
-    if(not(Objects.equals(httpreq.getJwtRefreshToken(), refreshToken))) {
-      log.info("JWT {} missing or mis-matched refresh token {} (jwt refresh token claim value: {}).", jwtId, httpreq.getJwtRefreshToken(), refreshToken);
-      return JWTHttpRequestStatus.create(JWTStatus.BAD_REFRESH_TOKEN, jwtId, userId, issued, expires, false, null);
+    if(isNullOrEmpty(httpreq.getJwtRefreshToken())) {
+      // no refresh token present in request
+      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST, jwtId, userId, issued, expires, false, null);
     }
-    if(Instant.now().isAfter(refreshTokenExpiration)) {
-      log.info("JWT {} refresh token {} expired.", jwtId, refreshToken);
-      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_EXPIRED, jwtId, userId, issued, expires, false, null);
+    else if(not(Objects.equals(httpreq.getJwtRefreshToken(), refreshTokenClaim))) {
+      log.info("JWT {} missing or mis-matched refresh token {} (jwt refresh token claim value: {}).", jwtId, httpreq.getJwtRefreshToken(), refreshTokenClaim);
+      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_CLAMIN_MISMATCH, jwtId, userId, issued, expires, false, null);
     }
+    else if(Instant.now().isAfter(refreshTokenExpirationClaim)) {
+      log.info("JWT {} refresh token {} expired.", jwtId, refreshTokenClaim);
+      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_CLAIM_EXPIRED, jwtId, userId, issued, expires, false, null);
+    }
+    // END verify refresh token
 
     // [Default] Backend verification behavior:
     // 1) the jwt id is *known* and *not blacklisted*

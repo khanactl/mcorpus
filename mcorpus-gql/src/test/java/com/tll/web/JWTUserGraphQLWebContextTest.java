@@ -15,7 +15,7 @@ import org.junit.experimental.categories.Category;
 public class JWTUserGraphQLWebContextTest {
 
   static JWTUserGraphQLWebContext create(String query) {
-    return new JWTUserGraphQLWebContext(query, null, null, null, null, null, "jwtLogin");
+    return new JWTUserGraphQLWebContext(query, null, null, null, null, null, "jwtLogin", "jwtRefresh");
   }
 
   @Test

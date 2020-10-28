@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,12 +36,12 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
   public static class JwtLoginResponse {
     public final String jwt;
-    public final Instant jwtExpires;
+    public final Date jwtExpires;
     public final String errorMsg;
 
     public JwtLoginResponse(String jwt, Instant jwtExpires) {
       this.jwt = jwt;
-      this.jwtExpires = jwtExpires;
+      this.jwtExpires = Date.from(jwtExpires);
       this.errorMsg = null;
     }
 
@@ -89,6 +90,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   private final IJwtHttpRequestProvider jwtRequest;
   private final IJwtHttpResponseAction jwtResponse;
   private final String jwtUserLoginQueryMethodName;
+  private final String jwtUserLoginRefreshQueryMethodName;
 
   /**
    * Constructor.
@@ -109,7 +111,8 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     JWTHttpRequestStatus jwtRequestStatus,
     JWT jwtbiz,
     IJwtHttpResponseAction jwtResponse,
-    String jwtUserLoginQueryMethodName
+    String jwtUserLoginQueryMethodName,
+    String jwtUserLoginRefreshQueryMethodName
   ) {
     super(query, vmap);
     this.jwtRequestStatus = jwtRequestStatus;
@@ -117,6 +120,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     this.jwtRequest = jwtRequest;
     this.jwtResponse = jwtResponse;
     this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
+    this.jwtUserLoginRefreshQueryMethodName = jwtUserLoginRefreshQueryMethodName;
   }
 
   @Override
@@ -126,7 +130,8 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
       isNotNull(jwtbiz) &&
       isNotNull(jwtRequest) &&
       isNotNull(jwtResponse) &&
-      isNotNullOrEmpty(jwtUserLoginQueryMethodName)
+      isNotNullOrEmpty(jwtUserLoginQueryMethodName) &&
+      isNotNullOrEmpty(jwtUserLoginRefreshQueryMethodName)
     ;
   }
 
@@ -148,11 +153,26 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
   }
 
   /**
+   * @return true when the GraphQL query is for JWT user login *refresh*, false otherwise.
+   */
+  public boolean isJwtUserLoginRefreshQuery() {
+    return isMutation() && jwtUserLoginQueryMethodName.equals(getFirstMethodName());
+  }
+
+  /**
    * @return true when this GraphQL query is either a JWT user login mutation query
    *         or an introspection query, false otherwise.
    */
   public boolean isJwtUserLoginOrIntrospectionQuery() {
     return isJwtUserLoginQuery() || isIntrospectionQuery();
+  }
+
+  /**
+   * @return true when this GraphQL query is either a JWT user login *refresh* mutation query
+   *         or an introspection query, false otherwise.
+   */
+  public boolean isJwtUserLoginRefreshOrIntrospectionQuery() {
+    return isJwtUserLoginRefreshQuery() || isIntrospectionQuery();
   }
 
   /**
@@ -219,12 +239,12 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
     // verify the JWT status is either not present or expired
     if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
-      return null;
+      return new JwtLoginResponse("Login failed: Invalid JWT request state.");
     }
 
     // validate login input
     if(isBlank(username) || isBlank(pswd)) {
-      return null;
+      return new JwtLoginResponse("Login failed: Missing username and/or password.");
     }
 
     final UUID pendingJwtID = UUID.randomUUID();
@@ -245,7 +265,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     );
     if(not(loginResult.isSuccess())) {
       log.error("JWT user login failed (emsg: {}).", loginResult.getErrorMsg());
-      return null;
+      return new JwtLoginResponse("Login failed.");
     }
     log.info("JWT user '{}' authenticated.", username);
     // at this point, we're authenticated
@@ -289,9 +309,9 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @return Newly created, never-null {@link JwtLoginResponse}
    */
   public JwtLoginResponse jwtRefresh() {
-    // verify the JWT status is either not present or expired
+    // verify the JWT is present but expired and the refresh token is present and not expired
     if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
-      return null;
+      return new JwtLoginResponse("Login refresh failed: Invalid JWT request state.");
     }
 
     final UUID pendingJwtID = UUID.randomUUID();
@@ -311,7 +331,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     );
     if(not(loginResult.isSuccess())) {
       log.error("JWT login refresh failed (emsg: {}).", loginResult.getErrorMsg());
-      return null;
+      return new JwtLoginResponse("Login refresh failed: Invalid JWT request state.");
     }
     final IJwtUser jwtUser = loginResult.get();
 

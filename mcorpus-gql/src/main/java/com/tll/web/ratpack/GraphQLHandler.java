@@ -42,15 +42,18 @@ public class GraphQLHandler implements Handler {
 
   private final String jwtUserLoginQueryMethodName;
 
+  private final String jwtUserLoginRefreshQueryMethodName;
+
   /**
    * Constructor.
    *
    * @param graphQL the app scoped {@link GraphQL} instance.
    * @param jwtUserLoginQueryMethodName the graphql query method name for JWT login.
    */
-  public GraphQLHandler(final GraphQL graphQL, String jwtUserLoginQueryMethodName) {
+  public GraphQLHandler(final GraphQL graphQL, String jwtUserLoginQueryMethodName, String jwtUserLoginRefreshQueryMethodName) {
     this.graphQL = graphQL;
     this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
+    this.jwtUserLoginRefreshQueryMethodName = jwtUserLoginRefreshQueryMethodName;
   }
 
   @SuppressWarnings("serial")
@@ -79,7 +82,8 @@ public class GraphQLHandler implements Handler {
         jwtRequestStatus,
         jwtbiz,
         jwtResponseAction,
-        jwtUserLoginQueryMethodName
+        jwtUserLoginQueryMethodName,
+        jwtUserLoginRefreshQueryMethodName
       );
       log.info("graphql query pending: {}.", gqlWebCtx);
 
@@ -93,9 +97,18 @@ public class GraphQLHandler implements Handler {
       switch(jwtRequestStatus.status()) {
       case NOT_PRESENT_IN_REQUEST:
       case JWT_EXPIRED:
-      case REFRESH_TOKEN_EXPIRED:
         // only jwtLogin and introspection queries are allowed when no valid JWT present
         if(gqlWebCtx.isJwtUserLoginOrIntrospectionQuery()) {
+          // allowed - you may proceed
+          break;
+        }
+        ctx.clientError(401); // unauthorized
+        return;
+
+      case REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST:
+      case REFRESH_TOKEN_CLAIM_EXPIRED:
+        // mcuser login refresh allowed
+        if(gqlWebCtx.isJwtUserLoginRefreshOrIntrospectionQuery()) {
           // allowed - you may proceed
           break;
         }

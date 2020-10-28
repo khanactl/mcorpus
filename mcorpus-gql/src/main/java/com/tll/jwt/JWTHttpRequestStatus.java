@@ -75,13 +75,20 @@ public class JWTHttpRequestStatus {
      */
     JWT_EXPIRED,
     /**
-     * Missing refresh token value mis-match between jwt refresh token claim vs. refresh token cookie value.
+     * Refresh token cookie not present in incoming http request.
+     * <p>
+     * IMPT: The JWT is valid save for backend check.
      */
-    BAD_REFRESH_TOKEN,
+    REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST,
     /**
-     * JWT refresh token has expired.
+     * Refresh token value mis-match between jwt refresh token claim
+     * and refresh token cookie value.
      */
-    REFRESH_TOKEN_EXPIRED,
+    REFRESH_TOKEN_CLAMIN_MISMATCH,
+    /**
+     * JWT refresh token is expired per the embedded claim.
+     */
+    REFRESH_TOKEN_CLAIM_EXPIRED,
     /**
      * The JWT signature and claims are valid but either the jwt id or
      * associated user are logically blocked by way of backend check.
@@ -94,9 +101,13 @@ public class JWTHttpRequestStatus {
     ERROR,
     /**
      * The JWT signature and claims are valid and valid by way of backend check.
+     * <p>
+     * The refresh token in present and non-expired.
+     * <p>
      * You may proceed forward.
      */
-    VALID;
+    VALID
+    ;
 
     /**
      * @return true of a JWT is present in the incoming (target) request.
@@ -116,12 +127,7 @@ public class JWTHttpRequestStatus {
     /**
      * @return true if the refresh token is expired.
      */
-    public boolean isRefreshTokenExpired() { return this == REFRESH_TOKEN_EXPIRED; }
-
-    /**
-     * @return true if the JWT is invalid for any reason.
-     */
-    public boolean isInvalid() { return this != VALID; }
+    public boolean isRefreshTokenExpired() { return this == REFRESH_TOKEN_CLAIM_EXPIRED; }
 
   } // JWTStatus enum
 
@@ -161,11 +167,11 @@ public class JWTHttpRequestStatus {
   public JWTStatus status() { return status; }
 
   /**
-   * @return true if the JWT status is either expired or not present,
+   * @return true if the JWT status is either expired or no JWT is present,
    *         false otherwise.
    */
   public boolean isJWTStatusExpiredOrNotPresent() {
-    return not(status.isPresent()) || status.isJwtExpired() || status.isRefreshTokenExpired();
+    return not(status.isPresent()) || status.isJwtExpired();
   }
 
   /**

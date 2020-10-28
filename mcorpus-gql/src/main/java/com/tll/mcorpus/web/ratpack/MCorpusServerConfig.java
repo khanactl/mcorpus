@@ -64,6 +64,11 @@ public class MCorpusServerConfig {
   public String jwtUserLoginGraphqlMethodName = "jwtLogin";
 
   /**
+   * The GraphQL schema method name for JWT-based user *refresh* logins.
+   */
+  public String jwtUserLoginRefreshGraphqlMethodName = "jwtRefresh";
+
+  /**
    * The number of minutes the status of JWTs should be held in-memory
    * before re-fetching them from the bakend data store.
    * <p>
