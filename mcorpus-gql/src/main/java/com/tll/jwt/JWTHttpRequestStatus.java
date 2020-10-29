@@ -22,7 +22,7 @@ public class JWTHttpRequestStatus {
    * @return Newly created {@link JWTHttpRequestStatus}
    */
   public static JWTHttpRequestStatus create(JWTStatus status) {
-    return new JWTHttpRequestStatus(status, null, null, null, null, false, null);
+    return new JWTHttpRequestStatus(status, null, null, null, null, false, null, RefreshTokenStatus.UNKNOWN);
   }
 
   /**
@@ -38,15 +38,30 @@ public class JWTHttpRequestStatus {
    * @return Newly created {@link JWTHttpRequestStatus}
    */
   public static JWTHttpRequestStatus create(JWTStatus status, UUID jwtId, UUID userId, Instant issued, Instant expires, boolean admin, String roles) {
-    return new JWTHttpRequestStatus(status, jwtId, userId, issued, expires, admin, roles);
+    return new JWTHttpRequestStatus(status, jwtId, userId, issued, expires, admin, roles, RefreshTokenStatus.UNKNOWN);
+  }
+
+  /**
+   * Factory method to generate a fully populated {@link JWTHttpRequestStatus}.
+   *
+   * @param status
+   * @param jwtId
+   * @param userId
+   * @param issued
+   * @param expires
+   * @param admin
+   * @param roles
+   * @param refreshTokenStatus
+   * @return Newly created {@link JWTHttpRequestStatus}
+   */
+  public static JWTHttpRequestStatus create(JWTStatus status, UUID jwtId, UUID userId, Instant issued, Instant expires, boolean admin, String roles, RefreshTokenStatus refreshTokenStatus) {
+    return new JWTHttpRequestStatus(status, jwtId, userId, issued, expires, admin, roles, refreshTokenStatus);
   }
 
   /**
    * The possible states of a JWT held in an incoming http request.
    * <p>
    * Backend JWT verification by jwt id is integrated in these possible states.
-   *
-   * @author jpk
    */
   public static enum JWTStatus {
     /**
@@ -73,22 +88,7 @@ public class JWTHttpRequestStatus {
     /**
      * JWT has valid signature and claims but is expired.
      */
-    JWT_EXPIRED,
-    /**
-     * Refresh token cookie not present in incoming http request.
-     * <p>
-     * IMPT: The JWT is valid save for backend check.
-     */
-    REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST,
-    /**
-     * Refresh token value mis-match between jwt refresh token claim
-     * and refresh token cookie value.
-     */
-    REFRESH_TOKEN_CLAMIN_MISMATCH,
-    /**
-     * JWT refresh token is expired per the embedded claim.
-     */
-    REFRESH_TOKEN_CLAIM_EXPIRED,
+    EXPIRED,
     /**
      * The JWT signature and claims are valid but either the jwt id or
      * associated user are logically blocked by way of backend check.
@@ -122,14 +122,55 @@ public class JWTHttpRequestStatus {
     /**
      * @return true if the JWT is expired.
      */
-    public boolean isJwtExpired() { return this == JWT_EXPIRED; }
+    public boolean isJwtExpired() { return this == EXPIRED; }
+
+  } // JWTStatus enum
+
+  /**
+   * The possible states of a refresh token cookie held in an incoming http request.
+   */
+  public static enum RefreshTokenStatus {
+    /**
+     * Refresh token status was NOT checked.
+     */
+    UNKNOWN,
+    /**
+     * Refresh token cookie not present in incoming http request.
+     */
+    NOT_PRESENT_IN_REQUEST,
+    /**
+     * Refresh token value mis-match between jwt refresh token claim
+     * and refresh token cookie value.
+     */
+    REFRESH_TOKEN_CLAIM_MISMATCH,
+    /**
+     * JWT refresh token is expired per the embedded claim.
+     */
+    REFRESH_TOKEN_CLAIM_EXPIRED,
+    /**
+     * Refresh token cookie is present, not expired
+     * and its value matches the jwt refresh token claim.
+     */
+    VALID
+    ;
+
+    /**
+     * @return true if the refresh token cookie is present in the incoming http request.
+     */
+    public boolean isPresent() { return this != NOT_PRESENT_IN_REQUEST; }
 
     /**
      * @return true if the refresh token is expired.
      */
-    public boolean isRefreshTokenExpired() { return this == REFRESH_TOKEN_CLAIM_EXPIRED; }
+    public boolean isExpired() { return this == REFRESH_TOKEN_CLAIM_EXPIRED; }
 
-  } // JWTStatus enum
+    /**
+     * @return true if the refresh token is present, non-expired
+     *         and its value matches the JWT refresh token claim value.
+     */
+    public boolean isValid() { return this == VALID; }
+
+  } // RefreshTokenStatus
 
   private final JWTStatus status;
   private final UUID jwtId;
@@ -138,6 +179,7 @@ public class JWTHttpRequestStatus {
   private final Instant expires;
   private final boolean admin;
   private final String roles;
+  private final RefreshTokenStatus refreshTokenStatus;
 
   /**
    * Constructor.
@@ -149,8 +191,9 @@ public class JWTHttpRequestStatus {
    * @param expires the expiration date as a long of the JWT in the received request
    * @param admin true if the associated user has admin privileges
    * @param roles the associated user roles as a comma-delimeted string (if any)
+   * @param refreshTokenStatus
    */
-  JWTHttpRequestStatus(JWTStatus status, UUID jwtId, UUID userId, Instant issued, Instant expires, boolean admin, String roles) {
+  JWTHttpRequestStatus(JWTStatus status, UUID jwtId, UUID userId, Instant issued, Instant expires, boolean admin, String roles, RefreshTokenStatus refreshTokenStatus) {
     super();
     this.status = status;
     this.jwtId = jwtId;
@@ -159,6 +202,7 @@ public class JWTHttpRequestStatus {
     this.expires = expires;
     this.admin = admin;
     this.roles = roles;
+    this.refreshTokenStatus = refreshTokenStatus;
   }
 
   /**
@@ -203,6 +247,11 @@ public class JWTHttpRequestStatus {
    * @return the comma-delimited user roles (may be null).
    */
   public String roles() { return roles; }
+
+  /**
+   * @return the refresh token [cookie] status of the received http request.
+   */
+  public RefreshTokenStatus refreshTokenStatus() { return refreshTokenStatus; }
 
   @Override
   public String toString() {

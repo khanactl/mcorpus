@@ -96,25 +96,37 @@ public class GraphQLHandler implements Handler {
 
       switch(jwtRequestStatus.status()) {
       case NOT_PRESENT_IN_REQUEST:
-      case JWT_EXPIRED:
-        // only jwtLogin and introspection queries are allowed when no valid JWT present
-        if(gqlWebCtx.isJwtUserLoginOrIntrospectionQuery()) {
-          // allowed - you may proceed
-          break;
+      case EXPIRED: {
+        // check refresh token status
+        boolean requestOk = false;
+        switch(jwtRequestStatus.refreshTokenStatus()) {
+          case UNKNOWN:
+          case NOT_PRESENT_IN_REQUEST:
+          case REFRESH_TOKEN_CLAIM_EXPIRED:
+            // login only allowed
+            // only jwtLogin and introspection queries are allowed when no valid JWT present
+            if(gqlWebCtx.isJwtUserLoginOrIntrospectionQuery()) {
+              // allowed - you may proceed
+              requestOk = true;
+            }
+            break;
+          case VALID:
+            // refresh login allowed
+            if(gqlWebCtx.isJwtUserLoginRefreshOrIntrospectionQuery()) {
+              // allowed - you may proceed
+              requestOk = true;
+            }
+            break;
+          default:
+          case REFRESH_TOKEN_CLAIM_MISMATCH:
+            // not cool
+            break;
         }
-        ctx.clientError(401); // unauthorized
-        return;
-
-      case REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST:
-      case REFRESH_TOKEN_CLAIM_EXPIRED:
-        // mcuser login refresh allowed
-        if(gqlWebCtx.isJwtUserLoginRefreshOrIntrospectionQuery()) {
-          // allowed - you may proceed
-          break;
+        if(!requestOk) {
+          ctx.clientError(401); // unauthorized
+          return;
         }
-        ctx.clientError(401); // unauthorized
-        return;
-
+      }
       case VALID:
         // mcuser logged in by jwt - you may proceed
         break;

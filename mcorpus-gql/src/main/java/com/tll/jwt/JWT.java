@@ -30,6 +30,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tll.jwt.IJwtBackendHandler.JwtBackendStatus;
 import com.tll.jwt.JWTHttpRequestStatus.JWTStatus;
+import com.tll.jwt.JWTHttpRequestStatus.RefreshTokenStatus;
 import com.tll.repo.FetchResult;
 
 import org.slf4j.Logger;
@@ -209,9 +210,10 @@ public class JWT {
    */
   public JWTHttpRequestStatus jwtHttpRequestStatus(final IJwtHttpRequestProvider httpreq) {
 
-    // present?
-    if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwt()))
+    // jwt present?
+    if(isNull(httpreq) || isNullOrEmpty(httpreq.getJwt())) {
       return JWTHttpRequestStatus.create(JWTStatus.NOT_PRESENT_IN_REQUEST);
+    }
 
     // decrypt JWT
     final JWEObject jweObject;
@@ -307,26 +309,46 @@ public class JWT {
     }
     log.info("JWT audience {} verified against http request client origin {}.", jwtAudience, httpreq.getRequestOrigin().getHostAddress());
 
+    // *************************************
+    // at this point, the refresh token's
+    // status becomes relevant
+    // *************************************
+
+    JWTStatus jwtStatus = null;
+
     // expired? (check for exp. time in the past)
     if(Instant.now().isAfter(expires)) {
       log.info("JWT {} expired.", jwtId);
-      return JWTHttpRequestStatus.create(JWTStatus.JWT_EXPIRED, jwtId, userId, issued, expires, false, null);
+      // return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, issued, expires, false, null);
+      jwtStatus = JWTStatus.EXPIRED;
     }
+
+    final RefreshTokenStatus refreshTokenStatus;
 
     // verify refresh token
     if(isNullOrEmpty(httpreq.getJwtRefreshToken())) {
       // no refresh token present in request
-      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST, jwtId, userId, issued, expires, false, null);
+      // return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_NOT_PRESENT_IN_REQUEST, jwtId, userId, issued, expires, false, null);
+      refreshTokenStatus = RefreshTokenStatus.NOT_PRESENT_IN_REQUEST;
     }
     else if(not(Objects.equals(httpreq.getJwtRefreshToken(), refreshTokenClaim))) {
-      log.info("JWT {} missing or mis-matched refresh token {} (jwt refresh token claim value: {}).", jwtId, httpreq.getJwtRefreshToken(), refreshTokenClaim);
-      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_CLAMIN_MISMATCH, jwtId, userId, issued, expires, false, null);
+      log.info("JWT {} refresh token claim {} does not match refresh token value {}.", jwtId, refreshTokenClaim, httpreq.getJwtRefreshToken());
+      //return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_CLAMIN_MISMATCH, jwtId, userId, issued, expires, false, null);
+      refreshTokenStatus = RefreshTokenStatus.REFRESH_TOKEN_CLAIM_MISMATCH;
     }
     else if(Instant.now().isAfter(refreshTokenExpirationClaim)) {
       log.info("JWT {} refresh token {} expired.", jwtId, refreshTokenClaim);
-      return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_CLAIM_EXPIRED, jwtId, userId, issued, expires, false, null);
+      // return JWTHttpRequestStatus.create(JWTStatus.REFRESH_TOKEN_CLAIM_EXPIRED, jwtId, userId, issued, expires, false, null);
+      refreshTokenStatus = RefreshTokenStatus.REFRESH_TOKEN_CLAIM_EXPIRED;
+    }
+    else {
+      refreshTokenStatus = RefreshTokenStatus.VALID;
     }
     // END verify refresh token
+
+    if(jwtStatus == JWTStatus.EXPIRED) {
+      return JWTHttpRequestStatus.create(JWTStatus.EXPIRED, jwtId, userId, issued, expires, false, null, refreshTokenStatus);
+    }
 
     // [Default] Backend verification behavior:
     // 1) the jwt id is *known* and *not blacklisted*
@@ -340,45 +362,45 @@ public class JWT {
       return JWTHttpRequestStatus.create(JWTStatus.ERROR, jwtId, userId, issued, expires, false, null);
     }
     final JwtBackendStatus jwtBackendStatus = fr.get();
-    final JWTStatus jwtRequestStatus;
+    // final JWTStatus jwtStatus;
 
     // map backend jwt status -> jwt http request status
     switch(jwtBackendStatus) {
     case NOT_PRESENT:
       // jwt id not found in db - treat as blocked then
       log.warn("JWT {} not present in backend.", jwtId);
-      jwtRequestStatus = JWTStatus.NOT_PRESENT_BACKEND;
+      jwtStatus = JWTStatus.NOT_PRESENT_BACKEND;
       break;
     case PRESENT_BAD_STATE:
       // jwt id found in db but the status could not be determined
       log.warn("JWT {} present in backend but in bad state.", jwtId);
-      jwtRequestStatus = JWTStatus.ERROR;
+      jwtStatus = JWTStatus.ERROR;
       break;
     case BLACKLISTED:
       log.warn("JWT {} blacklisted.", jwtId);
-      jwtRequestStatus = JWTStatus.BLOCKED;
+      jwtStatus = JWTStatus.BLOCKED;
       break;
     case BAD_USER:
       log.warn("JWT {} bad user.", jwtId);
-      jwtRequestStatus = JWTStatus.BLOCKED;
+      jwtStatus = JWTStatus.BLOCKED;
       break;
     case EXPIRED:
       // jwt (login) expired
       log.warn("JWT {} expired.", jwtId);
-      jwtRequestStatus = JWTStatus.JWT_EXPIRED;
+      jwtStatus = JWTStatus.EXPIRED;
       break;
     case VALID:
       // valid - provide roles
-      jwtRequestStatus = JWTStatus.VALID;
+      jwtStatus = JWTStatus.VALID;
       break;
     case ERROR:
     default:
       // unhandled jwt status so convey status as backend error
       log.error("JWT {} backend status error: {}.", jwtId, jwtBackendStatus);
-      jwtRequestStatus = JWTStatus.ERROR;
+      jwtStatus = JWTStatus.ERROR;
       break;
     }
 
-    return JWTHttpRequestStatus.create(jwtRequestStatus, jwtId, userId, issued, expires, admin, roles);
+    return JWTHttpRequestStatus.create(jwtStatus, jwtId, userId, issued, expires, admin, roles, refreshTokenStatus);
   }
 }
