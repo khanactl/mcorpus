@@ -356,6 +356,28 @@ BEGIN
 END
 $_$;
 
+CREATE OR REPLACE FUNCTION _blacklist_jwt(
+  in_uid uuid,
+  in_request_timestamp timestamptz,
+  in_request_origin inet,
+  in_jwt_id uuid
+) RETURNS void
+LANGUAGE plpgsql AS
+$_$
+BEGIN
+  insert into mcuser_audit
+  (uid, type, request_timestamp, request_origin, jwt_id, jwt_id_status)
+  values (
+    $1,
+    'LOGOUT'::mcuser_audit_type,
+    in_request_timestamp,
+    in_request_origin,
+    in_jwt_id,
+    'BLACKLISTED'::jwt_id_status
+  );
+END
+$_$;
+
 /**
   _blacklist_jwt_ids_at_request_origin()
 
@@ -477,10 +499,13 @@ BEGIN
     FROM mcuser m
     WHERE m.uid = qrec.uid;
 
-    -- ** RULE: only allow *one* active mcuser login per request origin **
-    -- blacklist existing valid and non-expired mcuser logins
-    -- for the mcuser logging in at the given request origin
-    perform _blacklist_jwt_ids_at_request_origin(mcuser_row.uid, in_request_origin);
+    -- invalidate the old jwt id
+    perform _blacklist_jwt(
+      qrec.uid,
+      in_request_timestamp,
+      in_request_origin,
+      in_old_jwt_id
+    );
 
     -- add mcuser_audit LOGIN record upon successful login
     INSERT INTO mcuser_audit (
