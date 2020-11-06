@@ -23,7 +23,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implements Record13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> {
 
-    private static final long serialVersionUID = -1798711208;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.mbenefits.mid</code>.
@@ -556,18 +556,18 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     public MbenefitsRecord(UUID mid, OffsetDateTime modified, String foreignAdrsFlag, Beli beli, Object mcb, String medPlanCode, String medOptOut, String denPlanCode, String denOptOut, String visPlanCode, String visOptOut, String legPlanCode, String legOptOut) {
         super(Mbenefits.MBENEFITS);
 
-        set(0, mid);
-        set(1, modified);
-        set(2, foreignAdrsFlag);
-        set(3, beli);
-        set(4, mcb);
-        set(5, medPlanCode);
-        set(6, medOptOut);
-        set(7, denPlanCode);
-        set(8, denOptOut);
-        set(9, visPlanCode);
-        set(10, visOptOut);
-        set(11, legPlanCode);
-        set(12, legOptOut);
+        setMid(mid);
+        setModified(modified);
+        setForeignAdrsFlag(foreignAdrsFlag);
+        setBeli(beli);
+        setMcb(mcb);
+        setMedPlanCode(medPlanCode);
+        setMedOptOut(medOptOut);
+        setDenPlanCode(denPlanCode);
+        setDenOptOut(denOptOut);
+        setVisPlanCode(visPlanCode);
+        setVisOptOut(visOptOut);
+        setLegPlanCode(legPlanCode);
+        setLegOptOut(legOptOut);
     }
 }

@@ -19,7 +19,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit implements Serializable {
 
-    private static final long serialVersionUID = -1372362375;
+    private static final long serialVersionUID = 1L;
 
     private final UUID            uid;
     private final OffsetDateTime  created;
@@ -61,34 +61,58 @@ public class McuserAudit implements Serializable {
         this.jwtIdStatus = jwtIdStatus;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.uid</code>.
+     */
     public UUID getUid() {
         return this.uid;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.created</code>.
+     */
     public OffsetDateTime getCreated() {
         return this.created;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.type</code>.
+     */
     public McuserAuditType getType() {
         return this.type;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.request_timestamp</code>.
+     */
     public OffsetDateTime getRequestTimestamp() {
         return this.requestTimestamp;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.request_origin</code>.
+     */
     public InetAddress getRequestOrigin() {
         return this.requestOrigin;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.login_expiration</code>.
+     */
     public OffsetDateTime getLoginExpiration() {
         return this.loginExpiration;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.jwt_id</code>.
+     */
     public UUID getJwtId() {
         return this.jwtId;
     }
 
+    /**
+     * Getter for <code>public.mcuser_audit.jwt_id_status</code>.
+     */
     public JwtIdStatus getJwtIdStatus() {
         return this.jwtIdStatus;
     }

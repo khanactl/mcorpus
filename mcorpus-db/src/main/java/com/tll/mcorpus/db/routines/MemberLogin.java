@@ -15,6 +15,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -23,7 +24,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberLogin extends AbstractRoutine<MrefRecord> {
 
-    private static final long serialVersionUID = -266853161;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.member_login.RETURN_VALUE</code>.
@@ -33,17 +34,17 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
     /**
      * The parameter <code>public.member_login.member_username</code>.
      */
-    public static final Parameter<String> MEMBER_USERNAME = Internal.createParameter("member_username", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> MEMBER_USERNAME = Internal.createParameter("member_username", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.member_login.member_password</code>.
      */
-    public static final Parameter<String> MEMBER_PASSWORD = Internal.createParameter("member_password", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> MEMBER_PASSWORD = Internal.createParameter("member_password", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.member_login.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.member_login.in_request_origin</code>.

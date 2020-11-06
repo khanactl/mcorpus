@@ -22,7 +22,7 @@ import org.jooq.Result;
 
 
 /**
- * Convenience access to all tables in public
+ * Convenience access to all tables in public.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
@@ -35,22 +35,35 @@ public class Tables {
     /**
      * Call <code>public.get_active_logins</code>.
      */
-    public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(Configuration configuration, UUID mcuserId) {
-        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId)).fetch();
+    public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(
+          Configuration configuration
+        , UUID mcuserId
+    ) {
+        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+              mcuserId
+        )).fetch();
     }
 
     /**
      * Get <code>public.get_active_logins</code> as a table.
      */
-    public static GetActiveLogins GET_ACTIVE_LOGINS(UUID mcuserId) {
-        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    public static GetActiveLogins GET_ACTIVE_LOGINS(
+          UUID mcuserId
+    ) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+              mcuserId
+        );
     }
 
     /**
      * Get <code>public.get_active_logins</code> as a table.
      */
-    public static GetActiveLogins GET_ACTIVE_LOGINS(Field<UUID> mcuserId) {
-        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    public static GetActiveLogins GET_ACTIVE_LOGINS(
+          Field<UUID> mcuserId
+    ) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+              mcuserId
+        );
     }
 
     /**

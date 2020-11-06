@@ -13,6 +13,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -21,23 +22,23 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetJwtStatus extends AbstractRoutine<JwtStatus> {
 
-    private static final long serialVersionUID = 307893355;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.get_jwt_status.RETURN_VALUE</code>.
      */
-    public static final Parameter<JwtStatus> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), false, false);
+    public static final Parameter<JwtStatus> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), false, false);
 
     /**
      * The parameter <code>public.get_jwt_status.jwt_id</code>.
      */
-    public static final Parameter<UUID> JWT_ID = Internal.createParameter("jwt_id", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> JWT_ID = Internal.createParameter("jwt_id", SQLDataType.UUID, false, false);
 
     /**
      * Create a new routine call instance
      */
     public GetJwtStatus() {
-        super("get_jwt_status", Public.PUBLIC, org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class));
+        super("get_jwt_status", Public.PUBLIC, SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class));
 
         setReturnParameter(RETURN_VALUE);
         addInParameter(JWT_ID);

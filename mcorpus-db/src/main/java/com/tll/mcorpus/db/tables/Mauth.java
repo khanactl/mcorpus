@@ -25,6 +25,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -34,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth extends TableImpl<MauthRecord> {
 
-    private static final long serialVersionUID = -1514377290;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.mauth</code>
@@ -52,68 +53,69 @@ public class Mauth extends TableImpl<MauthRecord> {
     /**
      * The column <code>public.mauth.mid</code>.
      */
-    public final TableField<MauthRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<MauthRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.mauth.modified</code>.
      */
-    public final TableField<MauthRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<MauthRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mauth.dob</code>.
      */
-    public final TableField<MauthRecord, LocalDate> DOB = createField(DSL.name("dob"), org.jooq.impl.SQLDataType.LOCALDATE.nullable(false), this, "");
+    public final TableField<MauthRecord, LocalDate> DOB = createField(DSL.name("dob"), SQLDataType.LOCALDATE.nullable(false), this, "");
 
     /**
      * The column <code>public.mauth.ssn</code>.
      */
-    public final TableField<MauthRecord, String> SSN = createField(DSL.name("ssn"), org.jooq.impl.SQLDataType.CHAR(9).nullable(false), this, "");
+    public final TableField<MauthRecord, String> SSN = createField(DSL.name("ssn"), SQLDataType.CHAR(9).nullable(false), this, "");
 
     /**
      * The column <code>public.mauth.email_personal</code>.
      */
-    public final TableField<MauthRecord, String> EMAIL_PERSONAL = createField(DSL.name("email_personal"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MauthRecord, String> EMAIL_PERSONAL = createField(DSL.name("email_personal"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.mauth.email_work</code>.
      */
-    public final TableField<MauthRecord, String> EMAIL_WORK = createField(DSL.name("email_work"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MauthRecord, String> EMAIL_WORK = createField(DSL.name("email_work"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.mauth.mobile_phone</code>.
      */
-    public final TableField<MauthRecord, String> MOBILE_PHONE = createField(DSL.name("mobile_phone"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MauthRecord, String> MOBILE_PHONE = createField(DSL.name("mobile_phone"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.mauth.home_phone</code>.
      */
-    public final TableField<MauthRecord, String> HOME_PHONE = createField(DSL.name("home_phone"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MauthRecord, String> HOME_PHONE = createField(DSL.name("home_phone"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.mauth.work_phone</code>.
      */
-    public final TableField<MauthRecord, String> WORK_PHONE = createField(DSL.name("work_phone"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MauthRecord, String> WORK_PHONE = createField(DSL.name("work_phone"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.mauth.fax</code>.
      */
-    public final TableField<MauthRecord, String> FAX = createField(DSL.name("fax"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MauthRecord, String> FAX = createField(DSL.name("fax"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.mauth.username</code>.
      */
-    public final TableField<MauthRecord, String> USERNAME = createField(DSL.name("username"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MauthRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.mauth.pswd</code>.
      */
-    public final TableField<MauthRecord, String> PSWD = createField(DSL.name("pswd"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MauthRecord, String> PSWD = createField(DSL.name("pswd"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * Create a <code>public.mauth</code> table reference
-     */
-    public Mauth() {
-        this(DSL.name("mauth"), null);
+    private Mauth(Name alias, Table<MauthRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private Mauth(Name alias, Table<MauthRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -130,12 +132,11 @@ public class Mauth extends TableImpl<MauthRecord> {
         this(alias, MAUTH);
     }
 
-    private Mauth(Name alias, Table<MauthRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private Mauth(Name alias, Table<MauthRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.mauth</code> table reference
+     */
+    public Mauth() {
+        this(DSL.name("mauth"), null);
     }
 
     public <O extends Record> Mauth(Table<O> child, ForeignKey<O, MauthRecord> key) {

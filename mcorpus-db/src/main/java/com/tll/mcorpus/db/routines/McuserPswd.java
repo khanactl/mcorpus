@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -19,17 +20,17 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserPswd extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = -687247993;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.mcuser_pswd.in_uid</code>.
      */
-    public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.mcuser_pswd.in_pswd</code>.
      */
-    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", SQLDataType.CLOB, false, false);
 
     /**
      * Create a new routine call instance

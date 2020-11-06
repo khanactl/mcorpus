@@ -13,15 +13,14 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.jooq.Field;
-import org.jooq.ForeignKey;
 import org.jooq.Name;
-import org.jooq.Record;
 import org.jooq.Row4;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -31,7 +30,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
 
-    private static final long serialVersionUID = 982442204;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.get_active_logins</code>
@@ -49,28 +48,29 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
     /**
      * The column <code>public.get_active_logins.jwt_id</code>.
      */
-    public final TableField<GetActiveLoginsRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), org.jooq.impl.SQLDataType.UUID, this, "");
+    public final TableField<GetActiveLoginsRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID, this, "");
 
     /**
      * The column <code>public.get_active_logins.login_expiration</code>.
      */
-    public final TableField<GetActiveLoginsRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<GetActiveLoginsRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.get_active_logins.request_timestamp</code>.
      */
-    public final TableField<GetActiveLoginsRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<GetActiveLoginsRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.get_active_logins.request_origin</code>.
      */
     public final TableField<GetActiveLoginsRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), this, "", new PostgresInetAddressBinding());
 
-    /**
-     * Create a <code>public.get_active_logins</code> table reference
-     */
-    public GetActiveLogins() {
-        this(DSL.name("get_active_logins"), null);
+    private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased) {
+        this(alias, aliased, new Field[1]);
+    }
+
+    private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.function());
     }
 
     /**
@@ -87,16 +87,11 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
         this(alias, GET_ACTIVE_LOGINS);
     }
 
-    private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased) {
-        this(alias, aliased, new Field[1]);
-    }
-
-    private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.function());
-    }
-
-    public <O extends Record> GetActiveLogins(Table<O> child, ForeignKey<O, GetActiveLoginsRecord> key) {
-        super(child, key, GET_ACTIVE_LOGINS);
+    /**
+     * Create a <code>public.get_active_logins</code> table reference
+     */
+    public GetActiveLogins() {
+        this(DSL.name("get_active_logins"), null);
     }
 
     @Override
@@ -142,18 +137,26 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
     /**
      * Call this table-valued function
      */
-    public GetActiveLogins call(UUID mcuserId) {
-        return new GetActiveLogins(DSL.name(getName()), null, new Field[] { 
-              DSL.val(mcuserId, org.jooq.impl.SQLDataType.UUID)
+    public GetActiveLogins call(
+          UUID mcuserId
+    ) {
+        GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
+              DSL.val(mcuserId, SQLDataType.UUID)
         });
+
+        return aliased() ? result.as(getUnqualifiedName()) : result;
     }
 
     /**
      * Call this table-valued function
      */
-    public GetActiveLogins call(Field<UUID> mcuserId) {
-        return new GetActiveLogins(DSL.name(getName()), null, new Field[] { 
+    public GetActiveLogins call(
+          Field<UUID> mcuserId
+    ) {
+        GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
               mcuserId
         });
+
+        return aliased() ? result.as(getUnqualifiedName()) : result;
     }
 }

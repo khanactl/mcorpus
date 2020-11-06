@@ -26,6 +26,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -35,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser extends TableImpl<McuserRecord> {
 
-    private static final long serialVersionUID = -1607874137;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.mcuser</code>
@@ -53,53 +54,54 @@ public class Mcuser extends TableImpl<McuserRecord> {
     /**
      * The column <code>public.mcuser.uid</code>.
      */
-    public final TableField<McuserRecord, UUID> UID = createField(DSL.name("uid"), org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("public.gen_random_uuid()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<McuserRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("public.gen_random_uuid()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.mcuser.created</code>.
      */
-    public final TableField<McuserRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<McuserRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mcuser.modified</code>.
      */
-    public final TableField<McuserRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<McuserRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.mcuser.name</code>.
      */
-    public final TableField<McuserRecord, String> NAME = createField(DSL.name("name"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<McuserRecord, String> NAME = createField(DSL.name("name"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser.email</code>.
      */
-    public final TableField<McuserRecord, String> EMAIL = createField(DSL.name("email"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<McuserRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser.username</code>.
      */
-    public final TableField<McuserRecord, String> USERNAME = createField(DSL.name("username"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<McuserRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser.pswd</code>.
      */
-    public final TableField<McuserRecord, String> PSWD = createField(DSL.name("pswd"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<McuserRecord, String> PSWD = createField(DSL.name("pswd"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser.status</code>.
      */
-    public final TableField<McuserRecord, McuserStatus> STATUS = createField(DSL.name("status"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).defaultValue(org.jooq.impl.DSL.field("'ACTIVE'::mcuser_status", org.jooq.impl.SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), this, "");
+    public final TableField<McuserRecord, McuserStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("'ACTIVE'::mcuser_status", SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), this, "");
 
     /**
      * The column <code>public.mcuser.roles</code>.
      */
-    public final TableField<McuserRecord, McuserRole[]> ROLES = createField(DSL.name("roles"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), this, "");
+    public final TableField<McuserRecord, McuserRole[]> ROLES = createField(DSL.name("roles"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), this, "");
 
-    /**
-     * Create a <code>public.mcuser</code> table reference
-     */
-    public Mcuser() {
-        this(DSL.name("mcuser"), null);
+    private Mcuser(Name alias, Table<McuserRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private Mcuser(Name alias, Table<McuserRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -116,12 +118,11 @@ public class Mcuser extends TableImpl<McuserRecord> {
         this(alias, MCUSER);
     }
 
-    private Mcuser(Name alias, Table<McuserRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private Mcuser(Name alias, Table<McuserRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.mcuser</code> table reference
+     */
+    public Mcuser() {
+        this(DSL.name("mcuser"), null);
     }
 
     public <O extends Record> Mcuser(Table<O> child, ForeignKey<O, McuserRecord> key) {

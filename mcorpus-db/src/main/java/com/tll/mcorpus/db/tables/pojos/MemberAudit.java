@@ -18,7 +18,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit implements Serializable {
 
-    private static final long serialVersionUID = -1559546921;
+    private static final long serialVersionUID = 1L;
 
     private final UUID            mid;
     private final OffsetDateTime  created;
@@ -48,22 +48,37 @@ public class MemberAudit implements Serializable {
         this.requestOrigin = requestOrigin;
     }
 
+    /**
+     * Getter for <code>public.member_audit.mid</code>.
+     */
     public UUID getMid() {
         return this.mid;
     }
 
+    /**
+     * Getter for <code>public.member_audit.created</code>.
+     */
     public OffsetDateTime getCreated() {
         return this.created;
     }
 
+    /**
+     * Getter for <code>public.member_audit.type</code>.
+     */
     public MemberAuditType getType() {
         return this.type;
     }
 
+    /**
+     * Getter for <code>public.member_audit.request_timestamp</code>.
+     */
     public OffsetDateTime getRequestTimestamp() {
         return this.requestTimestamp;
     }
 
+    /**
+     * Getter for <code>public.member_audit.request_origin</code>.
+     */
     public InetAddress getRequestOrigin() {
         return this.requestOrigin;
     }

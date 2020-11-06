@@ -16,7 +16,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth implements Serializable {
 
-    private static final long serialVersionUID = -2081824258;
+    private static final long serialVersionUID = 1L;
 
     private final UUID           mid;
     private final OffsetDateTime modified;
@@ -74,50 +74,86 @@ public class Mauth implements Serializable {
         this.pswd = pswd;
     }
 
+    /**
+     * Getter for <code>public.mauth.mid</code>.
+     */
     public UUID getMid() {
         return this.mid;
     }
 
+    /**
+     * Getter for <code>public.mauth.modified</code>.
+     */
     public OffsetDateTime getModified() {
         return this.modified;
     }
 
+    /**
+     * Getter for <code>public.mauth.dob</code>.
+     */
     public LocalDate getDob() {
         return this.dob;
     }
 
+    /**
+     * Getter for <code>public.mauth.ssn</code>.
+     */
     public String getSsn() {
         return this.ssn;
     }
 
+    /**
+     * Getter for <code>public.mauth.email_personal</code>.
+     */
     public String getEmailPersonal() {
         return this.emailPersonal;
     }
 
+    /**
+     * Getter for <code>public.mauth.email_work</code>.
+     */
     public String getEmailWork() {
         return this.emailWork;
     }
 
+    /**
+     * Getter for <code>public.mauth.mobile_phone</code>.
+     */
     public String getMobilePhone() {
         return this.mobilePhone;
     }
 
+    /**
+     * Getter for <code>public.mauth.home_phone</code>.
+     */
     public String getHomePhone() {
         return this.homePhone;
     }
 
+    /**
+     * Getter for <code>public.mauth.work_phone</code>.
+     */
     public String getWorkPhone() {
         return this.workPhone;
     }
 
+    /**
+     * Getter for <code>public.mauth.fax</code>.
+     */
     public String getFax() {
         return this.fax;
     }
 
+    /**
+     * Getter for <code>public.mauth.username</code>.
+     */
     public String getUsername() {
         return this.username;
     }
 
+    /**
+     * Getter for <code>public.mauth.pswd</code>.
+     */
     public String getPswd() {
         return this.pswd;
     }

@@ -24,7 +24,7 @@ import org.jooq.impl.UDTRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatusRecord extends UDTRecordImpl<JwtMcuserStatusRecord> implements Record6<McuserAuditType, UUID, JwtIdStatus, OffsetDateTime, UUID, McuserStatus> {
 
-    private static final long serialVersionUID = 1354660093;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
@@ -278,11 +278,11 @@ public class JwtMcuserStatusRecord extends UDTRecordImpl<JwtMcuserStatusRecord> 
     public JwtMcuserStatusRecord(McuserAuditType mcuserAuditRecordType, UUID jwtId, JwtIdStatus jwtIdStatus, OffsetDateTime loginExpiration, UUID uid, McuserStatus mcuserStatus) {
         super(JwtMcuserStatus.JWT_MCUSER_STATUS);
 
-        set(0, mcuserAuditRecordType);
-        set(1, jwtId);
-        set(2, jwtIdStatus);
-        set(3, loginExpiration);
-        set(4, uid);
-        set(5, mcuserStatus);
+        setMcuserAuditRecordType(mcuserAuditRecordType);
+        setJwtId(jwtId);
+        setJwtIdStatus(jwtIdStatus);
+        setLoginExpiration(loginExpiration);
+        setUid(uid);
+        setMcuserStatus(mcuserStatus);
     }
 }

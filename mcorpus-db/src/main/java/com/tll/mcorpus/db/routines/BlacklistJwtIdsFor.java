@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -22,17 +23,17 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = 1663555712;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_uid</code>.
      */
-    public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_request_origin</code>.

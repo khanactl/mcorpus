@@ -22,68 +22,39 @@ import com.tll.mcorpus.db.tables.records.MemberRecord;
 import org.jooq.ForeignKey;
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
+import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
 
 /**
- * A class modelling foreign key relationships and constraints of tables of 
- * the <code>public</code> schema.
+ * A class modelling foreign key relationships and constraints of tables in 
+ * public.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Keys {
 
     // -------------------------------------------------------------------------
-    // IDENTITY definitions
-    // -------------------------------------------------------------------------
-
-
-    // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<MaddressRecord> MADDRESS_PKEY = UniqueKeys0.MADDRESS_PKEY;
-    public static final UniqueKey<MauthRecord> MAUTH_PKEY = UniqueKeys0.MAUTH_PKEY;
-    public static final UniqueKey<MauthRecord> MAUTH_USERNAME_KEY = UniqueKeys0.MAUTH_USERNAME_KEY;
-    public static final UniqueKey<MbenefitsRecord> MBENEFITS_PKEY = UniqueKeys0.MBENEFITS_PKEY;
-    public static final UniqueKey<McuserRecord> MCUSER_PKEY = UniqueKeys0.MCUSER_PKEY;
-    public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = UniqueKeys0.MCUSER_USERNAME_KEY;
-    public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = UniqueKeys0.MCUSER_AUDIT_PKEY;
-    public static final UniqueKey<MemberRecord> MEMBER_PKEY = UniqueKeys0.MEMBER_PKEY;
-    public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = UniqueKeys0.MEMBER_EMP_ID_LOCATION_KEY;
-    public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = UniqueKeys0.MEMBER_AUDIT_PKEY;
+    public static final UniqueKey<MaddressRecord> MADDRESS_PKEY = Internal.createUniqueKey(Maddress.MADDRESS, DSL.name("maddress_pkey"), new TableField[] { Maddress.MADDRESS.MID, Maddress.MADDRESS.ADDRESS_NAME }, true);
+    public static final UniqueKey<MauthRecord> MAUTH_PKEY = Internal.createUniqueKey(Mauth.MAUTH, DSL.name("mauth_pkey"), new TableField[] { Mauth.MAUTH.MID }, true);
+    public static final UniqueKey<MauthRecord> MAUTH_USERNAME_KEY = Internal.createUniqueKey(Mauth.MAUTH, DSL.name("mauth_username_key"), new TableField[] { Mauth.MAUTH.USERNAME }, true);
+    public static final UniqueKey<MbenefitsRecord> MBENEFITS_PKEY = Internal.createUniqueKey(Mbenefits.MBENEFITS, DSL.name("mbenefits_pkey"), new TableField[] { Mbenefits.MBENEFITS.MID }, true);
+    public static final UniqueKey<McuserRecord> MCUSER_PKEY = Internal.createUniqueKey(Mcuser.MCUSER, DSL.name("mcuser_pkey"), new TableField[] { Mcuser.MCUSER.UID }, true);
+    public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = Internal.createUniqueKey(Mcuser.MCUSER, DSL.name("mcuser_username_key"), new TableField[] { Mcuser.MCUSER.USERNAME }, true);
+    public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, DSL.name("mcuser_audit_pkey"), new TableField[] { McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID }, true);
+    public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = Internal.createUniqueKey(Member.MEMBER, DSL.name("member_emp_id_location_key"), new TableField[] { Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION }, true);
+    public static final UniqueKey<MemberRecord> MEMBER_PKEY = Internal.createUniqueKey(Member.MEMBER, DSL.name("member_pkey"), new TableField[] { Member.MEMBER.MID }, true);
+    public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = Internal.createUniqueKey(MemberAudit.MEMBER_AUDIT, DSL.name("member_audit_pkey"), new TableField[] { MemberAudit.MEMBER_AUDIT.MID, MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE }, true);
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final ForeignKey<MaddressRecord, MemberRecord> MADDRESS__MADDRESS_MID_FKEY = ForeignKeys0.MADDRESS__MADDRESS_MID_FKEY;
-    public static final ForeignKey<MauthRecord, MemberRecord> MAUTH__MAUTH_MID_FKEY = ForeignKeys0.MAUTH__MAUTH_MID_FKEY;
-    public static final ForeignKey<MbenefitsRecord, MemberRecord> MBENEFITS__MBENEFITS_MID_FKEY = ForeignKeys0.MBENEFITS__MBENEFITS_MID_FKEY;
-    public static final ForeignKey<McuserAuditRecord, McuserRecord> MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY = ForeignKeys0.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY;
-    public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY = ForeignKeys0.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY;
-
-    // -------------------------------------------------------------------------
-    // [#1459] distribute members to avoid static initialisers > 64kb
-    // -------------------------------------------------------------------------
-
-    private static class UniqueKeys0 {
-        public static final UniqueKey<MaddressRecord> MADDRESS_PKEY = Internal.createUniqueKey(Maddress.MADDRESS, "maddress_pkey", new TableField[] { Maddress.MADDRESS.MID, Maddress.MADDRESS.ADDRESS_NAME }, true);
-        public static final UniqueKey<MauthRecord> MAUTH_PKEY = Internal.createUniqueKey(Mauth.MAUTH, "mauth_pkey", new TableField[] { Mauth.MAUTH.MID }, true);
-        public static final UniqueKey<MauthRecord> MAUTH_USERNAME_KEY = Internal.createUniqueKey(Mauth.MAUTH, "mauth_username_key", new TableField[] { Mauth.MAUTH.USERNAME }, true);
-        public static final UniqueKey<MbenefitsRecord> MBENEFITS_PKEY = Internal.createUniqueKey(Mbenefits.MBENEFITS, "mbenefits_pkey", new TableField[] { Mbenefits.MBENEFITS.MID }, true);
-        public static final UniqueKey<McuserRecord> MCUSER_PKEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_pkey", new TableField[] { Mcuser.MCUSER.UID }, true);
-        public static final UniqueKey<McuserRecord> MCUSER_USERNAME_KEY = Internal.createUniqueKey(Mcuser.MCUSER, "mcuser_username_key", new TableField[] { Mcuser.MCUSER.USERNAME }, true);
-        public static final UniqueKey<McuserAuditRecord> MCUSER_AUDIT_PKEY = Internal.createUniqueKey(McuserAudit.MCUSER_AUDIT, "mcuser_audit_pkey", new TableField[] { McuserAudit.MCUSER_AUDIT.UID, McuserAudit.MCUSER_AUDIT.CREATED, McuserAudit.MCUSER_AUDIT.TYPE, McuserAudit.MCUSER_AUDIT.JWT_ID }, true);
-        public static final UniqueKey<MemberRecord> MEMBER_PKEY = Internal.createUniqueKey(Member.MEMBER, "member_pkey", new TableField[] { Member.MEMBER.MID }, true);
-        public static final UniqueKey<MemberRecord> MEMBER_EMP_ID_LOCATION_KEY = Internal.createUniqueKey(Member.MEMBER, "member_emp_id_location_key", new TableField[] { Member.MEMBER.EMP_ID, Member.MEMBER.LOCATION }, true);
-        public static final UniqueKey<MemberAuditRecord> MEMBER_AUDIT_PKEY = Internal.createUniqueKey(MemberAudit.MEMBER_AUDIT, "member_audit_pkey", new TableField[] { MemberAudit.MEMBER_AUDIT.MID, MemberAudit.MEMBER_AUDIT.CREATED, MemberAudit.MEMBER_AUDIT.TYPE }, true);
-    }
-
-    private static class ForeignKeys0 {
-        public static final ForeignKey<MaddressRecord, MemberRecord> MADDRESS__MADDRESS_MID_FKEY = Internal.createForeignKey(Keys.MEMBER_PKEY, Maddress.MADDRESS, "maddress_mid_fkey", new TableField[] { Maddress.MADDRESS.MID }, true);
-        public static final ForeignKey<MauthRecord, MemberRecord> MAUTH__MAUTH_MID_FKEY = Internal.createForeignKey(Keys.MEMBER_PKEY, Mauth.MAUTH, "mauth_mid_fkey", new TableField[] { Mauth.MAUTH.MID }, true);
-        public static final ForeignKey<MbenefitsRecord, MemberRecord> MBENEFITS__MBENEFITS_MID_FKEY = Internal.createForeignKey(Keys.MEMBER_PKEY, Mbenefits.MBENEFITS, "mbenefits_mid_fkey", new TableField[] { Mbenefits.MBENEFITS.MID }, true);
-        public static final ForeignKey<McuserAuditRecord, McuserRecord> MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY = Internal.createForeignKey(Keys.MCUSER_PKEY, McuserAudit.MCUSER_AUDIT, "mcuser_audit_uid_fkey", new TableField[] { McuserAudit.MCUSER_AUDIT.UID }, true);
-        public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY = Internal.createForeignKey(Keys.MEMBER_PKEY, MemberAudit.MEMBER_AUDIT, "member_audit_mid_fkey", new TableField[] { MemberAudit.MEMBER_AUDIT.MID }, true);
-    }
+    public static final ForeignKey<MaddressRecord, MemberRecord> MADDRESS__MADDRESS_MID_FKEY = Internal.createForeignKey(Maddress.MADDRESS, DSL.name("maddress_mid_fkey"), new TableField[] { Maddress.MADDRESS.MID }, Keys.MEMBER_PKEY, new TableField[] { Member.MEMBER.MID }, true);
+    public static final ForeignKey<MauthRecord, MemberRecord> MAUTH__MAUTH_MID_FKEY = Internal.createForeignKey(Mauth.MAUTH, DSL.name("mauth_mid_fkey"), new TableField[] { Mauth.MAUTH.MID }, Keys.MEMBER_PKEY, new TableField[] { Member.MEMBER.MID }, true);
+    public static final ForeignKey<MbenefitsRecord, MemberRecord> MBENEFITS__MBENEFITS_MID_FKEY = Internal.createForeignKey(Mbenefits.MBENEFITS, DSL.name("mbenefits_mid_fkey"), new TableField[] { Mbenefits.MBENEFITS.MID }, Keys.MEMBER_PKEY, new TableField[] { Member.MEMBER.MID }, true);
+    public static final ForeignKey<McuserAuditRecord, McuserRecord> MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY = Internal.createForeignKey(McuserAudit.MCUSER_AUDIT, DSL.name("mcuser_audit_uid_fkey"), new TableField[] { McuserAudit.MCUSER_AUDIT.UID }, Keys.MCUSER_PKEY, new TableField[] { Mcuser.MCUSER.UID }, true);
+    public static final ForeignKey<MemberAuditRecord, MemberRecord> MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY = Internal.createForeignKey(MemberAudit.MEMBER_AUDIT, DSL.name("member_audit_mid_fkey"), new TableField[] { MemberAudit.MEMBER_AUDIT.MID }, Keys.MEMBER_PKEY, new TableField[] { Member.MEMBER.MID }, true);
 }

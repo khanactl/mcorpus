@@ -15,6 +15,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -23,22 +24,22 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberLogout extends AbstractRoutine<UUID> {
 
-    private static final long serialVersionUID = 1147598341;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.member_logout.RETURN_VALUE</code>.
      */
-    public static final Parameter<UUID> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.member_logout.mid</code>.
      */
-    public static final Parameter<UUID> MID = Internal.createParameter("mid", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> MID = Internal.createParameter("mid", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.member_logout.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.member_logout.in_request_origin</code>.
@@ -49,7 +50,7 @@ public class MemberLogout extends AbstractRoutine<UUID> {
      * Create a new routine call instance
      */
     public MemberLogout() {
-        super("member_logout", Public.PUBLIC, org.jooq.impl.SQLDataType.UUID);
+        super("member_logout", Public.PUBLIC, SQLDataType.UUID);
 
         setReturnParameter(RETURN_VALUE);
         addInParameter(MID);

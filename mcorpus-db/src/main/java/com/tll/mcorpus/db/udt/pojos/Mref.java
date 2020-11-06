@@ -16,7 +16,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mref implements Serializable {
 
-    private static final long serialVersionUID = -34445881;
+    private static final long serialVersionUID = 1L;
 
     private final UUID     mid;
     private final String   empId;
@@ -38,14 +38,23 @@ public class Mref implements Serializable {
         this.location = location;
     }
 
+    /**
+     * Getter for <code>public.mref.mid</code>.
+     */
     public UUID getMid() {
         return this.mid;
     }
 
+    /**
+     * Getter for <code>public.mref.emp_id</code>.
+     */
     public String getEmpId() {
         return this.empId;
     }
 
+    /**
+     * Getter for <code>public.mref.location</code>.
+     */
     public Location getLocation() {
         return this.location;
     }

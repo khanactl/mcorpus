@@ -22,7 +22,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetActiveLoginsRecord extends TableRecordImpl<GetActiveLoginsRecord> implements Record4<UUID, OffsetDateTime, OffsetDateTime, InetAddress> {
 
-    private static final long serialVersionUID = -1252435769;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.get_active_logins.jwt_id</code>.
@@ -204,9 +204,9 @@ public class GetActiveLoginsRecord extends TableRecordImpl<GetActiveLoginsRecord
     public GetActiveLoginsRecord(UUID jwtId, OffsetDateTime loginExpiration, OffsetDateTime requestTimestamp, InetAddress requestOrigin) {
         super(GetActiveLogins.GET_ACTIVE_LOGINS);
 
-        set(0, jwtId);
-        set(1, loginExpiration);
-        set(2, requestTimestamp);
-        set(3, requestOrigin);
+        setJwtId(jwtId);
+        setLoginExpiration(loginExpiration);
+        setRequestTimestamp(requestTimestamp);
+        setRequestOrigin(requestOrigin);
     }
 }

@@ -26,6 +26,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -35,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Member extends TableImpl<MemberRecord> {
 
-    private static final long serialVersionUID = -1240238580;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.member</code>
@@ -53,58 +54,59 @@ public class Member extends TableImpl<MemberRecord> {
     /**
      * The column <code>public.member.mid</code>.
      */
-    public final TableField<MemberRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("public.gen_random_uuid()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<MemberRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("public.gen_random_uuid()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.member.created</code>.
      */
-    public final TableField<MemberRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<MemberRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.member.modified</code>.
      */
-    public final TableField<MemberRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<MemberRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.member.emp_id</code>.
      */
-    public final TableField<MemberRecord, String> EMP_ID = createField(DSL.name("emp_id"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MemberRecord, String> EMP_ID = createField(DSL.name("emp_id"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.member.location</code>.
      */
-    public final TableField<MemberRecord, Location> LOCATION = createField(DSL.name("location"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Location.class), this, "");
+    public final TableField<MemberRecord, Location> LOCATION = createField(DSL.name("location"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Location.class), this, "");
 
     /**
      * The column <code>public.member.name_first</code>.
      */
-    public final TableField<MemberRecord, String> NAME_FIRST = createField(DSL.name("name_first"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MemberRecord, String> NAME_FIRST = createField(DSL.name("name_first"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.member.name_middle</code>.
      */
-    public final TableField<MemberRecord, String> NAME_MIDDLE = createField(DSL.name("name_middle"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MemberRecord, String> NAME_MIDDLE = createField(DSL.name("name_middle"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.member.name_last</code>.
      */
-    public final TableField<MemberRecord, String> NAME_LAST = createField(DSL.name("name_last"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MemberRecord, String> NAME_LAST = createField(DSL.name("name_last"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.member.display_name</code>.
      */
-    public final TableField<MemberRecord, String> DISPLAY_NAME = createField(DSL.name("display_name"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MemberRecord, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.member.status</code>.
      */
-    public final TableField<MemberRecord, MemberStatus> STATUS = createField(DSL.name("status"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).defaultValue(org.jooq.impl.DSL.field("'ACTIVE'::member_status", org.jooq.impl.SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), this, "");
+    public final TableField<MemberRecord, MemberStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("'ACTIVE'::member_status", SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), this, "");
 
-    /**
-     * Create a <code>public.member</code> table reference
-     */
-    public Member() {
-        this(DSL.name("member"), null);
+    private Member(Name alias, Table<MemberRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private Member(Name alias, Table<MemberRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -121,12 +123,11 @@ public class Member extends TableImpl<MemberRecord> {
         this(alias, MEMBER);
     }
 
-    private Member(Name alias, Table<MemberRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private Member(Name alias, Table<MemberRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.member</code> table reference
+     */
+    public Member() {
+        this(DSL.name("member"), null);
     }
 
     public <O extends Record> Member(Table<O> child, ForeignKey<O, MemberRecord> key) {

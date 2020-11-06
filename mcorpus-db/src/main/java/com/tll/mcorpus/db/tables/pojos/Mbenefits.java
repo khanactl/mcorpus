@@ -17,7 +17,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mbenefits implements Serializable {
 
-    private static final long serialVersionUID = 1719449137;
+    private static final long serialVersionUID = 1L;
 
     private final UUID           mid;
     private final OffsetDateTime modified;
@@ -79,22 +79,33 @@ public class Mbenefits implements Serializable {
         this.legOptOut = legOptOut;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.mid</code>.
+     */
     public UUID getMid() {
         return this.mid;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.modified</code>.
+     */
     public OffsetDateTime getModified() {
         return this.modified;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.foreign_adrs_flag</code>.
+     */
     public String getForeignAdrsFlag() {
         return this.foreignAdrsFlag;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.beli</code>.
+     */
     public Beli getBeli() {
         return this.beli;
     }
-
 
     /**
      * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
@@ -104,34 +115,58 @@ public class Mbenefits implements Serializable {
         return this.mcb;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.med_plan_code</code>.
+     */
     public String getMedPlanCode() {
         return this.medPlanCode;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.med_opt_out</code>.
+     */
     public String getMedOptOut() {
         return this.medOptOut;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.den_plan_code</code>.
+     */
     public String getDenPlanCode() {
         return this.denPlanCode;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.den_opt_out</code>.
+     */
     public String getDenOptOut() {
         return this.denOptOut;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.vis_plan_code</code>.
+     */
     public String getVisPlanCode() {
         return this.visPlanCode;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.vis_opt_out</code>.
+     */
     public String getVisOptOut() {
         return this.visOptOut;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.leg_plan_code</code>.
+     */
     public String getLegPlanCode() {
         return this.legPlanCode;
     }
 
+    /**
+     * Getter for <code>public.mbenefits.leg_opt_out</code>.
+     */
     public String getLegOptOut() {
         return this.legOptOut;
     }

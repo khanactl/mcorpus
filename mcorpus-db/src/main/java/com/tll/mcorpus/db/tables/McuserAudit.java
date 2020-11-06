@@ -30,6 +30,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -39,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = -81595160;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.mcuser_audit</code>
@@ -57,22 +58,22 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.uid</code>.
      */
-    public final TableField<McuserAuditRecord, UUID> UID = createField(DSL.name("uid"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<McuserAuditRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser_audit.created</code>.
      */
-    public final TableField<McuserAuditRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<McuserAuditRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mcuser_audit.type</code>.
      */
-    public final TableField<McuserAuditRecord, McuserAuditType> TYPE = createField(DSL.name("type"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), this, "");
+    public final TableField<McuserAuditRecord, McuserAuditType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), this, "");
 
     /**
      * The column <code>public.mcuser_audit.request_timestamp</code>.
      */
-    public final TableField<McuserAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false), this, "");
+    public final TableField<McuserAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser_audit.request_origin</code>.
@@ -82,23 +83,24 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     /**
      * The column <code>public.mcuser_audit.login_expiration</code>.
      */
-    public final TableField<McuserAuditRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<McuserAuditRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.mcuser_audit.jwt_id</code>.
      */
-    public final TableField<McuserAuditRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<McuserAuditRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.mcuser_audit.jwt_id_status</code>.
      */
-    public final TableField<McuserAuditRecord, JwtIdStatus> JWT_ID_STATUS = createField(DSL.name("jwt_id_status"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), this, "");
+    public final TableField<McuserAuditRecord, JwtIdStatus> JWT_ID_STATUS = createField(DSL.name("jwt_id_status"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), this, "");
 
-    /**
-     * Create a <code>public.mcuser_audit</code> table reference
-     */
-    public McuserAudit() {
-        this(DSL.name("mcuser_audit"), null);
+    private McuserAudit(Name alias, Table<McuserAuditRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private McuserAudit(Name alias, Table<McuserAuditRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -115,12 +117,11 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
         this(alias, MCUSER_AUDIT);
     }
 
-    private McuserAudit(Name alias, Table<McuserAuditRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private McuserAudit(Name alias, Table<McuserAuditRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.mcuser_audit</code> table reference
+     */
+    public McuserAudit() {
+        this(DSL.name("mcuser_audit"), null);
     }
 
     public <O extends Record> McuserAudit(Table<O> child, ForeignKey<O, McuserAuditRecord> key) {

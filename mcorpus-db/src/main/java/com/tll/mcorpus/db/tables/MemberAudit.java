@@ -27,6 +27,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -36,7 +37,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit extends TableImpl<MemberAuditRecord> {
 
-    private static final long serialVersionUID = 702374914;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.member_audit</code>
@@ -54,33 +55,34 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
     /**
      * The column <code>public.member_audit.mid</code>.
      */
-    public final TableField<MemberAuditRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<MemberAuditRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.member_audit.created</code>.
      */
-    public final TableField<MemberAuditRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<MemberAuditRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.member_audit.type</code>.
      */
-    public final TableField<MemberAuditRecord, MemberAuditType> TYPE = createField(DSL.name("type"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.MemberAuditType.class), this, "");
+    public final TableField<MemberAuditRecord, MemberAuditType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.MemberAuditType.class), this, "");
 
     /**
      * The column <code>public.member_audit.request_timestamp</code>.
      */
-    public final TableField<MemberAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false), this, "");
+    public final TableField<MemberAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
     /**
      * The column <code>public.member_audit.request_origin</code>.
      */
     public final TableField<MemberAuditRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "", new PostgresInetAddressBinding());
 
-    /**
-     * Create a <code>public.member_audit</code> table reference
-     */
-    public MemberAudit() {
-        this(DSL.name("member_audit"), null);
+    private MemberAudit(Name alias, Table<MemberAuditRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private MemberAudit(Name alias, Table<MemberAuditRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -97,12 +99,11 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
         this(alias, MEMBER_AUDIT);
     }
 
-    private MemberAudit(Name alias, Table<MemberAuditRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private MemberAudit(Name alias, Table<MemberAuditRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.member_audit</code> table reference
+     */
+    public MemberAudit() {
+        this(DSL.name("member_audit"), null);
     }
 
     public <O extends Record> MemberAudit(Table<O> child, ForeignKey<O, MemberAuditRecord> key) {

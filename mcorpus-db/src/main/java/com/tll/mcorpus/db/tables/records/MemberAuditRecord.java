@@ -24,7 +24,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAuditRecord extends UpdatableRecordImpl<MemberAuditRecord> implements Record5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> {
 
-    private static final long serialVersionUID = 276456747;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.member_audit.mid</code>.
@@ -251,10 +251,10 @@ public class MemberAuditRecord extends UpdatableRecordImpl<MemberAuditRecord> im
     public MemberAuditRecord(UUID mid, OffsetDateTime created, MemberAuditType type, OffsetDateTime requestTimestamp, InetAddress requestOrigin) {
         super(MemberAudit.MEMBER_AUDIT);
 
-        set(0, mid);
-        set(1, created);
-        set(2, type);
-        set(3, requestTimestamp);
-        set(4, requestOrigin);
+        setMid(mid);
+        setCreated(created);
+        setType(type);
+        setRequestTimestamp(requestTimestamp);
+        setRequestOrigin(requestOrigin);
     }
 }

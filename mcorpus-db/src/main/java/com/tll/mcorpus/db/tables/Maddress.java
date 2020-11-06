@@ -25,6 +25,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -34,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Maddress extends TableImpl<MaddressRecord> {
 
-    private static final long serialVersionUID = -1142970912;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.maddress</code>
@@ -52,58 +53,59 @@ public class Maddress extends TableImpl<MaddressRecord> {
     /**
      * The column <code>public.maddress.mid</code>.
      */
-    public final TableField<MaddressRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<MaddressRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.maddress.address_name</code>.
      */
-    public final TableField<MaddressRecord, Addressname> ADDRESS_NAME = createField(DSL.name("address_name"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Addressname.class), this, "");
+    public final TableField<MaddressRecord, Addressname> ADDRESS_NAME = createField(DSL.name("address_name"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Addressname.class), this, "");
 
     /**
      * The column <code>public.maddress.modified</code>.
      */
-    public final TableField<MaddressRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<MaddressRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.maddress.attn</code>.
      */
-    public final TableField<MaddressRecord, String> ATTN = createField(DSL.name("attn"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MaddressRecord, String> ATTN = createField(DSL.name("attn"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.maddress.street1</code>.
      */
-    public final TableField<MaddressRecord, String> STREET1 = createField(DSL.name("street1"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MaddressRecord, String> STREET1 = createField(DSL.name("street1"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.maddress.street2</code>.
      */
-    public final TableField<MaddressRecord, String> STREET2 = createField(DSL.name("street2"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MaddressRecord, String> STREET2 = createField(DSL.name("street2"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.maddress.city</code>.
      */
-    public final TableField<MaddressRecord, String> CITY = createField(DSL.name("city"), org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<MaddressRecord, String> CITY = createField(DSL.name("city"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.maddress.state</code>.
      */
-    public final TableField<MaddressRecord, String> STATE = createField(DSL.name("state"), org.jooq.impl.SQLDataType.CHAR(2).nullable(false), this, "");
+    public final TableField<MaddressRecord, String> STATE = createField(DSL.name("state"), SQLDataType.CHAR(2).nullable(false), this, "");
 
     /**
      * The column <code>public.maddress.postal_code</code>.
      */
-    public final TableField<MaddressRecord, String> POSTAL_CODE = createField(DSL.name("postal_code"), org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<MaddressRecord, String> POSTAL_CODE = createField(DSL.name("postal_code"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.maddress.country</code>.
      */
-    public final TableField<MaddressRecord, String> COUNTRY = createField(DSL.name("country"), org.jooq.impl.SQLDataType.CLOB.nullable(false).defaultValue(org.jooq.impl.DSL.field("'USA'::text", org.jooq.impl.SQLDataType.CLOB)), this, "");
+    public final TableField<MaddressRecord, String> COUNTRY = createField(DSL.name("country"), SQLDataType.CLOB.nullable(false).defaultValue(DSL.field("'USA'::text", SQLDataType.CLOB)), this, "");
 
-    /**
-     * Create a <code>public.maddress</code> table reference
-     */
-    public Maddress() {
-        this(DSL.name("maddress"), null);
+    private Maddress(Name alias, Table<MaddressRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private Maddress(Name alias, Table<MaddressRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -120,12 +122,11 @@ public class Maddress extends TableImpl<MaddressRecord> {
         this(alias, MADDRESS);
     }
 
-    private Maddress(Name alias, Table<MaddressRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private Maddress(Name alias, Table<MaddressRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.maddress</code> table reference
+     */
+    public Maddress() {
+        this(DSL.name("maddress"), null);
     }
 
     public <O extends Record> Maddress(Table<O> child, ForeignKey<O, MaddressRecord> key) {

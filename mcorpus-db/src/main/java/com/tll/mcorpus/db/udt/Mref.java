@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.jooq.Schema;
 import org.jooq.UDTField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.SchemaImpl;
 import org.jooq.impl.UDTImpl;
 
@@ -23,7 +24,7 @@ import org.jooq.impl.UDTImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mref extends UDTImpl<MrefRecord> {
 
-    private static final long serialVersionUID = -189559318;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.mref</code>
@@ -41,17 +42,17 @@ public class Mref extends UDTImpl<MrefRecord> {
     /**
      * The attribute <code>public.mref.mid</code>.
      */
-    public static final UDTField<MrefRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID, MREF, "");
+    public static final UDTField<MrefRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID, MREF, "");
 
     /**
      * The attribute <code>public.mref.emp_id</code>.
      */
-    public static final UDTField<MrefRecord, String> EMP_ID = createField(DSL.name("emp_id"), org.jooq.impl.SQLDataType.CLOB, MREF, "");
+    public static final UDTField<MrefRecord, String> EMP_ID = createField(DSL.name("emp_id"), SQLDataType.CLOB, MREF, "");
 
     /**
      * The attribute <code>public.mref.location</code>.
      */
-    public static final UDTField<MrefRecord, Location> LOCATION = createField(DSL.name("location"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), MREF, "");
+    public static final UDTField<MrefRecord, Location> LOCATION = createField(DSL.name("location"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), MREF, "");
 
     /**
      * No further instances allowed

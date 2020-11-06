@@ -24,7 +24,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserRecord extends UpdatableRecordImpl<McuserRecord> implements Record9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> {
 
-    private static final long serialVersionUID = 2108011985;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.mcuser.uid</code>.
@@ -395,14 +395,14 @@ public class McuserRecord extends UpdatableRecordImpl<McuserRecord> implements R
     public McuserRecord(UUID uid, OffsetDateTime created, OffsetDateTime modified, String name, String email, String username, String pswd, McuserStatus status, McuserRole[] roles) {
         super(Mcuser.MCUSER);
 
-        set(0, uid);
-        set(1, created);
-        set(2, modified);
-        set(3, name);
-        set(4, email);
-        set(5, username);
-        set(6, pswd);
-        set(7, status);
-        set(8, roles);
+        setUid(uid);
+        setCreated(created);
+        setModified(modified);
+        setName(name);
+        setEmail(email);
+        setUsername(username);
+        setPswd(pswd);
+        setStatus(status);
+        setRoles(roles);
     }
 }

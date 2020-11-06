@@ -1,6 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -24,10 +23,10 @@
 
     <postgres-jdbc.version>42.2.18</postgres-jdbc.version>
 
-    <jooq.version>3.13.5</jooq.version>
+    <jooq.version>3.14.1</jooq.version>
     <hikari-cp.version>3.4.5</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>9.0.1</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>9.1.2</nimbus-jose-jwt.version>
 
     <guava.version>29.0-jre</guava.version>
     <guice.version>4.2.3</guice.version>
@@ -54,7 +53,7 @@
   <dependencyManagement>
     <dependencies>
       <!-- postgres-jdbc -->
-      <dependency><!-- https://github.com/pgjdbc/pgjdbc -->
+      <dependency>        <!-- https://github.com/pgjdbc/pgjdbc -->
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgres-jdbc.version}</version>
@@ -265,17 +264,17 @@
         <version>1.0-1</version>
       </dependency>
 
-      <dependency><!-- (Ratpack logs via SLF4J API) -->
+      <dependency>        <!-- (Ratpack logs via SLF4J API) -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j-api.version}</version>
       </dependency>
-      <dependency><!-- NOP SLF4J logger -->
+      <dependency>        <!-- NOP SLF4J logger -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-nop</artifactId>
         <version>${slf4j-api.version}</version>
       </dependency>
-      <dependency><!-- Log4j2 and bridge from SLF4J API via: log4j-slf4j-impl -->
+      <dependency>        <!-- Log4j2 and bridge from SLF4J API via: log4j-slf4j-impl -->
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
         <version>${log4j2.version}</version>
@@ -305,7 +304,7 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency><!-- all sub-projects get junit on test classpath by default -->
+    <dependency>      <!-- all sub-projects get junit on test classpath by default -->
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -318,7 +317,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -385,7 +384,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.2.0</version>
           <configuration>
             <nonFilteredFileExtensions>
               <nonFilteredFileExtension>ico</nonFilteredFileExtension>
@@ -414,32 +413,32 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.3</version>
+          <version>3.2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M4</version>
+          <version>3.0.0-M5</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.9.0</version>
+          <version>3.9.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.1</version>
         </plugin>
         <plugin>
           <groupId>pl.project13.maven</groupId>
           <artifactId>git-commit-id-plugin</artifactId>
-          <version>4.0.0</version>
+          <version>4.0.3</version>
         </plugin>
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.0.0</version>
+          <version>4.1.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

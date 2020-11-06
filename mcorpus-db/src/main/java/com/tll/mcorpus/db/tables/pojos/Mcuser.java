@@ -19,7 +19,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser implements Serializable {
 
-    private static final long serialVersionUID = 740027552;
+    private static final long serialVersionUID = 1L;
 
     private final UUID           uid;
     private final OffsetDateTime created;
@@ -65,38 +65,65 @@ public class Mcuser implements Serializable {
         this.roles = roles;
     }
 
+    /**
+     * Getter for <code>public.mcuser.uid</code>.
+     */
     public UUID getUid() {
         return this.uid;
     }
 
+    /**
+     * Getter for <code>public.mcuser.created</code>.
+     */
     public OffsetDateTime getCreated() {
         return this.created;
     }
 
+    /**
+     * Getter for <code>public.mcuser.modified</code>.
+     */
     public OffsetDateTime getModified() {
         return this.modified;
     }
 
+    /**
+     * Getter for <code>public.mcuser.name</code>.
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Getter for <code>public.mcuser.email</code>.
+     */
     public String getEmail() {
         return this.email;
     }
 
+    /**
+     * Getter for <code>public.mcuser.username</code>.
+     */
     public String getUsername() {
         return this.username;
     }
 
+    /**
+     * Getter for <code>public.mcuser.pswd</code>.
+     */
     public String getPswd() {
         return this.pswd;
     }
 
+    /**
+     * Getter for <code>public.mcuser.status</code>.
+     */
     public McuserStatus getStatus() {
         return this.status;
     }
 
+    /**
+     * Getter for <code>public.mcuser.roles</code>.
+     */
     public McuserRole[] getRoles() {
         return this.roles;
     }

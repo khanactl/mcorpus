@@ -17,7 +17,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Maddress implements Serializable {
 
-    private static final long serialVersionUID = -8886027;
+    private static final long serialVersionUID = 1L;
 
     private final UUID           mid;
     private final Addressname    addressName;
@@ -67,42 +67,72 @@ public class Maddress implements Serializable {
         this.country = country;
     }
 
+    /**
+     * Getter for <code>public.maddress.mid</code>.
+     */
     public UUID getMid() {
         return this.mid;
     }
 
+    /**
+     * Getter for <code>public.maddress.address_name</code>.
+     */
     public Addressname getAddressName() {
         return this.addressName;
     }
 
+    /**
+     * Getter for <code>public.maddress.modified</code>.
+     */
     public OffsetDateTime getModified() {
         return this.modified;
     }
 
+    /**
+     * Getter for <code>public.maddress.attn</code>.
+     */
     public String getAttn() {
         return this.attn;
     }
 
+    /**
+     * Getter for <code>public.maddress.street1</code>.
+     */
     public String getStreet1() {
         return this.street1;
     }
 
+    /**
+     * Getter for <code>public.maddress.street2</code>.
+     */
     public String getStreet2() {
         return this.street2;
     }
 
+    /**
+     * Getter for <code>public.maddress.city</code>.
+     */
     public String getCity() {
         return this.city;
     }
 
+    /**
+     * Getter for <code>public.maddress.state</code>.
+     */
     public String getState() {
         return this.state;
     }
 
+    /**
+     * Getter for <code>public.maddress.postal_code</code>.
+     */
     public String getPostalCode() {
         return this.postalCode;
     }
 
+    /**
+     * Getter for <code>public.maddress.country</code>.
+     */
     public String getCountry() {
         return this.country;
     }

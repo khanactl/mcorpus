@@ -16,6 +16,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -24,7 +25,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserLogin extends AbstractRoutine<McuserRecord> {
 
-    private static final long serialVersionUID = 875859062;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.mcuser_login.RETURN_VALUE</code>.
@@ -34,17 +35,17 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.mcuser_login.mcuser_username</code>.
      */
-    public static final Parameter<String> MCUSER_USERNAME = Internal.createParameter("mcuser_username", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> MCUSER_USERNAME = Internal.createParameter("mcuser_username", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.mcuser_login.mcuser_password</code>.
      */
-    public static final Parameter<String> MCUSER_PASSWORD = Internal.createParameter("mcuser_password", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> MCUSER_PASSWORD = Internal.createParameter("mcuser_password", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.mcuser_login.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.mcuser_login.in_request_origin</code>.
@@ -54,12 +55,12 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.mcuser_login.in_login_expiration</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.mcuser_login.in_jwt_id</code>.
      */
-    public static final Parameter<UUID> IN_JWT_ID = Internal.createParameter("in_jwt_id", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> IN_JWT_ID = Internal.createParameter("in_jwt_id", SQLDataType.UUID, false, false);
 
     /**
      * Create a new routine call instance

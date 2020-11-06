@@ -10,6 +10,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -18,23 +19,23 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class PassHash extends AbstractRoutine<String> {
 
-    private static final long serialVersionUID = -1196326879;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.pass_hash.RETURN_VALUE</code>.
      */
-    public static final Parameter<String> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.pass_hash.pswd</code>.
      */
-    public static final Parameter<String> PSWD = Internal.createParameter("pswd", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> PSWD = Internal.createParameter("pswd", SQLDataType.CLOB, false, false);
 
     /**
      * Create a new routine call instance
      */
     public PassHash() {
-        super("pass_hash", Public.PUBLIC, org.jooq.impl.SQLDataType.CLOB);
+        super("pass_hash", Public.PUBLIC, SQLDataType.CLOB);
 
         setReturnParameter(RETURN_VALUE);
         addInParameter(PSWD);

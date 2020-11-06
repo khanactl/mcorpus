@@ -12,7 +12,6 @@ import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fval;
 import static com.tll.repo.FetchResult.fetchrslt;
 
-import java.io.Closeable;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -65,7 +64,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jpk
  */
-public class MCorpusRepo implements Closeable {
+public class MCorpusRepo {
 
   static MemberAndMauth mapToMemberAndMauth(final Map<String, Object> mmap) {
       // map to pojo
@@ -135,15 +134,6 @@ public class MCorpusRepo implements Closeable {
     s.setRenderNameCase(RenderNameCase.LOWER);
     s.setRenderKeywordCase(RenderKeywordCase.UPPER);
     this.dsl = DSL.using(ds, SQLDialect.POSTGRES, s);
-  }
-
-  @Override
-  public void close() {
-    if(dsl != null) {
-      log.debug("Closing..");
-      dsl.close();
-      log.info("Closed.");
-    }
   }
 
   /**

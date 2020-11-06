@@ -21,7 +21,7 @@ import org.jooq.impl.UDTRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MrefRecord extends UDTRecordImpl<MrefRecord> implements Record3<UUID, String, Location> {
 
-    private static final long serialVersionUID = -1090010008;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.mref.mid</code>.
@@ -167,8 +167,8 @@ public class MrefRecord extends UDTRecordImpl<MrefRecord> implements Record3<UUI
     public MrefRecord(UUID mid, String empId, Location location) {
         super(Mref.MREF);
 
-        set(0, mid);
-        set(1, empId);
-        set(2, location);
+        setMid(mid);
+        setEmpId(empId);
+        setLocation(location);
     }
 }

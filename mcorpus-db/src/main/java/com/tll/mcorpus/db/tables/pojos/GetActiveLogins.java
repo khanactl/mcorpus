@@ -16,7 +16,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetActiveLogins implements Serializable {
 
-    private static final long serialVersionUID = -1633675016;
+    private static final long serialVersionUID = 1L;
 
     private final UUID           jwtId;
     private final OffsetDateTime loginExpiration;
@@ -42,18 +42,30 @@ public class GetActiveLogins implements Serializable {
         this.requestOrigin = requestOrigin;
     }
 
+    /**
+     * Getter for <code>public.get_active_logins.jwt_id</code>.
+     */
     public UUID getJwtId() {
         return this.jwtId;
     }
 
+    /**
+     * Getter for <code>public.get_active_logins.login_expiration</code>.
+     */
     public OffsetDateTime getLoginExpiration() {
         return this.loginExpiration;
     }
 
+    /**
+     * Getter for <code>public.get_active_logins.request_timestamp</code>.
+     */
     public OffsetDateTime getRequestTimestamp() {
         return this.requestTimestamp;
     }
 
+    /**
+     * Getter for <code>public.get_active_logins.request_origin</code>.
+     */
     public InetAddress getRequestOrigin() {
         return this.requestOrigin;
     }

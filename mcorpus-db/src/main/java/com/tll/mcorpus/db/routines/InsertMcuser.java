@@ -13,6 +13,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -21,7 +22,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class InsertMcuser extends AbstractRoutine<McuserRecord> {
 
-    private static final long serialVersionUID = -1231719637;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.insert_mcuser.RETURN_VALUE</code>.
@@ -31,32 +32,32 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.insert_mcuser.in_name</code>.
      */
-    public static final Parameter<String> IN_NAME = Internal.createParameter("in_name", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_NAME = Internal.createParameter("in_name", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_mcuser.in_email</code>.
      */
-    public static final Parameter<String> IN_EMAIL = Internal.createParameter("in_email", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_EMAIL = Internal.createParameter("in_email", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_mcuser.in_username</code>.
      */
-    public static final Parameter<String> IN_USERNAME = Internal.createParameter("in_username", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_USERNAME = Internal.createParameter("in_username", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_mcuser.in_pswd</code>.
      */
-    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_mcuser.in_status</code>.
      */
-    public static final Parameter<McuserStatus> IN_STATUS = Internal.createParameter("in_status", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), false, false);
+    public static final Parameter<McuserStatus> IN_STATUS = Internal.createParameter("in_status", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), false, false);
 
     /**
      * The parameter <code>public.insert_mcuser.in_roles</code>.
      */
-    public static final Parameter<McuserRole[]> IN_ROLES = Internal.createParameter("in_roles", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), false, false);
+    public static final Parameter<McuserRole[]> IN_ROLES = Internal.createParameter("in_roles", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), false, false);
 
     /**
      * Create a new routine call instance

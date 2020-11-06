@@ -15,6 +15,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -23,27 +24,27 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserLogout extends AbstractRoutine<Boolean> {
 
-    private static final long serialVersionUID = -480475874;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.mcuser_logout.RETURN_VALUE</code>.
      */
-    public static final Parameter<Boolean> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", org.jooq.impl.SQLDataType.BOOLEAN, false, false);
+    public static final Parameter<Boolean> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.BOOLEAN, false, false);
 
     /**
      * The parameter <code>public.mcuser_logout.mcuser_uid</code>.
      */
-    public static final Parameter<UUID> MCUSER_UID = Internal.createParameter("mcuser_uid", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> MCUSER_UID = Internal.createParameter("mcuser_uid", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.mcuser_logout.jwt_id</code>.
      */
-    public static final Parameter<UUID> JWT_ID = Internal.createParameter("jwt_id", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> JWT_ID = Internal.createParameter("jwt_id", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.mcuser_logout.request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> REQUEST_TIMESTAMP = Internal.createParameter("request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> REQUEST_TIMESTAMP = Internal.createParameter("request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.mcuser_logout.request_origin</code>.
@@ -54,7 +55,7 @@ public class McuserLogout extends AbstractRoutine<Boolean> {
      * Create a new routine call instance
      */
     public McuserLogout() {
-        super("mcuser_logout", Public.PUBLIC, org.jooq.impl.SQLDataType.BOOLEAN);
+        super("mcuser_logout", Public.PUBLIC, SQLDataType.BOOLEAN);
 
         setReturnParameter(RETURN_VALUE);
         addInParameter(MCUSER_UID);

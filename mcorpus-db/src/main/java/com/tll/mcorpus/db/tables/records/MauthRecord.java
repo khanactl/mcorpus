@@ -23,7 +23,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MauthRecord extends UpdatableRecordImpl<MauthRecord> implements Record12<UUID, OffsetDateTime, LocalDate, String, String, String, String, String, String, String, String, String> {
 
-    private static final long serialVersionUID = 1141763537;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.mauth.mid</code>.
@@ -502,17 +502,17 @@ public class MauthRecord extends UpdatableRecordImpl<MauthRecord> implements Rec
     public MauthRecord(UUID mid, OffsetDateTime modified, LocalDate dob, String ssn, String emailPersonal, String emailWork, String mobilePhone, String homePhone, String workPhone, String fax, String username, String pswd) {
         super(Mauth.MAUTH);
 
-        set(0, mid);
-        set(1, modified);
-        set(2, dob);
-        set(3, ssn);
-        set(4, emailPersonal);
-        set(5, emailWork);
-        set(6, mobilePhone);
-        set(7, homePhone);
-        set(8, workPhone);
-        set(9, fax);
-        set(10, username);
-        set(11, pswd);
+        setMid(mid);
+        setModified(modified);
+        setDob(dob);
+        setSsn(ssn);
+        setEmailPersonal(emailPersonal);
+        setEmailWork(emailWork);
+        setMobilePhone(mobilePhone);
+        setHomePhone(homePhone);
+        setWorkPhone(workPhone);
+        setFax(fax);
+        setUsername(username);
+        setPswd(pswd);
     }
 }

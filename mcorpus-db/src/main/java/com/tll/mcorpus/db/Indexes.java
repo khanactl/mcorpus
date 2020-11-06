@@ -8,11 +8,12 @@ import com.tll.mcorpus.db.tables.McuserAudit;
 
 import org.jooq.Index;
 import org.jooq.OrderField;
+import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
 
 /**
- * A class modelling indexes of tables of the <code>public</code> schema.
+ * A class modelling indexes of tables in public.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Indexes {
@@ -21,13 +22,5 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
-    public static final Index MCUSER_AUDIT__JWT_ID = Indexes0.MCUSER_AUDIT__JWT_ID;
-
-    // -------------------------------------------------------------------------
-    // [#1459] distribute members to avoid static initialisers > 64kb
-    // -------------------------------------------------------------------------
-
-    private static class Indexes0 {
-        public static Index MCUSER_AUDIT__JWT_ID = Internal.createIndex("mcuser_audit__jwt_id", McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.JWT_ID }, false);
-    }
+    public static final Index MCUSER_AUDIT__JWT_ID = Internal.createIndex(DSL.name("mcuser_audit__jwt_id"), McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.JWT_ID }, false);
 }

@@ -9,7 +9,6 @@ import static com.tll.mcorpus.db.Tables.MCUSER_AUDIT;
 import static com.tll.mcorpus.repo.MCorpusRepoUtil.fputWhenNotNull;
 import static com.tll.repo.FetchResult.fetchrslt;
 
-import java.io.Closeable;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -65,7 +64,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jpk
  */
-public class MCorpusUserRepo implements Closeable {
+public class MCorpusUserRepo {
 
   protected final Logger log = LoggerFactory.getLogger("MCorpusUserRepo");
 
@@ -81,15 +80,6 @@ public class MCorpusUserRepo implements Closeable {
     s.setRenderNameCase(RenderNameCase.LOWER);
     s.setRenderKeywordCase(RenderKeywordCase.UPPER);
     this.dsl = DSL.using(ds, SQLDialect.POSTGRES, s);
-  }
-
-  @Override
-  public void close() {
-    if(dsl != null) {
-      log.debug("Closing..");
-      dsl.close();
-      log.info("Closed.");
-    }
   }
 
   /**

@@ -35,7 +35,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1571051910;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public</code>
@@ -50,22 +50,35 @@ public class Public extends SchemaImpl {
     /**
      * Call <code>public.get_active_logins</code>.
      */
-    public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(Configuration configuration, UUID mcuserId) {
-        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId)).fetch();
+    public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(
+          Configuration configuration
+        , UUID mcuserId
+    ) {
+        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+              mcuserId
+        )).fetch();
     }
 
     /**
      * Get <code>public.get_active_logins</code> as a table.
      */
-    public static GetActiveLogins GET_ACTIVE_LOGINS(UUID mcuserId) {
-        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    public static GetActiveLogins GET_ACTIVE_LOGINS(
+          UUID mcuserId
+    ) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+              mcuserId
+        );
     }
 
     /**
      * Get <code>public.get_active_logins</code> as a table.
      */
-    public static GetActiveLogins GET_ACTIVE_LOGINS(Field<UUID> mcuserId) {
-        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(mcuserId);
+    public static GetActiveLogins GET_ACTIVE_LOGINS(
+          Field<UUID> mcuserId
+    ) {
+        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+              mcuserId
+        );
     }
 
     /**

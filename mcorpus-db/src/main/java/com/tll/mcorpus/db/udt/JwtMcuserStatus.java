@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.jooq.Schema;
 import org.jooq.UDTField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.SchemaImpl;
 import org.jooq.impl.UDTImpl;
 
@@ -26,7 +27,7 @@ import org.jooq.impl.UDTImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
 
-    private static final long serialVersionUID = -1372767377;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.jwt_mcuser_status</code>
@@ -44,32 +45,32 @@ public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
     /**
      * The attribute <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, McuserAuditType> MCUSER_AUDIT_RECORD_TYPE = createField(DSL.name("mcuser_audit_record_type"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, McuserAuditType> MCUSER_AUDIT_RECORD_TYPE = createField(DSL.name("mcuser_audit_record_type"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.jwt_id</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), org.jooq.impl.SQLDataType.UUID, JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID, JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.jwt_id_status</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, JwtIdStatus> JWT_ID_STATUS = createField(DSL.name("jwt_id_status"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, JwtIdStatus> JWT_ID_STATUS = createField(DSL.name("jwt_id_status"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.login_expiration</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE, JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.uid</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, UUID> UID = createField(DSL.name("uid"), org.jooq.impl.SQLDataType.UUID, JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID, JWT_MCUSER_STATUS, "");
 
     /**
      * The attribute <code>public.jwt_mcuser_status.mcuser_status</code>.
      */
-    public static final UDTField<JwtMcuserStatusRecord, McuserStatus> MCUSER_STATUS = createField(DSL.name("mcuser_status"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), JWT_MCUSER_STATUS, "");
+    public static final UDTField<JwtMcuserStatusRecord, McuserStatus> MCUSER_STATUS = createField(DSL.name("mcuser_status"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), JWT_MCUSER_STATUS, "");
 
     /**
      * No further instances allowed

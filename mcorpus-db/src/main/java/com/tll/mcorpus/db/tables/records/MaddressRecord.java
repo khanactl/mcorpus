@@ -23,7 +23,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MaddressRecord extends UpdatableRecordImpl<MaddressRecord> implements Record10<UUID, Addressname, OffsetDateTime, String, String, String, String, String, String, String> {
 
-    private static final long serialVersionUID = 1460974477;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.maddress.mid</code>.
@@ -430,15 +430,15 @@ public class MaddressRecord extends UpdatableRecordImpl<MaddressRecord> implemen
     public MaddressRecord(UUID mid, Addressname addressName, OffsetDateTime modified, String attn, String street1, String street2, String city, String state, String postalCode, String country) {
         super(Maddress.MADDRESS);
 
-        set(0, mid);
-        set(1, addressName);
-        set(2, modified);
-        set(3, attn);
-        set(4, street1);
-        set(5, street2);
-        set(6, city);
-        set(7, state);
-        set(8, postalCode);
-        set(9, country);
+        setMid(mid);
+        setAddressName(addressName);
+        setModified(modified);
+        setAttn(attn);
+        setStreet1(street1);
+        setStreet2(street2);
+        setCity(city);
+        setState(state);
+        setPostalCode(postalCode);
+        setCountry(country);
     }
 }

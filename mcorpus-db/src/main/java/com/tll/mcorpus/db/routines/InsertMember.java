@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -23,187 +24,187 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class InsertMember extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = -37102905;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.insert_member.in_emp_id</code>.
      */
-    public static final Parameter<String> IN_EMP_ID = Internal.createParameter("in_emp_id", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_EMP_ID = Internal.createParameter("in_emp_id", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_location</code>.
      */
-    public static final Parameter<Location> IN_LOCATION = Internal.createParameter("in_location", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), false, false);
+    public static final Parameter<Location> IN_LOCATION = Internal.createParameter("in_location", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), false, false);
 
     /**
      * The parameter <code>public.insert_member.in_name_first</code>.
      */
-    public static final Parameter<String> IN_NAME_FIRST = Internal.createParameter("in_name_first", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_NAME_FIRST = Internal.createParameter("in_name_first", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_name_middle</code>.
      */
-    public static final Parameter<String> IN_NAME_MIDDLE = Internal.createParameter("in_name_middle", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_NAME_MIDDLE = Internal.createParameter("in_name_middle", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_name_last</code>.
      */
-    public static final Parameter<String> IN_NAME_LAST = Internal.createParameter("in_name_last", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_NAME_LAST = Internal.createParameter("in_name_last", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_display_name</code>.
      */
-    public static final Parameter<String> IN_DISPLAY_NAME = Internal.createParameter("in_display_name", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_DISPLAY_NAME = Internal.createParameter("in_display_name", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_status</code>.
      */
-    public static final Parameter<MemberStatus> IN_STATUS = Internal.createParameter("in_status", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), false, false);
+    public static final Parameter<MemberStatus> IN_STATUS = Internal.createParameter("in_status", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), false, false);
 
     /**
      * The parameter <code>public.insert_member.in_dob</code>.
      */
-    public static final Parameter<LocalDate> IN_DOB = Internal.createParameter("in_dob", org.jooq.impl.SQLDataType.LOCALDATE, false, false);
+    public static final Parameter<LocalDate> IN_DOB = Internal.createParameter("in_dob", SQLDataType.LOCALDATE, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_ssn</code>.
      */
-    public static final Parameter<String> IN_SSN = Internal.createParameter("in_ssn", org.jooq.impl.SQLDataType.CHAR, false, false);
+    public static final Parameter<String> IN_SSN = Internal.createParameter("in_ssn", SQLDataType.CHAR, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_email_personal</code>.
      */
-    public static final Parameter<String> IN_EMAIL_PERSONAL = Internal.createParameter("in_email_personal", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_EMAIL_PERSONAL = Internal.createParameter("in_email_personal", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_email_work</code>.
      */
-    public static final Parameter<String> IN_EMAIL_WORK = Internal.createParameter("in_email_work", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_EMAIL_WORK = Internal.createParameter("in_email_work", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_mobile_phone</code>.
      */
-    public static final Parameter<String> IN_MOBILE_PHONE = Internal.createParameter("in_mobile_phone", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_MOBILE_PHONE = Internal.createParameter("in_mobile_phone", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_home_phone</code>.
      */
-    public static final Parameter<String> IN_HOME_PHONE = Internal.createParameter("in_home_phone", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_HOME_PHONE = Internal.createParameter("in_home_phone", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_work_phone</code>.
      */
-    public static final Parameter<String> IN_WORK_PHONE = Internal.createParameter("in_work_phone", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_WORK_PHONE = Internal.createParameter("in_work_phone", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_fax</code>.
      */
-    public static final Parameter<String> IN_FAX = Internal.createParameter("in_fax", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_FAX = Internal.createParameter("in_fax", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_username</code>.
      */
-    public static final Parameter<String> IN_USERNAME = Internal.createParameter("in_username", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_USERNAME = Internal.createParameter("in_username", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.in_pswd</code>.
      */
-    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_mid</code>.
      */
-    public static final Parameter<UUID> OUT_MID = Internal.createParameter("out_mid", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> OUT_MID = Internal.createParameter("out_mid", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_created</code>.
      */
-    public static final Parameter<OffsetDateTime> OUT_CREATED = Internal.createParameter("out_created", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> OUT_CREATED = Internal.createParameter("out_created", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_modified</code>.
      */
-    public static final Parameter<OffsetDateTime> OUT_MODIFIED = Internal.createParameter("out_modified", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> OUT_MODIFIED = Internal.createParameter("out_modified", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_emp_id</code>.
      */
-    public static final Parameter<String> OUT_EMP_ID = Internal.createParameter("out_emp_id", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_EMP_ID = Internal.createParameter("out_emp_id", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_location</code>.
      */
-    public static final Parameter<Location> OUT_LOCATION = Internal.createParameter("out_location", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), false, false);
+    public static final Parameter<Location> OUT_LOCATION = Internal.createParameter("out_location", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), false, false);
 
     /**
      * The parameter <code>public.insert_member.out_name_first</code>.
      */
-    public static final Parameter<String> OUT_NAME_FIRST = Internal.createParameter("out_name_first", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_NAME_FIRST = Internal.createParameter("out_name_first", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_name_middle</code>.
      */
-    public static final Parameter<String> OUT_NAME_MIDDLE = Internal.createParameter("out_name_middle", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_NAME_MIDDLE = Internal.createParameter("out_name_middle", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_name_last</code>.
      */
-    public static final Parameter<String> OUT_NAME_LAST = Internal.createParameter("out_name_last", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_NAME_LAST = Internal.createParameter("out_name_last", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_display_name</code>.
      */
-    public static final Parameter<String> OUT_DISPLAY_NAME = Internal.createParameter("out_display_name", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_DISPLAY_NAME = Internal.createParameter("out_display_name", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_status</code>.
      */
-    public static final Parameter<MemberStatus> OUT_STATUS = Internal.createParameter("out_status", org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), false, false);
+    public static final Parameter<MemberStatus> OUT_STATUS = Internal.createParameter("out_status", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), false, false);
 
     /**
      * The parameter <code>public.insert_member.out_dob</code>.
      */
-    public static final Parameter<LocalDate> OUT_DOB = Internal.createParameter("out_dob", org.jooq.impl.SQLDataType.LOCALDATE, false, false);
+    public static final Parameter<LocalDate> OUT_DOB = Internal.createParameter("out_dob", SQLDataType.LOCALDATE, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_ssn</code>.
      */
-    public static final Parameter<String> OUT_SSN = Internal.createParameter("out_ssn", org.jooq.impl.SQLDataType.CHAR, false, false);
+    public static final Parameter<String> OUT_SSN = Internal.createParameter("out_ssn", SQLDataType.CHAR, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_email_personal</code>.
      */
-    public static final Parameter<String> OUT_EMAIL_PERSONAL = Internal.createParameter("out_email_personal", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_EMAIL_PERSONAL = Internal.createParameter("out_email_personal", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_email_work</code>.
      */
-    public static final Parameter<String> OUT_EMAIL_WORK = Internal.createParameter("out_email_work", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_EMAIL_WORK = Internal.createParameter("out_email_work", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_mobile_phone</code>.
      */
-    public static final Parameter<String> OUT_MOBILE_PHONE = Internal.createParameter("out_mobile_phone", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_MOBILE_PHONE = Internal.createParameter("out_mobile_phone", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_home_phone</code>.
      */
-    public static final Parameter<String> OUT_HOME_PHONE = Internal.createParameter("out_home_phone", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_HOME_PHONE = Internal.createParameter("out_home_phone", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_work_phone</code>.
      */
-    public static final Parameter<String> OUT_WORK_PHONE = Internal.createParameter("out_work_phone", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_WORK_PHONE = Internal.createParameter("out_work_phone", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_fax</code>.
      */
-    public static final Parameter<String> OUT_FAX = Internal.createParameter("out_fax", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_FAX = Internal.createParameter("out_fax", SQLDataType.CLOB, false, false);
 
     /**
      * The parameter <code>public.insert_member.out_username</code>.
      */
-    public static final Parameter<String> OUT_USERNAME = Internal.createParameter("out_username", org.jooq.impl.SQLDataType.CLOB, false, false);
+    public static final Parameter<String> OUT_USERNAME = Internal.createParameter("out_username", SQLDataType.CLOB, false, false);
 
     /**
      * Create a new routine call instance

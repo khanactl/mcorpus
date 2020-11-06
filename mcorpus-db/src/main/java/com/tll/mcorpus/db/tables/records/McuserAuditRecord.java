@@ -25,7 +25,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAuditRecord extends UpdatableRecordImpl<McuserAuditRecord> implements Record8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> {
 
-    private static final long serialVersionUID = 1752943452;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.mcuser_audit.uid</code>.
@@ -360,13 +360,13 @@ public class McuserAuditRecord extends UpdatableRecordImpl<McuserAuditRecord> im
     public McuserAuditRecord(UUID uid, OffsetDateTime created, McuserAuditType type, OffsetDateTime requestTimestamp, InetAddress requestOrigin, OffsetDateTime loginExpiration, UUID jwtId, JwtIdStatus jwtIdStatus) {
         super(McuserAudit.MCUSER_AUDIT);
 
-        set(0, uid);
-        set(1, created);
-        set(2, type);
-        set(3, requestTimestamp);
-        set(4, requestOrigin);
-        set(5, loginExpiration);
-        set(6, jwtId);
-        set(7, jwtIdStatus);
+        setUid(uid);
+        setCreated(created);
+        setType(type);
+        setRequestTimestamp(requestTimestamp);
+        setRequestOrigin(requestOrigin);
+        setLoginExpiration(loginExpiration);
+        setJwtId(jwtId);
+        setJwtIdStatus(jwtIdStatus);
     }
 }

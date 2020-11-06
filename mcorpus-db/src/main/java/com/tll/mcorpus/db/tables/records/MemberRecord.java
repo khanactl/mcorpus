@@ -24,7 +24,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberRecord extends UpdatableRecordImpl<MemberRecord> implements Record10<UUID, OffsetDateTime, OffsetDateTime, String, Location, String, String, String, String, MemberStatus> {
 
-    private static final long serialVersionUID = -1384384842;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Setter for <code>public.member.mid</code>.
@@ -431,15 +431,15 @@ public class MemberRecord extends UpdatableRecordImpl<MemberRecord> implements R
     public MemberRecord(UUID mid, OffsetDateTime created, OffsetDateTime modified, String empId, Location location, String nameFirst, String nameMiddle, String nameLast, String displayName, MemberStatus status) {
         super(Member.MEMBER);
 
-        set(0, mid);
-        set(1, created);
-        set(2, modified);
-        set(3, empId);
-        set(4, location);
-        set(5, nameFirst);
-        set(6, nameMiddle);
-        set(7, nameLast);
-        set(8, displayName);
-        set(9, status);
+        setMid(mid);
+        setCreated(created);
+        setModified(modified);
+        setEmpId(empId);
+        setLocation(location);
+        setNameFirst(nameFirst);
+        setNameMiddle(nameMiddle);
+        setNameLast(nameLast);
+        setDisplayName(displayName);
+        setStatus(status);
     }
 }

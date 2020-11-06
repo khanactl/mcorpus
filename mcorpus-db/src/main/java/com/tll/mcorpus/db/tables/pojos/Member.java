@@ -18,7 +18,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Member implements Serializable {
 
-    private static final long serialVersionUID = 103938838;
+    private static final long serialVersionUID = 1L;
 
     private final UUID           mid;
     private final OffsetDateTime created;
@@ -68,42 +68,72 @@ public class Member implements Serializable {
         this.status = status;
     }
 
+    /**
+     * Getter for <code>public.member.mid</code>.
+     */
     public UUID getMid() {
         return this.mid;
     }
 
+    /**
+     * Getter for <code>public.member.created</code>.
+     */
     public OffsetDateTime getCreated() {
         return this.created;
     }
 
+    /**
+     * Getter for <code>public.member.modified</code>.
+     */
     public OffsetDateTime getModified() {
         return this.modified;
     }
 
+    /**
+     * Getter for <code>public.member.emp_id</code>.
+     */
     public String getEmpId() {
         return this.empId;
     }
 
+    /**
+     * Getter for <code>public.member.location</code>.
+     */
     public Location getLocation() {
         return this.location;
     }
 
+    /**
+     * Getter for <code>public.member.name_first</code>.
+     */
     public String getNameFirst() {
         return this.nameFirst;
     }
 
+    /**
+     * Getter for <code>public.member.name_middle</code>.
+     */
     public String getNameMiddle() {
         return this.nameMiddle;
     }
 
+    /**
+     * Getter for <code>public.member.name_last</code>.
+     */
     public String getNameLast() {
         return this.nameLast;
     }
 
+    /**
+     * Getter for <code>public.member.display_name</code>.
+     */
     public String getDisplayName() {
         return this.displayName;
     }
 
+    /**
+     * Getter for <code>public.member.status</code>.
+     */
     public MemberStatus getStatus() {
         return this.status;
     }

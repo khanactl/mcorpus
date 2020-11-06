@@ -16,6 +16,7 @@ import org.jooq.Field;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.Internal;
+import org.jooq.impl.SQLDataType;
 
 
 /**
@@ -24,7 +25,7 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
 
-    private static final long serialVersionUID = -246086883;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The parameter <code>public.mcuser_refresh_login.RETURN_VALUE</code>.
@@ -34,7 +35,7 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.mcuser_refresh_login.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.mcuser_refresh_login.in_request_origin</code>.
@@ -44,17 +45,17 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.mcuser_refresh_login.in_login_expiration</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
 
     /**
      * The parameter <code>public.mcuser_refresh_login.in_old_jwt_id</code>.
      */
-    public static final Parameter<UUID> IN_OLD_JWT_ID = Internal.createParameter("in_old_jwt_id", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> IN_OLD_JWT_ID = Internal.createParameter("in_old_jwt_id", SQLDataType.UUID, false, false);
 
     /**
      * The parameter <code>public.mcuser_refresh_login.in_new_jwt_id</code>.
      */
-    public static final Parameter<UUID> IN_NEW_JWT_ID = Internal.createParameter("in_new_jwt_id", org.jooq.impl.SQLDataType.UUID, false, false);
+    public static final Parameter<UUID> IN_NEW_JWT_ID = Internal.createParameter("in_new_jwt_id", SQLDataType.UUID, false, false);
 
     /**
      * Create a new routine call instance

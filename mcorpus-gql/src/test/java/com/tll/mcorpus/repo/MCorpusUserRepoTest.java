@@ -2,7 +2,6 @@ package com.tll.mcorpus.repo;
 
 import static com.tll.core.Util.isNotNullOrEmpty;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
-import static com.tll.mcorpus.MCorpusTestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcwebTest;
 import static com.tll.mcorpus.MCorpusTestUtil.testRequestOrigin;
@@ -62,9 +61,6 @@ public class MCorpusUserRepoTest {
           testDslMcwebTest().delete(MCUSER).where(MCUSER.USERNAME.eq(TEST_MCUSER_USERNAME)).execute());
     } catch (Exception e) {
       log.error(e.getMessage());
-    } finally {
-      if (isTestDslMcwebTestLoaded())
-        testDslMcwebTest().close();
     }
   }
 
@@ -124,9 +120,6 @@ public class MCorpusUserRepoTest {
       log.error(e.getMessage());
       throw e;
     }
-    finally {
-      if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
-    }
   }
 
   static void deleteTestMcuser(final UUID uid) {
@@ -137,9 +130,6 @@ public class MCorpusUserRepoTest {
     }
     catch(Exception e) {
       log.error(e.getMessage());
-    }
-    finally {
-      if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
     }
   }
 
@@ -280,7 +270,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -310,9 +299,6 @@ public class MCorpusUserRepoTest {
       log.error(e.getMessage());
       fail(e.getMessage());
     }
-    finally {
-      if(repo != null) repo.close();
-    }
   }
 
   /**
@@ -341,9 +327,6 @@ public class MCorpusUserRepoTest {
       log.error(e.getMessage());
       fail(e.getMessage());
     }
-    finally {
-      if(repo != null) repo.close();
-    }
   }
 
   @Test
@@ -364,9 +347,6 @@ public class MCorpusUserRepoTest {
     catch(Exception e) {
       log.error(e.getMessage());
       fail(e.getMessage());
-    }
-    finally {
-      if(repo != null) repo.close();
     }
   }
 
@@ -402,7 +382,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -439,7 +418,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -470,7 +448,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -499,7 +476,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -538,7 +514,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -563,7 +538,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -588,7 +562,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -617,7 +590,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -649,7 +621,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }
@@ -682,7 +653,6 @@ public class MCorpusUserRepoTest {
     finally {
       if(repo != null) {
         if(uid != null) deleteTestMcuser(uid);
-        repo.close();
       }
     }
   }

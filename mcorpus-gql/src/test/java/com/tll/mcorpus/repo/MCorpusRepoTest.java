@@ -3,7 +3,6 @@ package com.tll.mcorpus.repo;
 
 import static com.tll.TestUtil.toLocalDate;
 import static com.tll.mcorpus.MCorpusTestUtil.ds_mcweb;
-import static com.tll.mcorpus.MCorpusTestUtil.isTestDslMcwebTestLoaded;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcweb;
 import static com.tll.mcorpus.MCorpusTestUtil.testDslMcwebTest;
 import static com.tll.mcorpus.MCorpusTestUtil.testRequestOrigin;
@@ -326,9 +325,6 @@ public class MCorpusRepoTest {
     catch(Exception e) {
       log.error(e.getMessage());
     }
-    finally {
-      if(isTestDslMcwebTestLoaded()) testDslMcwebTest().close();
-    }
   }
 
   static MCorpusRepo mcorpusRepo() { return new MCorpusRepo(ds_mcweb()); }
@@ -359,7 +355,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         if(mid != null) deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -388,7 +383,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -414,7 +408,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -440,7 +433,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -471,7 +463,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -499,7 +490,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -531,7 +521,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid); // NOTE: maddress are cascade deleted
-        repo.close();
       }
     }
   }
@@ -565,7 +554,6 @@ public class MCorpusRepoTest {
         if(mid != null) {
           deleteTestMember(mid);
         }
-        repo.close();
       }
     }
   }
@@ -600,7 +588,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -624,7 +611,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -648,7 +634,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         if(mid != null) deleteTestMember(mid);
-        repo.close();
       }
     }
   }
@@ -677,7 +662,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid); // NOTE: maddress records are cascade deleted
-        repo.close();
       }
     }
   }
@@ -705,7 +689,6 @@ public class MCorpusRepoTest {
     finally {
       if(repo != null) {
         deleteTestMember(mid); // NOTE: maddress records are cascade deleted
-        repo.close();
       }
     }
   }
@@ -731,7 +714,6 @@ public class MCorpusRepoTest {
     } finally {
       if (repo != null) {
         deleteTestMember(mid); // NOTE: maddress records are cascade deleted
-        repo.close();
       }
     }
   }
@@ -754,11 +736,6 @@ public class MCorpusRepoTest {
     catch(Exception e) {
       log.error(e.getMessage());
       fail(e.getMessage());
-    }
-    finally {
-      if(repo != null) {
-        repo.close();
-      }
     }
   }
 

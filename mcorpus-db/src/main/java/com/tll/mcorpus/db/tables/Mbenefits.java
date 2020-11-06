@@ -25,6 +25,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 
@@ -34,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mbenefits extends TableImpl<MbenefitsRecord> {
 
-    private static final long serialVersionUID = -1312347104;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The reference instance of <code>public.mbenefits</code>
@@ -52,22 +53,22 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     /**
      * The column <code>public.mbenefits.mid</code>.
      */
-    public final TableField<MbenefitsRecord, UUID> MID = createField(DSL.name("mid"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<MbenefitsRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.mbenefits.modified</code>.
      */
-    public final TableField<MbenefitsRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<MbenefitsRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.mbenefits.foreign_adrs_flag</code>.
      */
-    public final TableField<MbenefitsRecord, String> FOREIGN_ADRS_FLAG = createField(DSL.name("foreign_adrs_flag"), org.jooq.impl.SQLDataType.CHAR(1), this, "");
+    public final TableField<MbenefitsRecord, String> FOREIGN_ADRS_FLAG = createField(DSL.name("foreign_adrs_flag"), SQLDataType.CHAR(1), this, "");
 
     /**
      * The column <code>public.mbenefits.beli</code>.
      */
-    public final TableField<MbenefitsRecord, Beli> BELI = createField(DSL.name("beli"), org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Beli.class), this, "");
+    public final TableField<MbenefitsRecord, Beli> BELI = createField(DSL.name("beli"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Beli.class), this, "");
 
     /**
      * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
@@ -78,48 +79,49 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     /**
      * The column <code>public.mbenefits.med_plan_code</code>.
      */
-    public final TableField<MbenefitsRecord, String> MED_PLAN_CODE = createField(DSL.name("med_plan_code"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> MED_PLAN_CODE = createField(DSL.name("med_plan_code"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.med_opt_out</code>.
      */
-    public final TableField<MbenefitsRecord, String> MED_OPT_OUT = createField(DSL.name("med_opt_out"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> MED_OPT_OUT = createField(DSL.name("med_opt_out"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.den_plan_code</code>.
      */
-    public final TableField<MbenefitsRecord, String> DEN_PLAN_CODE = createField(DSL.name("den_plan_code"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> DEN_PLAN_CODE = createField(DSL.name("den_plan_code"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.den_opt_out</code>.
      */
-    public final TableField<MbenefitsRecord, String> DEN_OPT_OUT = createField(DSL.name("den_opt_out"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> DEN_OPT_OUT = createField(DSL.name("den_opt_out"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.vis_plan_code</code>.
      */
-    public final TableField<MbenefitsRecord, String> VIS_PLAN_CODE = createField(DSL.name("vis_plan_code"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> VIS_PLAN_CODE = createField(DSL.name("vis_plan_code"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.vis_opt_out</code>.
      */
-    public final TableField<MbenefitsRecord, String> VIS_OPT_OUT = createField(DSL.name("vis_opt_out"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> VIS_OPT_OUT = createField(DSL.name("vis_opt_out"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.leg_plan_code</code>.
      */
-    public final TableField<MbenefitsRecord, String> LEG_PLAN_CODE = createField(DSL.name("leg_plan_code"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> LEG_PLAN_CODE = createField(DSL.name("leg_plan_code"), SQLDataType.CHAR(2), this, "");
 
     /**
      * The column <code>public.mbenefits.leg_opt_out</code>.
      */
-    public final TableField<MbenefitsRecord, String> LEG_OPT_OUT = createField(DSL.name("leg_opt_out"), org.jooq.impl.SQLDataType.CHAR(2), this, "");
+    public final TableField<MbenefitsRecord, String> LEG_OPT_OUT = createField(DSL.name("leg_opt_out"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * Create a <code>public.mbenefits</code> table reference
-     */
-    public Mbenefits() {
-        this(DSL.name("mbenefits"), null);
+    private Mbenefits(Name alias, Table<MbenefitsRecord> aliased) {
+        this(alias, aliased, null);
+    }
+
+    private Mbenefits(Name alias, Table<MbenefitsRecord> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
     }
 
     /**
@@ -136,12 +138,11 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
         this(alias, MBENEFITS);
     }
 
-    private Mbenefits(Name alias, Table<MbenefitsRecord> aliased) {
-        this(alias, aliased, null);
-    }
-
-    private Mbenefits(Name alias, Table<MbenefitsRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    /**
+     * Create a <code>public.mbenefits</code> table reference
+     */
+    public Mbenefits() {
+        this(DSL.name("mbenefits"), null);
     }
 
     public <O extends Record> Mbenefits(Table<O> child, ForeignKey<O, MbenefitsRecord> key) {
