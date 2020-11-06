@@ -309,9 +309,13 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @return Newly created, never-null {@link JwtLoginResponse}
    */
   public JwtLoginResponse jwtRefresh() {
-    // verify the JWT is present but expired and the refresh token is present and not expired
+    // verify the JWT is present but expired
     if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
-      return new JwtLoginResponse("Login refresh failed: Invalid JWT request state.");
+      return new JwtLoginResponse("Login refresh failed: Invalid JWT status.");
+    }
+    // verify the refresh token is present, non-expired and valid
+    if(not(jwtRequestStatus.isRefreshTokenValid())) {
+      return new JwtLoginResponse("Login refresh failed: Invalid or expired refresh token.");
     }
 
     final UUID pendingJwtID = UUID.randomUUID();
@@ -331,7 +335,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
     );
     if(not(loginResult.isSuccess())) {
       log.error("JWT login refresh failed (emsg: {}).", loginResult.getErrorMsg());
-      return new JwtLoginResponse("Login refresh failed: Invalid JWT request state.");
+      return new JwtLoginResponse("Login refresh failed: Backend login refresh failed.");
     }
     final IJwtUser jwtUser = loginResult.get();
 

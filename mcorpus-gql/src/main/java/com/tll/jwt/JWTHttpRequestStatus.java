@@ -219,6 +219,11 @@ public class JWTHttpRequestStatus {
   }
 
   /**
+   * @return true when the refresh token is valid in the associated http request.
+   */
+  public boolean isRefreshTokenValid() { return refreshTokenStatus.isValid(); }
+
+  /**
    * @return the bound jwt id claim.
    */
   public UUID jwtId() { return jwtId; }
