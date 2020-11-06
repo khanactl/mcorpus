@@ -156,7 +156,7 @@ public class JWTUserGraphQLWebContext extends GraphQLWebContext {
    * @return true when the GraphQL query is for JWT user login *refresh*, false otherwise.
    */
   public boolean isJwtUserLoginRefreshQuery() {
-    return isMutation() && jwtUserLoginQueryMethodName.equals(getFirstMethodName());
+    return isMutation() && jwtUserLoginRefreshQueryMethodName.equals(getFirstMethodName());
   }
 
   /**

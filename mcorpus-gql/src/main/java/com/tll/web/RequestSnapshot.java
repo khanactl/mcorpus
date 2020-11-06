@@ -278,7 +278,7 @@ public class RequestSnapshot {
         "x-forwarded-proto: %s, " +
         "rstCookie: %s, "+
         "rstHeader: %s, " +
-        "authHeader: %s" +
+        "authHeader: %s, " +
         "jwtCookieRefreshTokenLen: %d",
       getShortRequestId(),
       getPath(),
