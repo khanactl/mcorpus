@@ -62,7 +62,7 @@ public class MCorpusWebModule extends AbstractModule {
     return new CsrfGuardHandler(
       config.rstTokenName,
       config.rstRegExRequestPaths,
-      config.rstTtlInSeconds,
+      Duration.ofMinutes(config.rstTtlInMinutes).toSeconds(),
       config.cookieSecure
     );
   }

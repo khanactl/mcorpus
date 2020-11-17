@@ -23,11 +23,11 @@ public class MCorpusServerConfig {
   public String rstTokenName = "rst";
 
   /**
-   * The Request Sync Token time to live in seconds on the client browser.
+   * The Request Sync Token time to live in minutes on the client browser.
    * <p>
-   * Default is 30 minutes (1800 seconds).
+   * Default is 30 minutes.
    */
-  public long rstTtlInSeconds = 1800L;
+  public long rstTtlInMinutes = 30L;
 
   /**
    * RegEx that identifies the http request paths subject to RST server handling.
