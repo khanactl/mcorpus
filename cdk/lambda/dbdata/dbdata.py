@@ -3,7 +3,6 @@ def main(event, context):
   import boto3
   import psycopg2
   from botocore.exceptions import ClientError
-  import secrets
   import json
   from urllib.parse import unquote_plus
   from zipfile import ZipFile
@@ -11,9 +10,9 @@ def main(event, context):
 
   log.getLogger().setLevel(log.INFO)
 
-  physical_id = 'mcorpus-db-data-ingest'
+  # physical_id = 'mcorpus-db-data-ingest'
   region_name = 'us-west-2'
-  
+
   response_obj = {}
 
   try:
@@ -26,16 +25,16 @@ def main(event, context):
     record = event['Records'][0]
     bucket = record['s3']['bucket']['name']
     key = unquote_plus(record['s3']['object']['key'])
-    
+
     mdata_zip_path = '/tmp/mdata.zip'
-    
+
     # download
     s3_client.download_file(bucket, key, mdata_zip_path)
 
     member_csv = '/tmp/member.csv'
     mauth_csv = '/tmp/mauth.csv'
     maddress_csv = '/tmp/maddress.csv'
-    
+
     session = boto3.session.Session()
 
     secrets_client = session.client(
@@ -51,6 +50,7 @@ def main(event, context):
     except ClientError as e:
       log.error(e)
       response_obj['status'] = "ERROR (DB CRED)"
+      response_obj['error_msg'] = str(e)
       return response_obj
     else:
       secret = json.loads(get_secret_value_response['SecretString'])
@@ -60,20 +60,23 @@ def main(event, context):
       db_masteruser = secret['username']
       db_masterpswd = secret['password']
       log.info("db: {dbHost}:{dbPort}/{dbName} ({dbMasterUser})".format(
-        dbHost = db_host, 
-        dbPort = db_port, 
-        dbName = db_name, 
+        dbHost = db_host,
+        dbPort = db_port,
+        dbName = db_name,
         dbMasterUser = db_masteruser
       ))
+
+      cursor = 0
+      conn = 0
 
       try:
         # db connect
         conn = psycopg2.connect(
-          host = db_host, 
-          database = db_name, 
-          user = db_masteruser, 
+          host = db_host,
+          database = db_name,
+          user = db_masteruser,
           password = db_masterpswd
-        )          
+        )
         cursor = conn.cursor()
         log.info('db connected')
 
@@ -115,6 +118,7 @@ def main(event, context):
       except Exception as e:
         log.error(e)
         response_obj['status'] = "ERROR (DB)"
+        response_obj['error_msg'] = str(e)
         return response_obj
       finally:
         if(cursor):
@@ -130,4 +134,5 @@ def main(event, context):
   except Exception as e:
     log.exception(e)
     response_obj['status'] = "ERROR"
+    response_obj['error_msg'] = str(e)
     return response_obj

@@ -6,7 +6,7 @@ import { IDatabaseInstance } from '@aws-cdk/aws-rds';
 import { Topic } from '@aws-cdk/aws-sns';
 import { EmailSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { CfnOutput, Construct } from '@aws-cdk/core';
-import { BaseStack, iname, IStackProps } from './cdk-native';
+import { BaseStack, ename, iname, IStackProps } from './cdk-native';
 
 export interface IMetricsStackProps extends IStackProps {
   readonly dbInstanceRef: IDatabaseInstance;
@@ -35,8 +35,8 @@ export class MetricsStack extends BaseStack {
 
   public readonly dashboard: Dashboard;
 
-  constructor(scope: Construct, id: string, props: IMetricsStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IMetricsStackProps) {
+    super(scope, 'metrics', props);
 
     // *** metrics ***
     // db
@@ -66,7 +66,7 @@ export class MetricsStack extends BaseStack {
     this.dbCpuAlarmTopic = new Topic(this, dbCpuAlarmTopicName, {
       topicName: dbCpuAlarmTopicName,
     });
-    const alarmDbHighCpuName = iname('db-high-cpu', props, false);
+    const alarmDbHighCpuName = ename('db-high-cpu', props.appEnv);
     this.dbCpuAlarm = new Alarm(this, alarmDbHighCpuName, {
       metric: metricDbCpuUtilization,
       threshold: 90,
@@ -80,7 +80,7 @@ export class MetricsStack extends BaseStack {
     this.dbFresStorageSpaceAlarmTopic = new Topic(this, dbFreeStoreageSpaceAlarmTopicName, {
       topicName: dbFreeStoreageSpaceAlarmTopicName,
     });
-    const alarmDbFreeStorageSpaceName = iname('db-low-disk-space', props, false);
+    const alarmDbFreeStorageSpaceName = ename('db-low-disk-space', props.appEnv);
     this.dbFreeStorageSpaceAlarm = new Alarm(this, alarmDbFreeStorageSpaceName, {
       metric: metricDbFreeStorageSpace,
       comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -95,7 +95,7 @@ export class MetricsStack extends BaseStack {
     this.ecsCpuAlarmTopic = new Topic(this, ecsCpuAlarmTopicName, {
       topicName: ecsCpuAlarmTopicName,
     });
-    const alarmEcsCpuName = iname('ecs-high-cpu', props, false);
+    const alarmEcsCpuName = ename('ecs-high-cpu', props.appEnv);
     this.ecsCpuAlarm = new Alarm(this, alarmEcsCpuName, {
       metric: metricEcsCpu,
       threshold: 90,
@@ -109,7 +109,7 @@ export class MetricsStack extends BaseStack {
     this.ecsMemoryAlarmTopic = new Topic(this, ecsMemoryAlarmTopicName, {
       topicName: ecsMemoryAlarmTopicName,
     });
-    const alarmEcsMemoryName = iname('ecs-high-memory', props, false);
+    const alarmEcsMemoryName = ename('ecs-high-memory', props.appEnv);
     this.ecsMemoryAlarm = new Alarm(this, alarmEcsMemoryName, {
       metric: metricEcsMemory,
       threshold: 90,

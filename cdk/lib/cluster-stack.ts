@@ -13,8 +13,8 @@ export interface IClusterStackProps extends IStackProps {
 export class ClusterStack extends BaseStack {
   public readonly cluster: Cluster;
 
-  constructor(scope: Construct, id: string, props: IClusterStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IClusterStackProps) {
+    super(scope, 'cluster', props);
 
     this.cluster = new Cluster(this, 'FargateCluster', {
       vpc: props.vpc,

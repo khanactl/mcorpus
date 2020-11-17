@@ -2,6 +2,7 @@ import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
 import { PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import { S3EventSource } from '@aws-cdk/aws-lambda-event-sources';
+import { RetentionDays } from '@aws-cdk/aws-logs';
 import { BlockPublicAccess, Bucket, BucketEncryption, EventType } from '@aws-cdk/aws-s3';
 import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
 import { join as pjoin } from 'path';
@@ -36,8 +37,8 @@ export class DbDataStack extends BaseStack {
 
   // public readonly s3KmsKey: IKey;
 
-  constructor(scope: Construct, id: string, props: IDbDataProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IDbDataProps) {
+    super(scope, 'db-data', props);
 
     // const s3KmsKey: IKey = kms.Key.fromKeyArn(this, 's3-kms-key', props.s3KmsEncKeyArn);
 
@@ -95,7 +96,7 @@ export class DbDataStack extends BaseStack {
         pjoin(__dirname, '../lambda/dbdata') // dir ref
       ),
       handler: 'dbdata.main',
-      runtime: Runtime.PYTHON_3_7,
+      runtime: Runtime.PYTHON_3_8,
       // functionName: 'db-data',
       memorySize: 512,
       timeout: Duration.seconds(3 * 60),
@@ -103,6 +104,7 @@ export class DbDataStack extends BaseStack {
       environment: {
         DbJsonSecretArn: props.dbJsonSecretArn,
       },
+      logRetention: RetentionDays.ONE_WEEK,
     });
 
     // s3 object created event

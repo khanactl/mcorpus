@@ -63,8 +63,8 @@ export class DbStack extends BaseStack {
    */
   public readonly dbInstance: DatabaseInstance;
 
-  constructor(scope: Construct, id: string, props: IDbProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IDbProps) {
+    super(scope, 'db', props);
 
     // db security group
     const sgDbInstNme = iname('db-sec-grp', props);

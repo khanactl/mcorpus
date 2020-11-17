@@ -1,4 +1,5 @@
 import { ISecurityGroup, IVpc, Port, SubnetType } from '@aws-cdk/aws-ec2';
+import { Repository } from '@aws-cdk/aws-ecr';
 import {
   AssetImage,
   AwsLogDriver,
@@ -7,20 +8,20 @@ import {
   FargatePlatformVersion,
   FargateService,
   FargateTaskDefinition,
-  Secret,
+  Secret
 } from '@aws-cdk/aws-ecs';
 import {
   ApplicationListener,
   ApplicationProtocol,
   ApplicationTargetGroup,
-  Protocol,
+  Protocol
 } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { IParameter, IStringParameter, StringParameter } from '@aws-cdk/aws-ssm';
 import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
-import { BaseStack, iname, IStackProps } from './cdk-native';
+import { BaseStack, ename, iname, IStackProps } from './cdk-native';
 import path = require('path');
 
 /**
@@ -35,6 +36,7 @@ export interface IAppStackProps extends IStackProps {
   readonly cluster: Cluster;
 
   readonly appImage?: ContainerImage;
+  // readonly ecrRepoName: string;
 
   readonly lbListener: ApplicationListener;
 
@@ -87,6 +89,19 @@ export interface IAppStackProps extends IStackProps {
    * The JAVA_OPTS docker container env var value to use.
    */
   readonly javaOpts: string;
+
+  readonly devFlag: boolean;
+  readonly publicAddress: string;
+  readonly dbDataSourceClassName: string;
+  readonly rstTtlInMinutes: number;
+  readonly jwtTtlInMinutes: number;
+  readonly jwtRefreshTokenTtlInMinutes: number;
+  readonly jwtStatusTimeoutInMinutes: number,
+  readonly jwtStatusCacheMaxSize: number,
+  readonly metricsOn: boolean,
+  readonly graphiql: boolean,
+  readonly cookieSecure: boolean,
+  readonly httpClientOrigin: string,
 }
 
 /**
@@ -108,8 +123,8 @@ export class AppStack extends BaseStack {
 
   public readonly albTargetGroup: ApplicationTargetGroup;
 
-  constructor(scope: Construct, id: string, props: IAppStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IAppStackProps) {
+    super(scope, 'app', props);
 
     // generate JWT salt ssm param
     const rhs = randomBytes(32).toString('hex');
@@ -140,6 +155,12 @@ export class AppStack extends BaseStack {
     });
 
     const appImage = props.appImage || new AssetImage(path.join(__dirname, '../mcorpus-gql/target/awsdockerasset'));
+    /*
+    const ecrName = iname('ecr', props);
+    const repository = Repository.fromRepositoryName(this, ecrName, props.ecrRepoName);
+    const imageTag = process.env.CODEBUILD_RESOLVED_SOURCE_VERSION || ename('docker-image', props.appEnv);
+    const appImage = ContainerImage.fromEcrRepository(repository, imageTag);
+    */
 
     this.containerName = iname('gql', props);
     const containerDef = taskDef.addContainer(this.containerName, {
@@ -156,21 +177,21 @@ export class AppStack extends BaseStack {
       essential: true,
       environment: {
         JAVA_OPTS: props.javaOpts,
-        MCORPUS_COOKIE_SECURE: 'true',
-        MCORPUS_DB_DATA_SOURCE_CLASS_NAME: 'org.postgresql.ds.PGSimpleDataSource',
-        MCORPUS_RST_TTL_IN_SECONDS: '1800',
+        MCORPUS_COOKIE_SECURE: String(props.cookieSecure),
+        MCORPUS_DB_DATA_SOURCE_CLASS_NAME: props.dbDataSourceClassName,
+        MCORPUS_RST_TTL_IN_MINUTES: String(props.jwtRefreshTokenTtlInMinutes),
 
-        MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: '5',
-        MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES: '5',
+        MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: String(props.jwtStatusCacheMaxSize),
+        MCORPUS_JWT_STATUS_CACHE_TIMEOUT_IN_MINUTES: String(props.jwtStatusTimeoutInMinutes),
 
-        MCORPUS_JWT_TTL_IN_MINUTES: '5',
-        MCORPUS_JWT_REFRESH_TOKEN_TTL_IN_MINUTES: '20160',
+        MCORPUS_JWT_TTL_IN_MINUTES: String(props.jwtTtlInMinutes),
+        MCORPUS_JWT_REFRESH_TOKEN_TTL_IN_MINUTES: String(props.jwtRefreshTokenTtlInMinutes),
 
-        MCORPUS_METRICS_ON: 'true',
-        MCORPUS_GRAPHIQL: 'true',
-        MCORPUS_HTTP_CLIENT_ORIGIN: '',
+        MCORPUS_METRICS_ON: String(props.metricsOn),
+        MCORPUS_GRAPHIQL: String(props.graphiql),
+        MCORPUS_HTTP_CLIENT_ORIGIN: props.httpClientOrigin,
 
-        MCORPUS_SERVER__DEVELOPMENT: 'false',
+        MCORPUS_SERVER__DEVELOPMENT: String(props.devFlag),
         MCORPUS_SERVER__PORT: `${props.lbToEcsPort}`,
         MCORPUS_SERVER__PUBLIC_ADDRESS: props.webAppUrl,
       },

@@ -9,8 +9,8 @@ export interface IEcrStackProps extends IStackProps {
 export class EcrStack extends BaseStack {
   public readonly appRepository: Repository;
 
-  constructor(scope: Construct, id: string, props: IEcrStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IEcrStackProps) {
+    super(scope, 'ecr', props);
 
     this.appRepository = new Repository(this, 'AppEcrRepo', {
       repositoryName: props.ecrName,

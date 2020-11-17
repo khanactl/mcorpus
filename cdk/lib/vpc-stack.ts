@@ -1,6 +1,6 @@
 import { Vpc } from '@aws-cdk/aws-ec2';
 import { CfnOutput, Construct } from '@aws-cdk/core';
-import { BaseStack, IStackProps } from './cdk-native';
+import { BaseStack, IStackProps, iname } from './cdk-native';
 
 /**
  * VPC stack config properties.
@@ -16,10 +16,10 @@ export interface IVpcProps extends IStackProps {
 export class VpcStack extends BaseStack {
   public readonly vpc: Vpc;
 
-  constructor(scope: Construct, id: string, props: IVpcProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IVpcProps) {
+    super(scope, 'vpc', props);
 
-    this.vpc = new Vpc(this, 'VPC', {
+    this.vpc = new Vpc(this, iname('vpc', props), {
       maxAzs: props.maxAzs,
       // natGateways: 1,
       cidr: props.cidr,

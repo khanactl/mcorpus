@@ -95,8 +95,8 @@ export class DevPipelineStack extends BaseStack {
   public readonly dockerBuildFailureEventTopic?: Topic;
   public readonly cdkBuildFailureEventTopic?: Topic;
 
-  constructor(scope: Construct, id: string, props: IDevPipelineStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IDevPipelineStackProps) {
+    super(scope, 'pipeline', props);
 
     this.appBuiltImage = new PipelineContainerImage(props.appRepository);
 

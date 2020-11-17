@@ -26,8 +26,8 @@ export class SecGrpStack extends BaseStack {
 
   public readonly codebuildSecGrp: SecurityGroup;
 
-  constructor(scope: Construct, id: string, props: ISecGrpProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: ISecGrpProps) {
+    super(scope, 'secgrp', props);
 
     /* :( NO WORK - error - cyclic reference
     // db security group

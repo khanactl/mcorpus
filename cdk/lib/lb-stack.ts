@@ -43,8 +43,8 @@ export class LbStack extends BaseStack {
 
   public readonly webAcl: CfnWebACL;
 
-  constructor(scope: Construct, id: string, props: ILbStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: ILbStackProps) {
+    super(scope, 'lb', props);
 
     // ****************************
     // *** inline load balancer ***

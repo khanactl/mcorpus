@@ -2,8 +2,10 @@ import { CustomResource, CustomResourceProvider } from '@aws-cdk/aws-cloudformat
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
 import { PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { Code, Runtime, SingletonFunction } from '@aws-cdk/aws-lambda';
+import { RetentionDays } from '@aws-cdk/aws-logs';
 import { IStringParameter, StringParameter } from '@aws-cdk/aws-ssm';
 import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
+import { RemovalPolicy } from "@aws-cdk/core/lib/removal-policy";
 import { join as pjoin } from 'path';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 
@@ -50,8 +52,8 @@ export class DbBootstrapStack extends BaseStack {
   public readonly ssmJdbcUrl: IStringParameter;
   public readonly ssmJdbcTestUrl: IStringParameter;
 
-  constructor(scope: Construct, id: string, props: IDbBootstrapProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, props: IDbBootstrapProps) {
+    super(scope, 'db-bootstrap', props);
 
     // db dbootstrap role
     const dbBootstrapRoleInstNme = iname('db-bootstrap-role', props);
@@ -86,7 +88,7 @@ export class DbBootstrapStack extends BaseStack {
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       securityGroup: props.dbBootstrapSecGrp,
       uuid: 'f8dfc6d4-d864-4f4f-8d65-63c2ea54f2ac', // one-time globaly unique
-      runtime: Runtime.PYTHON_3_7,
+      runtime: Runtime.PYTHON_3_8,
       // functionName: 'DbBootstrapLambda',
       memorySize: 128,
       timeout: Duration.seconds(60),
@@ -95,6 +97,7 @@ export class DbBootstrapStack extends BaseStack {
       ),
       handler: 'dbbootstrap.main',
       role: this.dbBootstrapRole,
+      logRetention: RetentionDays.ONE_DAY,
     });
 
     const resourceInstNme = iname('db-bootstrap', props);
@@ -106,15 +109,16 @@ export class DbBootstrapStack extends BaseStack {
         SsmNameJdbcUrl: `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
         SsmNameJdbcTestUrl: `/mcorpusTestDbUrl/${props.appEnv}`,
       },
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    this.ssmNameJdbcUrl = resource.getAtt('SsmNameJdbcUrl').toString();
-    this.ssmVersionJdbcUrl = parseInt(resource.getAtt('SsmVersionJdbcUrl').toString());
+    this.ssmNameJdbcUrl = resource.getAttString('SsmNameJdbcUrl');
+    this.ssmVersionJdbcUrl = parseInt(resource.getAttString('SsmVersionJdbcUrl'));
 
-    this.ssmNameJdbcTestUrl = resource.getAtt('SsmNameJdbcTestUrl').toString();
-    this.ssmVersionJdbcTestUrl = parseInt(resource.getAtt('SsmVersionJdbcTestUrl').toString());
+    this.ssmNameJdbcTestUrl = resource.getAttString('SsmNameJdbcTestUrl');
+    this.ssmVersionJdbcTestUrl = parseInt(resource.getAttString('SsmVersionJdbcTestUrl'));
 
-    this.responseMessage = resource.getAtt('Message').toString();
+    this.responseMessage = resource.getAttString('Message');
 
     // obtain the just generated SSM jdbc url param refs
     const ssmJdbcUrlInstNme = iname('db-url', props);
