@@ -189,7 +189,6 @@ function appInstance(cdkAppConfig: ICdkAppConfig): void {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     ecsSecGrp: secGrpStack.ecsSecGrp,
     lbSecGrp: secGrpStack.lbSecGrp,
-    webAppUrl: cdkAppConfig.webAppContainerConfig.webappUrl,
     javaOpts: cdkAppConfig.appConfig.javaOpts,
     devFlag: cdkAppConfig.appConfig.devFlag,
     publicAddress: cdkAppConfig.appConfig.publicAddress,

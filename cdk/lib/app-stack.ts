@@ -81,11 +81,6 @@ export interface IAppStackProps extends IStackProps {
    */
   readonly ecsSecGrp: ISecurityGroup;
   /**
-   * The web app domain name URL used for server-issued http 302 redirects
-   * and cookie/jwt verifications.
-   */
-  readonly webAppUrl: string;
-  /**
    * The JAVA_OPTS docker container env var value to use.
    */
   readonly javaOpts: string;
@@ -193,7 +188,7 @@ export class AppStack extends BaseStack {
 
         MCORPUS_SERVER__DEVELOPMENT: String(props.devFlag),
         MCORPUS_SERVER__PORT: `${props.lbToEcsPort}`,
-        MCORPUS_SERVER__PUBLIC_ADDRESS: props.webAppUrl,
+        MCORPUS_SERVER__PUBLIC_ADDRESS: props.publicAddress,
       },
       secrets: {
         MCORPUS_DB_URL: Secret.fromSsmParameter(props.ssmJdbcUrl),

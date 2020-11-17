@@ -85,7 +85,6 @@ export interface IWebAppContainerConfig {
   readonly taskdefMemLimitInMb: number;
   readonly containerDefMemoryLimitInMb: number;
   readonly containerDefMemoryReservationInMb: number;
-  readonly webappUrl: string;
   readonly tlsCertArn: string;
   readonly dnsConfig: IDnsConfig;
 }
@@ -231,7 +230,6 @@ export function webappContainerConfig(appEnv: AppEnv, jsonAppConfig: any): IWebA
     taskdefMemLimitInMb: subobj.taskdefMemoryLimitInMb,
     containerDefMemoryLimitInMb: subobj.containerDefMemoryLimitInMb,
     containerDefMemoryReservationInMb: subobj.containerDefMemoryReservationInMb,
-    webappUrl: subobj.webAppUrl,
     tlsCertArn: subobj.tlsCertArn,
     dnsConfig: dnsConfig(appEnv, jsonAppConfig),
   };
