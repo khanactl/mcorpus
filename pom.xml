@@ -17,13 +17,13 @@
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-    <log4j2.version>2.13.3</log4j2.version>
+    <log4j2.version>2.14.0</log4j2.version>
     <slf4j-api.version>1.7.30</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
     <postgres-jdbc.version>42.2.18</postgres-jdbc.version>
 
-    <jooq.version>3.14.1</jooq.version>
+    <jooq.version>3.14.3</jooq.version>
     <hikari-cp.version>3.4.5</hikari-cp.version>
 
     <nimbus-jose-jwt.version>9.1.2</nimbus-jose-jwt.version>

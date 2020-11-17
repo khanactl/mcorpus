@@ -4,7 +4,7 @@ import {
   CloudFormationCreateUpdateStackAction,
   CodeBuildAction,
   GitHubSourceAction,
-  GitHubTrigger,
+  GitHubTrigger
 } from '@aws-cdk/aws-codepipeline-actions';
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
 import { IRepository } from '@aws-cdk/aws-ecr';

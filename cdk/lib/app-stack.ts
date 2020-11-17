@@ -1,5 +1,4 @@
 import { ISecurityGroup, IVpc, Port, SubnetType } from '@aws-cdk/aws-ec2';
-import { Repository } from '@aws-cdk/aws-ecr';
 import {
   AssetImage,
   AwsLogDriver,
@@ -21,7 +20,7 @@ import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { IParameter, IStringParameter, StringParameter } from '@aws-cdk/aws-ssm';
 import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
-import { BaseStack, ename, iname, IStackProps } from './cdk-native';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import path = require('path');
 
 /**
