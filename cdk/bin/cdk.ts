@@ -140,7 +140,7 @@ function appInstance(cdkAppConfig: ICdkAppConfig): void {
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
     appConfigCacheS3BucketName: cdkAppConfig.cdkAppConfigCacheS3BucketName,
     appConfigFilename: cdkAppConfig.cdkAppConfigFilename,
-    ssmImageTagParamName: cdkAppConfig.cicdConfig.ssmImageTagName,
+    ssmImageTagParamName: cdkAppConfig.cicdConfig.ssmImageTagParamName,
     githubOwner: cdkAppConfig.gitHubRepoRef.owner,
     githubRepo: cdkAppConfig.gitHubRepoRef.repo,
     githubOauthTokenSecretArn: cdkAppConfig.gitHubRepoRef.oauthTokenSecretArn,

@@ -93,7 +93,7 @@ export interface IWebAppContainerConfig {
 export interface ICicdConfig {
   readonly gitBranchName: string;
   readonly triggerOnCommit: boolean;
-  readonly ssmImageTagName: string;
+  readonly ssmImageTagParamName: string;
   readonly appDeployApprovalEmails: [string];
   readonly onBuildFailureEmails: [string];
 }
@@ -243,7 +243,7 @@ export function cicdConfig(appEnv: AppEnv, jsonAppConfig: any): ICicdConfig {
   return {
     gitBranchName: subobj.gitBranchName,
     triggerOnCommit: subobj.triggerOnCommit,
-    ssmImageTagName: subobj.ssmImageTagName!,
+    ssmImageTagParamName: subobj.ssmImageTagParamName,
     appDeployApprovalEmails: subobj.appDeployApprovalEmails,
     onBuildFailureEmails: subobj.onBuildFailureEmails,
   };
