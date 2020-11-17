@@ -195,7 +195,7 @@ export function dbConfig(appEnv: AppEnv, jsonAppConfig: any): IDbConfig {
 
 export function appConfig(appEnv: AppEnv, jsonAppConfig: any): IAppConfig {
   const key = `${appEnv.toLowerCase()}Config`;
-  const subobj = jsonAppConfig[key].dbConfig;
+  const subobj = jsonAppConfig[key].appConfig;
   return {
     javaOpts: subobj.javaOpts,
     devFlag: subobj.devFlag,
