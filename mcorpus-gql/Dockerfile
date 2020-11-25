@@ -1,4 +1,6 @@
-FROM openjdk:11.0.7-jre
+# FROM openjdk:11.0.7-jre
+ARG REPO_LOCATION=524006177124.dkr.ecr.us-west-2.amazonaws.com/mcorpus-gql
+FROM ${REPO_LOCATION}:amazoncorretto-11
 
 # RUN apk --no-cache add curl
 

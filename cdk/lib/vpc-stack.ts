@@ -2,6 +2,11 @@ import { Vpc } from '@aws-cdk/aws-ec2';
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, IStackProps, iname } from './cdk-native';
 
+export const VpcStackRootProps = {
+  rootStackName: 'vpc',
+  description: 'The required VPC',
+};
+
 /**
  * VPC stack config properties.
  */
@@ -17,7 +22,9 @@ export class VpcStack extends BaseStack {
   public readonly vpc: Vpc;
 
   constructor(scope: Construct, props: IVpcProps) {
-    super(scope, 'vpc', props);
+    super(scope, VpcStackRootProps.rootStackName, {
+      ...props,  ...{ description: VpcStackRootProps.description }
+    });
 
     this.vpc = new Vpc(this, iname('vpc', props), {
       maxAzs: props.maxAzs,

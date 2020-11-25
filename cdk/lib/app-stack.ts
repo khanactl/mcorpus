@@ -1,4 +1,5 @@
 import { ISecurityGroup, IVpc, Port, SubnetType } from '@aws-cdk/aws-ec2';
+import { Repository } from '@aws-cdk/aws-ecr';
 import {
   AssetImage,
   AwsLogDriver,
@@ -22,6 +23,11 @@ import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
 import { randomBytes } from 'crypto';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 import path = require('path');
+
+export const AppStackRootProps = {
+  rootStackName: 'app',
+  description: 'The web app docker container stack that runs in ECS.',
+};
 
 /**
  * AppStack config properties.
@@ -118,7 +124,9 @@ export class AppStack extends BaseStack {
   public readonly albTargetGroup: ApplicationTargetGroup;
 
   constructor(scope: Construct, props: IAppStackProps) {
-    super(scope, 'app', props);
+    super(scope, AppStackRootProps.rootStackName, {
+      ...props, ...{ description: AppStackRootProps.description }
+    });
 
     // generate JWT salt ssm param
     const rhs = randomBytes(32).toString('hex');
@@ -150,9 +158,8 @@ export class AppStack extends BaseStack {
 
     const appImage = props.appImage || new AssetImage(path.join(__dirname, '../mcorpus-gql/target/awsdockerasset'));
     /*
-    const ecrName = iname('ecr', props);
-    const repository = Repository.fromRepositoryName(this, ecrName, props.ecrRepoName);
-    const imageTag = process.env.CODEBUILD_RESOLVED_SOURCE_VERSION || ename('docker-image', props.appEnv);
+    const repository = Repository.fromRepositoryName(this, iname('ecr', props), props.ecrRepoName);
+    const imageTag = process.env.CODEBUILD_RESOLVED_SOURCE_VERSION;
     const appImage = ContainerImage.fromEcrRepository(repository, imageTag);
     */
 

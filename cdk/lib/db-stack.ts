@@ -13,6 +13,11 @@ import { ISecret } from '@aws-cdk/aws-secretsmanager';
 import { Aspects, CfnOutput, Construct, Duration, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 
+export const DbStackRootProps = {
+  rootStackName: 'db',
+  description: 'Creates the app database instance in RDS.',
+};
+
 /**
  * Db Stack config properties.
  */
@@ -64,7 +69,9 @@ export class DbStack extends BaseStack {
   public readonly dbInstance: DatabaseInstance;
 
   constructor(scope: Construct, props: IDbProps) {
-    super(scope, 'db', props);
+    super(scope, DbStackRootProps.rootStackName, {
+      ...props, ...{ description: DbStackRootProps.description }
+    });
 
     // db security group
     const sgDbInstNme = iname('db-sec-grp', props);

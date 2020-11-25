@@ -7,18 +7,26 @@ import {
   GitHubTrigger
 } from '@aws-cdk/aws-codepipeline-actions';
 import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
-import { IRepository } from '@aws-cdk/aws-ecr';
+import { Repository } from '@aws-cdk/aws-ecr';
 import { SnsTopic } from '@aws-cdk/aws-events-targets';
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { Topic } from '@aws-cdk/aws-sns';
 import { EmailSubscription } from '@aws-cdk/aws-sns-subscriptions';
-import { IStringParameter } from '@aws-cdk/aws-ssm';
+import { IStringParameter } from "@aws-cdk/aws-ssm";
 import { CfnOutput, Construct, SecretValue } from '@aws-cdk/core';
-import { BaseStack, iname, IStackProps } from './cdk-native';
+import { BaseStack, ICdkAppConfig, iname, IStackProps } from './cdk-native';
 import { PipelineContainerImage } from './pipeline-container-image';
 
+export const DevPipelineStackRootProps = {
+  rootStackName: 'pipeline',
+  description: 'The DEV CICD pipeline stack.',
+};
+
 export interface IDevPipelineStackProps extends IStackProps {
-  readonly appRepository: IRepository;
+  /**
+   * The name of the pre-existing ECR repo to which built app docker images are pushed.
+   */
+  readonly ecrRepoName: string;
   /**
    * The VPC ref
    */
@@ -96,9 +104,10 @@ export class DevPipelineStack extends BaseStack {
   public readonly cdkBuildFailureEventTopic?: Topic;
 
   constructor(scope: Construct, props: IDevPipelineStackProps) {
-    super(scope, 'pipeline', props);
+    super(scope, DevPipelineStackRootProps.rootStackName, props);
 
-    this.appBuiltImage = new PipelineContainerImage(props.appRepository);
+    const ecrRepo = Repository.fromRepositoryName(this, iname('ecr', props), props.ecrRepoName);
+    this.appBuiltImage = new PipelineContainerImage(ecrRepo);
 
     // source (github)
     const sourceOutput = new Artifact();
@@ -123,7 +132,7 @@ export class DevPipelineStack extends BaseStack {
       environment: {
         computeType: ComputeType.SMALL,
         privileged: true, // for Docker to run
-        buildImage: LinuxBuildImage.STANDARD_2_0,
+        buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
       },
       securityGroups: [props.codebuildSecGrp],
       subnetSelection: { subnetType: SubnetType.PRIVATE },
@@ -131,7 +140,7 @@ export class DevPipelineStack extends BaseStack {
         version: '0.2',
         env: {
           variables: {
-            REPOSITORY_URI: props.appRepository.repositoryUri,
+            REPOSITORY_URI: ecrRepo.repositoryUri,
           },
           'parameter-store': {
             MCORPUS_DB_URL: props.ssmJdbcUrl.parameterName,
@@ -141,49 +150,56 @@ export class DevPipelineStack extends BaseStack {
         phases: {
           install: {
             'runtime-versions': {
-              java: 'openjdk11',
+              java: 'corretto11',
               docker: 18,
             },
             commands: ['pip install --upgrade awscli'],
           },
           pre_build: {
             commands: [
-              // '$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)',
               'echo Test started on `date`',
               'aws --version',
               'docker --version',
               'mvn --version',
 
               'echo $(env)', // output the env vars
-
-              'mvn clean test',
+              // 'echo $AWS_DEFAULT_REGION',
 
               'echo Logging in to Amazon ECR...',
-              'echo $AWS_DEFAULT_REGION',
               '$(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)',
-              'COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)',
+
+              'echo Running Maven test...',
+              'mvn clean test',
+
+              // 'COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)',
+              'COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION)',
               "APP_VERSION=$(cat mcorpus-gql/target/classes/app.properties | grep app.version | cut -d'=' -f2)",
               "BUILD_TIMESTAMP=$(cat mcorpus-gql/target/classes/app.properties | grep build.timestamp | cut -d'=' -f2)",
               "BUILD_TIMESTAMP_DIGITS=$(echo $BUILD_TIMESTAMP | sed 's/[^0-9]//g')",
-              'BUILD_VERSION_TAG=${APP_VERSION}.${BUILD_TIMESTAMP_DIGITS}',
+              // 'BUILD_VERSION_TAG=${APP_VERSION}.${BUILD_TIMESTAMP_DIGITS}',
+              'BUILD_VERSION_TAG=${APP_VERSION}',
+
+              'docker pull $REPOSITORY_URI:$BUILD_VERSION_TAG || true',
             ],
           },
           build: {
             commands: [
               'echo Build started on `date`',
+
+              'echo Running Maven package...',
               'mvn -DskipTests package',
 
               'echo Building the Docker image...',
               'cd mcorpus-gql/target/awsdockerasset',
-              'docker build -t $REPOSITORY_URI:$COMMIT_HASH .',
-              'docker tag $REPOSITORY_URI:$COMMIT_HASH $REPOSITORY_URI:$BUILD_VERSION_TAG',
+              'docker build --cache-from $REPOSITORY_URI:$BUILD_VERSION_TAG -t $REPOSITORY_URI:$BUILD_VERSION_TAG -t $REPOSITORY_URI:$COMMIT_HASH .',
+              // 'docker tag $REPOSITORY_URI:$COMMIT_HASH $REPOSITORY_URI:$BUILD_VERSION_TAG',
             ],
           },
           post_build: {
             commands: [
               'echo Pushing the Docker images...',
-              'docker push $REPOSITORY_URI:$COMMIT_HASH',
-              'docker push $REPOSITORY_URI:$BUILD_VERSION_TAG',
+              // 'docker push $REPOSITORY_URI:$COMMIT_HASH',
+              'docker push $REPOSITORY_URI',
               'echo Writing image detail file...',
               `printf '{ "imageTag": "'$COMMIT_HASH'" }' > imageTag.json`,
               `aws ssm put-parameter --name "${props.ssmImageTagParamName}" --value $COMMIT_HASH --type String --overwrite`,
@@ -210,7 +226,7 @@ export class DevPipelineStack extends BaseStack {
         actions: ['ssm:PutParameter'],
       })
     );
-    props.appRepository.grantPullPush(dockerBuild);
+    ecrRepo.grantPullPush(dockerBuild);
 
     // docker build failure email dispatch
     if (props.onBuildFailureEmails && props.onBuildFailureEmails.length > 0) {
@@ -233,7 +249,7 @@ export class DevPipelineStack extends BaseStack {
 
     const cdkBuild = new PipelineProject(this, 'CdkBuildProject', {
       environment: {
-        buildImage: LinuxBuildImage.STANDARD_2_0,
+        buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
         computeType: ComputeType.SMALL,
       },
       buildSpec: BuildSpec.fromObject({

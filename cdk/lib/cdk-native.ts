@@ -123,15 +123,15 @@ export interface ICdkAppConfig extends IAppNameAndEnv {
 /**
  * Convert a cdk json app config object to an app env specific ICdkAppConfig instance.
  *
+ * @param appEnv the app env to create
  * @param cdkAppConfigFilename
  * @param cdkAppConfigCacheS3BucketName
- * @param appEnv
- * @param jsonAppConfig
+ * @param jsonAppConfig the loaded json app config object
  */
 export function cdkAppConfig(
+  appEnv: AppEnv,
   cdkAppConfigFilename: string,
   cdkAppConfigCacheS3BucketName: string,
-  appEnv: AppEnv,
   jsonAppConfig: any
 ): ICdkAppConfig {
   return {

@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 import { App } from '@aws-cdk/core';
 import 'source-map-support/register';
-import { AppStack } from '../lib/app-stack';
+import { AppStack, AppStackRootProps } from '../lib/app-stack';
 import { AppEnv, cdkAppConfig, ICdkAppConfig, iname, loadConfig } from '../lib/cdk-native';
 import { ClusterStack } from '../lib/cluster-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbDataStack } from '../lib/db-data-stack';
 import { DbStack } from '../lib/db-stack';
 import { DevPipelineStack } from '../lib/dev-pipeline-stack';
-import { EcrStack } from '../lib/ecr-stack';
-import { LbStack } from '../lib/lb-stack';
-import { MetricsStack } from '../lib/metrics-stack';
+import { LbStack, LbStackRootProps } from '../lib/lb-stack';
+import { MetricsStack, MetricsStackRootProps } from '../lib/metrics-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
 import { VpcStack } from '../lib/vpc-stack';
 
@@ -35,38 +34,17 @@ const cdkAppConfigFilename = 'mcorpus-cdk-app-config.json';
  */
 const cdkAppConfigCacheS3BucketName = 'mcorpus-app-config';
 
-/**
- * Generate the cdk stacks.
- *
- * @param jsonConfig the loaded cdk app json config object
- */
-function generate(jsonConfig: any): void {
-  // *** DEV app instance ***
-  const configDev = cdkAppConfig(
+async function configTransform(jsonConfig: any): Promise<ICdkAppConfig> {
+  // DEV
+  return cdkAppConfig(
+    AppEnv.DEV,
     cdkAppConfigFilename,
     cdkAppConfigCacheS3BucketName,
-    AppEnv.DEV,
     jsonConfig
   );
-  appInstance(configDev);
-  // *** END DEV app instance ***
 }
 
-/**
- * Generate all app env specific cdk stacks.
- *
- * @param cdkAppConfig the app env specific configuration
- */
-function appInstance(cdkAppConfig: ICdkAppConfig): void {
-  // ECR (common)
-  const ecrStack = new EcrStack(app, {
-    appName: cdkAppConfig.appName,
-    appEnv: AppEnv.COMMON,
-    env: cdkAppConfig.ecrConfig, // provision for ECR-specific aws account and region
-    tags: cdkAppConfig.commonEnvStackTags,
-    ecrName: cdkAppConfig.ecrConfig.name,
-  });
-
+async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
   // VPC
   const vpcStack = new VpcStack(app, {
     appName: cdkAppConfig.appName,
@@ -131,12 +109,13 @@ function appInstance(cdkAppConfig: ICdkAppConfig): void {
   clusterStack.addDependency(secGrpStack);
 
   const devPipelineStack = new DevPipelineStack(app, {
+    ecrRepoName: cdkAppConfig.ecrConfig.name,
     appName: cdkAppConfig.appName,
     appEnv: cdkAppConfig.appEnv,
     env: cdkAppConfig.awsEnv,
     tags: cdkAppConfig.appEnvStackTags,
     vpc: vpcStack.vpc,
-    appRepository: ecrStack.appRepository,
+    // appRepository: ecrStack.appRepository,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
     appConfigCacheS3BucketName: cdkAppConfig.cdkAppConfigCacheS3BucketName,
     appConfigFilename: cdkAppConfig.cdkAppConfigFilename,
@@ -151,11 +130,11 @@ function appInstance(cdkAppConfig: ICdkAppConfig): void {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     appDeployApprovalEmails: cdkAppConfig.cicdConfig.appDeployApprovalEmails,
     onBuildFailureEmails: cdkAppConfig.cicdConfig.onBuildFailureEmails,
-    cdkDevLbStackName: iname('lb', cdkAppConfig),
-    cdkDevAppStackName: iname('app', cdkAppConfig),
-    cdkDevMetricsStackName: iname('metrics', cdkAppConfig),
+    cdkDevLbStackName: iname(LbStackRootProps.rootStackName, cdkAppConfig),
+    cdkDevAppStackName: iname(AppStackRootProps.rootStackName, cdkAppConfig),
+    cdkDevMetricsStackName: iname(MetricsStackRootProps.rootStackName, cdkAppConfig),
   });
-  devPipelineStack.addDependency(ecrStack);
+  // devPipelineStack.addDependency(ecrStack);
   devPipelineStack.addDependency(secGrpStack);
   devPipelineStack.addDependency(clusterStack);
 
@@ -178,6 +157,7 @@ function appInstance(cdkAppConfig: ICdkAppConfig): void {
     tags: cdkAppConfig.appEnvStackTags,
     vpc: vpcStack.vpc,
     cluster: clusterStack.cluster,
+    // ecrRepoName: cdkAppConfig.ecrConfig.name,
     appImage: devPipelineStack.appBuiltImage,
     lbListener: lbStack.lbListener,
     taskdefCpu: cdkAppConfig.webAppContainerConfig.taskdefCpu,
@@ -219,10 +199,10 @@ function appInstance(cdkAppConfig: ICdkAppConfig): void {
   });
   metricsStack.addDependency(devPipelineStack);
   metricsStack.addDependency(appStack);
-  // *** END DEV ***
 }
 
 // run the trap
 loadConfig(cdkAppConfigFilename, cdkAppConfigCacheS3BucketName)
+  .then(json => configTransform(json))
   .then(config => generate(config))
   .catch(err => console.log(err));

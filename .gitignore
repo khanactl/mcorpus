@@ -16,7 +16,7 @@
 target
 
 # cert files
-*.pem
+# *.pem
 *.crt
 *.key
 localhost-certgen.sh

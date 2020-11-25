@@ -4,15 +4,21 @@ def main(event, context):
   import secrets
 
   import boto3
-  import cfnresponse
   import psycopg2
   from botocore.exceptions import ClientError
 
   log.getLogger().setLevel(log.INFO)
 
-  responseData = {}
-
-  physical_id = 'McorpusDbBootstrap'
+  response = {
+    'Data': {
+      'SsmNameJdbcUrl': '',
+      'SsmNameJdbcTestUrl': '',
+      'SsmVersionJdbcUrl': '',
+      'SsmVersionJdbcTestUrl': '',
+      'Message': ''
+    },
+    'PhysicalResourceId': 'McorpusDbBootstrap' + event['ResourceProperties']['AppEnv']
+  }
 
   try:
     log.info('Input event: %s', event)
@@ -47,9 +53,8 @@ def main(event, context):
         )
       except ClientError as e:
         log.error(e)
-        responseData['ErrorMsg'] = str(e)
-        cfnresponse.send(event, context, cfnresponse.FAILED, responseData, physical_id)
-        return
+        response['Data']['Message'] = str(e)
+        return response
       else:
         # Decrypts secret using the associated KMS CMK.
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
@@ -108,9 +113,8 @@ def main(event, context):
 
           except Exception as e:
             log.error(e)
-            responseData['ErrorMsg'] = str(e)
-            cfnresponse.send(event, context, cfnresponse.FAILED, responseData, physical_id)
-            return
+            response['Data']['Message'] = str(e)
+            return response
           finally:
             if(cursor):
               cursor.close()
@@ -161,43 +165,39 @@ def main(event, context):
         else:
           # decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
           raise Exception('error', 'No SecretString found.')
-          return
 
-      responseData['SsmNameJdbcUrl'] = ssmNameJdbcUrl
-      responseData['SsmNameJdbcTestUrl'] = ssmNameJdbcTestUrl
+      response['Data']['SsmNameJdbcUrl'] = ssmNameJdbcUrl
+      response['Data']['SsmNameJdbcTestUrl'] = ssmNameJdbcTestUrl
 
-      responseData['SsmVersionJdbcUrl'] = ssmJdbcUrlVersion
-      responseData['SsmVersionJdbcTestUrl'] = ssmJdbcTestUrlVersion
+      response['Data']['SsmVersionJdbcUrl'] = ssmJdbcUrlVersion
+      response['Data']['SsmVersionJdbcTestUrl'] = ssmJdbcTestUrlVersion
 
-      responseData['Message'] = 'Db bootstrap completed.'
+      response['Data']['Message'] = 'Db bootstrap completed.'
       log.info('Db bootstrap completed.')
 
       # CREATE success
-      cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, physical_id)
+      return response
 
     # UPDATE
     elif event['RequestType'] == 'Update':
       log.info('UPDATE request')
-      cfnresponse.send(event, context, cfnresponse.SUCCESS, {
-        "Message": "Update is a no-op."
-      }, physical_id)
+      response['Data']['Message'] = 'Update is a no-op.'
+      return response
 
     # DELETE
     elif event['RequestType'] == 'Delete':
       log.info('DELETE request')
-      cfnresponse.send(event, context, cfnresponse.SUCCESS, {
-        "Message": "Delete is a no-op."
-      }, physical_id)
+      response['Data']['Message'] = 'Delete is a no-op.'
+      return response
 
     # default
     else:
       msg = "Unrecognized request type: {reqType}.".format(reqType = event['RequestType'])
       log.info("FAIL - {msg}".format(msg = msg))
-      cfnresponse.send(event, context, cfnresponse.SUCCESS, {
-        "Message": msg
-      }, physical_id)
+      response['Data']['Message'] = msg
+      return response
 
   except Exception as e:
     log.exception(e)
-    responseData['ErrorMsg'] = str(e)
-    cfnresponse.send(event, context, cfnresponse.FAILED, responseData, physical_id)
+    response['Data']['Message'] = str(e)
+    return response

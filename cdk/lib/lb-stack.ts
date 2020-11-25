@@ -11,6 +11,11 @@ import { CfnWebACL, CfnWebACLAssociation } from '@aws-cdk/aws-wafregional';
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
+export const LbStackRootProps = {
+  rootStackName: 'lb',
+  description: 'The public facing web app load balancer.',
+};
+
 export interface ILbStackProps extends IStackProps {
   /**
    * The VPC ref
@@ -44,7 +49,9 @@ export class LbStack extends BaseStack {
   public readonly webAcl: CfnWebACL;
 
   constructor(scope: Construct, props: ILbStackProps) {
-    super(scope, 'lb', props);
+    super(scope, LbStackRootProps.rootStackName, {
+      ...props, ...{ description: LbStackRootProps.description }
+  });
 
     // ****************************
     // *** inline load balancer ***

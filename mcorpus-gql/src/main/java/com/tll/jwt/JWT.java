@@ -119,7 +119,7 @@ public class JWT {
     this.jwtRefreshTokenTimeToLive = jwtRefreshTokenTimeToLive;
     this.jkey = new SecretKeySpec(Objects.requireNonNull(jwtSharedSecret), 0, jwtSharedSecret.length, "AES");
     this.serverIssuer = Objects.requireNonNull(serverIssuer);
-    log.info("JWT configured with Time-to-live: {} hours, Issuer: {}.", jwtTimeToLive.toHours(), serverIssuer);
+    log.info("JWT configured with Time-to-live: {} minutes, Issuer: {}.", jwtTimeToLive.toMinutes(), serverIssuer);
   }
 
   /**

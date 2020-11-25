@@ -2,6 +2,11 @@ import { IVpc, SecurityGroup } from '@aws-cdk/aws-ec2';
 import { Aspects, CfnOutput, Construct, Tag } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 
+export const SecGrpStackRootProps = {
+  rootStackName: 'secgrp',
+  description: 'The defined security groups in the VPC.',
+};
+
 /**
  * Security Group config properties.
  */
@@ -27,7 +32,9 @@ export class SecGrpStack extends BaseStack {
   public readonly codebuildSecGrp: SecurityGroup;
 
   constructor(scope: Construct, props: ISecGrpProps) {
-    super(scope, 'secgrp', props);
+    super(scope, SecGrpStackRootProps.rootStackName, {
+      ...props, ...{ description: SecGrpStackRootProps.description }
+    });
 
     /* :( NO WORK - error - cyclic reference
     // db security group

@@ -8,6 +8,11 @@ import { EmailSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, ename, iname, IStackProps } from './cdk-native';
 
+export const MetricsStackRootProps = {
+  rootStackName: 'metrics',
+  description: 'The CloudWatch app metrics dashboard.',
+};
+
 export interface IMetricsStackProps extends IStackProps {
   readonly dbInstanceRef: IDatabaseInstance;
 
@@ -36,7 +41,9 @@ export class MetricsStack extends BaseStack {
   public readonly dashboard: Dashboard;
 
   constructor(scope: Construct, props: IMetricsStackProps) {
-    super(scope, 'metrics', props);
+    super(scope, MetricsStackRootProps.rootStackName, {
+      ...props, ...{ description: MetricsStackRootProps.description }
+    });
 
     // *** metrics ***
     // db

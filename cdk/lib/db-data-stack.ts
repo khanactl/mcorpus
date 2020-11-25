@@ -5,8 +5,15 @@ import { S3EventSource } from '@aws-cdk/aws-lambda-event-sources';
 import { RetentionDays } from '@aws-cdk/aws-logs';
 import { BlockPublicAccess, Bucket, BucketEncryption, EventType } from '@aws-cdk/aws-s3';
 import { CfnOutput, Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
+import { copyFileSync, copySync, mkdirSync } from 'fs-extra';
 import { join as pjoin } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { BaseStack, iname, IStackProps } from './cdk-native';
+
+export const DbDataStackRootProps = {
+  rootStackName: 'db-data',
+  description: 'Creates an S3 bucket ties to a lambda function that populates the db from a zipped CSV data file.',
+};
 
 export interface IDbDataProps extends IStackProps {
   /**
@@ -38,7 +45,9 @@ export class DbDataStack extends BaseStack {
   // public readonly s3KmsKey: IKey;
 
   constructor(scope: Construct, props: IDbDataProps) {
-    super(scope, 'db-data', props);
+    super(scope, DbDataStackRootProps.rootStackName, {
+      ...props, ...{ description: DbDataStackRootProps.description }
+    });
 
     // const s3KmsKey: IKey = kms.Key.fromKeyArn(this, 's3-kms-key', props.s3KmsEncKeyArn);
 
@@ -86,15 +95,20 @@ export class DbDataStack extends BaseStack {
     );
     // END db data role
 
+    // prepare asset under /tmp dir as cdk does NOT honor symlinks in codepipeline/pipelines
+    const dpath = pjoin(__dirname, '../lambda/dbdata');
+    const tmpAssetDir = `/tmp/${uuidv4()}`;
+    mkdirSync(tmpAssetDir);
+    copyFileSync(`${dpath}/dbdata.py`, `${tmpAssetDir}/dbdata.py`);
+    copySync(`${dpath}/../psycopg2`, `${tmpAssetDir}/psycopg2`);
+
     // lambda fn
     const dbDataFnInstNme = iname('db-data-fn', props);
     this.dbDataFn = new Function(this, dbDataFnInstNme, {
       vpc: props.vpc,
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       securityGroup: props.dbDataSecGrp,
-      code: Code.fromAsset(
-        pjoin(__dirname, '../lambda/dbdata') // dir ref
-      ),
+      code: Code.fromAsset(tmpAssetDir),
       handler: 'dbdata.main',
       runtime: Runtime.PYTHON_3_8,
       // functionName: 'db-data',
