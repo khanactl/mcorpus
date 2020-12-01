@@ -2,7 +2,7 @@ def main(event, context):
   import json
   import logging as log
   import secrets
-
+  import subprocess
   import boto3
   import psycopg2
   from botocore.exceptions import ClientError
@@ -181,13 +181,15 @@ def main(event, context):
     # UPDATE
     elif event['RequestType'] == 'Update':
       log.info('UPDATE request')
-      response['Data']['Message'] = 'Update is a no-op.'
+      rcode = subprocess.call(["mvn flyway:migrate", "-D"])
+      response['Data']['Message'] = 'FlyWay db migration return code: ' + rcode
       return response
 
     # DELETE
     elif event['RequestType'] == 'Delete':
       log.info('DELETE request')
-      response['Data']['Message'] = 'Delete is a no-op.'
+      rcode = subprocess.call(["mvn flyway:clean", "-D"])
+      response['Data']['Message'] = 'FlyWay db clean return code: ' + rcode
       return response
 
     # default

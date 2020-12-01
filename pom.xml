@@ -23,6 +23,7 @@
 
     <postgres-jdbc.version>42.2.18</postgres-jdbc.version>
 
+    <flyway.version>7.3.0</flyway.version>
     <jooq.version>3.14.3</jooq.version>
     <hikari-cp.version>3.4.5</hikari-cp.version>
 
@@ -344,6 +345,11 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-maven-plugin</artifactId>
+          <version>${flyway.version}</version>
         </plugin>
         <plugin>
           <groupId>org.jooq</groupId>
