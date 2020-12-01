@@ -5,7 +5,7 @@ import { BaseStack, iname, IStackProps } from './cdk-native';
 
 export const ClusterStackRootProps = {
   rootStackName: 'ecs-cluster',
-  description: 'Creates the ECS cluster the app container in which the app docker container resides.',
+  description: 'Creates the ECS cluster in which the docker app container resides.',
 };
 
 export interface IClusterStackProps extends IStackProps {

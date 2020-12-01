@@ -14,7 +14,7 @@ import { Topic } from '@aws-cdk/aws-sns';
 import { EmailSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { IStringParameter } from "@aws-cdk/aws-ssm";
 import { CfnOutput, Construct, SecretValue } from '@aws-cdk/core';
-import { BaseStack, ICdkAppConfig, iname, IStackProps } from './cdk-native';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 import { PipelineContainerImage } from './pipeline-container-image';
 
 export const DevPipelineStackRootProps = {

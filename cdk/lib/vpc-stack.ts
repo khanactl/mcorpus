@@ -1,6 +1,6 @@
 import { Vpc } from '@aws-cdk/aws-ec2';
 import { CfnOutput, Construct } from '@aws-cdk/core';
-import { BaseStack, IStackProps, iname } from './cdk-native';
+import { BaseStack, iname, IStackProps } from './cdk-native';
 
 export const VpcStackRootProps = {
   rootStackName: 'vpc',

@@ -1,5 +1,4 @@
 import { ISecurityGroup, IVpc, Port, SubnetType } from '@aws-cdk/aws-ec2';
-import { Repository } from '@aws-cdk/aws-ecr';
 import {
   AssetImage,
   AwsLogDriver,
