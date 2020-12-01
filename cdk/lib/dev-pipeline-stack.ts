@@ -152,12 +152,6 @@ export class DevPipelineStack extends BaseStack {
             },
             commands: ['pip install --upgrade awscli'],
           },
-          /*
-          pre_build: {
-            commands: [
-            ],
-          },
-          */
           build: {
             commands: [
               'echo db migration started on `date`',
@@ -171,19 +165,7 @@ export class DevPipelineStack extends BaseStack {
               'mvn flyway:migrate -DTODO',
             ],
           },
-          /*
-          post_build: {
-            commands: [
-            ],
-          },
-          */
         },
-        /*
-        artifacts: {
-          files: ['mcorpus-gql/target/awsdockerasset/imageTag.json'],
-          'discard-paths': 'yes',
-        },
-        */
       }),
     });
 
