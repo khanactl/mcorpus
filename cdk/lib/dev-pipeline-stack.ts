@@ -100,6 +100,7 @@ export class DevPipelineStack extends BaseStack {
   public readonly imageTag: string;
   public readonly gitBranchName: string;
 
+  public readonly dbMigrationFailureEventTopic?: Topic;
   public readonly dockerBuildFailureEventTopic?: Topic;
   public readonly cdkBuildFailureEventTopic?: Topic;
 
@@ -123,6 +124,93 @@ export class DevPipelineStack extends BaseStack {
       output: sourceOutput,
     });
     this.gitBranchName = props.gitBranchName;
+
+    // *** Db Migration build ***
+
+    const dbMigrationBuild = new PipelineProject(this, 'DbMigrationProject', {
+      vpc: props.vpc,
+      // projectName: codebuildInstNme,
+      environment: {
+        computeType: ComputeType.SMALL,
+        // privileged: true,
+        buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
+      },
+      securityGroups: [props.codebuildSecGrp],
+      subnetSelection: { subnetType: SubnetType.PRIVATE },
+      buildSpec: BuildSpec.fromObject({
+        version: '0.2',
+        env: {
+          'parameter-store': {
+            MCORPUS_DB_URL: props.ssmJdbcUrl.parameterName,
+            MCORPUS_TEST_DB_URL: props.ssmJdbcTestUrl.parameterName,
+          },
+        },
+        phases: {
+          install: {
+            'runtime-versions': {
+              java: 'corretto11',
+            },
+            commands: ['pip install --upgrade awscli'],
+          },
+          /*
+          pre_build: {
+            commands: [
+            ],
+          },
+          */
+          build: {
+            commands: [
+              'echo db migration started on `date`',
+              'aws --version',
+              'mvn --version',
+
+              'echo $(env)', // output the env vars
+
+              'echo Running Maven FlyWay db migration task...',
+              'cd mcorpus-db',
+              'mvn flyway:migrate -DTODO',
+            ],
+          },
+          /*
+          post_build: {
+            commands: [
+            ],
+          },
+          */
+        },
+        /*
+        artifacts: {
+          files: ['mcorpus-gql/target/awsdockerasset/imageTag.json'],
+          'discard-paths': 'yes',
+        },
+        */
+      }),
+    });
+
+    // codebuild/pipeline ssm access
+    dbMigrationBuild.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['ssm:GetParameters', 'ssm:GetParameter'],
+        resources: [props.ssmJdbcUrl.parameterArn, props.ssmJdbcTestUrl.parameterArn],
+      })
+    );
+
+    // db migration build failure email dispatch
+    if (props.onBuildFailureEmails && props.onBuildFailureEmails.length > 0) {
+      const topicName = iname('db-migration-failure', props);
+      const displayName = `${props.appName} ${props.appEnv} Db Migration failure.`;
+      this.dbMigrationFailureEventTopic = new Topic(this, topicName, {
+        topicName: topicName,
+        displayName: displayName,
+      });
+      props.onBuildFailureEmails.forEach((email) =>
+        this.dbMigrationFailureEventTopic!.addSubscription(new EmailSubscription(email))
+      );
+      dbMigrationBuild.onBuildFailed(topicName, {
+        target: new SnsTopic(this.dbMigrationFailureEventTopic),
+        description: displayName,
+      });
+    }
 
     // *** Docker (web app container) build ***
 
@@ -314,6 +402,16 @@ export class DevPipelineStack extends BaseStack {
           actions: [sourceAction],
         },
         {
+          stageName: 'DbMigration',
+          actions: [
+            new CodeBuildAction({
+              actionName: 'DbMigration',
+              project: dbMigrationBuild,
+              input: sourceOutput,
+            }),
+          ],
+        },
+        {
           stageName: 'Build',
           actions: [
             new CodeBuildAction({
@@ -366,6 +464,7 @@ export class DevPipelineStack extends BaseStack {
     this.imageTag = dockerBuildOutput.getParam('imageTag.json', 'imageTag');
 
     // stack output
+    new CfnOutput(this, 'DevCicdDbMigrationFailedEvent', { value: this.dbMigrationFailureEventTopic!.topicName });
     new CfnOutput(this, 'DevCicdDockerBuildFailedEvent', { value: this.dockerBuildFailureEventTopic!.topicName });
     new CfnOutput(this, 'DevCicdCdkBuildFailedEvent', { value: this.cdkBuildFailureEventTopic!.topicName });
     // new cdk.CfnOutput(this, 'DevCicdImageTag', { value: this.imageTag }); // WONT WORK!

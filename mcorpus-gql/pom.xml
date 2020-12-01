@@ -21,7 +21,7 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-db.version>1.4.22-SNAPSHOT</mcorpus-db.version>
+    <mcorpus-db.version>1.5.0-SNAPSHOT</mcorpus-db.version>
     <main-class>com.tll.mcorpus.web.ratpack.Main</main-class>
   </properties>
 
