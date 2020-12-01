@@ -7,21 +7,21 @@ import java.util.Map;
 
 import com.tll.validate.VldtnResult;
 
-import graphql.execution.ExecutionPath;
+import graphql.execution.ResultPath;
 
 /**
  * Sanitized graphql data fetch error specifically for conveying entity validation errors.
  * <p>
  * No stack trace will get serialized to JSON.
- * 
+ *
  * @author jpk
  */
 public class GraphQLDataValidationError extends GraphQLDataFetchError {
   private static final long serialVersionUID = 1L;
 
-  public static GraphQLDataValidationError inst(final ExecutionPath epath, VldtnResult vrslt) {
+  public static GraphQLDataValidationError inst(final ResultPath epath, VldtnResult vrslt) {
     return new GraphQLDataValidationError(
-      (isNull(epath) ? ExecutionPath.rootPath() : epath).toString(), 
+      (isNull(epath) ? ResultPath.rootPath() : epath).toString(),
       vrslt.getSummaryMsg(),
       vrslt.getMappedFieldErrors()
     );
@@ -31,7 +31,7 @@ public class GraphQLDataValidationError extends GraphQLDataFetchError {
 
   /**
    * Constructor
-   * 
+   *
    * @param epath the graphql execution path associated with the error(s)
    * @param emsg the error message
    * @param verrs the validation errors

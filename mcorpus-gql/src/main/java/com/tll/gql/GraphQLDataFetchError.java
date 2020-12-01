@@ -13,27 +13,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.ErrorClassification;
 import graphql.ErrorType;
 import graphql.GraphQLError;
-import graphql.execution.ExecutionPath;
+import graphql.execution.ResultPath;
 import graphql.language.SourceLocation;
 
 /**
  * Sanitized graphql data fetch error type.
  * <p>
  * No stack trace will get serialized to JSON.
- * 
+ *
  * @author jpk
  */
 public class GraphQLDataFetchError implements GraphQLError {
   private static final long serialVersionUID = 1L;
 
-  public static GraphQLDataFetchError inst(final ExecutionPath epath, String emsg) {
+  public static GraphQLDataFetchError inst(final ResultPath epath, String emsg) {
     return new GraphQLDataFetchError(
-      (isNull(epath) ? ExecutionPath.rootPath() : epath).toString(), 
+      (isNull(epath) ? ResultPath.rootPath() : epath).toString(),
       isNullOrEmpty(emsg) ? "Unspecified data fetch error." : clean(emsg)
     );
   }
 
-  public static GraphQLDataFetchError inst(final ExecutionPath epath, final Throwable exception) {
+  public static GraphQLDataFetchError inst(final ResultPath epath, final Throwable exception) {
     return inst(epath, exception.getMessage());
   }
 
@@ -42,7 +42,7 @@ public class GraphQLDataFetchError implements GraphQLError {
 
   /**
    * Constructor
-   * 
+   *
    * @param epath the graphql execution path associated with the error(s)
    * @param emsg the error message
    */

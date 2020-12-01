@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.33-SNAPSHOT</version>
+  <version>0.9.35-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
