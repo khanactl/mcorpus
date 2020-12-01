@@ -27,3 +27,4 @@ aws-env*
 # app
 mcorpus-creds.txt
 *.log
+aws-env.sh
