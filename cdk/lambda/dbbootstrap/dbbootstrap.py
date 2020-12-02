@@ -36,6 +36,7 @@ def main(event, context):
       # input: db rds json secret
       db_secret_arn = event['ResourceProperties']['DbJsonSecretArn']
 
+      ssmNameJdbcAdminUrl = event['ResourceProperties']['SsmNameJdbcAdminUrl']
       ssmNameJdbcUrl = event['ResourceProperties']['SsmNameJdbcUrl']
       ssmNameJdbcTestUrl = event['ResourceProperties']['SsmNameJdbcTestUrl']
 
@@ -88,6 +89,7 @@ def main(event, context):
             log.info('db connected')
 
             # generate rando mcweb and mcwebtest db user passwords
+            mcadmin = secrets.token_urlsafe(16)
             mcweb = secrets.token_urlsafe(16)
             mcwebtest = secrets.token_urlsafe(16)
 
@@ -97,6 +99,7 @@ def main(event, context):
 
             # run the db user roles file
             cursor.execute(open("mcorpus-roles.ddl", "r").read()
+              .replace("{mcadmin}", mcadmin)
               .replace("{mcweb}", mcweb)
               .replace("{mcwebtest}", mcwebtest)
             )
@@ -122,6 +125,13 @@ def main(event, context):
               conn.close()
 
           # assemble jdbc urls
+          jdbcAdminUrl = "jdbc:postgresql://{dbHost}:{dbPort}/{dbName}?user={dbUser}&password={dbPswd}&ssl=false".format(
+            dbHost = db_host,
+            dbPort = db_port,
+            dbName = db_name,
+            dbUser = 'mcadmin',
+            dbPswd = mcadmin
+          )
           jdbcUrl = "jdbc:postgresql://{dbHost}:{dbPort}/{dbName}?user={dbUser}&password={dbPswd}&ssl=false".format(
             dbHost = db_host,
             dbPort = db_port,
@@ -141,6 +151,16 @@ def main(event, context):
             service_name = 'ssm',
             region_name = region_name
           )
+
+          # generate ssm jdbc admin url
+          ssmResponseJdbcAdminUrl = ssmClient.put_parameter(
+            Name = ssmNameJdbcAdminUrl,
+            Value = jdbcAdminUrl,
+            Type = 'SecureString',
+            Overwrite = True,
+          )
+          ssmJdbcAdminUrlVersion = ssmResponseJdbcAdminUrl['Version']
+          log.info('ssmJdbcAdminUrlVersion: {ssmJdbcAdminUrlVersion}'.format(ssmJdbcAdminUrlVersion = ssmJdbcAdminUrlVersion))
 
           # generate ssm jdbc url
           ssmResponseJdbcUrl = ssmClient.put_parameter(
@@ -166,9 +186,11 @@ def main(event, context):
           # decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
           raise Exception('error', 'No SecretString found.')
 
+      response['Data']['SsmNameJdbcAdminUrl'] = ssmNameJdbcAdminUrl
       response['Data']['SsmNameJdbcUrl'] = ssmNameJdbcUrl
       response['Data']['SsmNameJdbcTestUrl'] = ssmNameJdbcTestUrl
 
+      response['Data']['SsmVersionJdbcAdminUrl'] = ssmJdbcAdminUrlVersion
       response['Data']['SsmVersionJdbcUrl'] = ssmJdbcUrlVersion
       response['Data']['SsmVersionJdbcTestUrl'] = ssmJdbcTestUrlVersion
 

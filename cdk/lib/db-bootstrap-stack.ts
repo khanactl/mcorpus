@@ -48,6 +48,9 @@ export interface IDbBootstrapProps extends IStackProps {
 export class DbBootstrapStack extends BaseStack {
   public readonly dbBootstrapRole: Role;
 
+  public readonly ssmNameJdbcAdminUrl: string;
+  public readonly ssmVersionJdbcAdminUrl: number;
+
   public readonly ssmNameJdbcUrl: string;
   public readonly ssmVersionJdbcUrl: number;
 
@@ -56,6 +59,7 @@ export class DbBootstrapStack extends BaseStack {
 
   public readonly responseMessage: string;
 
+  public readonly ssmJdbcAdminUrl: IStringParameter;
   public readonly ssmJdbcUrl: IStringParameter;
   public readonly ssmJdbcTestUrl: IStringParameter;
 
@@ -137,11 +141,15 @@ export class DbBootstrapStack extends BaseStack {
         AppEnv: props.appEnv,
         DbJsonSecretArn: props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
         TargetRegion: props.targetRegion,
+        SsmNameJdbcAdminUrl: `mcorpusDbAdminUrl/${props.appEnv}`,
         SsmNameJdbcUrl: `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
         SsmNameJdbcTestUrl: `/mcorpusTestDbUrl/${props.appEnv}`,
       },
       removalPolicy: RemovalPolicy.DESTROY,
     });
+
+    this.ssmNameJdbcAdminUrl = resource.getAttString('SsmNameJdbcAdminUrl');
+    this.ssmVersionJdbcAdminUrl = parseInt(resource.getAttString('SsmVersionJdbcAdminUrl'));
 
     this.ssmNameJdbcUrl = resource.getAttString('SsmNameJdbcUrl');
     this.ssmVersionJdbcUrl = parseInt(resource.getAttString('SsmVersionJdbcUrl'));
@@ -152,12 +160,21 @@ export class DbBootstrapStack extends BaseStack {
     this.responseMessage = resource.getAttString('Message');
 
     // obtain the just generated SSM jdbc url param refs
+    // mcadmin
+    const ssmJdbcAdminUrlInstNme = iname('db-admin-url', props);
+    this.ssmJdbcAdminUrl = StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcAdminUrlInstNme, {
+      parameterName: this.ssmNameJdbcAdminUrl,
+      version: this.ssmVersionJdbcAdminUrl,
+      simpleName: false,
+    });
+    // mcweb
     const ssmJdbcUrlInstNme = iname('db-url', props);
     this.ssmJdbcUrl = StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcUrlInstNme, {
       parameterName: this.ssmNameJdbcUrl,
       version: this.ssmVersionJdbcUrl,
       simpleName: false,
     });
+    // mewebtest
     const ssmJdbcTestUrlInstNme = iname('test-db-url', props);
     this.ssmJdbcTestUrl = StringParameter.fromSecureStringParameterAttributes(this, ssmJdbcTestUrlInstNme, {
       parameterName: this.ssmNameJdbcTestUrl,
@@ -169,6 +186,7 @@ export class DbBootstrapStack extends BaseStack {
     // new CfnOutput(this, 'CustomResourceRef', { value: resource.ref });
     new CfnOutput(this, 'dbBootstrapRoleArn', { value: this.dbBootstrapRole.roleArn });
     new CfnOutput(this, 'dbBootstrapResponseMessage', { value: this.responseMessage });
+    new CfnOutput(this, 'ssmJdbcAdminUrlArn', { value: this.ssmJdbcAdminUrl.parameterArn });
     new CfnOutput(this, 'ssmJdbcUrlArn', { value: this.ssmJdbcUrl.parameterArn });
     new CfnOutput(this, 'ssmJdbcTestUrlArn', { value: this.ssmJdbcTestUrl.parameterArn });
   }

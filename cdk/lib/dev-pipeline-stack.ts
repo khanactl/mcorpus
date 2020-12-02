@@ -78,6 +78,11 @@ export interface IDevPipelineStackProps extends IStackProps {
   readonly triggerOnCommit: boolean;
 
   /**
+   * The SSM secure param of the db migration cicd stage url to the backend db.
+   */
+  readonly ssmJdbcAdminUrl: IStringParameter;
+
+  /**
    * The SSM secure param of the web app jdbc url to the backend db.
    */
   readonly ssmJdbcUrl: IStringParameter;
@@ -141,8 +146,7 @@ export class DevPipelineStack extends BaseStack {
         version: '0.2',
         env: {
           'parameter-store': {
-            MCORPUS_DB_URL: props.ssmJdbcUrl.parameterName,
-            MCORPUS_TEST_DB_URL: props.ssmJdbcTestUrl.parameterName,
+            MCORPUS_DB_ADMIN_URL: props.ssmJdbcAdminUrl.parameterName,
           },
         },
         phases: {
@@ -162,7 +166,7 @@ export class DevPipelineStack extends BaseStack {
 
               'echo Running Maven FlyWay db migration task...',
               'cd mcorpus-db',
-              'mvn flyway:migrate -DTODO',
+              'mvn flyway:migrate',
             ],
           },
         },

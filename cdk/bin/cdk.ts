@@ -129,6 +129,7 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     githubOauthTokenSecretJsonFieldName: cdkAppConfig.gitHubRepoRef.oauthTokenSecretJsonFieldName,
     gitBranchName: cdkAppConfig.cicdConfig.gitBranchName,
     triggerOnCommit: cdkAppConfig.cicdConfig.triggerOnCommit,
+    ssmJdbcAdminUrl: dbBootstrapStack.ssmJdbcAdminUrl,
     ssmJdbcUrl: dbBootstrapStack.ssmJdbcUrl,
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     appDeployApprovalEmails: cdkAppConfig.cicdConfig.appDeployApprovalEmails,

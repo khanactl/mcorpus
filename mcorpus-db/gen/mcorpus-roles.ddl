@@ -43,11 +43,12 @@ grant select, insert, update, delete on mcuser, mcuser_audit, member_audit to mc
 
 -- Role: mcadmin
 -- Desc: mcorpus db architect privileges - ddl create/drop
-/*
+--       (Intended role for cloud-based cicd pipeline agent to assume)
 create role mcadmin with
   login
   encrypted password '{mcadmin}'
   connection limit 1
   valid until '2021-01-01';
 grant connect on database mcorpus to mcadmin;
-*/
+GRANT ALL PRIVILEGES ON DATABASE mcorpus TO mcadmin;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mcadmin;
