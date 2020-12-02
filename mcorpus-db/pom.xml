@@ -67,15 +67,15 @@
         <artifactId>flyway-maven-plugin</artifactId>
         <configuration>
           <skip>false</skip>
-          <url>${env.MCORPUS_DB_URL}</url>
+          <url>${env.MCORPUS_DB_ADMIN_URL}</url>
           <table>schema_history</table>
           <locations>
             <location>filesystem:${project.basedir}/gen/migration</location>
           </locations>
           <encoding>ISO-8859-1</encoding>
-          <baselineOnMigrate>true</baselineOnMigrate>
-          <target>1.0.0</target>
+          <baselineOnMigrate>false</baselineOnMigrate>
           <baselineVersion>1.0.0</baselineVersion>
+          <target>latest</target>
           <workingDirectory>${project.build.directory}</workingDirectory>
         </configuration>
         <dependencies>
