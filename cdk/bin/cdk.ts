@@ -86,8 +86,6 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
     targetRegion: dbStack.region,
   });
-  // TODO temp debug: keep db data stack between cdk stack re-generation
-  /*
   const dbDataStack = new DbDataStack(app, {
     appName: cdkAppConfig.appName,
     appEnv: cdkAppConfig.appEnv,
@@ -99,7 +97,6 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     // s3KmsEncKeyArn: appConfig.ssmKmsArn
   });
   dbDataStack.addDependency(dbBootstrapStack);
-  */
 
   // ECS cluster
   const clusterStack = new ClusterStack(app, {
