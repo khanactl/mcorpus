@@ -141,7 +141,7 @@ export class DbBootstrapStack extends BaseStack {
         AppEnv: props.appEnv,
         DbJsonSecretArn: props.dbJsonSecretArn, // NOTE: python lambda input params are capitalized!
         TargetRegion: props.targetRegion,
-        SsmNameJdbcAdminUrl: `mcorpusDbAdminUrl/${props.appEnv}`,
+        SsmNameJdbcAdminUrl: `/mcorpusDbAdminUrl/${props.appEnv}`,
         SsmNameJdbcUrl: `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
         SsmNameJdbcTestUrl: `/mcorpusTestDbUrl/${props.appEnv}`,
       },
