@@ -177,7 +177,7 @@ export class DevPipelineStack extends BaseStack {
     dbMigrationBuild.addToRolePolicy(
       new PolicyStatement({
         actions: ['ssm:GetParameters', 'ssm:GetParameter'],
-        resources: [props.ssmJdbcUrl.parameterArn, props.ssmJdbcTestUrl.parameterArn],
+        resources: [props.ssmJdbcAdminUrl.parameterArn, props.ssmJdbcUrl.parameterArn, props.ssmJdbcTestUrl.parameterArn],
       })
     );
 
