@@ -3,11 +3,11 @@ import {
   ApplicationListener,
   ApplicationLoadBalancer,
   ApplicationProtocol,
-  SslPolicy,
+  SslPolicy
 } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { ARecord, HostedZone, RecordTarget } from '@aws-cdk/aws-route53';
 import { LoadBalancerTarget } from '@aws-cdk/aws-route53-targets';
-import { CfnWebACL, CfnWebACLAssociation } from '@aws-cdk/aws-wafregional';
+import { CfnWebACL, CfnWebACLAssociation } from '@aws-cdk/aws-wafv2';
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
@@ -40,22 +40,22 @@ export interface ILbStackProps extends IStackProps {
    * SSL Certificate Arn
    */
   readonly sslCertArn: string;
+
+  /**
+   * The optional wafv2 access control list.
+   */
+  readonly webAclArn?: string;
 }
 
 export class LbStack extends BaseStack {
   public readonly appLoadBalancer: ApplicationLoadBalancer;
   public readonly lbListener: ApplicationListener;
 
-  public readonly webAcl: CfnWebACL;
-
   constructor(scope: Construct, props: ILbStackProps) {
     super(scope, LbStackRootProps.rootStackName, {
       ...props, ...{ description: LbStackRootProps.description }
-  });
+    });
 
-    // ****************************
-    // *** inline load balancer ***
-    // ****************************
     // application load balancer
     const albInstNme = iname('app-loadbalancer', props);
     this.appLoadBalancer = new ApplicationLoadBalancer(this, albInstNme, {
@@ -77,10 +77,6 @@ export class LbStack extends BaseStack {
       // defaultTargetGroups: []
     });
 
-    // ****************************
-    // *** END inline load balancer ***
-    // ****************************
-
     // DNS bind load balancer to domain name record
     if (props.awsHostedZoneId && props.publicDomainName) {
       // console.log('Load balancer DNS will be bound in Route53.');
@@ -96,71 +92,24 @@ export class LbStack extends BaseStack {
         target: RecordTarget.fromAlias(new LoadBalancerTarget(this.appLoadBalancer)),
       });
       // dns specific stack output
-      new CfnOutput(this, 'HostedZone', {
-        value: hostedZone.hostedZoneId,
-      });
-      new CfnOutput(this, 'ARecord', {
-        value: arecord.domainName,
-      });
+      new CfnOutput(this, 'HostedZone', { value: hostedZone.hostedZoneId, });
+      new CfnOutput(this, 'ARecord', { value: arecord.domainName, });
     }
+    // END DNS bind
 
-    // ***************
-    // ***** WAF *****
-    // ***************
-    // *** firewall rules ***
-
-    // rule: rate limiter
-    /*
-    const ruleRateLimit = new waf.CfnRateBasedRule(this, "rateLimitByIP", {
-      name: "rateLimitByIP",
-      metricName: "myRateLimitByIP",
-      rateKey: "IP", // i.e. rate limiting based on a sourcing IP address (only available option currently per CloudFormation docs)
-      rateLimit: 2000, // the minimum allowed
-      matchPredicates: [
-        {
-          dataId: 'IPSetId',
-          negated: false,
-          type: 'IPMatch',
-        },
-      ],
-    });
-    */
-
-    // *** END firewall rules ***
-
-    // acl (groups rules)
-    const webAclName = inameCml('webAcl', props);
-    this.webAcl = new CfnWebACL(this, webAclName, {
-      name: webAclName,
-      metricName: `${webAclName}Metrics`,
-      defaultAction: { type: 'ALLOW' },
-      /*
-      rules: [
-        {
-          action: { type: "BLOCK" },
-          creationStack: [],
-          priority: 1,
-          ruleId: ruleRateLimit.ref,
-        },
-      ],
-      */
-    });
-
-    // bind waf to alb
-    const wafToAlb = new CfnWebACLAssociation(this, inameCml('Waf2Alb', props), {
-      resourceArn: this.appLoadBalancer.loadBalancerArn,
-      webAclId: this.webAcl.ref,
-    });
-    // ***************
-    // *** END WAF ***
-    // ***************
+    // bind WAF to Load Balancer
+    if(props.webAclArn) {
+      const wafToAlb = new CfnWebACLAssociation(this, inameCml('Waf2Alb', props), {
+        resourceArn: this.appLoadBalancer.loadBalancerArn,
+        webAclArn: props.webAclArn,
+      });
+      new CfnOutput(this, 'wafToAlbRef', { value: wafToAlb.ref });
+    }
+    // END bind WAF to Load Balancer
 
     // stack output
     new CfnOutput(this, 'AppLoadBalancerName', { value: this.appLoadBalancer.loadBalancerName });
     new CfnOutput(this, 'AppLoadBalancerListenerArn', { value: this.lbListener.listenerArn });
-    new CfnOutput(this, 'loadBalancerDnsName', {
-      value: this.appLoadBalancer.loadBalancerDnsName,
-    });
-    new CfnOutput(this, 'WafWebAclName', { value: this.webAcl.name });
+    new CfnOutput(this, 'loadBalancerDnsName', { value: this.appLoadBalancer.loadBalancerDnsName, });
   }
 }
