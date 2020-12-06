@@ -22,7 +22,7 @@ export enum AppEnv {
 }
 
 /**
- * Native stack properties definition.
+ * The app name and `AppEnv` instance definition.
  */
 export interface IAppNameAndEnv {
   /**
@@ -34,8 +34,6 @@ export interface IAppNameAndEnv {
    */
   readonly appEnv: AppEnv;
 }
-
-export interface IStackProps extends StackProps, IAppNameAndEnv {}
 
 export interface IGitHubRepoRef {
   readonly owner: string;
@@ -102,7 +100,8 @@ export interface IMetricsConfig {
 }
 
 /**
- * The cdk app config definition loaded from the cdk app config json file.
+ * Strongly typed environment instance specific
+ * cdk app configuration definition.
  */
 export interface ICdkAppConfig extends IAppNameAndEnv {
   readonly cdkAppConfigFilename: string;
@@ -280,11 +279,18 @@ export function tags(appEnv: AppEnv, jsonAppConfig: any): { [key: string]: strin
   return {
     AppName: jsonAppConfig.appName,
     AppEnv: appEnv,
+    Author: 'jpk',
+    Organization: 'The Logic Lab',
   };
 }
 
 /**
- * Native base CDK stack class.
+ * Native base interface to use for declared cdk stack property definition interfaces.
+ */
+export interface IStackProps extends StackProps, IAppNameAndEnv {}
+
+/**
+ * Native base class to use for declared cdk stacks.
  */
 export abstract class BaseStack extends Stack {
   /**
@@ -356,7 +362,7 @@ export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketN
     }
   }
   throw new Error(
-    "Unable to get cdk ap config: No local config file found and no cache config s3 bucket name provided."
+    "Unable to get cdk app config: No local config file found and no cache config s3 bucket name provided."
   );
 }
 
@@ -389,12 +395,6 @@ export function iname(rootName: string, appNameAndEnv: IAppNameAndEnv): string {
 export function ename(rootName: string, appEnv: AppEnv): string {
   return `${rootName}-${appEnv.toLowerCase()}`;
 }
-
-/*
-export function inamec(rootName: string, appEnv: AppEnv, appConfig: any): string {
-  return `${appConfig.appName.toLowerCase()}-${rootName}-${appEnv.toLowerCase()}`
-}
-*/
 
 /**
  * Generate an *instance name* given a root name in **camelCaseForm**.
