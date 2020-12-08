@@ -1,11 +1,16 @@
-def main(event, context):
-  import json
-  import logging as log
-  import secrets
+import json
+import logging as log
+import os
+import secrets
+from urllib.parse import unquote_plus
+from zipfile import ZipFile
 
-  import boto3
-  import psycopg2
-  from botocore.exceptions import ClientError
+import boto3
+import psycopg2
+from botocore.exceptions import ClientError
+
+
+def main(event, context):
 
   log.getLogger().setLevel(log.INFO)
 
@@ -74,8 +79,7 @@ def main(event, context):
             dbMasterUser = db_masteruser
           ))
 
-          cursor = 0
-          conn = 0
+          conn = None
 
           try:
             # db connect
@@ -85,43 +89,96 @@ def main(event, context):
               user = db_masteruser,
               password = db_masterpswd
             )
-            cursor = conn.cursor()
             log.info('db connected')
 
-            # generate rando mcweb and mcwebtest db user passwords
-            mcadmin = secrets.token_urlsafe(16)
-            mcweb = secrets.token_urlsafe(16)
-            mcwebtest = secrets.token_urlsafe(16)
+            # db schema and default mcuser records
+            with conn:
+              with conn.cursor() as cursor:
+                log.info('creating db schema')
 
-            # run the schema DDL file
-            cursor.execute(open("mcorpus-schema.ddl", "r").read())
-            log.info('db schema DDL file executed')
+                # generate rando mcweb and mcwebtest db user passwords
+                mcadmin = secrets.token_urlsafe(16)
+                mcweb = secrets.token_urlsafe(16)
+                mcwebtest = secrets.token_urlsafe(16)
 
-            # run the db user roles file
-            cursor.execute(open("mcorpus-roles.ddl", "r").read()
-              .replace("{mcadmin}", mcadmin)
-              .replace("{mcweb}", mcweb)
-              .replace("{mcwebtest}", mcwebtest)
-            )
-            log.info('db user roles SQL file executed')
+                # run the schema DDL file
+                cursor.execute(open("mcorpus-schema.ddl", "r").read())
+                log.info('db schema DDL file executed')
 
-            # insert the default mcuser records
-            with open("mcorpus-mcuser.csv", 'r') as f:
-              cursor.copy_expert("COPY mcuser from STDIN CSV HEADER NULL '\\N';", f)
-            log.info('default mcuser records inserted')
+                # run the db user roles file
+                cursor.execute(open("mcorpus-roles.ddl", "r").read()
+                  .replace("{mcadmin}", mcadmin)
+                  .replace("{mcweb}", mcweb)
+                  .replace("{mcwebtest}", mcwebtest)
+                )
+                log.info('db user roles SQL file executed')
 
-            # commit
-            conn.commit()
-            log.info('db mutations committed')
+                # insert the default mcuser records
+                with open("mcorpus-mcuser.csv", 'r') as f:
+                  cursor.copy_expert("COPY mcuser from STDIN CSV HEADER NULL '\\N';", f)
+                log.info('default mcuser records inserted')
+
+                log.info('db bootstrap schema complete')
+
+              # add default db dataset
+              with conn.cursor() as cursor:
+                log.info('db connected (add default dataset)')
+
+                s3_client = boto3.client('s3')
+                bucket = event['ResourceProperties']['S3DbDataBktNme']
+                key = event['ResourceProperties']['S3DbDataBktKey']
+
+                mdata_zip_path = '/tmp/mdata.zip'
+
+                # download
+                log.info(f"downloading mcorpus db data zip file (bucket: {bucket}, key: {key})..")
+                s3_client.download_file(bucket, key, mdata_zip_path)
+                log.info('db data file downloaded')
+
+                member_csv = '/tmp/member.csv'
+                mauth_csv = '/tmp/mauth.csv'
+                maddress_csv = '/tmp/maddress.csv'
+
+                # delete existing member records
+                cursor.execute("DELETE FROM maddress;")
+                cursor.execute("DELETE FROM mauth;")
+                cursor.execute("DELETE FROM member;")
+                log.info('existing db data cleared out')
+
+                # ingest csv db data
+                # member
+                with ZipFile(mdata_zip_path, 'r') as zipObj:
+                  zipObj.extract('member.csv', '/tmp')
+                with open(member_csv, 'r') as f:
+                  cursor.copy_expert("COPY member from STDIN CSV HEADER NULL '\\N';", f)
+                os.remove(member_csv)
+                log.info('member data copied')
+
+                # mauth
+                with ZipFile(mdata_zip_path, 'r') as zipObj:
+                  zipObj.extract('mauth.csv', '/tmp')
+                with open(mauth_csv, 'r') as f:
+                  cursor.copy_expert("COPY mauth from STDIN CSV HEADER NULL '\\N';", f)
+                os.remove(mauth_csv)
+                log.info('mauth data copied')
+
+                # maddress
+                with ZipFile(mdata_zip_path, 'r') as zipObj:
+                  zipObj.extract('maddress.csv', '/tmp')
+                with open(maddress_csv, 'r') as f:
+                  cursor.copy_expert("COPY maddress from STDIN CSV HEADER NULL '\\N';", f)
+                os.remove(maddress_csv)
+                log.info('maddress data copied')
+
+                log.info('default dataset added ok')
+            conn.close()
 
           except Exception as e:
             log.error(e)
             response['Data']['Message'] = str(e)
             return response
           finally:
-            if(cursor):
-              cursor.close()
-            if(conn):
+            if(conn is not None):
               conn.close()
 
           # assemble jdbc urls

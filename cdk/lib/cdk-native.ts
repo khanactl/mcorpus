@@ -50,6 +50,8 @@ export interface INetworkConfig {
 export interface IDbConfig {
   readonly dbName: string;
   readonly dbMasterUsername: string;
+  readonly dbDataBucketName: string;
+  readonly dbDataBucketKey: string;
 }
 
 export interface IEcrConfig extends Environment {
@@ -188,6 +190,8 @@ export function dbConfig(appEnv: AppEnv, jsonAppConfig: any): IDbConfig {
   return {
     dbName: subobj.dbName,
     dbMasterUsername: subobj.dbMasterUsername,
+    dbDataBucketName: subobj.dbDataBucketName,
+    dbDataBucketKey: subobj.dbDataBucketKey
   };
 }
 

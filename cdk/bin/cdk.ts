@@ -5,7 +5,6 @@ import { AppStack, AppStackRootProps } from '../lib/app-stack';
 import { AppEnv, cdkAppConfig, ICdkAppConfig, iname, loadConfig } from '../lib/cdk-native';
 import { ClusterStack } from '../lib/cluster-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
-import { DbDataStack } from '../lib/db-data-stack';
 import { DbStack } from '../lib/db-stack';
 import { DevPipelineStack } from '../lib/dev-pipeline-stack';
 import { LbStack, LbStackRootProps } from '../lib/lb-stack';
@@ -86,18 +85,9 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     dbBootstrapSecGrp: secGrpStack.dbBootstrapSecGrp,
     dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
     targetRegion: dbStack.region,
+    s3DbDataBktNme: cdkAppConfig.dbConfig.dbDataBucketName,
+    s3DbDataBktKey: cdkAppConfig.dbConfig.dbDataBucketKey,
   });
-  const dbDataStack = new DbDataStack(app, {
-    appName: cdkAppConfig.appName,
-    appEnv: cdkAppConfig.appEnv,
-    env: cdkAppConfig.awsEnv,
-    tags: cdkAppConfig.appEnvStackTags,
-    vpc: vpcStack.vpc,
-    dbDataSecGrp: secGrpStack.dbBootstrapSecGrp,
-    dbJsonSecretArn: dbStack.dbInstanceJsonSecret.secretArn,
-    // s3KmsEncKeyArn: appConfig.ssmKmsArn
-  });
-  dbDataStack.addDependency(dbBootstrapStack);
 
   // ECS cluster
   const clusterStack = new ClusterStack(app, {

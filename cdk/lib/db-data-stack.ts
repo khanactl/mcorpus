@@ -12,7 +12,7 @@ import { BaseStack, iname, IStackProps } from './cdk-native';
 
 export const DbDataStackRootProps = {
   rootStackName: 'db-data',
-  description: 'Creates an S3 bucket ties to a lambda function that populates the db from a zipped CSV data file.',
+  description: 'Creates an S3 bucket and a lambda fn that populates the db from a zipped CSV db data file.',
 };
 
 export interface IDbDataProps extends IStackProps {
@@ -35,6 +35,10 @@ export interface IDbDataProps extends IStackProps {
   // readonly s3KmsEncKeyArn: string;
 }
 
+/**
+ * @deprecated The db data s3 bucket is now externally managed
+ *             and initial db data insert migrated to db-bootstrap.
+ */
 export class DbDataStack extends BaseStack {
   public readonly dbDataBucket: Bucket;
 

@@ -2,6 +2,7 @@ import { ISecurityGroup, IVpc, SubnetType } from '@aws-cdk/aws-ec2';
 import { PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { Code, Runtime, SingletonFunction } from '@aws-cdk/aws-lambda';
 import { RetentionDays } from '@aws-cdk/aws-logs';
+import { Bucket } from '@aws-cdk/aws-s3';
 import { IStringParameter, StringParameter } from '@aws-cdk/aws-ssm';
 import { CfnOutput, Construct, CustomResource, Duration } from '@aws-cdk/core';
 import { RemovalPolicy } from "@aws-cdk/core/lib/removal-policy";
@@ -35,6 +36,21 @@ export interface IDbBootstrapProps extends IStackProps {
    * 2. Creating SSM secure param for jdbc urls (SSM SecureParameter)
    */
   readonly targetRegion: string;
+
+  /**
+   * The name of the pre-existing s3 bucket holding the db data zipped csv file.
+   */
+  readonly s3DbDataBktNme: string;
+  /**
+   * Path of the db data file in the db data s3 bucket (NO initial slash).
+   *
+   * Examples:
+   * ```
+   * "targetFile.txt"
+   * "folderA/folderB/targetFile.txt"
+   * ```
+   */
+  readonly s3DbDataBktKey: string;
 }
 
 /**
@@ -68,6 +84,9 @@ export class DbBootstrapStack extends BaseStack {
       ...props, ...{ description: DbBootstrapStackRootProps.description }
     });
 
+    // get db data bucket ref
+    const dbDataBucket = Bucket.fromBucketName(this, iname('db-data-bucket', props), props.s3DbDataBktNme);
+
     // db dbootstrap role
     const dbBootstrapRoleInstNme = iname('db-bootstrap-role', props);
     this.dbBootstrapRole = new Role(this, dbBootstrapRoleInstNme, {
@@ -93,6 +112,23 @@ export class DbBootstrapStack extends BaseStack {
         ],
       })
     );
+    dbDataBucket.grantRead(this.dbBootstrapRole);
+    /*
+    this.dbBootstrapRole.addToPolicy(
+      new PolicyStatement({
+        actions: [
+          // "s3:PutObject",
+          's3:GetObject',
+          's3:GetBucketTagging',
+          's3:ListBucket',
+          's3:GetBucketVersioning',
+          's3:GetObjectVersion',
+          'kms:Decrypt',
+        ],
+        resources: [dbDataBucket.bucketArn, dbDataBucket.bucketArn + '/*'],
+      })
+    );
+    */
     // END db bootstrap role
 
     // prepare asset under /tmp dir as cdk does NOT honor symlinks in codepipeline/pipelines
@@ -120,7 +156,7 @@ export class DbBootstrapStack extends BaseStack {
       runtime: Runtime.PYTHON_3_8,
       // functionName: 'DbBootstrapLambda',
       memorySize: 128,
-      timeout: Duration.seconds(60),
+      timeout: Duration.minutes(5),
       code: Code.fromAsset(pjoin(tmpAssetDir)),
       handler: 'dbbootstrap.main',
       role: this.dbBootstrapRole,
@@ -144,6 +180,8 @@ export class DbBootstrapStack extends BaseStack {
         SsmNameJdbcAdminUrl: `/mcorpusDbAdminUrl/${props.appEnv}`,
         SsmNameJdbcUrl: `/mcorpusDbUrl/${props.appEnv}`, // NOTE: must use '/pname' (not 'pname') format!
         SsmNameJdbcTestUrl: `/mcorpusTestDbUrl/${props.appEnv}`,
+        S3DbDataBktNme: props.s3DbDataBktNme,
+        S3DbDataBktKey: props.s3DbDataBktKey,
       },
       removalPolicy: RemovalPolicy.DESTROY,
     });
