@@ -25,13 +25,12 @@ Checkout the [wiki](https://github.com/khanactl/mcorpus/wiki) pages for design d
   - [graphql-java](https://github.com/graphql-java/graphql-java)
   - [Ratpack](https://ratpack.io/) / [Netty](https://netty.io/)
 
-## Demo
+## AWS
 
-A working demo is [here](https://mcorpusgql-dev.net).
-![GraphiQL-demo](docs/graphiql.png "mcorpus GraphiQL interface")
+mcorpus is maintained in [AWS](https://mcorpusgql-dev.net).
 
-- Click the GraphiQL link from the main index page.
-- Issue an mcuser login mutation query with username = 'demo' and password = 'password23'. You will then be logged in based on a JWT cookie for 2 days.
-  ![GraphiQL-mcuser-demo-login](docs/mcuser-demo-login.png "mcorpus demo login")
-- After a successful login, you may freely issue GraphQL queries through the standard GraphiQL interface.
+![mcorpus-jwt-login](docs/graphiql-jwt-login.png "mcorpus GrahiQL jwt login")
+
+![mcorpus-graphiql](docs/graphiql.png "mcorpus GraphiQL member search")
+
 - All mcorpus data was generated purely randomly and is completely fictitous meant only for demonstrating a Java/Netty based, fully asynchronous, highly performant GraphQL endpoint.
