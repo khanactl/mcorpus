@@ -5,6 +5,7 @@
   import fetch from 'cross-fetch';
   import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
   import { setContext } from '@apollo/client/link/context';
+import Login from "../components/Login.svelte";
 
   const httpLink = createHttpLink({
     uri: '/graphql',
@@ -32,12 +33,6 @@
 </script>
 
 <style>
-  label {
-    cursor: pointer;
-    width: 80px;
-    display: inline-block;
-  }
-
 	h1, figure, p {
 		text-align: center;
 		margin: 0 auto;
@@ -82,17 +77,6 @@
 	<figcaption>Have fun with Sapper!</figcaption>
 </figure>
 
-<div>
-  <form>
-    <div>
-      <label for="username">Username</label>
-      <input type="text" id="username" maxlength="30" />
-    </div>
-    <div>
-      <label for="password">Password</label>
-      <input type="password" id="password" maxlength="30" />
-    </div>
-  </form>
-</div>
-
 <p><strong>Try editing this file (src/routes/index.svelte) to test live reloading.</strong></p>
+
+<Login/>
