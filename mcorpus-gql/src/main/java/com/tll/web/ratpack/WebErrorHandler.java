@@ -1,5 +1,6 @@
 package com.tll.web.ratpack;
 
+import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.isNullOrEmpty;
 
@@ -24,25 +25,24 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
    */
   @Override
   public void error(Context ctx, int statusCode) throws Exception {
-    ctx.getResponse().status(statusCode);
     switch(statusCode) {
     case 205: // reset content
-      ctx.getResponse().send("Reset Content (205)");
+      sendError(ctx, statusCode, "Reset Content (205)");
       break;
     case 400: // bad request
-      ctx.getResponse().send("Bad Request (400)");
+      sendError(ctx, statusCode, "Bad Request (400)");
       break;
     case 401: // unauthorized
-      ctx.getResponse().send("Unauthorized (401)");
+      sendError(ctx, statusCode, "Unauthorized (401)");
       break;
     case 403: // forbidden
-      ctx.getResponse().send("Forbidden (403)");
+      sendError(ctx, statusCode, "Forbidden (403)");
       break;
     case 404: // not found
-      ctx.getResponse().send("Not Found (404)");
+      sendError(ctx, statusCode, "Not Found (404)");
       break;
     default: // default client error response
-      ctx.getResponse().send("Bad Client");
+      sendError(ctx, statusCode, "Bad Client");
       break;
     }
     log.error("Client error {} response sent for request: {} - {}",
@@ -60,7 +60,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
    */
   @Override
   public void error(Context ctx, Throwable error) throws Exception {
-    ctx.getResponse().send("Server error (500)");
+    sendError(ctx, 500, "Server error (500)");
     final String emsg = isNull(error) ? "UNKNOWN" :
       (isNullOrEmpty(error.getMessage()) ? "UNKNOWN" : error.getMessage());
     log.error("Server error '{}' for request: {} - {}",
@@ -70,6 +70,18 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
     );
     if(ctx.getServerConfig().isDevelopment()) {
       log.error("StackTrace:\n\n{}\n", error);
+    }
+  }
+
+  private void sendError(Context ctx, int httpStatusCode, String errorMsg) {
+    final boolean sendAsJson = clean(ctx.getRequest().getPath()).startsWith("graphql");
+    if(sendAsJson) {
+      // json
+      String jerror = String.format("{ \"httpStatusCode\": %d, \"error\": \"%s\" }", httpStatusCode, errorMsg);
+      ctx.getResponse().status(httpStatusCode).send("application/json", jerror);
+    } else {
+      // text
+      ctx.getResponse().status(httpStatusCode).send(errorMsg);
     }
   }
 

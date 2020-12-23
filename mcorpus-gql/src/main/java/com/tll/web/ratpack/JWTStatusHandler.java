@@ -172,7 +172,7 @@ public class JWTStatusHandler implements Handler {
     // create jwt response action and cache in request for downstream access
     final IJwtHttpResponseAction ra = new JwtHttpResponseActionImpl(
       cookieSecure,
-      rs.getXForwardedHost(),
+      rs.getHttpOriginDomain(),
       jwtRefreshTokenName,
       ctx
     );
