@@ -36,7 +36,7 @@ create role mcwebtest with
   login
   encrypted password '{mcwebtest}'
   connection limit 5
-  valid until '2021-01-01';
+  valid until '2024-01-01';
 grant connect on database mcorpus to mcwebtest;
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcwebtest;
 grant select, insert, update, delete on mcuser, mcuser_audit, member_audit to mcwebtest;
@@ -48,7 +48,7 @@ create role mcadmin with
   login
   encrypted password '{mcadmin}'
   connection limit 1
-  valid until '2021-01-01';
+  valid until '2024-01-01';
 grant connect on database mcorpus to mcadmin;
 GRANT ALL PRIVILEGES ON DATABASE mcorpus TO mcadmin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mcadmin;
