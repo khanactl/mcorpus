@@ -2,11 +2,8 @@
 ---     mcorpus db roles      ---
 ---------------------------------
 -- Author               jkirton
--- mcorpus Version:     0.9.0-SNAPSHOT
 -- Created:             10/15/17
--- Modified:            02/26/19
--- Description:         Prototype UC member corpus db written in PostgreSQL.
--- PostgreSQL Version   11.2
+-- Modified:            1/14/21
 ---------------------------------
 
 -- Role: mcweb
@@ -18,7 +15,7 @@ create role mcweb with
   login
   encrypted password '{mcweb}'
   connection limit 500
-  valid until '2021-01-01';
+  valid until '2024-01-01';
 grant connect on database mcorpus to mcweb;
 -- mcorpus related
 grant select, insert, update, delete on member, mauth, maddress, mbenefits to mcweb;
