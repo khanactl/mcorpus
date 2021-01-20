@@ -111,16 +111,16 @@ public class MCorpusServerConfig {
   public boolean graphiql = false;
 
   /**
-   * The optional http client origin enabling CORS functionality.
+   * Optional comma-delimited list of allowed http client origins.
    * <p>
    * When this property is specified,
    * CORS will be configured to allow http communication between
-   * this graphql server and the http client origin specified by this property.
+   * this graphql server and the list of given http client origins specified by this property.
    * <p>
-   * E.g.:  <code>https://clientAppDomain.net</code>
-   *        <code>http://localhost:8080</code>
+   * E.g.:  <code>https://clientAppDomain1.net, https://clientAppDomain2.com</code>
+   *        <code>http://localhost:3000</code>
    * <p>
    * The default is null (not specified) and NO CORS http headers will be issued.
    */
-  public String httpClientOrigin;
+  public String httpClientOrigins;
 }

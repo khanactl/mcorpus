@@ -77,13 +77,13 @@ public class CsrfGuardHandler implements Handler {
 
   @Override
   public void handle(final Context ctx) throws Exception {
+    final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
+    final String originDomain = rs.getHttpOriginDomain();
 
     if(doRstCheck(ctx)) {
-      final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
-
-      // require either http Origin or Referer header be present (assume https)
-      if(isNull(rs.getHttpOrigin()) && isNull(rs.getHttpReferer())) {
-        log.error("Origin and Referer http headers missing.");
+      // require http Origin header be present
+      if(isNull(rs.getHttpOrigin())) {
+        log.error("No http Origin header present.");
         ctx.clientError(400); // bad request
         return;
       }
@@ -96,7 +96,7 @@ public class CsrfGuardHandler implements Handler {
       if(isNull(cookieRst) && isNull(headerRst)) {
         final String nextRst = genRst();
         log.warn("No request sync tokens present in request.  Re-setting with short-lived token.");
-        setCookie(ctx, rstTokenName, nextRst, "/", 120, cookieSecureFlag); // you got 2 mins to re-request
+        setCookie(ctx, originDomain, rstTokenName, nextRst, "/", 120, cookieSecureFlag); // you got 2 mins to re-request
         ctx.getResponse().getHeaders().add(rstTokenName, nextRst);
         ctx.clientError(205); // 205 - Reset Content
         return;
@@ -122,7 +122,7 @@ public class CsrfGuardHandler implements Handler {
 
     if(doNextRst(ctx)) {
       final String nextRst = genRst();
-      setCookie(ctx, rstTokenName, nextRst, "/", rstTtlInSeconds, cookieSecureFlag);
+      setCookie(ctx, originDomain, rstTokenName, nextRst, "/", rstTtlInSeconds, cookieSecureFlag);
       ctx.getResponse().getHeaders().add(rstTokenName, nextRst);
       ctx.getRequest().add(RST_TYPE, new RST(nextRst)); // make next rst available downstream
       log.info("Request sync token added to http response.");

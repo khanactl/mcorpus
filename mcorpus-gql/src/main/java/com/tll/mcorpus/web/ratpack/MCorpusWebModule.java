@@ -1,6 +1,12 @@
 package com.tll.mcorpus.web.ratpack;
 
+import static com.tll.core.Util.clean;
+import static com.tll.core.Util.strlen;
+
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -53,7 +59,11 @@ public class MCorpusWebModule extends AbstractModule {
   @Provides
   @Singleton
   CorsHandler corsHandler(MCorpusServerConfig config) {
-    return new CorsHandler(config.httpClientOrigin, config.rstTokenName);
+    List<String> allowedOrigins = Arrays.stream(clean(config.httpClientOrigins).split(","))
+      .map(aelm -> clean(aelm))
+      .filter(aelm -> strlen(aelm) > 0)
+      .collect(Collectors.toList());
+    return new CorsHandler(allowedOrigins, "rst, authorization");
   }
 
   @Provides

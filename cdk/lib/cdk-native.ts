@@ -75,7 +75,7 @@ export interface IAppConfig {
   readonly metricsOn: boolean;
   readonly graphiql: boolean;
   readonly cookieSecure: boolean;
-  readonly httpClientOrigin: string;
+  readonly httpClientOrigins: string;
 }
 
 export interface IWebAppConfig {}
@@ -211,7 +211,7 @@ export function appConfig(appEnv: AppEnv, jsonAppConfig: any): IAppConfig {
     metricsOn: subobj.metricsOn,
     graphiql: subobj.graphiql,
     cookieSecure: subobj.cookieSecure,
-    httpClientOrigin: subobj.httpClientOrigin,
+    httpClientOrigins: subobj.httpClientOrigins,
   };
 }
 
