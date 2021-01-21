@@ -14,7 +14,7 @@ public class Cookie {
 
   private static final Logger log = LoggerFactory.getLogger("cookie");
 
-  private static final String SAME_SITE = "Lax";
+  private static final String SAME_SITE = "None";
 
   public static void setCookie(
     final Context ctx,
