@@ -79,6 +79,7 @@ public class CsrfGuardHandler implements Handler {
   public void handle(final Context ctx) throws Exception {
     final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
     final String originDomain = rs.getHttpOriginDomain();
+    log.debug("originDomain: {}, server host: {}", originDomain, ctx.getServerConfig().getPublicAddress().getHost());
 
     if(doRstCheck(ctx)) {
       // require http Origin header be present
