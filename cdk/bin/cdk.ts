@@ -11,7 +11,7 @@ import { LbStack, LbStackRootProps } from '../lib/lb-stack';
 import { MetricsStack, MetricsStackRootProps } from '../lib/metrics-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
 import { VpcStack } from '../lib/vpc-stack';
-import { WafStack, WafStackRootProps } from "../lib/waf-stack";
+// import { WafStack, WafStackRootProps } from "../lib/waf-stack";
 
 const app = new App();
 
@@ -122,7 +122,7 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     ssmJdbcTestUrl: dbBootstrapStack.ssmJdbcTestUrl,
     appDeployApprovalEmails: cdkAppConfig.cicdConfig.appDeployApprovalEmails,
     onBuildFailureEmails: cdkAppConfig.cicdConfig.onBuildFailureEmails,
-    cdkDevWafStackName: iname(WafStackRootProps.rootStackName, cdkAppConfig),
+    // cdkDevWafStackName: iname(WafStackRootProps.rootStackName, cdkAppConfig),
     cdkDevLbStackName: iname(LbStackRootProps.rootStackName, cdkAppConfig),
     cdkDevAppStackName: iname(AppStackRootProps.rootStackName, cdkAppConfig),
     cdkDevMetricsStackName: iname(MetricsStackRootProps.rootStackName, cdkAppConfig),
@@ -131,12 +131,14 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
   devPipelineStack.addDependency(secGrpStack);
   devPipelineStack.addDependency(clusterStack);
 
+  /*
   const wafStack = new WafStack(app, {
     appName: cdkAppConfig.appName,
     appEnv: cdkAppConfig.appEnv,
     env: cdkAppConfig.awsEnv,
     tags: cdkAppConfig.appEnvStackTags,
   });
+  */
   const lbStack = new LbStack(app, {
     appName: cdkAppConfig.appName,
     appEnv: cdkAppConfig.appEnv,
@@ -147,7 +149,7 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     sslCertArn: cdkAppConfig.webAppContainerConfig.tlsCertArn,
     awsHostedZoneId: cdkAppConfig.webAppContainerConfig.dnsConfig.awsHostedZoneId,
     publicDomainName: cdkAppConfig.webAppContainerConfig.dnsConfig.publicDomainName,
-    webAclArn: wafStack.webAclArn,
+    // webAclArn: wafStack.webAclArn,
   });
 
   const appStack = new AppStack(app, {
