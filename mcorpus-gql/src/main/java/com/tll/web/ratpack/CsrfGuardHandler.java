@@ -104,7 +104,7 @@ public class CsrfGuardHandler implements Handler {
 
       // one of expected 2 rst(s) not present
       if(isNull(cookieRst) || isNull(headerRst)) {
-        log.error("Request sync token(s) missing in request.");
+        log.error("Request sync {} token missing in request.", isNull(headerRst) ? "header" : "cookie");
         ctx.clientError(400); // bad request
         return;
       }

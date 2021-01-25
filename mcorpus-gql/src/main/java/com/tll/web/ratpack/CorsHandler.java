@@ -1,10 +1,13 @@
 package com.tll.web.ratpack;
 
 import static com.tll.core.Util.clean;
-import static com.tll.core.Util.isNotNullOrEmpty;
+import static com.tll.core.Util.isNotBlank;
+import static com.tll.core.Util.isNullOrEmpty;
+import static com.tll.core.Util.not;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.tll.web.RequestSnapshot;
 
@@ -43,11 +46,18 @@ public class CorsHandler implements Handler {
    *                        response header value
    */
   public CorsHandler(List<String> allowedOrigins, String exposeHeaders) {
-    this.corsEnabled = isNotNullOrEmpty(allowedOrigins);
-    this.allowedOrigins = this.corsEnabled ? allowedOrigins : null;
+    this.corsEnabled = isNullOrEmpty(allowedOrigins) ?
+      false :
+      not(allowedOrigins.stream().filter(e -> isNotBlank(e)).collect(Collectors.toList()).isEmpty());
+    this.allowedOrigins = this.corsEnabled ? new ArrayList<String>(allowedOrigins) : null;
     this.allowedHeaders = this.corsEnabled ?
       "x-requested-with, origin, content-type, accept, " + clean(exposeHeaders) : null;
     this.exposeHeaders = this.corsEnabled ? clean(exposeHeaders) : null;
+    log.info("CORS is {}",
+      this.corsEnabled ?
+        "ENABLED for domains: " + this.allowedOrigins.stream().collect(Collectors.joining(", ")) :
+        "DISABLED"
+    );
   }
 
   @Override
@@ -55,20 +65,19 @@ public class CorsHandler implements Handler {
     if(corsEnabled) {
       final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
       final String origin = rs.getHttpOrigin();
-      for(String aorigin : this.allowedOrigins) {
-        if(Objects.equals(aorigin, origin)) {
-          ctx.getResponse().getHeaders()
-            .add("Access-Control-Allow-Origin", aorigin)
-            .add("Access-Control-Allow-Credentials", "true")
-            .add("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-            .add("Access-Control-Allow-Headers", allowedHeaders)
-            .add("Access-Control-Expose-Headers", exposeHeaders)
-            .add("Access-Control-Max-Age", "86400") // 24 hours in seconds
-            ;
-          log.debug("CORS headers added to response.");
-          break;
-        }
+      if(allowedOrigins.contains(origin)) {
+        ctx.getResponse().getHeaders()
+          .add("Access-Control-Allow-Origin", origin)
+          .add("Access-Control-Allow-Credentials", "true")
+          .add("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+          .add("Access-Control-Allow-Headers", allowedHeaders)
+          .add("Access-Control-Expose-Headers", exposeHeaders)
+          .add("Access-Control-Max-Age", "86400") // 24 hours in seconds
+          ;
+        log.debug("CORS headers added to response.");
       }
+      else
+        log.warn("CORS: http request origin domain '{}' NOT ALLOWED.  No CORS response headers added!", origin);
     }
     ctx.next();
   }

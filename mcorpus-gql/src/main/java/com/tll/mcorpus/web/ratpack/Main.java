@@ -1,7 +1,6 @@
 package com.tll.mcorpus.web.ratpack;
 
 import static com.tll.core.Util.clean;
-import static com.tll.core.Util.isNotBlank;
 import static com.tll.core.Util.not;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
@@ -62,11 +61,6 @@ public class Main {
         }
         glog.info("metrics is {}", config.metricsOn ? "ON" : "OFF");
         glog.info("GraphiQL is {}", config.graphiql ? "ON" : "OFF");
-        glog.info("CORS is {}",
-          isNotBlank(config.httpClientOrigins) ?
-            "ENABLED for " + config.httpClientOrigins :
-            "DISABLED"
-        );
         bindings.module(HikariModule.class, hikariConfig -> {
           hikariConfig.setDataSourceClassName(config.dbDataSourceClassName);
           hikariConfig.addDataSourceProperty("URL", config.dbUrl);
