@@ -60,8 +60,8 @@ public class Cookie {
       )
     );
     log.debug(
-      "{} cookie set (domain: {}, path: {}, maxAge: {}, secure: {}, SameSite: {}).",
-      cookieName, domain, path, maxAge, secure, sameSiteVal
+      "{} cookie set (domain: {}, path: {}, maxAge: {}, secure: {}, SameSite: {}) - server domain name: {}.",
+      cookieName, domain, path, maxAge, secure, sameSiteVal, ctx.getServerConfig().getPublicAddress().getHost()
     );
   }
 
