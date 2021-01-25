@@ -100,7 +100,7 @@ export interface IAppStackProps extends IStackProps {
   readonly metricsOn: boolean,
   readonly graphiql: boolean,
   readonly cookieSecure: boolean,
-  readonly httpClientOrigin: string,
+  readonly httpClientOrigins: string,
 }
 
 /**
@@ -189,7 +189,7 @@ export class AppStack extends BaseStack {
 
         MCORPUS_METRICS_ON: String(props.metricsOn),
         MCORPUS_GRAPHIQL: String(props.graphiql),
-        MCORPUS_HTTP_CLIENT_ORIGIN: props.httpClientOrigin,
+        MCORPUS_HTTP_CLIENT_ORIGINS: props.httpClientOrigins,
 
         MCORPUS_SERVER__DEVELOPMENT: String(props.devFlag),
         MCORPUS_SERVER__PORT: `${props.lbToEcsPort}`,

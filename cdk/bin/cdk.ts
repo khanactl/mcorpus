@@ -181,7 +181,7 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     metricsOn: cdkAppConfig.appConfig.metricsOn,
     graphiql: cdkAppConfig.appConfig.graphiql,
     cookieSecure: cdkAppConfig.appConfig.cookieSecure,
-    httpClientOrigin: cdkAppConfig.appConfig.httpClientOrigin,
+    httpClientOrigins: cdkAppConfig.appConfig.httpClientOrigins,
   });
   appStack.addDependency(lbStack);
   appStack.addDependency(devPipelineStack);

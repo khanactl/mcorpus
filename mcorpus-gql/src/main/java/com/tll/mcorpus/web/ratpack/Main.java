@@ -63,8 +63,8 @@ public class Main {
         glog.info("metrics is {}", config.metricsOn ? "ON" : "OFF");
         glog.info("GraphiQL is {}", config.graphiql ? "ON" : "OFF");
         glog.info("CORS is {}",
-          isNotBlank(config.httpClientOrigin) ?
-            "ENABLED for " + config.httpClientOrigin :
+          isNotBlank(config.httpClientOrigins) ?
+            "ENABLED for " + config.httpClientOrigins :
             "DISABLED"
         );
         bindings.module(HikariModule.class, hikariConfig -> {
