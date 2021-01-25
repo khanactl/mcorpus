@@ -62,14 +62,6 @@ public class RequestSnapshotTest {
   }
 
   @Test
-  public void stripSchemeAndPortTest() {
-    assertEquals("localhost", RequestSnapshot.stripSchemeAndPort("https://localhost:3000"));
-    assertEquals("localhost", RequestSnapshot.stripSchemeAndPort("http://localhost:3000"));
-    assertEquals("localhost", RequestSnapshot.stripSchemeAndPort("localhost:3000"));
-    assertEquals("localhost", RequestSnapshot.stripSchemeAndPort("localhost"));
-  }
-
-  @Test
   public void testXForwardedForClientIp() {
     RequestSnapshot rs;
     rs = testRequestSnapshot_multi();

@@ -2,14 +2,11 @@ package com.tll.web;
 
 import static com.tll.core.Util.clean;
 import static com.tll.core.Util.isNotNull;
-import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.neclean;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 
 import java.time.Instant;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Immutable snapshot of the key 'auditable' attributes
@@ -19,19 +16,9 @@ import java.util.regex.Pattern;
  */
 public class RequestSnapshot {
 
-  static final Pattern PTRN_DOMAIN = Pattern.compile("^(http:\\/\\/|https:\\/\\/|)(.+)$");
-
   static String stripQS(final String s) {
     final int i = s == null ? -1 : s.indexOf("?");
     return i > 0 ? s.substring(0, i) : s;
-  }
-
-  static String stripSchemeAndPort(final String s) {
-    if(isNull(s)) return null;
-    Matcher m = PTRN_DOMAIN.matcher(s);
-    String host = m.matches() ? m.group(2) : s;
-    int i = host.lastIndexOf(":");
-    return i > 0 ? host.substring(0, i) : host;
   }
 
   private final Instant requestInstant;
@@ -43,7 +30,6 @@ public class RequestSnapshot {
 
   private final String httpHost;
   private final String httpOrigin;
-  private final String httpOriginDomain;
   private final String httpReferer;
   private final String httpForwarded;
 
@@ -110,7 +96,6 @@ public class RequestSnapshot {
 
     this.httpHost = neclean(httpHost);
     this.httpOrigin = neclean(httpOrigin);
-    this.httpOriginDomain = stripSchemeAndPort(this.httpOrigin);
     this.httpReferer = neclean(httpReferer);
     this.httpForwarded = neclean(httpForwarded);
 
@@ -172,13 +157,6 @@ public class RequestSnapshot {
    */
   public String getHttpOrigin() {
     return httpOrigin;
-  }
-
-  /**
-   * @return the domain (hostname) part of the http Origin header value.
-   */
-  public String getHttpOriginDomain() {
-    return httpOriginDomain;
   }
 
   /**
@@ -293,7 +271,6 @@ public class RequestSnapshot {
         "method: %s, " +
         "host: %s, " +
         "origin: %s, " +
-        "origin domain: %s, " +
         "referer: %s, " +
         "forwarded: %s, " +
         "x-forwarded-for: %s, " +
@@ -308,8 +285,7 @@ public class RequestSnapshot {
       getRemoteAddressHost(),
       getMethod(),
       getHttpHost(),
-      getHttpOrigin(),
-      getHttpOriginDomain(),
+      stripQS(getHttpOrigin()),
       stripQS(getHttpReferer()),
       getHttpForwarded(),
       getXForwardedFor(),
