@@ -163,8 +163,13 @@ public class Mauth extends TableImpl<MauthRecord> {
         return Arrays.<ForeignKey<MauthRecord, ?>>asList(Keys.MAUTH__MAUTH_MID_FKEY);
     }
 
+    private transient Member _member;
+
     public Member member() {
-        return new Member(this, Keys.MAUTH__MAUTH_MID_FKEY);
+        if (_member == null)
+            _member = new Member(this, Keys.MAUTH__MAUTH_MID_FKEY);
+
+        return _member;
     }
 
     @Override

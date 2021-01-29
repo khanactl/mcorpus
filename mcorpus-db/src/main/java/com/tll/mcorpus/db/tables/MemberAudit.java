@@ -130,8 +130,13 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
         return Arrays.<ForeignKey<MemberAuditRecord, ?>>asList(Keys.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY);
     }
 
+    private transient Member _member;
+
     public Member member() {
-        return new Member(this, Keys.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY);
+        if (_member == null)
+            _member = new Member(this, Keys.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY);
+
+        return _member;
     }
 
     @Override

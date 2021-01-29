@@ -153,8 +153,13 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
         return Arrays.<ForeignKey<McuserAuditRecord, ?>>asList(Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
     }
 
+    private transient Mcuser _mcuser;
+
     public Mcuser mcuser() {
-        return new Mcuser(this, Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
+        if (_mcuser == null)
+            _mcuser = new Mcuser(this, Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
+
+        return _mcuser;
     }
 
     @Override

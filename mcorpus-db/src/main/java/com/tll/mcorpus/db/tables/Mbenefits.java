@@ -73,7 +73,7 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     /**
      * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public final TableField<MbenefitsRecord, Object> MCB = createField(DSL.name("mcb"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"money\"").nullable(false), this, "");
 
     /**
@@ -169,8 +169,13 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
         return Arrays.<ForeignKey<MbenefitsRecord, ?>>asList(Keys.MBENEFITS__MBENEFITS_MID_FKEY);
     }
 
+    private transient Member _member;
+
     public Member member() {
-        return new Member(this, Keys.MBENEFITS__MBENEFITS_MID_FKEY);
+        if (_member == null)
+            _member = new Member(this, Keys.MBENEFITS__MBENEFITS_MID_FKEY);
+
+        return _member;
     }
 
     @Override

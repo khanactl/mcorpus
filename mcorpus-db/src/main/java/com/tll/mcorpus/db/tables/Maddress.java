@@ -153,8 +153,13 @@ public class Maddress extends TableImpl<MaddressRecord> {
         return Arrays.<ForeignKey<MaddressRecord, ?>>asList(Keys.MADDRESS__MADDRESS_MID_FKEY);
     }
 
+    private transient Member _member;
+
     public Member member() {
-        return new Member(this, Keys.MADDRESS__MADDRESS_MID_FKEY);
+        if (_member == null)
+            _member = new Member(this, Keys.MADDRESS__MADDRESS_MID_FKEY);
+
+        return _member;
     }
 
     @Override
