@@ -24,10 +24,10 @@
     <postgres-jdbc.version>42.2.18</postgres-jdbc.version>
 
     <flyway.version>7.5.2</flyway.version>
-    <jooq.version>3.14.6</jooq.version>
+    <jooq.version>3.14.7</jooq.version>
     <hikari-cp.version>4.0.1</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>9.4.2</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>9.5</nimbus-jose-jwt.version>
 
     <guava.version>29.0-jre</guava.version>
     <guice.version>4.2.3</guice.version>
@@ -41,7 +41,7 @@
 
     <dropwizard-metrics.version>4.1.6</dropwizard-metrics.version>
 
-    <graphql-java.version>16.1</graphql-java.version>
+    <graphql-java.version>16.2</graphql-java.version>
 
     <junit.version>4.13.1</junit.version>
   </properties>
