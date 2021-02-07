@@ -4,7 +4,7 @@ FROM ${REPO_LOCATION}:amazoncorretto-11
 
 # RUN apk --no-cache add curl
 
-EXPOSE 5150/tcp 5432/tcp
+EXPOSE ${env.MCORPUS_SERVER__PORT}/tcp 5432/tcp
 
 WORKDIR /webapp
 
@@ -15,6 +15,6 @@ COPY log4j-api-2.14.0.jar .
 COPY log4j-core-2.14.0.jar .
 COPY log4j-slf4j-impl-2.14.0.jar .
 
-HEALTHCHECK --interval=120s --timeout=5s --start-period=15s --retries=3 CMD curl -f -s http://localhost:5150/health/ || exit 1
+HEALTHCHECK --interval=120s --timeout=5s --start-period=15s --retries=3 CMD curl -f -s http://localhost:${env.MCORPUS_SERVER__PORT}/health/ || exit 1
 
 ENTRYPOINT exec java $JAVA_OPTS -jar mcorpus-gql-server.jar
