@@ -63,9 +63,9 @@ export interface IAppStackProps extends IStackProps {
 
   /**
    * The inner or traffic port used to send traffic
-   * from the load balancer to the ecs/fargate service.
+   * from the load balancer to the app docker container.
    */
-  readonly lbToEcsPort: number;
+  readonly lbToAppPort: number;
 
   // readonly ssmKmsArn: string;
   /**
@@ -166,7 +166,7 @@ export class AppStack extends BaseStack {
     const containerDef = taskDef.addContainer(this.containerName, {
       image: appImage,
       healthCheck: {
-        command: [`curl -f -s http://localhost:${props.lbToEcsPort}/health/ || exit 1`],
+        command: [`curl -f -s http://localhost:${props.lbToAppPort}/health/ || exit 1`],
         interval: Duration.seconds(120),
         timeout: Duration.seconds(5),
         startPeriod: Duration.seconds(15),
@@ -192,7 +192,7 @@ export class AppStack extends BaseStack {
         MCORPUS_HTTP_CLIENT_ORIGINS: props.httpClientOrigins,
 
         MCORPUS_SERVER__DEVELOPMENT: String(props.devFlag),
-        MCORPUS_SERVER__PORT: `${props.lbToEcsPort}`,
+        MCORPUS_SERVER__PORT: `${props.lbToAppPort}`,
         MCORPUS_SERVER__PUBLIC_ADDRESS: props.publicAddress,
       },
       secrets: {
@@ -206,11 +206,11 @@ export class AppStack extends BaseStack {
       }),
     });
     containerDef.addPortMappings({
-      containerPort: props.lbToEcsPort,
+      containerPort: props.lbToAppPort,
     });
 
     // sec grp rule: lb to ecs container traffic
-    props.ecsSecGrp.addIngressRule(props.lbSecGrp, Port.tcp(props.lbToEcsPort), 'lb to ecs container traffic');
+    props.ecsSecGrp.addIngressRule(props.lbSecGrp, Port.tcp(props.lbToAppPort), 'lb to ecs container traffic');
 
     const fargateSvcInstNme = iname('fargate-svc', props);
     this.fargateSvc = new FargateService(this, fargateSvcInstNme, {
@@ -229,7 +229,7 @@ export class AppStack extends BaseStack {
     const albTargetGroupInstNme = iname('fargate-target', props);
     this.albTargetGroup = props.lbListener.addTargets(albTargetGroupInstNme, {
       targetGroupName: albTargetGroupInstNme,
-      port: props.lbToEcsPort,
+      port: props.lbToAppPort,
       targets: [this.fargateSvc],
       healthCheck: {
         protocol: Protocol.HTTP,

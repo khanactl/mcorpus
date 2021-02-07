@@ -91,6 +91,12 @@ export interface IDevPipelineStackProps extends IStackProps {
    */
   readonly ssmJdbcTestUrl: IStringParameter;
 
+  /**
+   * The inner or traffic port used to send traffic
+   * from the load balancer to the app docker container in ecs.
+   */
+  readonly lbToAppPort: number;
+
   readonly appDeployApprovalEmails?: string[];
 
   readonly onBuildFailureEmails?: string[];
@@ -216,6 +222,7 @@ export class DevPipelineStack extends BaseStack {
         env: {
           variables: {
             REPOSITORY_URI: ecrRepo.repositoryUri,
+            MCORPUS_SERVER__PORT: props.lbToAppPort,
           },
           'parameter-store': {
             MCORPUS_DB_URL: props.ssmJdbcUrl.parameterName,
