@@ -117,7 +117,9 @@ export class DevPipelineStack extends BaseStack {
   public readonly cdkBuildFailureEventTopic?: Topic;
 
   constructor(scope: Construct, props: IDevPipelineStackProps) {
-    super(scope, DevPipelineStackRootProps.rootStackName, props);
+    super(scope, DevPipelineStackRootProps.rootStackName, {
+      ...props, ...{ description: DevPipelineStackRootProps.description }
+    });
 
     const ecrRepo = Repository.fromRepositoryName(this, iname('ecr', props), props.ecrRepoName);
     this.appBuiltImage = new PipelineContainerImage(ecrRepo);
