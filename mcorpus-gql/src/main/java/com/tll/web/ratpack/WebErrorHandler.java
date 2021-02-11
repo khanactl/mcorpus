@@ -62,7 +62,7 @@ public class WebErrorHandler implements ServerErrorHandler, ClientErrorHandler {
   public void error(Context ctx, Throwable error) throws Exception {
     sendError(ctx, 500, "Server error (500)");
     final String emsg = isNull(error) ? "UNKNOWN" :
-      (isNullOrEmpty(error.getMessage()) ? "UNKNOWN" : error.getMessage());
+      isNullOrEmpty(error.getMessage()) ? "UNKNOWN" : error.getMessage();
     log.error("Server error '{}' for request: {} - {}",
         emsg,
         ctx.getRequest().getPath(),

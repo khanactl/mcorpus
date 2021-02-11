@@ -23,7 +23,7 @@
 
     <postgres-jdbc.version>42.2.18</postgres-jdbc.version>
 
-    <flyway.version>7.5.2</flyway.version>
+    <flyway.version>7.5.3</flyway.version>
     <jooq.version>3.14.7</jooq.version>
     <hikari-cp.version>4.0.1</hikari-cp.version>
 
@@ -444,12 +444,19 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.1.4</version>
+          <version>4.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.1.2</version>
+          <configuration>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>3.14.0</version>
           <configuration>
           </configuration>
         </plugin>

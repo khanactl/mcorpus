@@ -28,7 +28,7 @@ import com.tll.mcorpus.db.enums.MemberStatus;
  */
 public class MemberFilter {
 
-  static interface IFieldPredicate {
+  interface IFieldPredicate {
     /**
      * @return true if a field value has been set,
      *         false otherwise.
@@ -36,7 +36,7 @@ public class MemberFilter {
     boolean isSet();
   }
 
-  static interface INullableFieldPredicate extends IFieldPredicate {
+  interface INullableFieldPredicate extends IFieldPredicate {
     /**
      * @return true if the operation is a null or non-null check,
      *         false otherwise.
@@ -46,7 +46,7 @@ public class MemberFilter {
 
   public static class StringPredicate implements INullableFieldPredicate {
 
-    public static enum Operation {
+    public enum Operation {
       IS_NULL,
       IS_NOT_NULL,
       EQUALS,
@@ -100,7 +100,7 @@ public class MemberFilter {
 
   public static class DatePredicate implements INullableFieldPredicate {
 
-    public static enum DateOp {
+    public enum DateOp {
       IS_NULL,
       IS_NOT_NULL,
       EQUAL_TO,
@@ -223,7 +223,7 @@ public class MemberFilter {
 
   public static class OrderBy implements IFieldPredicate {
 
-    public static enum Dir { ASC, DESC; }
+    public enum Dir { ASC, DESC; }
 
     private final String token;
     private final Dir dir;

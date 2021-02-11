@@ -14,7 +14,7 @@ import com.tll.repo.FetchResult;
  */
 public interface IJwtBackendHandler {
 
-  public static enum JwtBackendStatus {
+  enum JwtBackendStatus {
     /**
      * Present in backend but in a bad state.
      */

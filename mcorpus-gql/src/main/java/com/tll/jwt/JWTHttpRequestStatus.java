@@ -63,7 +63,7 @@ public class JWTHttpRequestStatus {
    * <p>
    * Backend JWT verification by jwt id is integrated in these possible states.
    */
-  public static enum JWTStatus {
+  public enum JWTStatus {
     /**
      * No JWT present in the received request.
      */
@@ -129,7 +129,7 @@ public class JWTHttpRequestStatus {
   /**
    * The possible states of a refresh token cookie held in an incoming http request.
    */
-  public static enum RefreshTokenStatus {
+  public enum RefreshTokenStatus {
     /**
      * Refresh token status was NOT checked.
      */

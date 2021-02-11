@@ -25,20 +25,6 @@
     <main-class>com.tll.mcorpus.web.ratpack.Main</main-class>
   </properties>
 
-  <profiles>
-    <profile>
-      <id>dev</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-    </profile>
-    <profile>
-      <id>prod</id>
-      <properties>
-      </properties>
-    </profile>
-  </profiles>
-
   <build>
     <resources>
       <resource>
@@ -61,6 +47,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <fork>true</fork>
+          <executable>${JAVA_HOME}/bin/javac</executable>
+          <compilerVersion>${java.version}</compilerVersion>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -95,35 +86,6 @@
           </archive>
         </configuration>
       </plugin>
-
-      <!--
-      <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>git-info</id>
-            <goals>
-              <goal>revision</goal>
-            </goals>
-            <phase>initialize</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
-          <prefix>git</prefix>
-          <verbose>false</verbose>
-          <generateGitPropertiesFile>true</generateGitPropertiesFile>
-          <generateGitPropertiesFilename>${project.build.directory}/git.properties</generateGitPropertiesFilename>
-          <format>json</format>
-          <gitDescribe>
-            <skip>false</skip>
-            <always>false</always>
-            <dirty>-dirty</dirty>
-          </gitDescribe>
-        </configuration>
-      </plugin>
-      -->
 
       <!-- gql-server uber-jar -->
       <plugin>
@@ -249,30 +211,6 @@
         </executions>
       </plugin>
 
-      <!--
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
-        <executions>
-          <execution>
-            <id>chmod-dockstart</id>
-            <phase>package</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>chmod</executable>
-              <arguments>
-                <argument>u+x</argument>
-                <argument>${project.build.directory}/dockerbuild.sh</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      -->
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -290,6 +228,22 @@
 
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin><!-- mvn spotbugs:gui -->
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <dependencies>
     <dependency>
@@ -423,17 +377,5 @@
       <scope>runtime</scope>
     </dependency>
   </dependencies>
-
-  <reporting>
-    <plugins>
-      <plugin><!-- mvn spotbugs:gui -->
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-maven-plugin</artifactId>
-        <configuration>
-          <xmlOutput>true</xmlOutput>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
 
 </project>
