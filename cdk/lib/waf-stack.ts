@@ -45,7 +45,7 @@ export class WafStack extends BaseStack {
             cloudWatchMetricsEnabled: true,
             metricName: "IPBlacklist",
           },
-          overrideAction: { none: {} },
+          overrideAction: { count: {} },
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
