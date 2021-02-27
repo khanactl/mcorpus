@@ -2,7 +2,7 @@
 import { App } from '@aws-cdk/core';
 import 'source-map-support/register';
 import { AppStack, AppStackRootProps } from '../lib/app-stack';
-import { AppEnv, cdkAppConfig, ICdkAppConfig, iname, loadConfig } from '../lib/cdk-native';
+import { configTransform, ICdkAppConfig, ICdkConfig, iname, loadConfig } from '../lib/cdk-native';
 import { ClusterStack } from '../lib/cluster-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbStack } from '../lib/db-stack';
@@ -15,36 +15,14 @@ import { WafStack, WafStackRootProps } from "../lib/waf-stack";
 
 const app = new App();
 
-/**
- * The expected name of the required cdk app config json file.
- *
- * This JSON object (assumed to adhere to an expected structure)
- * provides the needed input to all instantiated cdk stacks herein.
- */
-const cdkAppConfigFilename = 'mcorpus-cdk-app-config.json';
-
-/**
- * The S3 bucket name in the default AWS account holding a cached copy of
- * the app config file.
- *
- * This is used when no local app config file is found.
- *
- * This bucket's life-cycle is **not managed** by these CDK stacks.
- * That is, it is assumed to *pre-exist*.
- */
-const cdkAppConfigCacheS3BucketName = 'mcorpus-app-config';
-
-async function configTransform(jsonConfig: any): Promise<ICdkAppConfig> {
+async function generate(cdkConfig: ICdkConfig): Promise<void> {
   // DEV
-  return cdkAppConfig(
-    AppEnv.DEV,
-    cdkAppConfigFilename,
-    cdkAppConfigCacheS3BucketName,
-    jsonConfig
-  );
+  generateAppInstance(cdkConfig.devConfig, cdkConfig.cdkAppConfigFilename, cdkConfig.cdkAppConfigCacheS3BucketName);
+  // PROD
+  // generateAppInstance(cdkConfig.prodConfig, cdkConfig.cdkAppConfigFilename, cdkConfig.cdkAppConfigCacheS3BucketName);
 }
 
-async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
+async function generateAppInstance(cdkAppConfig: ICdkAppConfig, cdkAppConfigFilename: string, cdkAppConfigCacheS3BucketName: string): Promise<void> {
   // VPC
   const vpcStack = new VpcStack(app, {
     appName: cdkAppConfig.appName,
@@ -108,8 +86,8 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     vpc: vpcStack.vpc,
     // appRepository: ecrStack.appRepository,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
-    appConfigCacheS3BucketName: cdkAppConfig.cdkAppConfigCacheS3BucketName,
-    appConfigFilename: cdkAppConfig.cdkAppConfigFilename,
+    appConfigCacheS3BucketName: cdkAppConfigCacheS3BucketName,
+    appConfigFilename: cdkAppConfigFilename,
     ssmImageTagParamName: cdkAppConfig.cicdConfig.ssmImageTagParamName,
     githubOwner: cdkAppConfig.gitHubRepoRef.owner,
     githubRepo: cdkAppConfig.gitHubRepoRef.repo,
@@ -137,6 +115,7 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
     appEnv: cdkAppConfig.appEnv,
     env: cdkAppConfig.awsEnv,
     tags: cdkAppConfig.appEnvStackTags,
+    blacklistedIps: cdkAppConfig.loadBalancerConfig.blacklistedIps,
   });
   const lbStack = new LbStack(app, {
     appName: cdkAppConfig.appName,
@@ -203,7 +182,7 @@ async function generate(cdkAppConfig: ICdkAppConfig): Promise<void> {
 }
 
 // run the trap
-loadConfig(cdkAppConfigFilename, cdkAppConfigCacheS3BucketName)
+loadConfig()
   .then(json => configTransform(json))
   .then(config => generate(config))
   .catch(err => console.log(err));

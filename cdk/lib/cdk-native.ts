@@ -6,6 +6,25 @@ import { homedir } from "os";
 import cml = require("camelcase");
 
 /**
+ * The expected name of the required cdk app config json file.
+ *
+ * This JSON object (assumed to adhere to an expected structure)
+ * provides the needed input to all instantiated cdk stacks herein.
+ */
+const cdkAppConfigFilename = 'mcorpus-cdk-app-config.json';
+
+/**
+ * The S3 bucket name in the default AWS account holding a cached copy of
+ * the app config file.
+ *
+ * This is used when no local app config file is found.
+ *
+ * This bucket's life-cycle is **not managed** by these CDK stacks.
+ * That is, it is assumed to *pre-exist*.
+ */
+const cdkAppConfigCacheS3BucketName = 'mcorpus-app-config';
+
+/**
  * The supported application environments.
  */
 export enum AppEnv {
@@ -78,7 +97,6 @@ export interface IAppConfig {
   readonly httpClientOrigins: string;
 }
 
-export interface IWebAppConfig {}
 export interface IWebAppContainerConfig {
   readonly lbToAppPort: number;
   readonly taskdefCpu: number;
@@ -87,6 +105,10 @@ export interface IWebAppContainerConfig {
   readonly containerDefMemoryReservationInMb: number;
   readonly tlsCertArn: string;
   readonly dnsConfig: IDnsConfig;
+}
+
+export interface ILoadBalancerConfig {
+  readonly blacklistedIps: string[];
 }
 
 export interface ICicdConfig {
@@ -106,8 +128,6 @@ export interface IMetricsConfig {
  * cdk app configuration definition.
  */
 export interface ICdkAppConfig extends IAppNameAndEnv {
-  readonly cdkAppConfigFilename: string;
-  readonly cdkAppConfigCacheS3BucketName: string;
   readonly awsEnv: Environment;
   readonly appEnvStackTags: { [key: string]: string };
   readonly commonEnvStackTags: { [key: string]: string };
@@ -117,8 +137,34 @@ export interface ICdkAppConfig extends IAppNameAndEnv {
   readonly dbConfig: IDbConfig;
   readonly appConfig: IAppConfig;
   readonly webAppContainerConfig: IWebAppContainerConfig;
+  readonly loadBalancerConfig: ILoadBalancerConfig;
   readonly metricsConfig: IMetricsConfig;
   readonly cicdConfig: ICicdConfig;
+}
+
+/**
+ * Simple encapsulation of all concrete cdk app config
+ * instances broken out by app environment.
+ */
+export interface ICdkConfig {
+  readonly cdkAppConfigFilename: string;
+  readonly cdkAppConfigCacheS3BucketName: string;
+  readonly devConfig: ICdkAppConfig;
+  readonly prodConfig: ICdkAppConfig;
+}
+
+/**
+ * Generate a map of ICdkAppConfig instances keyed by AppEnv.
+ * @param jsonConfig the cdk app config json object
+ * @returns Newly ICdkAppConfig instance.
+ */
+export async function configTransform(jsonConfig: any): Promise<ICdkConfig> {
+  return {
+    cdkAppConfigFilename: cdkAppConfigFilename,
+    cdkAppConfigCacheS3BucketName: cdkAppConfigCacheS3BucketName,
+    devConfig: cdkAppConfig(AppEnv.DEV, jsonConfig),
+    prodConfig: cdkAppConfig(AppEnv.PROD, jsonConfig),
+  };
 }
 
 /**
@@ -131,13 +177,9 @@ export interface ICdkAppConfig extends IAppNameAndEnv {
  */
 export function cdkAppConfig(
   appEnv: AppEnv,
-  cdkAppConfigFilename: string,
-  cdkAppConfigCacheS3BucketName: string,
   jsonAppConfig: any
 ): ICdkAppConfig {
   return {
-    cdkAppConfigFilename: cdkAppConfigFilename,
-    cdkAppConfigCacheS3BucketName: cdkAppConfigCacheS3BucketName,
     appEnv: appEnv,
     appName: jsonAppConfig.appName,
     awsEnv: env(appEnv, jsonAppConfig),
@@ -149,6 +191,7 @@ export function cdkAppConfig(
     dbConfig: dbConfig(AppEnv.DEV, jsonAppConfig),
     appConfig: appConfig(AppEnv.DEV, jsonAppConfig),
     webAppContainerConfig: webappContainerConfig(appEnv, jsonAppConfig),
+    loadBalancerConfig: loadBalancerConfig(appEnv, jsonAppConfig),
     metricsConfig: metricsConfig(appEnv, jsonAppConfig),
     cicdConfig: cicdConfig(appEnv, jsonAppConfig)
   }
@@ -238,6 +281,14 @@ export function webappContainerConfig(appEnv: AppEnv, jsonAppConfig: any): IWebA
   };
 }
 
+export function loadBalancerConfig(appEnv: AppEnv, jsonAppConfig: any): ILoadBalancerConfig {
+  const key = `${appEnv.toLowerCase()}Config`;
+  const subobj = jsonAppConfig[key].loadBalancerConfig;
+  return {
+    blacklistedIps: subobj.blacklistedIps
+  };
+}
+
 export function cicdConfig(appEnv: AppEnv, jsonAppConfig: any): ICicdConfig {
   const key = `${appEnv.toLowerCase()}Config`;
   const subobj = jsonAppConfig[key].cicdConfig;
@@ -313,15 +364,6 @@ export abstract class BaseStack extends Stack {
  * Load the CDK app config JSON file either from local user dir
  * or, when no local one exists, from a known S3 bucket.
  *
- * @param appConfigFilename the CDK app config JSON file name
- *
- * The expected name of the required cdk app config json file.
- *
- * This JSON object (assumed to adhere to an expected structure)
- * provides the needed input to all instantiated cdk stacks herein.
- *
- * @param s3ConfigCacheBucketName Optional name of an S3 bucket containing the cached CDK app config JSON file
- *
  * The S3 bucket name in the default AWS account holding a cached copy of
  * the app config file.
  *
@@ -332,23 +374,23 @@ export abstract class BaseStack extends Stack {
  *
  * @returns the resolved CDK app config JSON **object**
  */
-export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketName?: string): Promise<any> {
+export async function loadConfig(): Promise<any> {
   // first try local home dir
-  if (existsSync(`${homedir()}/${appConfigFilename}`)) {
+  if (existsSync(`${homedir()}/${cdkAppConfigFilename}`)) {
     try {
-      const config = readFileSync(`${homedir()}/${appConfigFilename}`, "utf-8");
+      const config = readFileSync(`${homedir()}/${cdkAppConfigFilename}`, "utf-8");
       return Promise.resolve(JSON.parse(config));
     } catch (e) {
       throw new Error("Unable to get cdk app config from local user dir: " + e);
     }
-  } else if (s3ConfigCacheBucketName && s3ConfigCacheBucketName.length > 0) {
+  } else if (cdkAppConfigCacheS3BucketName && cdkAppConfigCacheS3BucketName.length > 0) {
     // try to fetch from known s3
     try {
       const s3 = new S3();
       const configObj = await s3
         .getObject({
-          Bucket: s3ConfigCacheBucketName,
-          Key: appConfigFilename,
+          Bucket: cdkAppConfigCacheS3BucketName,
+          Key: cdkAppConfigFilename,
         })
         .promise();
       // s3 case
@@ -356,7 +398,7 @@ export async function loadConfig(appConfigFilename: string, s3ConfigCacheBucketN
       const config = JSON.parse(configStr);
       if (config) {
         // cache config file locally
-        writeFileSync(`${homedir()}/${appConfigFilename}`, configStr, {
+        writeFileSync(`${homedir()}/${cdkAppConfigFilename}`, configStr, {
           encoding: "utf-8",
         });
       }
