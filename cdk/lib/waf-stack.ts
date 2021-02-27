@@ -1,6 +1,5 @@
-import { CfnWebACL } from '@aws-cdk/aws-wafv2';
+import { CfnIPSet, CfnWebACL } from '@aws-cdk/aws-wafv2';
 import { Construct } from '@aws-cdk/core';
-import { Reference } from "@aws-cdk/core/lib/reference";
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
 export const WafStackRootProps = {
@@ -12,6 +11,7 @@ export const WafStackRootProps = {
  * WAF stack config properties.
  */
 export interface IWafProps extends IStackProps {
+  readonly blacklistedIps: string[];
 }
 
 /**
@@ -25,12 +25,41 @@ export class WafStack extends BaseStack {
       ...props,  ...{ description: WafStackRootProps.description }
     });
 
+    // ip blacklist
+    const ipBlacklistName = inameCml('ipBlacklist', props);
+    const ipBlacklistSet = new CfnIPSet(this, ipBlacklistName, {
+      scope: 'REGIONAL',
+      ipAddressVersion: 'IPV4',
+      addresses: props.blacklistedIps,
+      name: ipBlacklistName,
+    });
+
     const webAclName = inameCml('WebAcl', props);
     const webAcl = new CfnWebACL(this, webAclName, {
       defaultAction: { allow: {} },
       rules: [
         {
           priority: 1,
+          visibilityConfig: {
+            sampledRequestsEnabled: true,
+            cloudWatchMetricsEnabled: true,
+            metricName: "IPBlacklist",
+          },
+          overrideAction: { none: {} },
+          name: "IPBlacklist",
+          statement: {
+            ipSetReferenceStatement: {
+              arn: ipBlacklistSet.attrArn,
+              ipSetForwardedIpConfig: {
+                headerName: 'X-Forwarded-For',
+                fallbackBehavior: 'NO_MATCH',
+                position: 'ANY',
+              }
+            },
+          }
+        },
+        {
+          priority: 2,
           overrideAction: { none: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
@@ -46,7 +75,7 @@ export class WafStack extends BaseStack {
           },
         },
         {
-          priority: 2,
+          priority: 3,
           overrideAction: { none: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
@@ -62,7 +91,7 @@ export class WafStack extends BaseStack {
           },
         },
         {
-          priority: 3,
+          priority: 4,
           overrideAction: { none: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
