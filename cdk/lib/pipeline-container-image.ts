@@ -9,7 +9,7 @@ export class PipelineContainerImage extends ContainerImage {
 
   constructor(repository: IRepository) {
     super();
-    this.imageName = repository.repositoryUriForTag(Lazy.stringValue({ produce: () => this.parameter!.valueAsString }));
+    this.imageName = repository.repositoryUriForTag(Lazy.string({ produce: () => this.parameter!.valueAsString }));
     this.repository = repository;
   }
 
