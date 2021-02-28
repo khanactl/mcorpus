@@ -16,8 +16,8 @@ Checkout the [wiki](https://github.com/khanactl/mcorpus/wiki) pages for design d
 ## Features
 
 - GraphQL-based user login by username and password.
-- JWT (signed and encrypted) via secure, http-only cookies upon successful user login.
-- Per-request sync token verification for all inbound GraphQL requests to mitigate CSRF attacks.
+- JWT (signed and encrypted) via graphql mutation method.  A short-lived JWT is returned as a string in the graphql resppnse and a long-lived jwt refresh token is returned as a secure, http-only cookie upon successful user login.
+- Per-request sync token verification via secure http-only cookie and http header for all inbound GraphQL requests to mitigate CSRF attacks.
 - GraphiQL - the 'schema discovery' UI intended for developers to introspect the schema and issue GraphQL requests from a web UI.
 - Lean and performant Java 8 code in a fully asynchronous paradigm realized by best-of-breed stack:
   - [Postgres](https://www.postgresql.org/)
