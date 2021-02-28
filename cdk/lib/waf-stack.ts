@@ -1,5 +1,5 @@
 import { CfnIPSet, CfnWebACL } from '@aws-cdk/aws-wafv2';
-import { Construct, Lazy } from '@aws-cdk/core';
+import { CfnOutput, Construct, Fn, Lazy } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
 export const WafStackRootProps = {
@@ -31,8 +31,9 @@ export class WafStack extends BaseStack {
       scope: 'REGIONAL',
       ipAddressVersion: 'IPV4',
       addresses: props.blacklistedIps,
-      name: ipBlacklistName,
+      // name: ipBlacklistName,
     });
+    const ipBlacklistSetArn = Fn.getAtt(ipBlacklistSet.logicalId, "Arn").toString();
 
     const webAclName = inameCml('WebAcl', props);
     const webAcl = new CfnWebACL(this, webAclName, {
@@ -49,7 +50,7 @@ export class WafStack extends BaseStack {
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
-              arn: Lazy.string({ produce: () => ipBlacklistSet.attrArn }),
+              arn: ipBlacklistSetArn,
               ipSetForwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'NO_MATCH',
@@ -116,5 +117,9 @@ export class WafStack extends BaseStack {
     });
 
     this.webAclArn = webAcl.attrArn;
+
+    // stack output
+    new CfnOutput(this, 'IpSetBlacklistSetArn', { value: ipBlacklistSet.attrArn });
+    new CfnOutput(this, 'WafAclArn', { value: webAcl.attrArn });
   }
 }
