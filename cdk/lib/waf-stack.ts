@@ -1,5 +1,5 @@
 import { CfnIPSet, CfnWebACL } from '@aws-cdk/aws-wafv2';
-import { CfnOutput, Construct, Fn, Lazy } from '@aws-cdk/core';
+import { CfnOutput, Construct, Fn, Lazy, NestedStack, NestedStackProps } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
 export const WafStackRootProps = {
@@ -14,6 +14,29 @@ export interface IWafProps extends IStackProps {
   readonly blacklistedIps: string[];
 }
 
+export interface IIpBlacklistProps extends NestedStackProps {
+  readonly blacklistedIps: string[];
+}
+
+export class IpBlacklistStack extends NestedStack {
+  public readonly ipBlacklistSet: CfnIPSet;
+
+  constructor(scope: Construct, blacklistedIps: string[]) {
+    super(scope, 'IPBlacklistSet', {});
+
+    // ip blacklist
+    this.ipBlacklistSet = new CfnIPSet(this, 'IpBlacklist', {
+      scope: 'REGIONAL',
+      ipAddressVersion: 'IPV4',
+      addresses: blacklistedIps,
+      // name: ipBlacklistName,
+    });
+
+    // output
+    new CfnOutput(this, 'IpSetBlacklistSetArn', { value: this.ipBlacklistSet.attrArn });
+  }
+}
+
 /**
  * WAF stack.
  */
@@ -25,15 +48,7 @@ export class WafStack extends BaseStack {
       ...props,  ...{ description: WafStackRootProps.description }
     });
 
-    // ip blacklist
-    const ipBlacklistName = inameCml('ipBlacklist', props);
-    const ipBlacklistSet = new CfnIPSet(this, ipBlacklistName, {
-      scope: 'REGIONAL',
-      ipAddressVersion: 'IPV4',
-      addresses: props.blacklistedIps,
-      // name: ipBlacklistName,
-    });
-    const ipBlacklistSetArn = Fn.getAtt(ipBlacklistSet.logicalId, "Arn").toString();
+    const ipBlacklistStack = new IpBlacklistStack(this, props.blacklistedIps);
 
     const webAclName = inameCml('WebAcl', props);
     const webAcl = new CfnWebACL(this, webAclName, {
@@ -50,7 +65,7 @@ export class WafStack extends BaseStack {
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
-              arn: ipBlacklistSetArn,
+              arn: ipBlacklistStack.ipBlacklistSet.attrArn,
               ipSetForwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'NO_MATCH',
@@ -119,7 +134,6 @@ export class WafStack extends BaseStack {
     this.webAclArn = webAcl.attrArn;
 
     // stack output
-    new CfnOutput(this, 'IpSetBlacklistSetArn', { value: ipBlacklistSet.attrArn });
     new CfnOutput(this, 'WafAclArn', { value: webAcl.attrArn });
   }
 }
