@@ -1,5 +1,5 @@
 import { CfnIPSet, CfnWebACL } from '@aws-cdk/aws-wafv2';
-import { Construct } from '@aws-cdk/core';
+import { Construct, Lazy } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
 export const WafStackRootProps = {
@@ -49,7 +49,7 @@ export class WafStack extends BaseStack {
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
-              arn: ipBlacklistSet.attrArn,
+              arn: Lazy.string({ produce: () => ipBlacklistSet.attrArn }),
               ipSetForwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'NO_MATCH',
