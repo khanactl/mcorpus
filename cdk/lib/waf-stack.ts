@@ -65,7 +65,7 @@ export class WafStack extends BaseStack {
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
-              arn: ipBlacklistStack.ipBlacklistSet.attrArn,
+              arn: Fn.importValue("IpSetBlacklistSetArn"),
               ipSetForwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'NO_MATCH',
