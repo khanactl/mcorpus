@@ -14,7 +14,7 @@
     "@types/node": "14.14.31",
     "aws-cdk": "^1.91.0",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.3"
   },
   "dependencies": {
     "@aws-cdk/aws-cloudwatch-actions": "^1.91.0",
@@ -31,15 +31,15 @@
     "@aws-cdk/custom-resources": "^1.91.0",
     "@aws-cdk/pipelines": "^1.91.0",
     "@types/archiver": "^5.1.0",
-    "@types/fs-extra": "^9.0.7",
+    "@types/fs-extra": "^9.0.8",
     "@types/source-map-support": "^0.5.3",
     "@types/uuid": "^8.3.0",
     "archiver": "^5.2.0",
-    "aws-sdk": "^2.853.0",
+    "aws-sdk": "^2.857.0",
     "camelcase": "^6.2.0",
     "fs-extra": "^9.1.0",
     "git-branch": "^2.0.1",
-    "npm-check-updates": "^11.1.9",
+    "npm-check-updates": "^11.1.10",
     "source-map-support": "^0.5.19",
     "uuid": "^8.3.2"
   },
