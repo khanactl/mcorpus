@@ -101,6 +101,7 @@ export interface IDevPipelineStackProps extends IStackProps {
 
   readonly onBuildFailureEmails?: string[];
 
+  readonly cdkDevIpBlacklistStackName: string;
   readonly cdkDevWafStackName: string;
   readonly cdkDevLbStackName: string;
   readonly cdkDevAppStackName: string;
@@ -429,18 +430,25 @@ export class DevPipelineStack extends BaseStack {
           stageName: 'Deploy',
           actions: [
             new CloudFormationCreateUpdateStackAction({
+              actionName: 'CFN_Deploy_IPBlacklist',
+              stackName: props.cdkDevIpBlacklistStackName,
+              templatePath: cdkBuildOutput.atPath(`${props.cdkDevIpBlacklistStackName}.template.json`),
+              adminPermissions: true,
+              runOrder: 1,
+            }),
+            new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_WAF',
               stackName: props.cdkDevWafStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevWafStackName}.template.json`),
               adminPermissions: true,
-              runOrder: 1,
+              runOrder: 2,
             }),
             new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_Lb',
               stackName: props.cdkDevLbStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevLbStackName}.template.json`),
               adminPermissions: true,
-              runOrder: 2,
+              runOrder: 3,
             }),
             new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_App',
@@ -451,14 +459,14 @@ export class DevPipelineStack extends BaseStack {
                 [this.appBuiltImage.paramName]: dockerBuildOutput.getParam('imageTag.json', 'imageTag'),
               },
               extraInputs: [dockerBuildOutput],
-              runOrder: 3,
+              runOrder: 4,
             }),
             new CloudFormationCreateUpdateStackAction({
               actionName: 'CFN_Deploy_Metrics',
               stackName: props.cdkDevMetricsStackName,
               templatePath: cdkBuildOutput.atPath(`${props.cdkDevMetricsStackName}.template.json`),
               adminPermissions: true,
-              runOrder: 4,
+              runOrder: 5,
             }),
           ],
         },

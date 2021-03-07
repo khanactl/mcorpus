@@ -7,6 +7,7 @@ import { ClusterStack } from '../lib/cluster-stack';
 import { DbBootstrapStack } from '../lib/db-bootstrap-stack';
 import { DbStack } from '../lib/db-stack';
 import { DevPipelineStack } from '../lib/dev-pipeline-stack';
+import { IPBlacklistStack, IPBlacklistStackRootProps } from '../lib/ip-blacklist-stack';
 import { LbStack, LbStackRootProps } from '../lib/lb-stack';
 import { MetricsStack, MetricsStackRootProps } from '../lib/metrics-stack';
 import { SecGrpStack } from '../lib/secgrp-stack';
@@ -101,6 +102,7 @@ async function generateAppInstance(cdkAppConfig: ICdkAppConfig, cdkAppConfigFile
     lbToAppPort: cdkAppConfig.webAppContainerConfig.lbToAppPort,
     appDeployApprovalEmails: cdkAppConfig.cicdConfig.appDeployApprovalEmails,
     onBuildFailureEmails: cdkAppConfig.cicdConfig.onBuildFailureEmails,
+    cdkDevIpBlacklistStackName: iname(IPBlacklistStackRootProps.rootStackName, cdkAppConfig),
     cdkDevWafStackName: iname(WafStackRootProps.rootStackName, cdkAppConfig),
     cdkDevLbStackName: iname(LbStackRootProps.rootStackName, cdkAppConfig),
     cdkDevAppStackName: iname(AppStackRootProps.rootStackName, cdkAppConfig),
@@ -110,13 +112,21 @@ async function generateAppInstance(cdkAppConfig: ICdkAppConfig, cdkAppConfigFile
   devPipelineStack.addDependency(secGrpStack);
   devPipelineStack.addDependency(clusterStack);
 
-  const wafStack = new WafStack(app, {
+  const ipBlacklistStack = new IPBlacklistStack(app, {
     appName: cdkAppConfig.appName,
     appEnv: cdkAppConfig.appEnv,
     env: cdkAppConfig.awsEnv,
     tags: cdkAppConfig.appEnvStackTags,
     blacklistedIps: cdkAppConfig.loadBalancerConfig.blacklistedIps,
   });
+  const wafStack = new WafStack(app, {
+    appName: cdkAppConfig.appName,
+    appEnv: cdkAppConfig.appEnv,
+    env: cdkAppConfig.awsEnv,
+    tags: cdkAppConfig.appEnvStackTags,
+  });
+  wafStack.addDependency(ipBlacklistStack);
+
   const lbStack = new LbStack(app, {
     appName: cdkAppConfig.appName,
     appEnv: cdkAppConfig.appEnv,

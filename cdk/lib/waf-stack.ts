@@ -11,30 +11,6 @@ export const WafStackRootProps = {
  * WAF stack config properties.
  */
 export interface IWafProps extends IStackProps {
-  readonly blacklistedIps: string[];
-}
-
-export interface IIpBlacklistProps extends NestedStackProps {
-  readonly blacklistedIps: string[];
-}
-
-export class IpBlacklistStack extends NestedStack {
-  public readonly ipBlacklistSet: CfnIPSet;
-
-  constructor(scope: Construct, blacklistedIps: string[]) {
-    super(scope, 'IPBlacklistSet', {});
-
-    // ip blacklist
-    this.ipBlacklistSet = new CfnIPSet(this, 'IpBlacklist', {
-      scope: 'REGIONAL',
-      ipAddressVersion: 'IPV4',
-      addresses: blacklistedIps,
-      // name: ipBlacklistName,
-    });
-
-    // output
-    new CfnOutput(this, 'IpSetBlacklistSetArn', { value: this.ipBlacklistSet.attrArn });
-  }
 }
 
 /**
@@ -47,8 +23,6 @@ export class WafStack extends BaseStack {
     super(scope, WafStackRootProps.rootStackName, {
       ...props,  ...{ description: WafStackRootProps.description }
     });
-
-    const ipBlacklistStack = new IpBlacklistStack(this, props.blacklistedIps);
 
     const webAclName = inameCml('WebAcl', props);
     const webAcl = new CfnWebACL(this, webAclName, {
