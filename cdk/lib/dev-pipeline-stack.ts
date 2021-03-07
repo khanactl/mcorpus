@@ -350,6 +350,7 @@ export class DevPipelineStack extends BaseStack {
         artifacts: {
           'base-directory': 'cdk/dist',
           files: [
+            `${props.cdkDevIpBlacklistStackName}.template.json`,
             `${props.cdkDevWafStackName}.template.json`,
             `${props.cdkDevLbStackName}.template.json`,
             `${props.cdkDevAppStackName}.template.json`,
