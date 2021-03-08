@@ -30,12 +30,12 @@ export class WafStack extends BaseStack {
       rules: [
         {
           priority: 1,
+          overrideAction: { none: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
             metricName: "IPBlacklist",
           },
-          overrideAction: { count: {} },
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
