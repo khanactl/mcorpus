@@ -30,7 +30,8 @@ export class WafStack extends BaseStack {
       rules: [
         {
           priority: 1,
-          overrideAction: { none: {} },
+          action: { count: {} },
+          // overrideAction: { none: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
