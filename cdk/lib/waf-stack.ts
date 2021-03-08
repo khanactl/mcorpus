@@ -31,7 +31,6 @@ export class WafStack extends BaseStack {
         {
           priority: 1,
           action: { count: {} },
-          // overrideAction: { none: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
@@ -40,7 +39,7 @@ export class WafStack extends BaseStack {
           name: "IPBlacklist",
           statement: {
             ipSetReferenceStatement: {
-              arn: "arn:aws:wafv2:us-west-2:524006177124:regional/ipset/mcorpus-ipblacklist-dev/cb1ff704-8f8f-42ea-af50-8e3e06ca74e7",
+              arn: Fn.importValue(inameCml('cfnOutIpBlacklistSetArnName', props)),
               ipSetForwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
                 fallbackBehavior: 'NO_MATCH',
