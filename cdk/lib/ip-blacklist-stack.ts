@@ -1,6 +1,6 @@
 import { CfnIPSet } from '@aws-cdk/aws-wafv2';
 import { CfnOutput, Construct } from '@aws-cdk/core';
-import { BaseStack, iname, IStackProps } from './cdk-native';
+import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 
 export const IPBlacklistStackRootProps = {
   rootStackName: 'ipblacklist',
@@ -12,7 +12,6 @@ export interface IIPBlacklistProps extends IStackProps {
 }
 
 export class IPBlacklistStack extends BaseStack {
-  public readonly ipBlacklistSet: CfnIPSet;
 
   constructor(scope: Construct, props: IIPBlacklistProps) {
     super(scope, IPBlacklistStackRootProps.rootStackName, {
@@ -20,7 +19,7 @@ export class IPBlacklistStack extends BaseStack {
     });
 
     // ip blacklist
-    this.ipBlacklistSet = new CfnIPSet(this, 'IPBlacklist', {
+    const ipBlacklistSet = new CfnIPSet(this, 'IPBlacklist', {
       scope: 'REGIONAL',
       ipAddressVersion: 'IPV4',
       addresses: props.blacklistedIps,
@@ -28,6 +27,9 @@ export class IPBlacklistStack extends BaseStack {
     });
 
     // output
-    new CfnOutput(this, 'IpSetBlacklistSetArn', { value: this.ipBlacklistSet.attrArn });
+    new CfnOutput(this, 'IpSetBlacklistSetArn', {
+      value: ipBlacklistSet.attrArn,
+      exportName: inameCml('cfnOutIpBlacklistSetArnName', props)
+    });
   }
 }
