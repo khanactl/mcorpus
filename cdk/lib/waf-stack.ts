@@ -30,7 +30,7 @@ export class WafStack extends BaseStack {
       rules: [
         {
           priority: 1,
-          action: { count: {} },
+          action: { block: {} },
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
