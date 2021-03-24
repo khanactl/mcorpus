@@ -125,6 +125,7 @@ async function generateAppInstance(cdkAppConfig: ICdkAppConfig, cdkAppConfigFile
     env: cdkAppConfig.awsEnv,
     tags: cdkAppConfig.appEnvStackTags,
   });
+  wafStack.addDependency(ipBlacklistStack);
 
   const lbStack = new LbStack(app, {
     appName: cdkAppConfig.appName,

@@ -27,6 +27,7 @@ export class WafStack extends BaseStack {
     const webAclName = inameCml('WebAcl', props);
     const webAcl = new CfnWebACL(this, webAclName, {
       defaultAction: { allow: {} },
+      description: 'Firewall rules for mcorpus web app.',
       rules: [
         {
           priority: 1,
@@ -34,7 +35,7 @@ export class WafStack extends BaseStack {
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
-            metricName: "IPBlacklist",
+            metricName: iname("IPBlacklist", props),
           },
           name: "IPBlacklist",
           statement: {
@@ -42,7 +43,7 @@ export class WafStack extends BaseStack {
               arn: Fn.importValue(inameCml('cfnOutIpBlacklistSetArnName', props)),
               ipSetForwardedIpConfig: {
                 headerName: 'X-Forwarded-For',
-                fallbackBehavior: 'NO_MATCH',
+                fallbackBehavior: 'MATCH',
                 position: 'ANY',
               }
             },

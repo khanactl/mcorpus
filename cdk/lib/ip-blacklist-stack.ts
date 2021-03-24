@@ -24,6 +24,7 @@ export class IPBlacklistStack extends BaseStack {
       ipAddressVersion: 'IPV4',
       addresses: props.blacklistedIps,
       name: iname('ipblacklist', props),
+      description: "Blacklisted IPs",
     });
 
     // output
