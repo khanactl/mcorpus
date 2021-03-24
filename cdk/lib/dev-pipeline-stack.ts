@@ -341,7 +341,10 @@ export class DevPipelineStack extends BaseStack {
         version: '0.2',
         phases: {
           install: {
-            commands: ['cd cdk', 'npm install'],
+            'runtime-versions': {
+              nodejs: '12',
+            },
+            commands: ['cd cdk', 'npm -g i npm', 'npm install'],
           },
           build: {
             commands: ['npm run build', 'npm run cdk synth -- -o dist'],
