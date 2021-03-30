@@ -112,6 +112,8 @@ export interface ILoadBalancerConfig {
 }
 
 export interface ICicdConfig {
+	readonly cdkAppConfigFilename: string;
+	readonly cdkAppConfigCacheS3BucketName: string;
   readonly gitBranchName: string;
   readonly triggerOnCommit: boolean;
   readonly ssmImageTagParamName: string;
@@ -147,10 +149,9 @@ export interface ICdkAppConfig extends IAppNameAndEnv {
  * instances broken out by app environment.
  */
 export interface ICdkConfig {
-  readonly cdkAppConfigFilename: string;
-  readonly cdkAppConfigCacheS3BucketName: string;
-  readonly devConfig: ICdkAppConfig;
-  readonly prodConfig: ICdkAppConfig;
+  readonly devConfig?: ICdkAppConfig;
+  readonly stagingConfig?: ICdkAppConfig;
+  readonly prodConfig?: ICdkAppConfig;
 }
 
 /**
@@ -158,10 +159,8 @@ export interface ICdkConfig {
  * @param jsonConfig the cdk app config json object
  * @returns Newly ICdkAppConfig instance.
  */
-export async function configTransform(jsonConfig: any): Promise<ICdkConfig> {
+ export async function configTransform(jsonConfig: any): Promise<ICdkConfig> {
   return {
-    cdkAppConfigFilename: cdkAppConfigFilename,
-    cdkAppConfigCacheS3BucketName: cdkAppConfigCacheS3BucketName,
     devConfig: cdkAppConfig(AppEnv.DEV, jsonConfig),
     prodConfig: cdkAppConfig(AppEnv.PROD, jsonConfig),
   };
@@ -187,9 +186,9 @@ export function cdkAppConfig(
     commonEnvStackTags: tags(AppEnv.COMMON, jsonAppConfig),
     gitHubRepoRef: gitHubRepoRef(AppEnv.COMMON, jsonAppConfig),
     ecrConfig: ecrConfig(AppEnv.COMMON, jsonAppConfig),
-    networkConfig: networkConfig(AppEnv.DEV, jsonAppConfig),
-    dbConfig: dbConfig(AppEnv.DEV, jsonAppConfig),
-    appConfig: appConfig(AppEnv.DEV, jsonAppConfig),
+    networkConfig: networkConfig(appEnv, jsonAppConfig),
+    dbConfig: dbConfig(appEnv, jsonAppConfig),
+    appConfig: appConfig(appEnv, jsonAppConfig),
     webAppContainerConfig: webappContainerConfig(appEnv, jsonAppConfig),
     loadBalancerConfig: loadBalancerConfig(appEnv, jsonAppConfig),
     metricsConfig: metricsConfig(appEnv, jsonAppConfig),
@@ -293,6 +292,8 @@ export function cicdConfig(appEnv: AppEnv, jsonAppConfig: any): ICicdConfig {
   const key = `${appEnv.toLowerCase()}Config`;
   const subobj = jsonAppConfig[key].cicdConfig;
   return {
+		cdkAppConfigCacheS3BucketName: cdkAppConfigCacheS3BucketName,
+		cdkAppConfigFilename: cdkAppConfigFilename,
     gitBranchName: subobj.gitBranchName,
     triggerOnCommit: subobj.triggerOnCommit,
     ssmImageTagParamName: subobj.ssmImageTagParamName,

@@ -18,12 +18,14 @@ const app = new App();
 
 async function generate(cdkConfig: ICdkConfig): Promise<void> {
   // DEV
-  generateAppInstance(cdkConfig.devConfig, cdkConfig.cdkAppConfigFilename, cdkConfig.cdkAppConfigCacheS3BucketName);
+	if(cdkConfig.devConfig) generateAppInstance(cdkConfig.devConfig);
+  // STAGING (qa)
+	// if(cdkConfig.stagingConfig) generateAppInstance(cdkConfig.stagingConfig);
   // PROD
-  // generateAppInstance(cdkConfig.prodConfig, cdkConfig.cdkAppConfigFilename, cdkConfig.cdkAppConfigCacheS3BucketName);
+	// if(cdkConfig.prodConfig) generateAppInstance(cdkConfig.prodConfig);
 }
 
-async function generateAppInstance(cdkAppConfig: ICdkAppConfig, cdkAppConfigFilename: string, cdkAppConfigCacheS3BucketName: string): Promise<void> {
+async function generateAppInstance(cdkAppConfig: ICdkAppConfig): Promise<void> {
   // VPC
   const vpcStack = new VpcStack(app, {
     appName: cdkAppConfig.appName,
@@ -87,8 +89,8 @@ async function generateAppInstance(cdkAppConfig: ICdkAppConfig, cdkAppConfigFile
     vpc: vpcStack.vpc,
     // appRepository: ecrStack.appRepository,
     codebuildSecGrp: secGrpStack.codebuildSecGrp,
-    appConfigCacheS3BucketName: cdkAppConfigCacheS3BucketName,
-    appConfigFilename: cdkAppConfigFilename,
+    appConfigCacheS3BucketName: cdkAppConfig.cicdConfig.cdkAppConfigCacheS3BucketName,
+    appConfigFilename: cdkAppConfig.cicdConfig.cdkAppConfigFilename,
     ssmImageTagParamName: cdkAppConfig.cicdConfig.ssmImageTagParamName,
     githubOwner: cdkAppConfig.gitHubRepoRef.owner,
     githubRepo: cdkAppConfig.gitHubRepoRef.repo,
