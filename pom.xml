@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -23,16 +22,16 @@
 
     <postgres-jdbc.version>42.2.19</postgres-jdbc.version>
 
-    <flyway.version>7.6.0</flyway.version>
+    <flyway.version>7.7.2</flyway.version>
     <jooq.version>3.14.8</jooq.version>
     <hikari-cp.version>4.0.3</hikari-cp.version>
 
-    <nimbus-jose-jwt.version>9.7</nimbus-jose-jwt.version>
+    <nimbus-jose-jwt.version>9.8.1</nimbus-jose-jwt.version>
 
     <guava.version>29.0-jre</guava.version>
     <guice.version>5.0.1</guice.version>
 
-    <caffeine.version>3.0.0</caffeine.version>
+    <caffeine.version>3.0.1</caffeine.version>
 
     <jackson.version>2.12.2</jackson.version>
 
@@ -54,7 +53,8 @@
   <dependencyManagement>
     <dependencies>
       <!-- postgres-jdbc -->
-      <dependency>        <!-- https://github.com/pgjdbc/pgjdbc -->
+      <dependency>
+        <!-- https://github.com/pgjdbc/pgjdbc -->
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgres-jdbc.version}</version>
@@ -265,17 +265,20 @@
         <version>1.0-1</version>
       </dependency>
 
-      <dependency>        <!-- (Ratpack logs via SLF4J API) -->
+      <dependency>
+        <!-- (Ratpack logs via SLF4J API) -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j-api.version}</version>
       </dependency>
-      <dependency>        <!-- NOP SLF4J logger -->
+      <dependency>
+        <!-- NOP SLF4J logger -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-nop</artifactId>
         <version>${slf4j-api.version}</version>
       </dependency>
-      <dependency>        <!-- Log4j2 and bridge from SLF4J API via: log4j-slf4j-impl -->
+      <dependency>
+        <!-- Log4j2 and bridge from SLF4J API via: log4j-slf4j-impl -->
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
         <version>${log4j2.version}</version>
@@ -305,7 +308,8 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency>      <!-- all sub-projects get junit on test classpath by default -->
+    <dependency>
+      <!-- all sub-projects get junit on test classpath by default -->
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -450,15 +454,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>3.1.2</version>
-          <configuration>
-          </configuration>
+          <configuration></configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
           <version>3.14.0</version>
-          <configuration>
-          </configuration>
+          <configuration></configuration>
         </plugin>
       </plugins>
     </pluginManagement>
