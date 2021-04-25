@@ -10,7 +10,7 @@ WORKDIR /webapp
 
 COPY mcorpus-gql-server.jar .
 COPY log4j2-aws.xml .
-COPY disruptor-3.4.2.jar .
+COPY disruptor-3.4.3.jar .
 COPY log4j-api-2.14.0.jar .
 COPY log4j-core-2.14.0.jar .
 COPY log4j-slf4j-impl-2.14.0.jar .
