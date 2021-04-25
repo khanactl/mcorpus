@@ -18,27 +18,27 @@
 
     <log4j2.version>2.14.0</log4j2.version>
     <slf4j-api.version>1.7.30</slf4j-api.version>
-    <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
+    <lmax-disruptor.version>3.4.3</lmax-disruptor.version>
 
-    <postgres-jdbc.version>42.2.19</postgres-jdbc.version>
+    <postgres-jdbc.version>42.2.20</postgres-jdbc.version>
 
-    <flyway.version>7.7.2</flyway.version>
-    <jooq.version>3.14.8</jooq.version>
+    <flyway.version>7.8.1</flyway.version>
+    <jooq.version>3.14.9</jooq.version>
     <hikari-cp.version>4.0.3</hikari-cp.version>
 
     <nimbus-jose-jwt.version>9.8.1</nimbus-jose-jwt.version>
 
-    <guava.version>29.0-jre</guava.version>
+    <guava.version>30.1.1-jre</guava.version>
     <guice.version>5.0.1</guice.version>
 
     <caffeine.version>3.0.1</caffeine.version>
 
-    <jackson.version>2.12.2</jackson.version>
+    <jackson.version>2.12.3</jackson.version>
 
-    <netty.version>4.1.59.Final</netty.version>
+    <netty.version>4.1.63.Final</netty.version>
     <ratpack.version>1.8.2</ratpack.version>
 
-    <dropwizard-metrics.version>4.1.8</dropwizard-metrics.version>
+    <dropwizard-metrics.version>4.1.20</dropwizard-metrics.version>
 
     <graphql-java.version>16.2</graphql-java.version>
 
