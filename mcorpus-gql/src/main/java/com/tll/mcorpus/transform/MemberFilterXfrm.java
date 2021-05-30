@@ -82,7 +82,7 @@ public class MemberFilterXfrm extends BaseTransformer<MemberFilter, MemberSearch
             break;
           case "value":
             final String sval = clean((String) entry.getValue());
-            value = sval.replaceAll("[^a-zA-Z|\\d| |\\*|%]", "");
+            value = sval.replaceAll("[^a-zA-Z|\\d| |\\*|%|_|\\-]", "");
             opValue = sval.matches("^.*?[*|%].*?$") ? Operation.LIKE : Operation.EQUALS;
             break;
           case "ignoreCase":
