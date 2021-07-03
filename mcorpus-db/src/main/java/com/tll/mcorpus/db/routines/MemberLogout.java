@@ -39,7 +39,7 @@ public class MemberLogout extends AbstractRoutine<UUID> {
     /**
      * The parameter <code>public.member_logout.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.member_logout.in_request_origin</code>.

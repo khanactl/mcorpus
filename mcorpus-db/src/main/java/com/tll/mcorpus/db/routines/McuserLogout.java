@@ -44,7 +44,7 @@ public class McuserLogout extends AbstractRoutine<Boolean> {
     /**
      * The parameter <code>public.mcuser_logout.request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> REQUEST_TIMESTAMP = Internal.createParameter("request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> REQUEST_TIMESTAMP = Internal.createParameter("request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.mcuser_logout.request_origin</code>.

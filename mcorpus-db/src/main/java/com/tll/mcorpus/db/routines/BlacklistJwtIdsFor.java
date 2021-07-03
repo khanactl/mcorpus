@@ -33,7 +33,7 @@ public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.blacklist_jwt_ids_for.in_request_origin</code>.

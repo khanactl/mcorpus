@@ -119,12 +119,12 @@ public class InsertMember extends AbstractRoutine<java.lang.Void> {
     /**
      * The parameter <code>public.insert_member.out_created</code>.
      */
-    public static final Parameter<OffsetDateTime> OUT_CREATED = Internal.createParameter("out_created", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> OUT_CREATED = Internal.createParameter("out_created", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.insert_member.out_modified</code>.
      */
-    public static final Parameter<OffsetDateTime> OUT_MODIFIED = Internal.createParameter("out_modified", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> OUT_MODIFIED = Internal.createParameter("out_modified", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.insert_member.out_emp_id</code>.

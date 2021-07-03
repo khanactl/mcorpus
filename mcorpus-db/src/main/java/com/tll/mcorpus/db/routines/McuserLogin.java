@@ -45,7 +45,7 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.mcuser_login.in_request_timestamp</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.mcuser_login.in_request_origin</code>.
@@ -55,7 +55,7 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     /**
      * The parameter <code>public.mcuser_login.in_login_expiration</code>.
      */
-    public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", SQLDataType.TIMESTAMPWITHTIMEZONE, false, false);
+    public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
      * The parameter <code>public.mcuser_login.in_jwt_id</code>.
