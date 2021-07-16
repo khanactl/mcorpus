@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.42-SNAPSHOT</version>
+  <version>0.9.43-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -19,7 +19,7 @@
   <inceptionYear>2017</inceptionYear>
 
   <properties>
-    <mcorpus-db.version>1.5.1-SNAPSHOT</mcorpus-db.version>
+    <mcorpus-db.version>1.5.2-SNAPSHOT</mcorpus-db.version>
     <main-class>com.tll.mcorpus.web.ratpack.Main</main-class>
   </properties>
 
