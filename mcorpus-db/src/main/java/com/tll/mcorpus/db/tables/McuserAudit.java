@@ -130,12 +130,12 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.MCUSER_AUDIT__JWT_ID);
+        return Arrays.asList(Indexes.MCUSER_AUDIT__JWT_ID);
     }
 
     @Override
@@ -144,13 +144,8 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     }
 
     @Override
-    public List<UniqueKey<McuserAuditRecord>> getKeys() {
-        return Arrays.<UniqueKey<McuserAuditRecord>>asList(Keys.MCUSER_AUDIT_PKEY);
-    }
-
-    @Override
     public List<ForeignKey<McuserAuditRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<McuserAuditRecord, ?>>asList(Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
+        return Arrays.asList(Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
     }
 
     private transient Mcuser _mcuser;

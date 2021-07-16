@@ -52,7 +52,8 @@ public class GetJwtStatus extends AbstractRoutine<JwtStatus> {
     }
 
     /**
-     * Set the <code>jwt_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>jwt_id</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setJwtId(Field<UUID> field) {
         setField(JWT_ID, field);

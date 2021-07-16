@@ -27,14 +27,16 @@ public class JwtMcuserStatusRecord extends UDTRecordImpl<JwtMcuserStatusRecord> 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
+     * Setter for
+     * <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
      */
     public void setMcuserAuditRecordType(McuserAuditType value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
+     * Getter for
+     * <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
      */
     public McuserAuditType getMcuserAuditRecordType() {
         return (McuserAuditType) get(0);
@@ -284,5 +286,21 @@ public class JwtMcuserStatusRecord extends UDTRecordImpl<JwtMcuserStatusRecord> 
         setLoginExpiration(loginExpiration);
         setUid(uid);
         setMcuserStatus(mcuserStatus);
+    }
+
+    /**
+     * Create a detached, initialised JwtMcuserStatusRecord
+     */
+    public JwtMcuserStatusRecord(com.tll.mcorpus.db.udt.pojos.JwtMcuserStatus value) {
+        super(JwtMcuserStatus.JWT_MCUSER_STATUS);
+
+        if (value != null) {
+            setMcuserAuditRecordType(value.getMcuserAuditRecordType());
+            setJwtId(value.getJwtId());
+            setJwtIdStatus(value.getJwtIdStatus());
+            setLoginExpiration(value.getLoginExpiration());
+            setUid(value.getUid());
+            setMcuserStatus(value.getMcuserStatus());
+        }
     }
 }

@@ -135,7 +135,7 @@ public class Maddress extends TableImpl<MaddressRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -144,13 +144,8 @@ public class Maddress extends TableImpl<MaddressRecord> {
     }
 
     @Override
-    public List<UniqueKey<MaddressRecord>> getKeys() {
-        return Arrays.<UniqueKey<MaddressRecord>>asList(Keys.MADDRESS_PKEY);
-    }
-
-    @Override
     public List<ForeignKey<MaddressRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<MaddressRecord, ?>>asList(Keys.MADDRESS__MADDRESS_MID_FKEY);
+        return Arrays.asList(Keys.MADDRESS__MADDRESS_MID_FKEY);
     }
 
     private transient Member _member;

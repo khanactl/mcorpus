@@ -369,4 +369,22 @@ public class McuserAuditRecord extends UpdatableRecordImpl<McuserAuditRecord> im
         setJwtId(jwtId);
         setJwtIdStatus(jwtIdStatus);
     }
+
+    /**
+     * Create a detached, initialised McuserAuditRecord
+     */
+    public McuserAuditRecord(com.tll.mcorpus.db.tables.pojos.McuserAudit value) {
+        super(McuserAudit.MCUSER_AUDIT);
+
+        if (value != null) {
+            setUid(value.getUid());
+            setCreated(value.getCreated());
+            setType(value.getType());
+            setRequestTimestamp(value.getRequestTimestamp());
+            setRequestOrigin(value.getRequestOrigin());
+            setLoginExpiration(value.getLoginExpiration());
+            setJwtId(value.getJwtId());
+            setJwtIdStatus(value.getJwtIdStatus());
+        }
+    }
 }

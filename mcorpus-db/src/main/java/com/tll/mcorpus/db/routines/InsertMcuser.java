@@ -82,7 +82,8 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_name</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_name</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setInName(Field<String> field) {
         setField(IN_NAME, field);
@@ -96,7 +97,8 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_email</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_email</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setInEmail(Field<String> field) {
         setField(IN_EMAIL, field);
@@ -110,7 +112,8 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_username</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_username</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setInUsername(Field<String> field) {
         setField(IN_USERNAME, field);
@@ -124,7 +127,8 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_pswd</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_pswd</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setInPswd(Field<String> field) {
         setField(IN_PSWD, field);
@@ -138,7 +142,8 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_status</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_status</code> parameter to the function to be used with
+     * a {@link org.jooq.Select} statement
      */
     public void setInStatus(Field<McuserStatus> field) {
         setField(IN_STATUS, field);
@@ -152,7 +157,8 @@ public class InsertMcuser extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_roles</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_roles</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setInRoles(Field<McuserRole[]> field) {
         setField(IN_ROLES, field);

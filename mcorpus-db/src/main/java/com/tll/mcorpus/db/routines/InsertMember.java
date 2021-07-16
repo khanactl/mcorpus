@@ -426,7 +426,8 @@ public class InsertMember extends AbstractRoutine<java.lang.Void> {
     }
 
     /**
-     * Get the <code>out_display_name</code> parameter OUT value from the routine
+     * Get the <code>out_display_name</code> parameter OUT value from the
+     * routine
      */
     public String getOutDisplayName() {
         return get(OUT_DISPLAY_NAME);
@@ -454,7 +455,8 @@ public class InsertMember extends AbstractRoutine<java.lang.Void> {
     }
 
     /**
-     * Get the <code>out_email_personal</code> parameter OUT value from the routine
+     * Get the <code>out_email_personal</code> parameter OUT value from the
+     * routine
      */
     public String getOutEmailPersonal() {
         return get(OUT_EMAIL_PERSONAL);
@@ -468,7 +470,8 @@ public class InsertMember extends AbstractRoutine<java.lang.Void> {
     }
 
     /**
-     * Get the <code>out_mobile_phone</code> parameter OUT value from the routine
+     * Get the <code>out_mobile_phone</code> parameter OUT value from the
+     * routine
      */
     public String getOutMobilePhone() {
         return get(OUT_MOBILE_PHONE);

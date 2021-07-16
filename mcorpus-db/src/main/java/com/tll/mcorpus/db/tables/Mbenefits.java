@@ -71,7 +71,10 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     public final TableField<MbenefitsRecord, Beli> BELI = createField(DSL.name("beli"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Beli.class), this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     public final TableField<MbenefitsRecord, Object> MCB = createField(DSL.name("mcb"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"money\"").nullable(false), this, "");
@@ -151,7 +154,7 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -160,13 +163,8 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     }
 
     @Override
-    public List<UniqueKey<MbenefitsRecord>> getKeys() {
-        return Arrays.<UniqueKey<MbenefitsRecord>>asList(Keys.MBENEFITS_PKEY);
-    }
-
-    @Override
     public List<ForeignKey<MbenefitsRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<MbenefitsRecord, ?>>asList(Keys.MBENEFITS__MBENEFITS_MID_FKEY);
+        return Arrays.asList(Keys.MBENEFITS__MBENEFITS_MID_FKEY);
     }
 
     private transient Member _member;

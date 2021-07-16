@@ -209,4 +209,18 @@ public class GetActiveLoginsRecord extends TableRecordImpl<GetActiveLoginsRecord
         setRequestTimestamp(requestTimestamp);
         setRequestOrigin(requestOrigin);
     }
+
+    /**
+     * Create a detached, initialised GetActiveLoginsRecord
+     */
+    public GetActiveLoginsRecord(com.tll.mcorpus.db.tables.pojos.GetActiveLogins value) {
+        super(GetActiveLogins.GET_ACTIVE_LOGINS);
+
+        if (value != null) {
+            setJwtId(value.getJwtId());
+            setLoginExpiration(value.getLoginExpiration());
+            setRequestTimestamp(value.getRequestTimestamp());
+            setRequestOrigin(value.getRequestOrigin());
+        }
+    }
 }

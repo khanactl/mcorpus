@@ -72,7 +72,8 @@ public class McuserLogout extends AbstractRoutine<Boolean> {
     }
 
     /**
-     * Set the <code>mcuser_uid</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>mcuser_uid</code> parameter to the function to be used with
+     * a {@link org.jooq.Select} statement
      */
     public void setMcuserUid(Field<UUID> field) {
         setField(MCUSER_UID, field);
@@ -86,7 +87,8 @@ public class McuserLogout extends AbstractRoutine<Boolean> {
     }
 
     /**
-     * Set the <code>jwt_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>jwt_id</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setJwtId(Field<UUID> field) {
         setField(JWT_ID, field);
@@ -100,7 +102,8 @@ public class McuserLogout extends AbstractRoutine<Boolean> {
     }
 
     /**
-     * Set the <code>request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>request_timestamp</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setRequestTimestamp(Field<OffsetDateTime> field) {
         setField(REQUEST_TIMESTAMP, field);
@@ -114,7 +117,8 @@ public class McuserLogout extends AbstractRoutine<Boolean> {
     }
 
     /**
-     * Set the <code>request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>request_origin</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setRequestOrigin(Field<InetAddress> field) {
         setField(REQUEST_ORIGIN, field);

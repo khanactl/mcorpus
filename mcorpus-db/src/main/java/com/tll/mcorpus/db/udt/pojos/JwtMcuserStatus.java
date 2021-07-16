@@ -54,7 +54,8 @@ public class JwtMcuserStatus implements Serializable {
     }
 
     /**
-     * Getter for <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
+     * Getter for
+     * <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
      */
     public McuserAuditType getMcuserAuditRecordType() {
         return this.mcuserAuditRecordType;

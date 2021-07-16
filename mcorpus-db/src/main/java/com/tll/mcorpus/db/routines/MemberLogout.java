@@ -66,21 +66,24 @@ public class MemberLogout extends AbstractRoutine<UUID> {
     }
 
     /**
-     * Set the <code>mid</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>mid</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setMid(Field<UUID> field) {
         setField(MID, field);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the
+     * routine
      */
     public void setInRequestTimestamp(OffsetDateTime value) {
         setValue(IN_REQUEST_TIMESTAMP, value);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_timestamp</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestTimestamp(Field<OffsetDateTime> field) {
         setField(IN_REQUEST_TIMESTAMP, field);
@@ -94,7 +97,8 @@ public class MemberLogout extends AbstractRoutine<UUID> {
     }
 
     /**
-     * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_origin</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestOrigin(Field<InetAddress> field) {
         setField(IN_REQUEST_ORIGIN, field);

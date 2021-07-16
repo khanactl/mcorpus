@@ -136,7 +136,7 @@ public class Member extends TableImpl<MemberRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -145,8 +145,8 @@ public class Member extends TableImpl<MemberRecord> {
     }
 
     @Override
-    public List<UniqueKey<MemberRecord>> getKeys() {
-        return Arrays.<UniqueKey<MemberRecord>>asList(Keys.MEMBER_PKEY, Keys.MEMBER_EMP_ID_LOCATION_KEY);
+    public List<UniqueKey<MemberRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.MEMBER_EMP_ID_LOCATION_KEY);
     }
 
     @Override

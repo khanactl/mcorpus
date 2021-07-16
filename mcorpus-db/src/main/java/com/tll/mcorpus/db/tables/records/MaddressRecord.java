@@ -441,4 +441,24 @@ public class MaddressRecord extends UpdatableRecordImpl<MaddressRecord> implemen
         setPostalCode(postalCode);
         setCountry(country);
     }
+
+    /**
+     * Create a detached, initialised MaddressRecord
+     */
+    public MaddressRecord(com.tll.mcorpus.db.tables.pojos.Maddress value) {
+        super(Maddress.MADDRESS);
+
+        if (value != null) {
+            setMid(value.getMid());
+            setAddressName(value.getAddressName());
+            setModified(value.getModified());
+            setAttn(value.getAttn());
+            setStreet1(value.getStreet1());
+            setStreet2(value.getStreet2());
+            setCity(value.getCity());
+            setState(value.getState());
+            setPostalCode(value.getPostalCode());
+            setCountry(value.getCountry());
+        }
+    }
 }

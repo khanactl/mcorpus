@@ -82,7 +82,10 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     public void setMcb(Object value) {
@@ -90,7 +93,10 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     public Object getMcb() {
@@ -253,7 +259,10 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     @Override
@@ -322,7 +331,10 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     @Override
@@ -391,7 +403,10 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     @Override
@@ -464,7 +479,10 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * @deprecated Unknown data type. Please define an explicit {@link
+     * org.jooq.Binding} to specify how this type should be handled. Deprecation
+     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
+     * code generator configuration.
      */
     @Deprecated
     @Override
@@ -569,5 +587,28 @@ public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implem
         setVisOptOut(visOptOut);
         setLegPlanCode(legPlanCode);
         setLegOptOut(legOptOut);
+    }
+
+    /**
+     * Create a detached, initialised MbenefitsRecord
+     */
+    public MbenefitsRecord(com.tll.mcorpus.db.tables.pojos.Mbenefits value) {
+        super(Mbenefits.MBENEFITS);
+
+        if (value != null) {
+            setMid(value.getMid());
+            setModified(value.getModified());
+            setForeignAdrsFlag(value.getForeignAdrsFlag());
+            setBeli(value.getBeli());
+            setMcb(value.getMcb());
+            setMedPlanCode(value.getMedPlanCode());
+            setMedOptOut(value.getMedOptOut());
+            setDenPlanCode(value.getDenPlanCode());
+            setDenOptOut(value.getDenOptOut());
+            setVisPlanCode(value.getVisPlanCode());
+            setVisOptOut(value.getVisOptOut());
+            setLegPlanCode(value.getLegPlanCode());
+            setLegOptOut(value.getLegOptOut());
+        }
     }
 }

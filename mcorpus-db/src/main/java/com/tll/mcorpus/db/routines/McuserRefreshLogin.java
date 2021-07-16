@@ -33,7 +33,8 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     public static final Parameter<McuserRecord> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", com.tll.mcorpus.db.tables.Mcuser.MCUSER.getDataType(), false, false);
 
     /**
-     * The parameter <code>public.mcuser_refresh_login.in_request_timestamp</code>.
+     * The parameter
+     * <code>public.mcuser_refresh_login.in_request_timestamp</code>.
      */
     public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
@@ -43,7 +44,8 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
 
     /**
-     * The parameter <code>public.mcuser_refresh_login.in_login_expiration</code>.
+     * The parameter
+     * <code>public.mcuser_refresh_login.in_login_expiration</code>.
      */
     public static final Parameter<OffsetDateTime> IN_LOGIN_EXPIRATION = Internal.createParameter("in_login_expiration", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
@@ -72,14 +74,16 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the
+     * routine
      */
     public void setInRequestTimestamp(OffsetDateTime value) {
         setValue(IN_REQUEST_TIMESTAMP, value);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_timestamp</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestTimestamp(Field<OffsetDateTime> field) {
         setField(IN_REQUEST_TIMESTAMP, field);
@@ -93,21 +97,24 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_origin</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestOrigin(Field<InetAddress> field) {
         setField(IN_REQUEST_ORIGIN, field);
     }
 
     /**
-     * Set the <code>in_login_expiration</code> parameter IN value to the routine
+     * Set the <code>in_login_expiration</code> parameter IN value to the
+     * routine
      */
     public void setInLoginExpiration(OffsetDateTime value) {
         setValue(IN_LOGIN_EXPIRATION, value);
     }
 
     /**
-     * Set the <code>in_login_expiration</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_login_expiration</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInLoginExpiration(Field<OffsetDateTime> field) {
         setField(IN_LOGIN_EXPIRATION, field);
@@ -121,7 +128,8 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_old_jwt_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_old_jwt_id</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setInOldJwtId(Field<UUID> field) {
         setField(IN_OLD_JWT_ID, field);
@@ -135,7 +143,8 @@ public class McuserRefreshLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_new_jwt_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_new_jwt_id</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setInNewJwtId(Field<UUID> field) {
         setField(IN_NEW_JWT_ID, field);

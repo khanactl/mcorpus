@@ -442,4 +442,24 @@ public class MemberRecord extends UpdatableRecordImpl<MemberRecord> implements R
         setDisplayName(displayName);
         setStatus(status);
     }
+
+    /**
+     * Create a detached, initialised MemberRecord
+     */
+    public MemberRecord(com.tll.mcorpus.db.tables.pojos.Member value) {
+        super(Member.MEMBER);
+
+        if (value != null) {
+            setMid(value.getMid());
+            setCreated(value.getCreated());
+            setModified(value.getModified());
+            setEmpId(value.getEmpId());
+            setLocation(value.getLocation());
+            setNameFirst(value.getNameFirst());
+            setNameMiddle(value.getNameMiddle());
+            setNameLast(value.getNameLast());
+            setDisplayName(value.getDisplayName());
+            setStatus(value.getStatus());
+        }
+    }
 }

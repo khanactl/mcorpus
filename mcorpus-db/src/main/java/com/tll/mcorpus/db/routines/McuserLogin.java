@@ -85,7 +85,8 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>mcuser_username</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>mcuser_username</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setMcuserUsername(Field<String> field) {
         setField(MCUSER_USERNAME, field);
@@ -99,21 +100,24 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>mcuser_password</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>mcuser_password</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setMcuserPassword(Field<String> field) {
         setField(MCUSER_PASSWORD, field);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the
+     * routine
      */
     public void setInRequestTimestamp(OffsetDateTime value) {
         setValue(IN_REQUEST_TIMESTAMP, value);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_timestamp</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestTimestamp(Field<OffsetDateTime> field) {
         setField(IN_REQUEST_TIMESTAMP, field);
@@ -127,21 +131,24 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_origin</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestOrigin(Field<InetAddress> field) {
         setField(IN_REQUEST_ORIGIN, field);
     }
 
     /**
-     * Set the <code>in_login_expiration</code> parameter IN value to the routine
+     * Set the <code>in_login_expiration</code> parameter IN value to the
+     * routine
      */
     public void setInLoginExpiration(OffsetDateTime value) {
         setValue(IN_LOGIN_EXPIRATION, value);
     }
 
     /**
-     * Set the <code>in_login_expiration</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_login_expiration</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInLoginExpiration(Field<OffsetDateTime> field) {
         setField(IN_LOGIN_EXPIRATION, field);
@@ -155,7 +162,8 @@ public class McuserLogin extends AbstractRoutine<McuserRecord> {
     }
 
     /**
-     * Set the <code>in_jwt_id</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_jwt_id</code> parameter to the function to be used with
+     * a {@link org.jooq.Select} statement
      */
     public void setInJwtId(Field<UUID> field) {
         setField(IN_JWT_ID, field);

@@ -43,7 +43,8 @@ public class JwtMcuserStatus extends UDTImpl<JwtMcuserStatusRecord> {
     }
 
     /**
-     * The attribute <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
+     * The attribute
+     * <code>public.jwt_mcuser_status.mcuser_audit_record_type</code>.
      */
     public static final UDTField<JwtMcuserStatusRecord, McuserAuditType> MCUSER_AUDIT_RECORD_TYPE = createField(DSL.name("mcuser_audit_record_type"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), JWT_MCUSER_STATUS, "");
 

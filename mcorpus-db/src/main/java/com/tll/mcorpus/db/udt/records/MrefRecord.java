@@ -171,4 +171,17 @@ public class MrefRecord extends UDTRecordImpl<MrefRecord> implements Record3<UUI
         setEmpId(empId);
         setLocation(location);
     }
+
+    /**
+     * Create a detached, initialised MrefRecord
+     */
+    public MrefRecord(com.tll.mcorpus.db.udt.pojos.Mref value) {
+        super(Mref.MREF);
+
+        if (value != null) {
+            setMid(value.getMid());
+            setEmpId(value.getEmpId());
+            setLocation(value.getLocation());
+        }
+    }
 }

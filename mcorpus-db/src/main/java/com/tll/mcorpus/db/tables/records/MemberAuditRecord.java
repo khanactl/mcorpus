@@ -257,4 +257,19 @@ public class MemberAuditRecord extends UpdatableRecordImpl<MemberAuditRecord> im
         setRequestTimestamp(requestTimestamp);
         setRequestOrigin(requestOrigin);
     }
+
+    /**
+     * Create a detached, initialised MemberAuditRecord
+     */
+    public MemberAuditRecord(com.tll.mcorpus.db.tables.pojos.MemberAudit value) {
+        super(MemberAudit.MEMBER_AUDIT);
+
+        if (value != null) {
+            setMid(value.getMid());
+            setCreated(value.getCreated());
+            setType(value.getType());
+            setRequestTimestamp(value.getRequestTimestamp());
+            setRequestOrigin(value.getRequestOrigin());
+        }
+    }
 }

@@ -112,7 +112,7 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -121,13 +121,8 @@ public class MemberAudit extends TableImpl<MemberAuditRecord> {
     }
 
     @Override
-    public List<UniqueKey<MemberAuditRecord>> getKeys() {
-        return Arrays.<UniqueKey<MemberAuditRecord>>asList(Keys.MEMBER_AUDIT_PKEY);
-    }
-
-    @Override
     public List<ForeignKey<MemberAuditRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<MemberAuditRecord, ?>>asList(Keys.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY);
+        return Arrays.asList(Keys.MEMBER_AUDIT__MEMBER_AUDIT_MID_FKEY);
     }
 
     private transient Member _member;

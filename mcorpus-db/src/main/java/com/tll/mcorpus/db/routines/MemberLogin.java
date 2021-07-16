@@ -72,7 +72,8 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
     }
 
     /**
-     * Set the <code>member_username</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>member_username</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setMemberUsername(Field<String> field) {
         setField(MEMBER_USERNAME, field);
@@ -86,21 +87,24 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
     }
 
     /**
-     * Set the <code>member_password</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>member_password</code> parameter to the function to be used
+     * with a {@link org.jooq.Select} statement
      */
     public void setMemberPassword(Field<String> field) {
         setField(MEMBER_PASSWORD, field);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the
+     * routine
      */
     public void setInRequestTimestamp(OffsetDateTime value) {
         setValue(IN_REQUEST_TIMESTAMP, value);
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_timestamp</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestTimestamp(Field<OffsetDateTime> field) {
         setField(IN_REQUEST_TIMESTAMP, field);
@@ -114,7 +118,8 @@ public class MemberLogin extends AbstractRoutine<MrefRecord> {
     }
 
     /**
-     * Set the <code>in_request_origin</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>in_request_origin</code> parameter to the function to be
+     * used with a {@link org.jooq.Select} statement
      */
     public void setInRequestOrigin(Field<InetAddress> field) {
         setField(IN_REQUEST_ORIGIN, field);

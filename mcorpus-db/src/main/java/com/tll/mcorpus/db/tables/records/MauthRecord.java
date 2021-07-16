@@ -515,4 +515,26 @@ public class MauthRecord extends UpdatableRecordImpl<MauthRecord> implements Rec
         setUsername(username);
         setPswd(pswd);
     }
+
+    /**
+     * Create a detached, initialised MauthRecord
+     */
+    public MauthRecord(com.tll.mcorpus.db.tables.pojos.Mauth value) {
+        super(Mauth.MAUTH);
+
+        if (value != null) {
+            setMid(value.getMid());
+            setModified(value.getModified());
+            setDob(value.getDob());
+            setSsn(value.getSsn());
+            setEmailPersonal(value.getEmailPersonal());
+            setEmailWork(value.getEmailWork());
+            setMobilePhone(value.getMobilePhone());
+            setHomePhone(value.getHomePhone());
+            setWorkPhone(value.getWorkPhone());
+            setFax(value.getFax());
+            setUsername(value.getUsername());
+            setPswd(value.getPswd());
+        }
+    }
 }

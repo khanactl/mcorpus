@@ -49,7 +49,8 @@ public class PassHash extends AbstractRoutine<String> {
     }
 
     /**
-     * Set the <code>pswd</code> parameter to the function to be used with a {@link org.jooq.Select} statement
+     * Set the <code>pswd</code> parameter to the function to be used with a
+     * {@link org.jooq.Select} statement
      */
     public void setPswd(Field<String> field) {
         setField(PSWD, field);

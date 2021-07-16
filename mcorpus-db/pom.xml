@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>mcorpus-db</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-db</name>
@@ -66,7 +66,7 @@
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-maven-plugin</artifactId>
         <configuration>
-          <skip>false</skip>
+          <skip>true</skip>
           <url>${env.MCORPUS_DB_ADMIN_URL}</url>
           <table>schema_history</table>
           <locations>
@@ -109,7 +109,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <skip>true</skip>
+          <skip>false</skip>
           <jdbc>
             <driver>org.postgresql.Driver</driver>
             <url>${env.MCORPUS_DB_URL}</url>

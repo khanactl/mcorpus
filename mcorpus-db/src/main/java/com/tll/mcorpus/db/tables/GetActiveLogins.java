@@ -66,7 +66,9 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
     public final TableField<GetActiveLoginsRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), this, "", new PostgresInetAddressBinding());
 
     private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased) {
-        this(alias, aliased, new Field[1]);
+        this(alias, aliased, new Field[] {
+            DSL.val(null, SQLDataType.UUID)
+        });
     }
 
     private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased, Field<?>[] parameters) {
@@ -96,7 +98,7 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -141,7 +143,7 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
           UUID mcuserId
     ) {
         GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
-              DSL.val(mcuserId, SQLDataType.UUID)
+            DSL.val(mcuserId, SQLDataType.UUID)
         });
 
         return aliased() ? result.as(getUnqualifiedName()) : result;
@@ -154,7 +156,7 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
           Field<UUID> mcuserId
     ) {
         GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
-              mcuserId
+            mcuserId
         });
 
         return aliased() ? result.as(getUnqualifiedName()) : result;

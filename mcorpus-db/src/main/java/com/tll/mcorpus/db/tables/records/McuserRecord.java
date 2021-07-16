@@ -405,4 +405,23 @@ public class McuserRecord extends UpdatableRecordImpl<McuserRecord> implements R
         setStatus(status);
         setRoles(roles);
     }
+
+    /**
+     * Create a detached, initialised McuserRecord
+     */
+    public McuserRecord(com.tll.mcorpus.db.tables.pojos.Mcuser value) {
+        super(Mcuser.MCUSER);
+
+        if (value != null) {
+            setUid(value.getUid());
+            setCreated(value.getCreated());
+            setModified(value.getModified());
+            setName(value.getName());
+            setEmail(value.getEmail());
+            setUsername(value.getUsername());
+            setPswd(value.getPswd());
+            setStatus(value.getStatus());
+            setRoles(value.getRoles());
+        }
+    }
 }

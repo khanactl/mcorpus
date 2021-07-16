@@ -31,12 +31,14 @@ public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
     public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
 
     /**
-     * The parameter <code>public.blacklist_jwt_ids_for.in_request_timestamp</code>.
+     * The parameter
+     * <code>public.blacklist_jwt_ids_for.in_request_timestamp</code>.
      */
     public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
     /**
-     * The parameter <code>public.blacklist_jwt_ids_for.in_request_origin</code>.
+     * The parameter
+     * <code>public.blacklist_jwt_ids_for.in_request_origin</code>.
      */
     public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
 
@@ -59,7 +61,8 @@ public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
     }
 
     /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the routine
+     * Set the <code>in_request_timestamp</code> parameter IN value to the
+     * routine
      */
     public void setInRequestTimestamp(OffsetDateTime value) {
         setValue(IN_REQUEST_TIMESTAMP, value);

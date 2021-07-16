@@ -131,7 +131,7 @@ public class Mcuser extends TableImpl<McuserRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -140,8 +140,8 @@ public class Mcuser extends TableImpl<McuserRecord> {
     }
 
     @Override
-    public List<UniqueKey<McuserRecord>> getKeys() {
-        return Arrays.<UniqueKey<McuserRecord>>asList(Keys.MCUSER_PKEY, Keys.MCUSER_USERNAME_KEY);
+    public List<UniqueKey<McuserRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.MCUSER_USERNAME_KEY);
     }
 
     @Override

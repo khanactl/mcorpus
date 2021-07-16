@@ -51,7 +51,7 @@ public class Tables {
           UUID mcuserId
     ) {
         return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-              mcuserId
+            mcuserId
         );
     }
 
@@ -62,7 +62,7 @@ public class Tables {
           Field<UUID> mcuserId
     ) {
         return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-              mcuserId
+            mcuserId
         );
     }
 

@@ -145,7 +145,7 @@ public class Mauth extends TableImpl<MauthRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return aliased() ? null : Public.PUBLIC;
     }
 
     @Override
@@ -154,13 +154,13 @@ public class Mauth extends TableImpl<MauthRecord> {
     }
 
     @Override
-    public List<UniqueKey<MauthRecord>> getKeys() {
-        return Arrays.<UniqueKey<MauthRecord>>asList(Keys.MAUTH_PKEY, Keys.MAUTH_USERNAME_KEY);
+    public List<UniqueKey<MauthRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.MAUTH_USERNAME_KEY);
     }
 
     @Override
     public List<ForeignKey<MauthRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<MauthRecord, ?>>asList(Keys.MAUTH__MAUTH_MID_FKEY);
+        return Arrays.asList(Keys.MAUTH__MAUTH_MID_FKEY);
     }
 
     private transient Member _member;

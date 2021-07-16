@@ -66,7 +66,7 @@ public class Public extends SchemaImpl {
           UUID mcuserId
     ) {
         return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-              mcuserId
+            mcuserId
         );
     }
 
@@ -77,7 +77,7 @@ public class Public extends SchemaImpl {
           Field<UUID> mcuserId
     ) {
         return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-              mcuserId
+            mcuserId
         );
     }
 
@@ -131,7 +131,7 @@ public class Public extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             GetActiveLogins.GET_ACTIVE_LOGINS,
             Maddress.MADDRESS,
             Mauth.MAUTH,
@@ -139,13 +139,15 @@ public class Public extends SchemaImpl {
             Mcuser.MCUSER,
             McuserAudit.MCUSER_AUDIT,
             Member.MEMBER,
-            MemberAudit.MEMBER_AUDIT);
+            MemberAudit.MEMBER_AUDIT
+        );
     }
 
     @Override
     public final List<UDT<?>> getUDTs() {
-        return Arrays.<UDT<?>>asList(
+        return Arrays.asList(
             JwtMcuserStatus.JWT_MCUSER_STATUS,
-            Mref.MREF);
+            Mref.MREF
+        );
     }
 }
