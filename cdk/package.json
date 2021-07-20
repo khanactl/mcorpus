@@ -19,7 +19,7 @@
     "clean": "rm -rf cdk.out && rm -rf dist && rm -f lib/*.d.ts && rm -f lib/*.js && rm -f bin/*.d.ts && rm -f bin/*.js"
   },
   "devDependencies": {
-    "@types/node": "^16.3.2",
+    "@types/node": "^16.3.3",
     "aws-cdk": "^1.114.0",
     "prettier": "2.3.2",
     "ts-node": "^10.1.0",
@@ -44,7 +44,7 @@
     "@types/source-map-support": "^0.5.4",
     "@types/uuid": "^8.3.1",
     "archiver": "^5.3.0",
-    "aws-sdk": "^2.947.0",
+    "aws-sdk": "^2.949.0",
     "camelcase": "^6.2.0",
     "fs-extra": "^10.0.0",
     "git-branch": "^2.0.1",
