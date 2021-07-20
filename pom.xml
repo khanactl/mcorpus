@@ -34,7 +34,7 @@
 
     <jackson.version>2.12.3</jackson.version>
 
-    <netty.version>4.1.66.Final</netty.version>
+    <!--<netty.version>4.1.66.Final</netty.version>-->
     <ratpack.version>1.9.0</ratpack.version>
 
     <dropwizard-metrics.version>4.2.3</dropwizard-metrics.version>
@@ -139,6 +139,7 @@
       </dependency>
 
       <!-- netty -->
+      <!--
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-handler</artifactId>
@@ -198,6 +199,7 @@
         <classifier>linux-x86_64</classifier>
         <version>2.0.30.Final</version>
       </dependency>
+      -->
 
       <!-- ratpack -->
       <dependency>
