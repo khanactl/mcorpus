@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.43-SNAPSHOT</version>
+  <version>0.9.44-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -42,6 +42,27 @@
     </testResources>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <!-- require Maven v3.5.0 or better -->
+                  <version>[3.5.0,)</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
