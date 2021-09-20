@@ -14,6 +14,7 @@ import com.tll.web.JWTUserGraphQLWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import graphql.language.StringValue;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
@@ -128,7 +129,7 @@ class MCorpusAuthorizationDirective implements SchemaDirectiveWiring {
    */
   @Override
   public GraphQLFieldDefinition onField(SchemaDirectiveWiringEnvironment<GraphQLFieldDefinition> env) {
-    final String roletok = (String) env.getDirective().getArgument("role").getValue();
+    final String roletok = ((StringValue) env.getDirective().getArgument("role").getArgumentValue().getValue()).getValue();
     final GraphQLRole targetRole = GraphQLRole.fromString(upper(roletok));
 
     final GraphQLFieldDefinition f = env.getElement();
@@ -139,7 +140,7 @@ class MCorpusAuthorizationDirective implements SchemaDirectiveWiring {
 
       @Override
       public Object get(DataFetchingEnvironment environment) throws Exception {
-        final JWTUserGraphQLWebContext webContext = environment.getContext();
+        final JWTUserGraphQLWebContext webContext = environment.getGraphQlContext().get(JWTUserGraphQLWebContext.class);
         final List<GraphQLRole> requestingRoles = GraphQLRole.fromCommaDelimitedString(webContext.getJwtRequestStatus().roles());
         // log.debug("Authorizing access to {} requiring role {} for requesting role(s) {}..", f.getName(), targetRole, requestingRoles);
         if(targetRole.isAuthorized(requestingRoles)) {

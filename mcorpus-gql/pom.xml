@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>mcorpus-gql</artifactId>
-  <version>0.9.44-SNAPSHOT</version>
+  <version>0.9.46-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>mcorpus-gql</name>
@@ -265,6 +265,25 @@
   </reporting>
 
   <dependencies>
+
+    <!-- TEMP: settle dependency conflicts -->
+    <dependency>
+      <groupId>org.reactivestreams</groupId>
+      <artifactId>reactive-streams</artifactId>
+      <version>1.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker-qual</artifactId>
+      <version>3.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.errorprone</groupId>
+      <artifactId>error_prone_annotations</artifactId>
+      <version>2.7.1</version>
+    </dependency>
+    <!-- END TEMP: settle dependency conflicts -->
+
     <dependency>
       <groupId>com.tll</groupId>
       <artifactId>mcorpus-db</artifactId>

@@ -142,7 +142,8 @@ public class MCorpusGraphQLTest {
     final ExecutionInput executionInput =
       ExecutionInput.newExecutionInput()
         .query(query)
-        .context(gqlWebContext(query, testRequestSnapshot(), testJwtStatus(jwtStatus, roles)))
+        .graphQLContext(builder -> builder.of(JWTUserGraphQLWebContext.class, gqlWebContext(query, testRequestSnapshot(), testJwtStatus(jwtStatus, roles))))
+        // .context(gqlWebContext(query, testRequestSnapshot(), testJwtStatus(jwtStatus, roles)))
         .build();
     final ExecutionResult result = graphQL.execute(executionInput);
     return result;

@@ -172,7 +172,7 @@ public class MCorpusGraphQL {
   private RuntimeWiring buildRuntimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
 
-      .scalar(new GraphQLDate())
+      .scalar(GraphQLDate.newInstance())
       .directive("auth", new MCorpusAuthorizationDirective())
 
       // Query
@@ -183,13 +183,13 @@ public class MCorpusGraphQL {
         // current jwt login info
         .dataFetcher("currentJwt", env -> processor.process(
           env,
-          () -> ((JWTUserGraphQLWebContext) env.getContext()).currentJwt())
+          () -> ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).currentJwt())
         )
 
         // active jwts
         .dataFetcher("activeJwts", env -> processor.process(
           env,
-          () -> ((JWTUserGraphQLWebContext) env.getContext()).activeJwts())
+          () -> ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).activeJwts())
         )
 
         // mcuser history
@@ -276,7 +276,7 @@ public class MCorpusGraphQL {
             clean(env.getArgument("pswd"))
           ),
           key -> fetchrslt(
-            ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogin(key.getUsername(), key.getPswd()),
+            ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).jwtUserLogin(key.getUsername(), key.getPswd()),
             true
           ),
           cji -> cji)
@@ -286,7 +286,7 @@ public class MCorpusGraphQL {
         .dataFetcher("jwtRefresh", env -> processor.mutate(
           env,
           () -> fetchrslt(
-            ((JWTUserGraphQLWebContext) env.getContext()).jwtRefresh(),
+            ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).jwtRefresh(),
             true
           ),
           cji -> cji)
@@ -295,7 +295,7 @@ public class MCorpusGraphQL {
         // jwt logout
         .dataFetcher("jwtLogout", env -> processor.process(
           env,
-          () -> ((JWTUserGraphQLWebContext) env.getContext()).jwtUserLogout())
+          () -> ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).jwtUserLogout())
         )
 
         // add mcuser
@@ -341,7 +341,7 @@ public class MCorpusGraphQL {
         .dataFetcher("invalidateJwts", env -> processor.mutate(
           env,
           () -> uuidFromToken(env.getArgument("uid")),
-          key -> fetchrslt(((JWTUserGraphQLWebContext) env.getContext()).jwtInvalidateAllForUser(key)),
+          key -> fetchrslt(((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).jwtInvalidateAllForUser(key)),
           b -> b)
         )
 
@@ -353,8 +353,8 @@ public class MCorpusGraphQL {
           () -> new Mlogin(
             clean(env.getArgument("username")),
             clean(env.getArgument("pswd")),
-            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(),
-            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestOrigin()
+            ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).getJwtRequestProvider().getRequestInstant(),
+            ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).getJwtRequestProvider().getRequestOrigin()
           ),
           mlogin -> mcorpusRepo.memberLogin(
             mlogin.getUsername(),
@@ -370,8 +370,8 @@ public class MCorpusGraphQL {
           env,
           () -> new Mlogout(
             uuidFromToken(env.getArgument("mid")),
-            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestInstant(),
-            ((JWTUserGraphQLWebContext) env.getContext()).getJwtRequestProvider().getRequestOrigin()
+            ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).getJwtRequestProvider().getRequestInstant(),
+            ((JWTUserGraphQLWebContext) env.getGraphQlContext().get(JWTUserGraphQLWebContext.class)).getJwtRequestProvider().getRequestOrigin()
           ),
           mlogout -> mcorpusRepo.memberLogout(
             mlogout.getMid(),

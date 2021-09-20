@@ -151,7 +151,7 @@ public class GraphQLHandler implements Handler {
                         .variables(gqlWebCtx.getVariables())
                         .operationName(gqlWebCtx.getOpName())
                         .executionId(ExecutionId.from(gqlWebCtx.getExecutionId()))
-                        .context(gqlWebCtx)
+                        .graphQLContext(builder -> builder.of(JWTUserGraphQLWebContext.class, gqlWebCtx))
                         .build();
       graphQL.executeAsync(executionInput).thenAccept(executionResult -> {
         if (executionResult.getErrors().isEmpty()) {

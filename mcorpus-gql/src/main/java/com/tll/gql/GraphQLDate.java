@@ -27,52 +27,51 @@ import java.util.Date;
 /**
  * @author <a href='mailto:alexey@zhokhov.com'>Alexey Zhokhov</a>
  */
-public class GraphQLDate extends GraphQLScalarType {
+public class GraphQLDate {
 
-    @SuppressWarnings("deprecation")
-    public GraphQLDate() {
-        super("Date", "Date type", new Coercing<Date, String>() {
-            private Date convertImpl(Object input) {
-                if (input instanceof String) {
-                    LocalDateTime localDateTime = DateTimeHelper.parseDate((String) input);
+	public static GraphQLScalarType newInstance() {
+		return GraphQLScalarType.newScalar().name("Date").description("Data type").coercing(new Coercing<Date, String>() {
+			
+			private Date convertImpl(Object input) {
+				if (input instanceof String) {
+					LocalDateTime localDateTime = DateTimeHelper.parseDate((String) input);
+					if (localDateTime != null) {
+						return DateTimeHelper.toDate(localDateTime);
+					}
+				}
+				return null;
+			}
 
-                    if (localDateTime != null) {
-                        return DateTimeHelper.toDate(localDateTime);
-                    }
-                }
-                return null;
-            }
+			@Override
+			public String serialize(Object input) {
+				if (input instanceof Date) {
+					return DateTimeHelper.toISOString((Date) input);
+				} else {
+					Date result = convertImpl(input);
+					if (result == null) {
+						throw new CoercingSerializeException("Invalid value '" + input + "' for Date");
+					}
+					return DateTimeHelper.toISOString(result);
+				}
+			}
 
-            @Override
-            public String serialize(Object input) {
-                if (input instanceof Date) {
-                    return DateTimeHelper.toISOString((Date) input);
-                } else {
-                    Date result = convertImpl(input);
-                    if (result == null) {
-                        throw new CoercingSerializeException("Invalid value '" + input + "' for Date");
-                    }
-                    return DateTimeHelper.toISOString(result);
-                }
-            }
+			@Override
+			public Date parseValue(Object input) {
+				Date result = convertImpl(input);
+				if (result == null) {
+					throw new CoercingParseValueException("Invalid value '" + input + "' for Date");
+				}
+				return result;
+			}
 
-            @Override
-            public Date parseValue(Object input) {
-                Date result = convertImpl(input);
-                if (result == null) {
-                    throw new CoercingParseValueException("Invalid value '" + input + "' for Date");
-                }
-                return result;
-            }
-
-            @Override
-            public Date parseLiteral(Object input) {
-                if (!(input instanceof StringValue)) return null;
-                String value = ((StringValue) input).getValue();
-                Date result = convertImpl(value);
-                return result;
-            }
-        });
-    }
-
+			@Override
+			public Date parseLiteral(Object input) {
+				if (!(input instanceof StringValue))
+					return null;
+				String value = ((StringValue) input).getValue();
+				Date result = convertImpl(value);
+				return result;
+			}
+		}).build();
+	}
 }
