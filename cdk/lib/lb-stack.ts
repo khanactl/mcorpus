@@ -7,7 +7,7 @@ import {
 } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { ARecord, HostedZone, RecordTarget } from '@aws-cdk/aws-route53';
 import { LoadBalancerTarget } from '@aws-cdk/aws-route53-targets';
-import { CfnWebACL, CfnWebACLAssociation } from '@aws-cdk/aws-wafv2';
+import { CfnWebACLAssociation } from '@aws-cdk/aws-wafv2';
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, inameCml, IStackProps } from './cdk-native';
 

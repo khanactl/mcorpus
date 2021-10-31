@@ -151,7 +151,7 @@ export class DevPipelineStack extends BaseStack {
         buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
       },
       securityGroups: [props.codebuildSecGrp],
-      subnetSelection: { subnetType: SubnetType.PRIVATE },
+      subnetSelection: { subnetType: SubnetType.PRIVATE_WITH_NAT },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
         env: {
@@ -283,8 +283,8 @@ export class DevPipelineStack extends BaseStack {
           post_build: {
             commands: [
               'echo Pushing the Docker images...',
-              // 'docker push $REPOSITORY_URI:$COMMIT_HASH',
-              'docker push $REPOSITORY_URI',
+              'docker push $REPOSITORY_URI:$COMMIT_HASH',
+              // 'docker push $REPOSITORY_URI',
               'echo Writing image detail file...',
               `printf '{ "imageTag": "'$COMMIT_HASH'" }' > imageTag.json`,
               `aws ssm put-parameter --name "${props.ssmImageTagParamName}" --value $COMMIT_HASH --type String --overwrite`,
