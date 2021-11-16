@@ -31,7 +31,7 @@
     "@types/archiver": "^3.1.1",
     "@types/source-map-support": "^0.5.3",
     "archiver": "^5.0.2",
-    "aws-sdk": "^2.773.0",
+    "aws-sdk": "^2.814.0",
     "camelcase": "^6.1.0",
     "git-branch": "^2.0.1",
     "npm-check-updates": "^9.1.0",
