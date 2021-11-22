@@ -150,8 +150,8 @@ export class DbBootstrapStack extends BaseStack {
     const lambdaProviderInstNme = iname('db-bootstrap-lambda-fn', props);
     const lambdaFn = new SingletonFunction(this, lambdaProviderInstNme, {
       vpc: props.vpc,
-      vpcSubnets: { subnetType: SubnetType.PRIVATE },
-      securityGroup: props.dbBootstrapSecGrp,
+      vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_NAT },
+      securityGroups: [ props.dbBootstrapSecGrp ],
       uuid: 'f8dfc6d4-d864-4f4f-8d65-63c2ea54f2ac', // one-time globaly unique
       runtime: Runtime.PYTHON_3_8,
       // functionName: 'DbBootstrapLambda',

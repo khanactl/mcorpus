@@ -222,7 +222,7 @@ export class AppStack extends BaseStack {
       vpcSubnets: { subnetType: SubnetType.PRIVATE },
       serviceName: fargateSvcInstNme,
       platformVersion: FargatePlatformVersion.LATEST,
-      securityGroup: props.ecsSecGrp,
+      securityGroups: [ props.ecsSecGrp ],
     });
 
     // bind load balancing target to lb group

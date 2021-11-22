@@ -108,7 +108,7 @@ export class DbStack extends BaseStack {
       monitoringInterval: Duration.seconds(60), // default is 1 min
       storageEncrypted: true,
       backupRetention: Duration.days(0), // i.e. do not do backups
-      vpcPlacement: { subnetType: SubnetType.PRIVATE }, // private
+      vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_NAT }, // private
       deletionProtection: false,
       securityGroups: [this.dbSecGrp],
     });

@@ -72,7 +72,7 @@ export class LbStack extends BaseStack {
     this.lbListener = this.appLoadBalancer.addListener(listenerInstNme, {
       protocol: ApplicationProtocol.HTTPS,
       port: 443,
-      certificateArns: [props.sslCertArn],
+      certificates: [ { certificateArn: props.sslCertArn } ],
       sslPolicy: SslPolicy.RECOMMENDED,
       // defaultTargetGroups: []
     });

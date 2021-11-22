@@ -110,8 +110,8 @@ export class DbDataStack extends BaseStack {
     const dbDataFnInstNme = iname('db-data-fn', props);
     this.dbDataFn = new Function(this, dbDataFnInstNme, {
       vpc: props.vpc,
-      vpcSubnets: { subnetType: SubnetType.PRIVATE },
-      securityGroup: props.dbDataSecGrp,
+      vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_NAT },
+      securityGroups: [ props.dbDataSecGrp ],
       code: Code.fromAsset(tmpAssetDir),
       handler: 'dbdata.main',
       runtime: Runtime.PYTHON_3_8,

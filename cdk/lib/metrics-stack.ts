@@ -52,13 +52,13 @@ export class MetricsStack extends BaseStack {
     const metricDbFreeStorageSpace = props.dbInstanceRef.metricFreeStorageSpace();
     // ecs
     const metricEcsCpu = props.ecsClusterRef.metric('CPUUtilization', {
-      dimensions: {
+      dimensionsMap: {
         ClusterName: props.ecsClusterRef.clusterName,
         ServiceName: props.fargateSvcRef.serviceName,
       },
     });
     const metricEcsMemory = props.ecsClusterRef.metric('MemoryUtilization', {
-      dimensions: {
+      dimensionsMap: {
         ClusterName: props.ecsClusterRef.clusterName,
         ServiceName: props.fargateSvcRef.serviceName,
       },
