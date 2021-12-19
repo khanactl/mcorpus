@@ -53,12 +53,12 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
     /**
      * The column <code>public.get_active_logins.login_expiration</code>.
      */
-    public final TableField<GetActiveLoginsRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<GetActiveLoginsRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.get_active_logins.request_timestamp</code>.
      */
-    public final TableField<GetActiveLoginsRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<GetActiveLoginsRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
      * The column <code>public.get_active_logins.request_origin</code>.
