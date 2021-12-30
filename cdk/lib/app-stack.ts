@@ -92,6 +92,7 @@ export interface IAppStackProps extends IStackProps {
   readonly devFlag: boolean;
   readonly publicAddress: string;
   readonly dbDataSourceClassName: string;
+  readonly rstCheck: boolean;
   readonly rstTtlInMinutes: number;
   readonly jwtTtlInMinutes: number;
   readonly jwtRefreshTokenTtlInMinutes: number;
@@ -179,6 +180,8 @@ export class AppStack extends BaseStack {
         JAVA_OPTS: props.javaOpts,
         MCORPUS_COOKIE_SECURE: String(props.cookieSecure),
         MCORPUS_DB_DATA_SOURCE_CLASS_NAME: props.dbDataSourceClassName,
+        
+        MCORPUS_DO_RST_CHECK: String(props.rstCheck),
         MCORPUS_RST_TTL_IN_MINUTES: String(props.jwtRefreshTokenTtlInMinutes),
 
         MCORPUS_JWT_STATUS_CACHE_MAX_SIZE: String(props.jwtStatusCacheMaxSize),

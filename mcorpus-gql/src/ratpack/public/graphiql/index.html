@@ -101,9 +101,11 @@
     // Change this to point wherever you host your GraphQL server.
     var headers = {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'rst': rst
+      'Content-Type': 'application/json'
     };
+    if(rst && rst.length > 0) {
+      headers['rst'] = rst;
+    }
     if(jwt && jwt.length > 0) {
       headers['Authorization'] = 'Bearer ' + jwt;
     }

@@ -165,6 +165,7 @@ async function generateAppInstance(cdkAppConfig: ICdkAppConfig): Promise<void> {
     devFlag: cdkAppConfig.appConfig.devFlag,
     publicAddress: cdkAppConfig.appConfig.publicAddress,
     dbDataSourceClassName: cdkAppConfig.appConfig.dbDataSourceClassName,
+    rstCheck: cdkAppConfig.appConfig.rstCheck,
     rstTtlInMinutes: cdkAppConfig.appConfig.rstTtlInMinutes,
     jwtTtlInMinutes: cdkAppConfig.appConfig.jwtTtlInMinutes,
     jwtRefreshTokenTtlInMinutes: cdkAppConfig.appConfig.jwtRefreshTokenTtlInMinutes,

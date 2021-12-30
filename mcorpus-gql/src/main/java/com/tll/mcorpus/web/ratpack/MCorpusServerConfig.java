@@ -18,6 +18,13 @@ public class MCorpusServerConfig {
   public String dbUrl;
 
   /**
+   * Do Request-Sync-Token checking?
+   * <p>
+   * Default is <code>true</code>.
+   */
+  public boolean doRstCheck = true;
+
+  /**
    * The Request Sync Token name to use (http cookie name and http header name).
    */
   public String rstTokenName = "rst";

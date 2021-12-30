@@ -86,6 +86,7 @@ export interface IAppConfig {
   readonly devFlag: boolean;
   readonly publicAddress: string;
   readonly dbDataSourceClassName: string;
+  readonly rstCheck: boolean;
   readonly rstTtlInMinutes: number;
   readonly jwtTtlInMinutes: number;
   readonly jwtRefreshTokenTtlInMinutes: number;
@@ -245,6 +246,7 @@ export function appConfig(appEnv: AppEnv, jsonAppConfig: any): IAppConfig {
     devFlag: subobj.devFlag,
     publicAddress: subobj.publicAddress,
     dbDataSourceClassName: subobj.dbDataSourceClassName,
+    rstCheck: subobj.rstCheck,
     rstTtlInMinutes: subobj.rstTtlInMinutes,
     jwtTtlInMinutes: subobj.jwtTtlInMinutes,
     jwtRefreshTokenTtlInMinutes: subobj.jwtRefreshTokenTtlInMinutes,

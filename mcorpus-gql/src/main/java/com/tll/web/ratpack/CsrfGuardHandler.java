@@ -35,7 +35,6 @@ public class CsrfGuardHandler implements Handler {
     public RST(final String rst) { this.rst = rst; }
   }
 
-  @SuppressWarnings("serial")
   public static final TypeToken<RST> RST_TYPE = new TypeToken<RST>() {};
 
   private final Logger log = LoggerFactory.getLogger(CsrfGuardHandler.class);

@@ -59,6 +59,7 @@ public class Main {
         if(config.metricsOn) {
           bindings.module(DropwizardMetricsModule.class);
         }
+        glog.info("RST (anti-CSRF) checking is {}", config.doRstCheck ? "ON" : "OFF");
         glog.info("metrics is {}", config.metricsOn ? "ON" : "OFF");
         glog.info("GraphiQL is {}", config.graphiql ? "ON" : "OFF");
         bindings.module(HikariModule.class, hikariConfig -> {
@@ -84,8 +85,8 @@ public class Main {
         // CORS support
         .all(CorsHandler.class)
 
-        // CSRF protection
-        .all(CsrfGuardHandler.class)
+        // CSRF protection (when RST flag is on)
+        .onlyIf(ctx -> ctx.getServerConfig().get(MCorpusServerConfig.class).doRstCheck, CsrfGuardHandler.class)
 
         // redirect to /index if coming in under /
         .path(redirect(301, "index"))
@@ -116,10 +117,12 @@ public class Main {
                 "jwt",
                 clean(ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx).getAuthBearer())
               );
-              dmap.put(
-                ctx.getServerConfig().get(MCorpusServerConfig.class).rstTokenName,
-                ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst
-              );
+              if(ctx.getServerConfig().get(MCorpusServerConfig.class).doRstCheck) {
+                dmap.put(
+                  ctx.getServerConfig().get(MCorpusServerConfig.class).rstTokenName,
+                  ctx.getRequest().get(CsrfGuardHandler.RST_TYPE).rst
+                );
+              }
               ctx.render(htmlNoCache(
                 ctx.file("public/graphiql/index.html"),
                 dmap
