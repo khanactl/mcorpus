@@ -22,7 +22,7 @@
     <slf4j-api.version>1.7.30</slf4j-api.version>
     <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
 
-    <postgres-jdbc.version>42.2.18</postgres-jdbc.version>
+    <postgres-jdbc.version>42.2.25</postgres-jdbc.version>
 
     <jooq.version>3.13.5</jooq.version>
     <hikari-cp.version>3.4.5</hikari-cp.version>
