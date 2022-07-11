@@ -3,7 +3,6 @@ import { Construct, Environment, Stack, StackProps } from "@aws-cdk/core";
 import { S3 } from "aws-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
-import cml = require("camelcase");
 
 /**
  * The expected name of the required cdk app config json file.
@@ -24,6 +23,12 @@ const cdkAppConfigFilename = 'mcorpus-cdk-app-config.json';
  */
 const cdkAppConfigCacheS3BucketName = 'mcorpus-app-config';
 
+function camelize(str: string) {
+  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
+    if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+    return index === 0 ? match.toLowerCase() : match.toUpperCase();
+  });
+}
 /**
  * The supported application environments.
  */
@@ -453,7 +458,7 @@ export function ename(rootName: string, appEnv: AppEnv): string {
  * @returns the generated iname in camelCase
  */
 export function inameCml(rootName: string, props: IAppNameAndEnv) {
-  return cml(iname(rootName, props));
+  return camelize(iname(rootName, props));
 }
 
 /**
