@@ -21,7 +21,7 @@
 		<slf4j-api.version>1.7.30</slf4j-api.version>
 		<lmax-disruptor.version>3.4.4</lmax-disruptor.version>
 
-		<postgres-jdbc.version>42.3.1</postgres-jdbc.version>
+		<postgres-jdbc.version>42.4.1</postgres-jdbc.version>
 		<flyway.version>8.4.3</flyway.version>
 		<jooq.version>3.15.5</jooq.version>
 		<hikari-cp.version>5.0.1</hikari-cp.version>
@@ -33,14 +33,14 @@
 
 		<caffeine.version>3.0.6</caffeine.version>
 
-		<jackson.version>2.13.2</jackson.version>
+		<jackson.version>2.13.3</jackson.version>
 
 		<!--<netty.version>4.1.66.Final</netty.version>-->
 		<ratpack.version>1.9.0</ratpack.version>
 
 		<dropwizard-metrics.version>4.2.9</dropwizard-metrics.version>
 
-		<graphql-java.version>17.3</graphql-java.version>
+		<graphql-java.version>19.1</graphql-java.version>
 
 		<junit.version>4.13.2</junit.version>
 	</properties>
