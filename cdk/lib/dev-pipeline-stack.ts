@@ -342,7 +342,7 @@ export class DevPipelineStack extends BaseStack {
         phases: {
           install: {
             'runtime-versions': {
-              nodejs: '16',
+              nodejs: '14',
             },
             commands: ['cd cdk', 'npm -g i npm', 'npm install'],
           },
