@@ -334,7 +334,7 @@ export class DevPipelineStack extends BaseStack {
 
     const cdkBuild = new PipelineProject(this, 'CdkBuildProject', {
       environment: {
-        buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
+        buildImage: LinuxBuildImage.STANDARD_5_0,
         computeType: ComputeType.SMALL,
       },
       buildSpec: BuildSpec.fromObject({
@@ -342,7 +342,7 @@ export class DevPipelineStack extends BaseStack {
         phases: {
           install: {
             'runtime-versions': {
-              nodejs: '12',
+              nodejs: '16',
             },
             commands: ['cd cdk', 'npm -g i npm', 'npm install'],
           },
