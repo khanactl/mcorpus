@@ -17,7 +17,7 @@
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-		<log4j2.version>2.17.2</log4j2.version>
+		<log4j2.version>2.18.0</log4j2.version>
 		<slf4j-api.version>1.7.30</slf4j-api.version>
 		<lmax-disruptor.version>3.4.4</lmax-disruptor.version>
 
