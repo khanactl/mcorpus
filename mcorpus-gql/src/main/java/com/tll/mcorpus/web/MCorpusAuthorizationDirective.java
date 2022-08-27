@@ -129,7 +129,7 @@ class MCorpusAuthorizationDirective implements SchemaDirectiveWiring {
    */
   @Override
   public GraphQLFieldDefinition onField(SchemaDirectiveWiringEnvironment<GraphQLFieldDefinition> env) {
-    final String roletok = ((StringValue) env.getDirective().getArgument("role").getArgumentValue().getValue()).getValue();
+    final String roletok = ((StringValue) env.getAppliedDirective().getArgument("role").getArgumentValue().getValue()).getValue();
     final GraphQLRole targetRole = GraphQLRole.fromString(upper(roletok));
 
     final GraphQLFieldDefinition f = env.getElement();

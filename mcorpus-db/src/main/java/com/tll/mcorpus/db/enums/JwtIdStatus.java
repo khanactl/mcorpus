@@ -46,4 +46,11 @@ public enum JwtIdStatus implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static JwtIdStatus lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(JwtIdStatus.class, literal);
+    }
 }

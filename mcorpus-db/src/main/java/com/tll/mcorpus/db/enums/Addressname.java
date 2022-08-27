@@ -48,4 +48,11 @@ public enum Addressname implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static Addressname lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(Addressname.class, literal);
+    }
 }

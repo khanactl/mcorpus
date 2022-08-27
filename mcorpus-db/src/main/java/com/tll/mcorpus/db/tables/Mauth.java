@@ -165,6 +165,9 @@ public class Mauth extends TableImpl<MauthRecord> {
 
     private transient Member _member;
 
+    /**
+     * Get the implicit join path to the <code>public.member</code> table.
+     */
     public Member member() {
         if (_member == null)
             _member = new Member(this, Keys.MAUTH__MAUTH_MID_FKEY);

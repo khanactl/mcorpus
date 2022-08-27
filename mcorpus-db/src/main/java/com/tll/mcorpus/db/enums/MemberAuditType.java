@@ -46,4 +46,11 @@ public enum MemberAuditType implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static MemberAuditType lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(MemberAuditType.class, literal);
+    }
 }

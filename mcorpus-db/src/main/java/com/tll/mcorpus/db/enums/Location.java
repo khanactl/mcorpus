@@ -64,4 +64,11 @@ public enum Location implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static Location lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(Location.class, literal);
+    }
 }

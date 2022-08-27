@@ -50,4 +50,11 @@ public enum McuserRole implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static McuserRole lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(McuserRole.class, literal);
+    }
 }

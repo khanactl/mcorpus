@@ -150,6 +150,9 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
     private transient Mcuser _mcuser;
 
+    /**
+     * Get the implicit join path to the <code>public.mcuser</code> table.
+     */
     public Mcuser mcuser() {
         if (_mcuser == null)
             _mcuser = new Mcuser(this, Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);

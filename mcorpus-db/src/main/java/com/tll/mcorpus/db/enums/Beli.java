@@ -56,4 +56,11 @@ public enum Beli implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static Beli lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(Beli.class, literal);
+    }
 }

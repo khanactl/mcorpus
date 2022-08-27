@@ -46,4 +46,11 @@ public enum McuserAuditType implements EnumType {
     public String getLiteral() {
         return literal;
     }
+
+    /**
+     * Lookup a value of this EnumType by its literal
+     */
+    public static McuserAuditType lookupLiteral(String literal) {
+        return EnumType.lookupLiteral(McuserAuditType.class, literal);
+    }
 }

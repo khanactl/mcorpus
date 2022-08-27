@@ -71,10 +71,12 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
     public final TableField<MbenefitsRecord, Beli> BELI = createField(DSL.name("beli"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Beli.class), this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link
-     * org.jooq.Binding} to specify how this type should be handled. Deprecation
-     * can be turned off using {@literal <deprecationOnUnknownTypes/>} in your
-     * code generator configuration.
+     * @deprecated Unknown data type. If this is a qualified, user-defined type,
+     * it may have been excluded from code generation. If this is a built-in
+     * type, you can define an explicit {@link org.jooq.Binding} to specify how
+     * this type should be handled. Deprecation can be turned off using
+     * {@literal <deprecationOnUnknownTypes/>} in your code generator
+     * configuration.
      */
     @Deprecated
     public final TableField<MbenefitsRecord, Object> MCB = createField(DSL.name("mcb"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"money\"").nullable(false), this, "");
@@ -169,6 +171,9 @@ public class Mbenefits extends TableImpl<MbenefitsRecord> {
 
     private transient Member _member;
 
+    /**
+     * Get the implicit join path to the <code>public.member</code> table.
+     */
     public Member member() {
         if (_member == null)
             _member = new Member(this, Keys.MBENEFITS__MBENEFITS_MID_FKEY);
