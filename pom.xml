@@ -41,7 +41,7 @@
 
     <dropwizard-metrics.version>4.1.6</dropwizard-metrics.version>
 
-    <graphql-java.version>14.0</graphql-java.version>
+    <graphql-java.version>17.4</graphql-java.version>
 
     <junit.version>4.13.1</junit.version>
   </properties>
