@@ -34,7 +34,7 @@
 
     <caffeine.version>2.8.6</caffeine.version>
 
-    <jackson.version>2.11.3</jackson.version>
+    <jackson.version>2.12.7.1</jackson.version>
 
     <netty.version>4.1.48.Final</netty.version>
     <ratpack.version>1.8.0</ratpack.version>
