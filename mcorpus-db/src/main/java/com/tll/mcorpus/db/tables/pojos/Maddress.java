@@ -19,16 +19,16 @@ public class Maddress implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID           mid;
-    private final Addressname    addressName;
+    private final UUID mid;
+    private final Addressname addressName;
     private final OffsetDateTime modified;
-    private final String         attn;
-    private final String         street1;
-    private final String         street2;
-    private final String         city;
-    private final String         state;
-    private final String         postalCode;
-    private final String         country;
+    private final String attn;
+    private final String street1;
+    private final String street2;
+    private final String city;
+    private final String state;
+    private final String postalCode;
+    private final String country;
 
     public Maddress(Maddress value) {
         this.mid = value.mid;
@@ -44,16 +44,16 @@ public class Maddress implements Serializable {
     }
 
     public Maddress(
-        UUID           mid,
-        Addressname    addressName,
+        UUID mid,
+        Addressname addressName,
         OffsetDateTime modified,
-        String         attn,
-        String         street1,
-        String         street2,
-        String         city,
-        String         state,
-        String         postalCode,
-        String         country
+        String attn,
+        String street1,
+        String street2,
+        String city,
+        String state,
+        String postalCode,
+        String country
     ) {
         this.mid = mid;
         this.addressName = addressName;
@@ -135,6 +135,95 @@ public class Maddress implements Serializable {
      */
     public String getCountry() {
         return this.country;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Maddress other = (Maddress) obj;
+        if (this.mid == null) {
+            if (other.mid != null)
+                return false;
+        }
+        else if (!this.mid.equals(other.mid))
+            return false;
+        if (this.addressName == null) {
+            if (other.addressName != null)
+                return false;
+        }
+        else if (!this.addressName.equals(other.addressName))
+            return false;
+        if (this.modified == null) {
+            if (other.modified != null)
+                return false;
+        }
+        else if (!this.modified.equals(other.modified))
+            return false;
+        if (this.attn == null) {
+            if (other.attn != null)
+                return false;
+        }
+        else if (!this.attn.equals(other.attn))
+            return false;
+        if (this.street1 == null) {
+            if (other.street1 != null)
+                return false;
+        }
+        else if (!this.street1.equals(other.street1))
+            return false;
+        if (this.street2 == null) {
+            if (other.street2 != null)
+                return false;
+        }
+        else if (!this.street2.equals(other.street2))
+            return false;
+        if (this.city == null) {
+            if (other.city != null)
+                return false;
+        }
+        else if (!this.city.equals(other.city))
+            return false;
+        if (this.state == null) {
+            if (other.state != null)
+                return false;
+        }
+        else if (!this.state.equals(other.state))
+            return false;
+        if (this.postalCode == null) {
+            if (other.postalCode != null)
+                return false;
+        }
+        else if (!this.postalCode.equals(other.postalCode))
+            return false;
+        if (this.country == null) {
+            if (other.country != null)
+                return false;
+        }
+        else if (!this.country.equals(other.country))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+        result = prime * result + ((this.addressName == null) ? 0 : this.addressName.hashCode());
+        result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
+        result = prime * result + ((this.attn == null) ? 0 : this.attn.hashCode());
+        result = prime * result + ((this.street1 == null) ? 0 : this.street1.hashCode());
+        result = prime * result + ((this.street2 == null) ? 0 : this.street2.hashCode());
+        result = prime * result + ((this.city == null) ? 0 : this.city.hashCode());
+        result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
+        result = prime * result + ((this.postalCode == null) ? 0 : this.postalCode.hashCode());
+        result = prime * result + ((this.country == null) ? 0 : this.country.hashCode());
+        return result;
     }
 
     @Override

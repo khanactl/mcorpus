@@ -3,8 +3,8 @@ package com.tll.web.ratpack;
 import static com.tll.core.Util.isBlank;
 import static com.tll.core.Util.isNull;
 import static com.tll.core.Util.not;
-import static ratpack.jackson.Jackson.fromJson;
-import static ratpack.jackson.Jackson.json;
+import static ratpack.core.jackson.Jackson.fromJson;
+import static ratpack.core.jackson.Jackson.json;
 
 import java.util.Collections;
 import java.util.Map;
@@ -26,8 +26,8 @@ import graphql.ExecutionInput;
 import graphql.GraphQL;
 import graphql.GraphqlErrorBuilder;
 import graphql.execution.ExecutionId;
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
+import ratpack.core.handling.Context;
+import ratpack.core.handling.Handler;
 
 /**
  * Graphql request handler Ratpack style.
@@ -56,7 +56,6 @@ public class GraphQLHandler implements Handler {
     this.jwtUserLoginRefreshQueryMethodName = jwtUserLoginRefreshQueryMethodName;
   }
 
-  @SuppressWarnings("serial")
   private static final TypeToken<Map<String, Object>> strObjMapTypeRef = new TypeToken<Map<String, Object>>() { };
 
   @Override

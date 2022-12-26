@@ -13,13 +13,17 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Function12;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Records;
 import org.jooq.Row12;
 import org.jooq.Schema;
+import org.jooq.SelectField;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -185,6 +189,11 @@ public class Mauth extends TableImpl<MauthRecord> {
         return new Mauth(alias, this);
     }
 
+    @Override
+    public Mauth as(Table<?> alias) {
+        return new Mauth(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -201,6 +210,14 @@ public class Mauth extends TableImpl<MauthRecord> {
         return new Mauth(name, null);
     }
 
+    /**
+     * Rename this table
+     */
+    @Override
+    public Mauth rename(Table<?> name) {
+        return new Mauth(name.getQualifiedName(), null);
+    }
+
     // -------------------------------------------------------------------------
     // Row12 type methods
     // -------------------------------------------------------------------------
@@ -208,5 +225,20 @@ public class Mauth extends TableImpl<MauthRecord> {
     @Override
     public Row12<UUID, OffsetDateTime, LocalDate, String, String, String, String, String, String, String, String, String> fieldsRow() {
         return (Row12) super.fieldsRow();
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     */
+    public <U> SelectField<U> mapping(Function12<? super UUID, ? super OffsetDateTime, ? super LocalDate, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+        return convertFrom(Records.mapping(from));
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Class,
+     * Function)}.
+     */
+    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super UUID, ? super OffsetDateTime, ? super LocalDate, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+        return convertFrom(toType, Records.mapping(from));
     }
 }

@@ -3,7 +3,7 @@ package com.tll.web.ratpack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ratpack.handling.Context;
+import ratpack.core.handling.Context;
 
 /**
  * Cookie util methods Ratpack style.

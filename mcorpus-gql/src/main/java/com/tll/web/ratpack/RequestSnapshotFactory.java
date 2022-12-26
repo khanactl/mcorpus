@@ -12,9 +12,9 @@ import com.tll.web.RequestSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ratpack.handling.Context;
-import ratpack.handling.RequestId;
-import ratpack.http.Request;
+import ratpack.core.handling.Context;
+import ratpack.core.handling.RequestId;
+import ratpack.core.http.Request;
 
 /**
  * {@link RequestSnapshot} provider Ratpack style.

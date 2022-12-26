@@ -5,7 +5,7 @@ import static com.tll.core.Util.not;
 import static com.tll.transform.TransformUtil.uuidFromToken;
 import static com.tll.transform.TransformUtil.uuidToToken;
 import static com.tll.web.ratpack.WebFileRenderer.TRefAndData.htmlNoCache;
-import static ratpack.handling.Handlers.redirect;
+import static ratpack.core.handling.Handlers.redirect;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,12 +27,12 @@ import ratpack.dropwizard.metrics.DropwizardMetricsConfig;
 import ratpack.dropwizard.metrics.DropwizardMetricsModule;
 import ratpack.dropwizard.metrics.MetricsWebsocketBroadcastHandler;
 import ratpack.guice.Guice;
-import ratpack.handling.RequestId;
-import ratpack.handling.RequestLogger;
+import ratpack.core.handling.RequestId;
+import ratpack.core.handling.RequestLogger;
 import ratpack.hikari.HikariModule;
-import ratpack.logging.MDCInterceptor;
-import ratpack.server.BaseDir;
-import ratpack.server.RatpackServer;
+import ratpack.core.logging.MDCInterceptor;
+import ratpack.core.server.BaseDir;
+import ratpack.core.server.RatpackServer;
 
 /**
  * MCorpus GraphQL Server entry point.

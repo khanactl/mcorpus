@@ -20,16 +20,16 @@ public class Member implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID           mid;
+    private final UUID mid;
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
-    private final String         empId;
-    private final Location       location;
-    private final String         nameFirst;
-    private final String         nameMiddle;
-    private final String         nameLast;
-    private final String         displayName;
-    private final MemberStatus   status;
+    private final String empId;
+    private final Location location;
+    private final String nameFirst;
+    private final String nameMiddle;
+    private final String nameLast;
+    private final String displayName;
+    private final MemberStatus status;
 
     public Member(Member value) {
         this.mid = value.mid;
@@ -45,16 +45,16 @@ public class Member implements Serializable {
     }
 
     public Member(
-        UUID           mid,
+        UUID mid,
         OffsetDateTime created,
         OffsetDateTime modified,
-        String         empId,
-        Location       location,
-        String         nameFirst,
-        String         nameMiddle,
-        String         nameLast,
-        String         displayName,
-        MemberStatus   status
+        String empId,
+        Location location,
+        String nameFirst,
+        String nameMiddle,
+        String nameLast,
+        String displayName,
+        MemberStatus status
     ) {
         this.mid = mid;
         this.created = created;
@@ -136,6 +136,95 @@ public class Member implements Serializable {
      */
     public MemberStatus getStatus() {
         return this.status;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Member other = (Member) obj;
+        if (this.mid == null) {
+            if (other.mid != null)
+                return false;
+        }
+        else if (!this.mid.equals(other.mid))
+            return false;
+        if (this.created == null) {
+            if (other.created != null)
+                return false;
+        }
+        else if (!this.created.equals(other.created))
+            return false;
+        if (this.modified == null) {
+            if (other.modified != null)
+                return false;
+        }
+        else if (!this.modified.equals(other.modified))
+            return false;
+        if (this.empId == null) {
+            if (other.empId != null)
+                return false;
+        }
+        else if (!this.empId.equals(other.empId))
+            return false;
+        if (this.location == null) {
+            if (other.location != null)
+                return false;
+        }
+        else if (!this.location.equals(other.location))
+            return false;
+        if (this.nameFirst == null) {
+            if (other.nameFirst != null)
+                return false;
+        }
+        else if (!this.nameFirst.equals(other.nameFirst))
+            return false;
+        if (this.nameMiddle == null) {
+            if (other.nameMiddle != null)
+                return false;
+        }
+        else if (!this.nameMiddle.equals(other.nameMiddle))
+            return false;
+        if (this.nameLast == null) {
+            if (other.nameLast != null)
+                return false;
+        }
+        else if (!this.nameLast.equals(other.nameLast))
+            return false;
+        if (this.displayName == null) {
+            if (other.displayName != null)
+                return false;
+        }
+        else if (!this.displayName.equals(other.displayName))
+            return false;
+        if (this.status == null) {
+            if (other.status != null)
+                return false;
+        }
+        else if (!this.status.equals(other.status))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+        result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
+        result = prime * result + ((this.empId == null) ? 0 : this.empId.hashCode());
+        result = prime * result + ((this.location == null) ? 0 : this.location.hashCode());
+        result = prime * result + ((this.nameFirst == null) ? 0 : this.nameFirst.hashCode());
+        result = prime * result + ((this.nameMiddle == null) ? 0 : this.nameMiddle.hashCode());
+        result = prime * result + ((this.nameLast == null) ? 0 : this.nameLast.hashCode());
+        result = prime * result + ((this.displayName == null) ? 0 : this.displayName.hashCode());
+        result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
+        return result;
     }
 
     @Override

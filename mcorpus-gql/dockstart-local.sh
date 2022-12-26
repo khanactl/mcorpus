@@ -13,7 +13,7 @@ JAVA_OPTS=(
   '-Djava.net.preferIPv4Stack=true'
   '-Dlog4j.configurationFile=log4j2-aws.xml'
   '-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector'
-  '-cp log4j-api-2.18.0.jar:log4j-core-2.18.0.jar:log4j-slf4j-impl-2.18.0.jar:disruptor-3.4.4.jar'
+  '-cp log4j-api-2.19.0.jar:log4j-core-2.19.0.jar:log4j-slf4j-impl-2.19.0.jar:disruptor-3.4.4.jar'
 )
 
 docker run \

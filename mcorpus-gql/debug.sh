@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-log4j2v="2.18.0"
+log4j2v="2.19.0"
 disruptorv="3.4.4"
 
 cd target

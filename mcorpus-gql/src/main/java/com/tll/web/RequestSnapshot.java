@@ -23,7 +23,7 @@ public class RequestSnapshot {
 
   static String stripQS(final String s) {
     final int i = s == null ? -1 : s.indexOf("?");
-    return i > 0 ? s.substring(0, i) : s;
+    return (i > 0 && s != null) ? s.substring(0, i) : s;
   }
 
   static String stripSchemeAndPort(final String s) {

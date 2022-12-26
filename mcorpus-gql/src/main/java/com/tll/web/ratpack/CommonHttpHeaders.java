@@ -1,7 +1,7 @@
 package com.tll.web.ratpack;
 
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
+import ratpack.core.handling.Context;
+import ratpack.core.handling.Handler;
 
 /**
  * Add HTTP response headers suitable for all

@@ -30,9 +30,9 @@ import com.tll.web.ratpack.WebFileRenderer;
 
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
-import ratpack.error.ClientErrorHandler;
-import ratpack.error.ServerErrorHandler;
-import ratpack.server.ServerConfig;
+import ratpack.core.error.ClientErrorHandler;
+import ratpack.core.error.ServerErrorHandler;
+import ratpack.core.server.ServerConfig;
 
 /**
  * Object bindings for the web layer.

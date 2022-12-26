@@ -18,8 +18,8 @@ public class Mref implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID     mid;
-    private final String   empId;
+    private final UUID mid;
+    private final String empId;
     private final Location location;
 
     public Mref(Mref value) {
@@ -29,8 +29,8 @@ public class Mref implements Serializable {
     }
 
     public Mref(
-        UUID     mid,
-        String   empId,
+        UUID mid,
+        String empId,
         Location location
     ) {
         this.mid = mid;
@@ -57,6 +57,46 @@ public class Mref implements Serializable {
      */
     public Location getLocation() {
         return this.location;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Mref other = (Mref) obj;
+        if (this.mid == null) {
+            if (other.mid != null)
+                return false;
+        }
+        else if (!this.mid.equals(other.mid))
+            return false;
+        if (this.empId == null) {
+            if (other.empId != null)
+                return false;
+        }
+        else if (!this.empId.equals(other.empId))
+            return false;
+        if (this.location == null) {
+            if (other.location != null)
+                return false;
+        }
+        else if (!this.location.equals(other.location))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+        result = prime * result + ((this.empId == null) ? 0 : this.empId.hashCode());
+        result = prime * result + ((this.location == null) ? 0 : this.location.hashCode());
+        return result;
     }
 
     @Override

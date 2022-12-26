@@ -21,15 +21,15 @@ public class Mcuser implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID           uid;
+    private final UUID uid;
     private final OffsetDateTime created;
     private final OffsetDateTime modified;
-    private final String         name;
-    private final String         email;
-    private final String         username;
-    private final String         pswd;
-    private final McuserStatus   status;
-    private final McuserRole[]   roles;
+    private final String name;
+    private final String email;
+    private final String username;
+    private final String pswd;
+    private final McuserStatus status;
+    private final McuserRole[] roles;
 
     public Mcuser(Mcuser value) {
         this.uid = value.uid;
@@ -44,15 +44,15 @@ public class Mcuser implements Serializable {
     }
 
     public Mcuser(
-        UUID           uid,
+        UUID uid,
         OffsetDateTime created,
         OffsetDateTime modified,
-        String         name,
-        String         email,
-        String         username,
-        String         pswd,
-        McuserStatus   status,
-        McuserRole[]   roles
+        String name,
+        String email,
+        String username,
+        String pswd,
+        McuserStatus status,
+        McuserRole[] roles
     ) {
         this.uid = uid;
         this.created = created;
@@ -126,6 +126,88 @@ public class Mcuser implements Serializable {
      */
     public McuserRole[] getRoles() {
         return this.roles;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Mcuser other = (Mcuser) obj;
+        if (this.uid == null) {
+            if (other.uid != null)
+                return false;
+        }
+        else if (!this.uid.equals(other.uid))
+            return false;
+        if (this.created == null) {
+            if (other.created != null)
+                return false;
+        }
+        else if (!this.created.equals(other.created))
+            return false;
+        if (this.modified == null) {
+            if (other.modified != null)
+                return false;
+        }
+        else if (!this.modified.equals(other.modified))
+            return false;
+        if (this.name == null) {
+            if (other.name != null)
+                return false;
+        }
+        else if (!this.name.equals(other.name))
+            return false;
+        if (this.email == null) {
+            if (other.email != null)
+                return false;
+        }
+        else if (!this.email.equals(other.email))
+            return false;
+        if (this.username == null) {
+            if (other.username != null)
+                return false;
+        }
+        else if (!this.username.equals(other.username))
+            return false;
+        if (this.pswd == null) {
+            if (other.pswd != null)
+                return false;
+        }
+        else if (!this.pswd.equals(other.pswd))
+            return false;
+        if (this.status == null) {
+            if (other.status != null)
+                return false;
+        }
+        else if (!this.status.equals(other.status))
+            return false;
+        if (this.roles == null) {
+            if (other.roles != null)
+                return false;
+        }
+        else if (!Arrays.equals(this.roles, other.roles))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
+        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+        result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
+        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+        result = prime * result + ((this.email == null) ? 0 : this.email.hashCode());
+        result = prime * result + ((this.username == null) ? 0 : this.username.hashCode());
+        result = prime * result + ((this.pswd == null) ? 0 : this.pswd.hashCode());
+        result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
+        result = prime * result + ((this.roles == null) ? 0 : Arrays.hashCode(this.roles));
+        return result;
     }
 
     @Override

@@ -18,8 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ratpack.exec.Blocking;
-import ratpack.handling.Context;
-import ratpack.render.RendererSupport;
+import ratpack.core.handling.Context;
+import ratpack.core.render.RendererSupport;
 
 /**
  * Simple {@link Renderer} in place of groovy templating

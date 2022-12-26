@@ -20,11 +20,11 @@ public class MemberAudit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID            mid;
-    private final OffsetDateTime  created;
+    private final UUID mid;
+    private final OffsetDateTime created;
     private final MemberAuditType type;
-    private final OffsetDateTime  requestTimestamp;
-    private final InetAddress     requestOrigin;
+    private final OffsetDateTime requestTimestamp;
+    private final InetAddress requestOrigin;
 
     public MemberAudit(MemberAudit value) {
         this.mid = value.mid;
@@ -35,11 +35,11 @@ public class MemberAudit implements Serializable {
     }
 
     public MemberAudit(
-        UUID            mid,
-        OffsetDateTime  created,
+        UUID mid,
+        OffsetDateTime created,
         MemberAuditType type,
-        OffsetDateTime  requestTimestamp,
-        InetAddress     requestOrigin
+        OffsetDateTime requestTimestamp,
+        InetAddress requestOrigin
     ) {
         this.mid = mid;
         this.created = created;
@@ -81,6 +81,60 @@ public class MemberAudit implements Serializable {
      */
     public InetAddress getRequestOrigin() {
         return this.requestOrigin;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final MemberAudit other = (MemberAudit) obj;
+        if (this.mid == null) {
+            if (other.mid != null)
+                return false;
+        }
+        else if (!this.mid.equals(other.mid))
+            return false;
+        if (this.created == null) {
+            if (other.created != null)
+                return false;
+        }
+        else if (!this.created.equals(other.created))
+            return false;
+        if (this.type == null) {
+            if (other.type != null)
+                return false;
+        }
+        else if (!this.type.equals(other.type))
+            return false;
+        if (this.requestTimestamp == null) {
+            if (other.requestTimestamp != null)
+                return false;
+        }
+        else if (!this.requestTimestamp.equals(other.requestTimestamp))
+            return false;
+        if (this.requestOrigin == null) {
+            if (other.requestOrigin != null)
+                return false;
+        }
+        else if (!this.requestOrigin.equals(other.requestOrigin))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
+        result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
+        return result;
     }
 
     @Override

@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ratpack.exec.Blocking;
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
+import ratpack.core.handling.Context;
+import ratpack.core.handling.Handler;
 
 /**
  * Determine the JWT status for incoming http requests and cache this status in

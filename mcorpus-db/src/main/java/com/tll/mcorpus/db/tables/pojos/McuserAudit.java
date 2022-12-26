@@ -21,14 +21,14 @@ public class McuserAudit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID            uid;
-    private final OffsetDateTime  created;
+    private final UUID uid;
+    private final OffsetDateTime created;
     private final McuserAuditType type;
-    private final OffsetDateTime  requestTimestamp;
-    private final InetAddress     requestOrigin;
-    private final OffsetDateTime  loginExpiration;
-    private final UUID            jwtId;
-    private final JwtIdStatus     jwtIdStatus;
+    private final OffsetDateTime requestTimestamp;
+    private final InetAddress requestOrigin;
+    private final OffsetDateTime loginExpiration;
+    private final UUID jwtId;
+    private final JwtIdStatus jwtIdStatus;
 
     public McuserAudit(McuserAudit value) {
         this.uid = value.uid;
@@ -42,14 +42,14 @@ public class McuserAudit implements Serializable {
     }
 
     public McuserAudit(
-        UUID            uid,
-        OffsetDateTime  created,
+        UUID uid,
+        OffsetDateTime created,
         McuserAuditType type,
-        OffsetDateTime  requestTimestamp,
-        InetAddress     requestOrigin,
-        OffsetDateTime  loginExpiration,
-        UUID            jwtId,
-        JwtIdStatus     jwtIdStatus
+        OffsetDateTime requestTimestamp,
+        InetAddress requestOrigin,
+        OffsetDateTime loginExpiration,
+        UUID jwtId,
+        JwtIdStatus jwtIdStatus
     ) {
         this.uid = uid;
         this.created = created;
@@ -115,6 +115,81 @@ public class McuserAudit implements Serializable {
      */
     public JwtIdStatus getJwtIdStatus() {
         return this.jwtIdStatus;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final McuserAudit other = (McuserAudit) obj;
+        if (this.uid == null) {
+            if (other.uid != null)
+                return false;
+        }
+        else if (!this.uid.equals(other.uid))
+            return false;
+        if (this.created == null) {
+            if (other.created != null)
+                return false;
+        }
+        else if (!this.created.equals(other.created))
+            return false;
+        if (this.type == null) {
+            if (other.type != null)
+                return false;
+        }
+        else if (!this.type.equals(other.type))
+            return false;
+        if (this.requestTimestamp == null) {
+            if (other.requestTimestamp != null)
+                return false;
+        }
+        else if (!this.requestTimestamp.equals(other.requestTimestamp))
+            return false;
+        if (this.requestOrigin == null) {
+            if (other.requestOrigin != null)
+                return false;
+        }
+        else if (!this.requestOrigin.equals(other.requestOrigin))
+            return false;
+        if (this.loginExpiration == null) {
+            if (other.loginExpiration != null)
+                return false;
+        }
+        else if (!this.loginExpiration.equals(other.loginExpiration))
+            return false;
+        if (this.jwtId == null) {
+            if (other.jwtId != null)
+                return false;
+        }
+        else if (!this.jwtId.equals(other.jwtId))
+            return false;
+        if (this.jwtIdStatus == null) {
+            if (other.jwtIdStatus != null)
+                return false;
+        }
+        else if (!this.jwtIdStatus.equals(other.jwtIdStatus))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
+        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
+        result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
+        result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
+        result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
+        result = prime * result + ((this.jwtIdStatus == null) ? 0 : this.jwtIdStatus.hashCode());
+        return result;
     }
 
     @Override

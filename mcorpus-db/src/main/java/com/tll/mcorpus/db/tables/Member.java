@@ -14,13 +14,17 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Function10;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Records;
 import org.jooq.Row10;
 import org.jooq.Schema;
+import org.jooq.SelectField;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -159,6 +163,11 @@ public class Member extends TableImpl<MemberRecord> {
         return new Member(alias, this);
     }
 
+    @Override
+    public Member as(Table<?> alias) {
+        return new Member(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -175,6 +184,14 @@ public class Member extends TableImpl<MemberRecord> {
         return new Member(name, null);
     }
 
+    /**
+     * Rename this table
+     */
+    @Override
+    public Member rename(Table<?> name) {
+        return new Member(name.getQualifiedName(), null);
+    }
+
     // -------------------------------------------------------------------------
     // Row10 type methods
     // -------------------------------------------------------------------------
@@ -182,5 +199,20 @@ public class Member extends TableImpl<MemberRecord> {
     @Override
     public Row10<UUID, OffsetDateTime, OffsetDateTime, String, Location, String, String, String, String, MemberStatus> fieldsRow() {
         return (Row10) super.fieldsRow();
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     */
+    public <U> SelectField<U> mapping(Function10<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super Location, ? super String, ? super String, ? super String, ? super String, ? super MemberStatus, ? extends U> from) {
+        return convertFrom(Records.mapping(from));
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Class,
+     * Function)}.
+     */
+    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super Location, ? super String, ? super String, ? super String, ? super String, ? super MemberStatus, ? extends U> from) {
+        return convertFrom(toType, Records.mapping(from));
     }
 }

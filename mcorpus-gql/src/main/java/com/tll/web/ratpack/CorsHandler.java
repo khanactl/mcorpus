@@ -14,8 +14,8 @@ import com.tll.web.RequestSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
+import ratpack.core.handling.Context;
+import ratpack.core.handling.Handler;
 
 /**
  * CORS support Ratpack style.

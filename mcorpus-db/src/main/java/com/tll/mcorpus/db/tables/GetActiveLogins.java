@@ -11,11 +11,15 @@ import com.tll.mcorpus.db.tables.records.GetActiveLoginsRecord;
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.jooq.Field;
+import org.jooq.Function4;
 import org.jooq.Name;
+import org.jooq.Records;
 import org.jooq.Row4;
 import org.jooq.Schema;
+import org.jooq.SelectField;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -111,6 +115,11 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
         return new GetActiveLogins(alias, this, parameters);
     }
 
+    @Override
+    public GetActiveLogins as(Table<?> alias) {
+        return new GetActiveLogins(alias.getQualifiedName(), this, parameters);
+    }
+
     /**
      * Rename this table
      */
@@ -125,6 +134,14 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
     @Override
     public GetActiveLogins rename(Name name) {
         return new GetActiveLogins(name, null, parameters);
+    }
+
+    /**
+     * Rename this table
+     */
+    @Override
+    public GetActiveLogins rename(Table<?> name) {
+        return new GetActiveLogins(name.getQualifiedName(), null, parameters);
     }
 
     // -------------------------------------------------------------------------
@@ -160,5 +177,20 @@ public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
         });
 
         return aliased() ? result.as(getUnqualifiedName()) : result;
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     */
+    public <U> SelectField<U> mapping(Function4<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super InetAddress, ? extends U> from) {
+        return convertFrom(Records.mapping(from));
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Class,
+     * Function)}.
+     */
+    public <U> SelectField<U> mapping(Class<U> toType, Function4<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super InetAddress, ? extends U> from) {
+        return convertFrom(toType, Records.mapping(from));
     }
 }

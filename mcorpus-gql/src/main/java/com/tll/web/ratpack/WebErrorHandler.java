@@ -7,9 +7,9 @@ import static com.tll.core.Util.isNullOrEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ratpack.error.ClientErrorHandler;
-import ratpack.error.ServerErrorHandler;
-import ratpack.handling.Context;
+import ratpack.core.error.ClientErrorHandler;
+import ratpack.core.error.ServerErrorHandler;
+import ratpack.core.handling.Context;
 
 /**
  * The global error handler for the mcorpus web app.

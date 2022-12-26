@@ -22,11 +22,11 @@ public class JwtMcuserStatus implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final McuserAuditType mcuserAuditRecordType;
-    private final UUID            jwtId;
-    private final JwtIdStatus     jwtIdStatus;
-    private final OffsetDateTime  loginExpiration;
-    private final UUID            uid;
-    private final McuserStatus    mcuserStatus;
+    private final UUID jwtId;
+    private final JwtIdStatus jwtIdStatus;
+    private final OffsetDateTime loginExpiration;
+    private final UUID uid;
+    private final McuserStatus mcuserStatus;
 
     public JwtMcuserStatus(JwtMcuserStatus value) {
         this.mcuserAuditRecordType = value.mcuserAuditRecordType;
@@ -39,11 +39,11 @@ public class JwtMcuserStatus implements Serializable {
 
     public JwtMcuserStatus(
         McuserAuditType mcuserAuditRecordType,
-        UUID            jwtId,
-        JwtIdStatus     jwtIdStatus,
-        OffsetDateTime  loginExpiration,
-        UUID            uid,
-        McuserStatus    mcuserStatus
+        UUID jwtId,
+        JwtIdStatus jwtIdStatus,
+        OffsetDateTime loginExpiration,
+        UUID uid,
+        McuserStatus mcuserStatus
     ) {
         this.mcuserAuditRecordType = mcuserAuditRecordType;
         this.jwtId = jwtId;
@@ -94,6 +94,67 @@ public class JwtMcuserStatus implements Serializable {
      */
     public McuserStatus getMcuserStatus() {
         return this.mcuserStatus;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final JwtMcuserStatus other = (JwtMcuserStatus) obj;
+        if (this.mcuserAuditRecordType == null) {
+            if (other.mcuserAuditRecordType != null)
+                return false;
+        }
+        else if (!this.mcuserAuditRecordType.equals(other.mcuserAuditRecordType))
+            return false;
+        if (this.jwtId == null) {
+            if (other.jwtId != null)
+                return false;
+        }
+        else if (!this.jwtId.equals(other.jwtId))
+            return false;
+        if (this.jwtIdStatus == null) {
+            if (other.jwtIdStatus != null)
+                return false;
+        }
+        else if (!this.jwtIdStatus.equals(other.jwtIdStatus))
+            return false;
+        if (this.loginExpiration == null) {
+            if (other.loginExpiration != null)
+                return false;
+        }
+        else if (!this.loginExpiration.equals(other.loginExpiration))
+            return false;
+        if (this.uid == null) {
+            if (other.uid != null)
+                return false;
+        }
+        else if (!this.uid.equals(other.uid))
+            return false;
+        if (this.mcuserStatus == null) {
+            if (other.mcuserStatus != null)
+                return false;
+        }
+        else if (!this.mcuserStatus.equals(other.mcuserStatus))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.mcuserAuditRecordType == null) ? 0 : this.mcuserAuditRecordType.hashCode());
+        result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
+        result = prime * result + ((this.jwtIdStatus == null) ? 0 : this.jwtIdStatus.hashCode());
+        result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
+        result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
+        result = prime * result + ((this.mcuserStatus == null) ? 0 : this.mcuserStatus.hashCode());
+        return result;
     }
 
     @Override

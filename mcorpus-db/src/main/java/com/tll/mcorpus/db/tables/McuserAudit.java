@@ -17,14 +17,18 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Function8;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Records;
 import org.jooq.Row8;
 import org.jooq.Schema;
+import org.jooq.SelectField;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -170,6 +174,11 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
         return new McuserAudit(alias, this);
     }
 
+    @Override
+    public McuserAudit as(Table<?> alias) {
+        return new McuserAudit(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -186,6 +195,14 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
         return new McuserAudit(name, null);
     }
 
+    /**
+     * Rename this table
+     */
+    @Override
+    public McuserAudit rename(Table<?> name) {
+        return new McuserAudit(name.getQualifiedName(), null);
+    }
+
     // -------------------------------------------------------------------------
     // Row8 type methods
     // -------------------------------------------------------------------------
@@ -193,5 +210,20 @@ public class McuserAudit extends TableImpl<McuserAuditRecord> {
     @Override
     public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
         return (Row8) super.fieldsRow();
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     */
+    public <U> SelectField<U> mapping(Function8<? super UUID, ? super OffsetDateTime, ? super McuserAuditType, ? super OffsetDateTime, ? super InetAddress, ? super OffsetDateTime, ? super UUID, ? super JwtIdStatus, ? extends U> from) {
+        return convertFrom(Records.mapping(from));
+    }
+
+    /**
+     * Convenience mapping calling {@link SelectField#convertFrom(Class,
+     * Function)}.
+     */
+    public <U> SelectField<U> mapping(Class<U> toType, Function8<? super UUID, ? super OffsetDateTime, ? super McuserAuditType, ? super OffsetDateTime, ? super InetAddress, ? super OffsetDateTime, ? super UUID, ? super JwtIdStatus, ? extends U> from) {
+        return convertFrom(toType, Records.mapping(from));
     }
 }

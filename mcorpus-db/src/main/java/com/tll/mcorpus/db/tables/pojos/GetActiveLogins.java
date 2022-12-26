@@ -18,10 +18,10 @@ public class GetActiveLogins implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID           jwtId;
+    private final UUID jwtId;
     private final OffsetDateTime loginExpiration;
     private final OffsetDateTime requestTimestamp;
-    private final InetAddress    requestOrigin;
+    private final InetAddress requestOrigin;
 
     public GetActiveLogins(GetActiveLogins value) {
         this.jwtId = value.jwtId;
@@ -31,10 +31,10 @@ public class GetActiveLogins implements Serializable {
     }
 
     public GetActiveLogins(
-        UUID           jwtId,
+        UUID jwtId,
         OffsetDateTime loginExpiration,
         OffsetDateTime requestTimestamp,
-        InetAddress    requestOrigin
+        InetAddress requestOrigin
     ) {
         this.jwtId = jwtId;
         this.loginExpiration = loginExpiration;
@@ -68,6 +68,53 @@ public class GetActiveLogins implements Serializable {
      */
     public InetAddress getRequestOrigin() {
         return this.requestOrigin;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final GetActiveLogins other = (GetActiveLogins) obj;
+        if (this.jwtId == null) {
+            if (other.jwtId != null)
+                return false;
+        }
+        else if (!this.jwtId.equals(other.jwtId))
+            return false;
+        if (this.loginExpiration == null) {
+            if (other.loginExpiration != null)
+                return false;
+        }
+        else if (!this.loginExpiration.equals(other.loginExpiration))
+            return false;
+        if (this.requestTimestamp == null) {
+            if (other.requestTimestamp != null)
+                return false;
+        }
+        else if (!this.requestTimestamp.equals(other.requestTimestamp))
+            return false;
+        if (this.requestOrigin == null) {
+            if (other.requestOrigin != null)
+                return false;
+        }
+        else if (!this.requestOrigin.equals(other.requestOrigin))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
+        result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
+        result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
+        result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
+        return result;
     }
 
     @Override

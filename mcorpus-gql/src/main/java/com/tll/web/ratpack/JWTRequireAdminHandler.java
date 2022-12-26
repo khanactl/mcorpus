@@ -7,8 +7,8 @@ import com.tll.jwt.JWTHttpRequestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
+import ratpack.core.handling.Context;
+import ratpack.core.handling.Handler;
 
 /**
  * Require a valid JWT with an administrator role in order to proceed.
