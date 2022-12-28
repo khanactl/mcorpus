@@ -148,7 +148,7 @@ export class DevPipelineStack extends BaseStack {
       environment: {
         computeType: ComputeType.SMALL,
         // privileged: true,
-        buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
+        buildImage: LinuxBuildImage.fromCodeBuildImageId("aws/codebuild/standard:6.0")
       },
       securityGroups: [props.codebuildSecGrp],
       subnetSelection: { subnetType: SubnetType.PRIVATE_WITH_NAT },
@@ -162,7 +162,7 @@ export class DevPipelineStack extends BaseStack {
         phases: {
           install: {
             'runtime-versions': {
-              java: 'corretto11',
+              java: 'corretto17',
             },
             commands: ['pip install --upgrade awscli'],
           },
@@ -216,10 +216,10 @@ export class DevPipelineStack extends BaseStack {
       environment: {
         computeType: ComputeType.SMALL,
         privileged: true, // for Docker to run
-        buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
+        buildImage: LinuxBuildImage.fromCodeBuildImageId("aws/codebuild/standard:6.0")
       },
       securityGroups: [props.codebuildSecGrp],
-      subnetSelection: { subnetType: SubnetType.PRIVATE },
+      subnetSelection: { subnetType: SubnetType.PRIVATE_WITH_NAT },
       buildSpec: BuildSpec.fromObject({
         version: '0.2',
         env: {
@@ -235,7 +235,7 @@ export class DevPipelineStack extends BaseStack {
         phases: {
           install: {
             'runtime-versions': {
-              java: 'corretto11',
+              java: 'corretto17',
               docker: 18,
             },
             commands: ['pip install --upgrade awscli'],
