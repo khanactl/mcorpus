@@ -346,7 +346,7 @@ export class DevPipelineStack extends BaseStack {
               nodejs: '16',
             },
             */
-            commands: ['cd cdk', 'npm -g i npm', 'npm ci'],
+            commands: ['cd cdk', 'npm -g i npm', 'npm ci', 'npm cache verify'],
           },
           build: {
             commands: ['npm run build', 'npm run cdk synth -- -o dist'],
