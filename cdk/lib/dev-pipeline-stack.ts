@@ -236,7 +236,7 @@ export class DevPipelineStack extends BaseStack {
           install: {
             'runtime-versions': {
               java: 'corretto17',
-              docker: 18,
+              // docker: 20,
             },
             commands: ['pip install --upgrade awscli'],
           },
@@ -341,10 +341,12 @@ export class DevPipelineStack extends BaseStack {
         version: '0.2',
         phases: {
           install: {
+            /*
             'runtime-versions': {
-              nodejs: '14',
+              nodejs: '16',
             },
-            commands: ['cd cdk', 'npm -g i npm', 'npm install'],
+            */
+            commands: ['cd cdk', 'npm -g i npm', 'npm ci'],
           },
           build: {
             commands: ['npm run build', 'npm run cdk synth -- -o dist'],
