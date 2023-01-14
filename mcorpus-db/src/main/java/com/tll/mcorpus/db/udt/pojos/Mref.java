@@ -16,98 +16,98 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mref implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID mid;
-    private final String empId;
-    private final Location location;
+		private final UUID mid;
+		private final String empId;
+		private final Location location;
 
-    public Mref(Mref value) {
-        this.mid = value.mid;
-        this.empId = value.empId;
-        this.location = value.location;
-    }
+		public Mref(Mref value) {
+				this.mid = value.mid;
+				this.empId = value.empId;
+				this.location = value.location;
+		}
 
-    public Mref(
-        UUID mid,
-        String empId,
-        Location location
-    ) {
-        this.mid = mid;
-        this.empId = empId;
-        this.location = location;
-    }
+		public Mref(
+				UUID mid,
+				String empId,
+				Location location
+		) {
+				this.mid = mid;
+				this.empId = empId;
+				this.location = location;
+		}
 
-    /**
-     * Getter for <code>public.mref.mid</code>.
-     */
-    public UUID getMid() {
-        return this.mid;
-    }
+		/**
+		 * Getter for <code>public.mref.mid</code>.
+		 */
+		public UUID getMid() {
+				return this.mid;
+		}
 
-    /**
-     * Getter for <code>public.mref.emp_id</code>.
-     */
-    public String getEmpId() {
-        return this.empId;
-    }
+		/**
+		 * Getter for <code>public.mref.emp_id</code>.
+		 */
+		public String getEmpId() {
+				return this.empId;
+		}
 
-    /**
-     * Getter for <code>public.mref.location</code>.
-     */
-    public Location getLocation() {
-        return this.location;
-    }
+		/**
+		 * Getter for <code>public.mref.location</code>.
+		 */
+		public Location getLocation() {
+				return this.location;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final Mref other = (Mref) obj;
-        if (this.mid == null) {
-            if (other.mid != null)
-                return false;
-        }
-        else if (!this.mid.equals(other.mid))
-            return false;
-        if (this.empId == null) {
-            if (other.empId != null)
-                return false;
-        }
-        else if (!this.empId.equals(other.empId))
-            return false;
-        if (this.location == null) {
-            if (other.location != null)
-                return false;
-        }
-        else if (!this.location.equals(other.location))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final Mref other = (Mref) obj;
+				if (this.mid == null) {
+						if (other.mid != null)
+								return false;
+				}
+				else if (!this.mid.equals(other.mid))
+						return false;
+				if (this.empId == null) {
+						if (other.empId != null)
+								return false;
+				}
+				else if (!this.empId.equals(other.empId))
+						return false;
+				if (this.location == null) {
+						if (other.location != null)
+								return false;
+				}
+				else if (!this.location.equals(other.location))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
-        result = prime * result + ((this.empId == null) ? 0 : this.empId.hashCode());
-        result = prime * result + ((this.location == null) ? 0 : this.location.hashCode());
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+				result = prime * result + ((this.empId == null) ? 0 : this.empId.hashCode());
+				result = prime * result + ((this.location == null) ? 0 : this.location.hashCode());
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("Mref (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("Mref (");
 
-        sb.append(mid);
-        sb.append(", ").append(empId);
-        sb.append(", ").append(location);
+				sb.append(mid);
+				sb.append(", ").append(empId);
+				sb.append(", ").append(location);
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

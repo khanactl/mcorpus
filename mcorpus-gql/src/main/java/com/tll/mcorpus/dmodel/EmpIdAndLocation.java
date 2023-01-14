@@ -9,15 +9,15 @@ import com.tll.mcorpus.db.enums.Location;
  */
 public class EmpIdAndLocation {
 
-  private final String empId;
-  private final Location location;
+	private final String empId;
+	private final Location location;
 
-  public EmpIdAndLocation(String empId, Location location) {
-    this.empId = empId;
-    this.location = location;
-  }
+	public EmpIdAndLocation(String empId, Location location) {
+		this.empId = empId;
+		this.location = location;
+	}
 
-  public String empId() { return empId; }
+	public String empId() { return empId; }
 
-  public Location location() { return location; }  
+	public Location location() { return location; }	 
 }

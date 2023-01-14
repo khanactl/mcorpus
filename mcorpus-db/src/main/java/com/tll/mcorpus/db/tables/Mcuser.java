@@ -40,174 +40,174 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser extends TableImpl<McuserRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.mcuser</code>
-     */
-    public static final Mcuser MCUSER = new Mcuser();
+		/**
+		 * The reference instance of <code>public.mcuser</code>
+		 */
+		public static final Mcuser MCUSER = new Mcuser();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<McuserRecord> getRecordType() {
-        return McuserRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<McuserRecord> getRecordType() {
+				return McuserRecord.class;
+		}
 
-    /**
-     * The column <code>public.mcuser.uid</code>.
-     */
-    public final TableField<McuserRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("public.gen_random_uuid()", SQLDataType.UUID)), this, "");
+		/**
+		 * The column <code>public.mcuser.uid</code>.
+		 */
+		public final TableField<McuserRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("public.gen_random_uuid()", SQLDataType.UUID)), this, "");
 
-    /**
-     * The column <code>public.mcuser.created</code>.
-     */
-    public final TableField<McuserRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+		/**
+		 * The column <code>public.mcuser.created</code>.
+		 */
+		public final TableField<McuserRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
-    /**
-     * The column <code>public.mcuser.modified</code>.
-     */
-    public final TableField<McuserRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+		/**
+		 * The column <code>public.mcuser.modified</code>.
+		 */
+		public final TableField<McuserRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
-    /**
-     * The column <code>public.mcuser.name</code>.
-     */
-    public final TableField<McuserRecord, String> NAME = createField(DSL.name("name"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser.name</code>.
+		 */
+		public final TableField<McuserRecord, String> NAME = createField(DSL.name("name"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser.email</code>.
-     */
-    public final TableField<McuserRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser.email</code>.
+		 */
+		public final TableField<McuserRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser.username</code>.
-     */
-    public final TableField<McuserRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser.username</code>.
+		 */
+		public final TableField<McuserRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser.pswd</code>.
-     */
-    public final TableField<McuserRecord, String> PSWD = createField(DSL.name("pswd"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser.pswd</code>.
+		 */
+		public final TableField<McuserRecord, String> PSWD = createField(DSL.name("pswd"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser.status</code>.
-     */
-    public final TableField<McuserRecord, McuserStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("'ACTIVE'::mcuser_status", SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), this, "");
+		/**
+		 * The column <code>public.mcuser.status</code>.
+		 */
+		public final TableField<McuserRecord, McuserStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("'ACTIVE'::mcuser_status", SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.McuserStatus.class), this, "");
 
-    /**
-     * The column <code>public.mcuser.roles</code>.
-     */
-    public final TableField<McuserRecord, McuserRole[]> ROLES = createField(DSL.name("roles"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), this, "");
+		/**
+		 * The column <code>public.mcuser.roles</code>.
+		 */
+		public final TableField<McuserRecord, McuserRole[]> ROLES = createField(DSL.name("roles"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.McuserRole.class).getArrayDataType(), this, "");
 
-    private Mcuser(Name alias, Table<McuserRecord> aliased) {
-        this(alias, aliased, null);
-    }
+		private Mcuser(Name alias, Table<McuserRecord> aliased) {
+				this(alias, aliased, null);
+		}
 
-    private Mcuser(Name alias, Table<McuserRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
-    }
+		private Mcuser(Name alias, Table<McuserRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+		}
 
-    /**
-     * Create an aliased <code>public.mcuser</code> table reference
-     */
-    public Mcuser(String alias) {
-        this(DSL.name(alias), MCUSER);
-    }
+		/**
+		 * Create an aliased <code>public.mcuser</code> table reference
+		 */
+		public Mcuser(String alias) {
+				this(DSL.name(alias), MCUSER);
+		}
 
-    /**
-     * Create an aliased <code>public.mcuser</code> table reference
-     */
-    public Mcuser(Name alias) {
-        this(alias, MCUSER);
-    }
+		/**
+		 * Create an aliased <code>public.mcuser</code> table reference
+		 */
+		public Mcuser(Name alias) {
+				this(alias, MCUSER);
+		}
 
-    /**
-     * Create a <code>public.mcuser</code> table reference
-     */
-    public Mcuser() {
-        this(DSL.name("mcuser"), null);
-    }
+		/**
+		 * Create a <code>public.mcuser</code> table reference
+		 */
+		public Mcuser() {
+				this(DSL.name("mcuser"), null);
+		}
 
-    public <O extends Record> Mcuser(Table<O> child, ForeignKey<O, McuserRecord> key) {
-        super(child, key, MCUSER);
-    }
+		public <O extends Record> Mcuser(Table<O> child, ForeignKey<O, McuserRecord> key) {
+				super(child, key, MCUSER);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public UniqueKey<McuserRecord> getPrimaryKey() {
-        return Keys.MCUSER_PKEY;
-    }
+		@Override
+		public UniqueKey<McuserRecord> getPrimaryKey() {
+				return Keys.MCUSER_PKEY;
+		}
 
-    @Override
-    public List<UniqueKey<McuserRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.MCUSER_USERNAME_KEY);
-    }
+		@Override
+		public List<UniqueKey<McuserRecord>> getUniqueKeys() {
+				return Arrays.asList(Keys.MCUSER_USERNAME_KEY);
+		}
 
-    @Override
-    public Mcuser as(String alias) {
-        return new Mcuser(DSL.name(alias), this);
-    }
+		@Override
+		public Mcuser as(String alias) {
+				return new Mcuser(DSL.name(alias), this);
+		}
 
-    @Override
-    public Mcuser as(Name alias) {
-        return new Mcuser(alias, this);
-    }
+		@Override
+		public Mcuser as(Name alias) {
+				return new Mcuser(alias, this);
+		}
 
-    @Override
-    public Mcuser as(Table<?> alias) {
-        return new Mcuser(alias.getQualifiedName(), this);
-    }
+		@Override
+		public Mcuser as(Table<?> alias) {
+				return new Mcuser(alias.getQualifiedName(), this);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mcuser rename(String name) {
-        return new Mcuser(DSL.name(name), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mcuser rename(String name) {
+				return new Mcuser(DSL.name(name), null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mcuser rename(Name name) {
-        return new Mcuser(name, null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mcuser rename(Name name) {
+				return new Mcuser(name, null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mcuser rename(Table<?> name) {
-        return new Mcuser(name.getQualifiedName(), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mcuser rename(Table<?> name) {
+				return new Mcuser(name.getQualifiedName(), null);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row9 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row9 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> fieldsRow() {
-        return (Row9) super.fieldsRow();
-    }
+		@Override
+		public Row9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> fieldsRow() {
+				return (Row9) super.fieldsRow();
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function9<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super McuserStatus, ? super McuserRole[], ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function9<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super McuserStatus, ? super McuserRole[], ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function9<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super McuserStatus, ? super McuserRole[], ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function9<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super McuserStatus, ? super McuserRole[], ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

@@ -17,40 +17,40 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum MemberAuditType implements EnumType {
 
-    LOGIN("LOGIN"),
+		LOGIN("LOGIN"),
 
-    LOGOUT("LOGOUT");
+		LOGOUT("LOGOUT");
 
-    private final String literal;
+		private final String literal;
 
-    private MemberAuditType(String literal) {
-        this.literal = literal;
-    }
+		private MemberAuditType(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "member_audit_type";
-    }
+		@Override
+		public String getName() {
+				return "member_audit_type";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static MemberAuditType lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(MemberAuditType.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static MemberAuditType lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(MemberAuditType.class, literal);
+		}
 }

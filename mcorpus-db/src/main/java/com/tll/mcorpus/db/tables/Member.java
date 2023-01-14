@@ -40,179 +40,179 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Member extends TableImpl<MemberRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.member</code>
-     */
-    public static final Member MEMBER = new Member();
+		/**
+		 * The reference instance of <code>public.member</code>
+		 */
+		public static final Member MEMBER = new Member();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<MemberRecord> getRecordType() {
-        return MemberRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<MemberRecord> getRecordType() {
+				return MemberRecord.class;
+		}
 
-    /**
-     * The column <code>public.member.mid</code>.
-     */
-    public final TableField<MemberRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("public.gen_random_uuid()", SQLDataType.UUID)), this, "");
+		/**
+		 * The column <code>public.member.mid</code>.
+		 */
+		public final TableField<MemberRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("public.gen_random_uuid()", SQLDataType.UUID)), this, "");
 
-    /**
-     * The column <code>public.member.created</code>.
-     */
-    public final TableField<MemberRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+		/**
+		 * The column <code>public.member.created</code>.
+		 */
+		public final TableField<MemberRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
-    /**
-     * The column <code>public.member.modified</code>.
-     */
-    public final TableField<MemberRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+		/**
+		 * The column <code>public.member.modified</code>.
+		 */
+		public final TableField<MemberRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
-    /**
-     * The column <code>public.member.emp_id</code>.
-     */
-    public final TableField<MemberRecord, String> EMP_ID = createField(DSL.name("emp_id"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.member.emp_id</code>.
+		 */
+		public final TableField<MemberRecord, String> EMP_ID = createField(DSL.name("emp_id"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.member.location</code>.
-     */
-    public final TableField<MemberRecord, Location> LOCATION = createField(DSL.name("location"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Location.class), this, "");
+		/**
+		 * The column <code>public.member.location</code>.
+		 */
+		public final TableField<MemberRecord, Location> LOCATION = createField(DSL.name("location"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Location.class), this, "");
 
-    /**
-     * The column <code>public.member.name_first</code>.
-     */
-    public final TableField<MemberRecord, String> NAME_FIRST = createField(DSL.name("name_first"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.member.name_first</code>.
+		 */
+		public final TableField<MemberRecord, String> NAME_FIRST = createField(DSL.name("name_first"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.member.name_middle</code>.
-     */
-    public final TableField<MemberRecord, String> NAME_MIDDLE = createField(DSL.name("name_middle"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.member.name_middle</code>.
+		 */
+		public final TableField<MemberRecord, String> NAME_MIDDLE = createField(DSL.name("name_middle"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.member.name_last</code>.
-     */
-    public final TableField<MemberRecord, String> NAME_LAST = createField(DSL.name("name_last"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.member.name_last</code>.
+		 */
+		public final TableField<MemberRecord, String> NAME_LAST = createField(DSL.name("name_last"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.member.display_name</code>.
-     */
-    public final TableField<MemberRecord, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.member.display_name</code>.
+		 */
+		public final TableField<MemberRecord, String> DISPLAY_NAME = createField(DSL.name("display_name"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.member.status</code>.
-     */
-    public final TableField<MemberRecord, MemberStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("'ACTIVE'::member_status", SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), this, "");
+		/**
+		 * The column <code>public.member.status</code>.
+		 */
+		public final TableField<MemberRecord, MemberStatus> STATUS = createField(DSL.name("status"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("'ACTIVE'::member_status", SQLDataType.VARCHAR)).asEnumDataType(com.tll.mcorpus.db.enums.MemberStatus.class), this, "");
 
-    private Member(Name alias, Table<MemberRecord> aliased) {
-        this(alias, aliased, null);
-    }
+		private Member(Name alias, Table<MemberRecord> aliased) {
+				this(alias, aliased, null);
+		}
 
-    private Member(Name alias, Table<MemberRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
-    }
+		private Member(Name alias, Table<MemberRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+		}
 
-    /**
-     * Create an aliased <code>public.member</code> table reference
-     */
-    public Member(String alias) {
-        this(DSL.name(alias), MEMBER);
-    }
+		/**
+		 * Create an aliased <code>public.member</code> table reference
+		 */
+		public Member(String alias) {
+				this(DSL.name(alias), MEMBER);
+		}
 
-    /**
-     * Create an aliased <code>public.member</code> table reference
-     */
-    public Member(Name alias) {
-        this(alias, MEMBER);
-    }
+		/**
+		 * Create an aliased <code>public.member</code> table reference
+		 */
+		public Member(Name alias) {
+				this(alias, MEMBER);
+		}
 
-    /**
-     * Create a <code>public.member</code> table reference
-     */
-    public Member() {
-        this(DSL.name("member"), null);
-    }
+		/**
+		 * Create a <code>public.member</code> table reference
+		 */
+		public Member() {
+				this(DSL.name("member"), null);
+		}
 
-    public <O extends Record> Member(Table<O> child, ForeignKey<O, MemberRecord> key) {
-        super(child, key, MEMBER);
-    }
+		public <O extends Record> Member(Table<O> child, ForeignKey<O, MemberRecord> key) {
+				super(child, key, MEMBER);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public UniqueKey<MemberRecord> getPrimaryKey() {
-        return Keys.MEMBER_PKEY;
-    }
+		@Override
+		public UniqueKey<MemberRecord> getPrimaryKey() {
+				return Keys.MEMBER_PKEY;
+		}
 
-    @Override
-    public List<UniqueKey<MemberRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.MEMBER_EMP_ID_LOCATION_KEY);
-    }
+		@Override
+		public List<UniqueKey<MemberRecord>> getUniqueKeys() {
+				return Arrays.asList(Keys.MEMBER_EMP_ID_LOCATION_KEY);
+		}
 
-    @Override
-    public Member as(String alias) {
-        return new Member(DSL.name(alias), this);
-    }
+		@Override
+		public Member as(String alias) {
+				return new Member(DSL.name(alias), this);
+		}
 
-    @Override
-    public Member as(Name alias) {
-        return new Member(alias, this);
-    }
+		@Override
+		public Member as(Name alias) {
+				return new Member(alias, this);
+		}
 
-    @Override
-    public Member as(Table<?> alias) {
-        return new Member(alias.getQualifiedName(), this);
-    }
+		@Override
+		public Member as(Table<?> alias) {
+				return new Member(alias.getQualifiedName(), this);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Member rename(String name) {
-        return new Member(DSL.name(name), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Member rename(String name) {
+				return new Member(DSL.name(name), null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Member rename(Name name) {
-        return new Member(name, null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Member rename(Name name) {
+				return new Member(name, null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Member rename(Table<?> name) {
-        return new Member(name.getQualifiedName(), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Member rename(Table<?> name) {
+				return new Member(name.getQualifiedName(), null);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row10 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row10 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row10<UUID, OffsetDateTime, OffsetDateTime, String, Location, String, String, String, String, MemberStatus> fieldsRow() {
-        return (Row10) super.fieldsRow();
-    }
+		@Override
+		public Row10<UUID, OffsetDateTime, OffsetDateTime, String, Location, String, String, String, String, MemberStatus> fieldsRow() {
+				return (Row10) super.fieldsRow();
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function10<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super Location, ? super String, ? super String, ? super String, ? super String, ? super MemberStatus, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function10<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super Location, ? super String, ? super String, ? super String, ? super String, ? super MemberStatus, ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super Location, ? super String, ? super String, ? super String, ? super String, ? super MemberStatus, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function10<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super String, ? super Location, ? super String, ? super String, ? super String, ? super String, ? super MemberStatus, ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

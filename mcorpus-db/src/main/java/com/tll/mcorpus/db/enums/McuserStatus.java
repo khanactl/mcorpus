@@ -17,40 +17,40 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum McuserStatus implements EnumType {
 
-    ACTIVE("ACTIVE"),
+		ACTIVE("ACTIVE"),
 
-    INACTIVE("INACTIVE");
+		INACTIVE("INACTIVE");
 
-    private final String literal;
+		private final String literal;
 
-    private McuserStatus(String literal) {
-        this.literal = literal;
-    }
+		private McuserStatus(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "mcuser_status";
-    }
+		@Override
+		public String getName() {
+				return "mcuser_status";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static McuserStatus lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(McuserStatus.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static McuserStatus lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(McuserStatus.class, literal);
+		}
 }

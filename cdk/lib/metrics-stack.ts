@@ -9,184 +9,184 @@ import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, ename, iname, IStackProps } from './cdk-native';
 
 export const MetricsStackRootProps = {
-  rootStackName: 'metrics',
-  description: 'The CloudWatch app metrics dashboard.',
+	rootStackName: 'metrics',
+	description: 'The CloudWatch app metrics dashboard.',
 };
 
 export interface IMetricsStackProps extends IStackProps {
-  readonly dbInstanceRef: IDatabaseInstance;
+	readonly dbInstanceRef: IDatabaseInstance;
 
-  readonly ecsClusterRef: Cluster;
+	readonly ecsClusterRef: Cluster;
 
-  readonly fargateSvcRef: FargateService;
+	readonly fargateSvcRef: FargateService;
 
-  readonly appLoadBalancerRef: ApplicationLoadBalancer;
+	readonly appLoadBalancerRef: ApplicationLoadBalancer;
 
-  readonly onMetricAlarmEmails?: string[];
+	readonly onMetricAlarmEmails?: string[];
 }
 
 export class MetricsStack extends BaseStack {
-  public readonly dbCpuAlarm: Alarm;
-  public readonly dbCpuAlarmTopic: Topic;
+	public readonly dbCpuAlarm: Alarm;
+	public readonly dbCpuAlarmTopic: Topic;
 
-  public readonly dbFreeStorageSpaceAlarm: Alarm;
-  public readonly dbFresStorageSpaceAlarmTopic: Topic;
+	public readonly dbFreeStorageSpaceAlarm: Alarm;
+	public readonly dbFresStorageSpaceAlarmTopic: Topic;
 
-  public readonly ecsCpuAlarm: Alarm;
-  public readonly ecsCpuAlarmTopic: Topic;
+	public readonly ecsCpuAlarm: Alarm;
+	public readonly ecsCpuAlarmTopic: Topic;
 
-  public readonly ecsMemoryAlarm: Alarm;
-  public readonly ecsMemoryAlarmTopic: Topic;
+	public readonly ecsMemoryAlarm: Alarm;
+	public readonly ecsMemoryAlarmTopic: Topic;
 
-  public readonly dashboard: Dashboard;
+	public readonly dashboard: Dashboard;
 
-  constructor(scope: Construct, props: IMetricsStackProps) {
-    super(scope, MetricsStackRootProps.rootStackName, {
-      ...props, ...{ description: MetricsStackRootProps.description }
-    });
+	constructor(scope: Construct, props: IMetricsStackProps) {
+		super(scope, MetricsStackRootProps.rootStackName, {
+			...props, ...{ description: MetricsStackRootProps.description }
+		});
 
-    // *** metrics ***
-    // db
-    const metricDbCpuUtilization = props.dbInstanceRef.metricCPUUtilization();
-    const metricDbNumConnections = props.dbInstanceRef.metricDatabaseConnections();
-    const metricDbFreeStorageSpace = props.dbInstanceRef.metricFreeStorageSpace();
-    // ecs
-    const metricEcsCpu = props.ecsClusterRef.metric('CPUUtilization', {
-      dimensionsMap: {
-        ClusterName: props.ecsClusterRef.clusterName,
-        ServiceName: props.fargateSvcRef.serviceName,
-      },
-    });
-    const metricEcsMemory = props.ecsClusterRef.metric('MemoryUtilization', {
-      dimensionsMap: {
-        ClusterName: props.ecsClusterRef.clusterName,
-        ServiceName: props.fargateSvcRef.serviceName,
-      },
-    });
-    // load balancer
-    const metricsLbRequestCount = props.appLoadBalancerRef.metricRequestCount({});
-    // *** END metrics ***
+		// *** metrics ***
+		// db
+		const metricDbCpuUtilization = props.dbInstanceRef.metricCPUUtilization();
+		const metricDbNumConnections = props.dbInstanceRef.metricDatabaseConnections();
+		const metricDbFreeStorageSpace = props.dbInstanceRef.metricFreeStorageSpace();
+		// ecs
+		const metricEcsCpu = props.ecsClusterRef.metric('CPUUtilization', {
+			dimensionsMap: {
+				ClusterName: props.ecsClusterRef.clusterName,
+				ServiceName: props.fargateSvcRef.serviceName,
+			},
+		});
+		const metricEcsMemory = props.ecsClusterRef.metric('MemoryUtilization', {
+			dimensionsMap: {
+				ClusterName: props.ecsClusterRef.clusterName,
+				ServiceName: props.fargateSvcRef.serviceName,
+			},
+		});
+		// load balancer
+		const metricsLbRequestCount = props.appLoadBalancerRef.metricRequestCount({});
+		// *** END metrics ***
 
-    // *** alarms ***
-    // db high cpu
-    const dbCpuAlarmTopicName = iname('db-high-cpu-alarm', props);
-    this.dbCpuAlarmTopic = new Topic(this, dbCpuAlarmTopicName, {
-      topicName: dbCpuAlarmTopicName,
-    });
-    const alarmDbHighCpuName = ename('db-high-cpu', props.appEnv);
-    this.dbCpuAlarm = new Alarm(this, alarmDbHighCpuName, {
-      metric: metricDbCpuUtilization,
-      threshold: 90,
-      evaluationPeriods: 1,
-      alarmName: alarmDbHighCpuName,
-    });
-    this.dbCpuAlarm.addAlarmAction(new SnsAction(this.dbCpuAlarmTopic));
+		// *** alarms ***
+		// db high cpu
+		const dbCpuAlarmTopicName = iname('db-high-cpu-alarm', props);
+		this.dbCpuAlarmTopic = new Topic(this, dbCpuAlarmTopicName, {
+			topicName: dbCpuAlarmTopicName,
+		});
+		const alarmDbHighCpuName = ename('db-high-cpu', props.appEnv);
+		this.dbCpuAlarm = new Alarm(this, alarmDbHighCpuName, {
+			metric: metricDbCpuUtilization,
+			threshold: 90,
+			evaluationPeriods: 1,
+			alarmName: alarmDbHighCpuName,
+		});
+		this.dbCpuAlarm.addAlarmAction(new SnsAction(this.dbCpuAlarmTopic));
 
-    // db free storage space
-    const dbFreeStoreageSpaceAlarmTopicName = iname('db-low-disk-space-alarm', props);
-    this.dbFresStorageSpaceAlarmTopic = new Topic(this, dbFreeStoreageSpaceAlarmTopicName, {
-      topicName: dbFreeStoreageSpaceAlarmTopicName,
-    });
-    const alarmDbFreeStorageSpaceName = ename('db-low-disk-space', props.appEnv);
-    this.dbFreeStorageSpaceAlarm = new Alarm(this, alarmDbFreeStorageSpaceName, {
-      metric: metricDbFreeStorageSpace,
-      comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-      threshold: 500 * 1000 * 1000, // 500MB
-      evaluationPeriods: 1,
-      alarmName: alarmDbFreeStorageSpaceName,
-    });
-    this.dbFreeStorageSpaceAlarm.addAlarmAction(new SnsAction(this.dbFresStorageSpaceAlarmTopic));
+		// db free storage space
+		const dbFreeStoreageSpaceAlarmTopicName = iname('db-low-disk-space-alarm', props);
+		this.dbFresStorageSpaceAlarmTopic = new Topic(this, dbFreeStoreageSpaceAlarmTopicName, {
+			topicName: dbFreeStoreageSpaceAlarmTopicName,
+		});
+		const alarmDbFreeStorageSpaceName = ename('db-low-disk-space', props.appEnv);
+		this.dbFreeStorageSpaceAlarm = new Alarm(this, alarmDbFreeStorageSpaceName, {
+			metric: metricDbFreeStorageSpace,
+			comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+			threshold: 500 * 1000 * 1000, // 500MB
+			evaluationPeriods: 1,
+			alarmName: alarmDbFreeStorageSpaceName,
+		});
+		this.dbFreeStorageSpaceAlarm.addAlarmAction(new SnsAction(this.dbFresStorageSpaceAlarmTopic));
 
-    // ecs high cpu
-    const ecsCpuAlarmTopicName = iname('ecs-high-cpu-alarm', props);
-    this.ecsCpuAlarmTopic = new Topic(this, ecsCpuAlarmTopicName, {
-      topicName: ecsCpuAlarmTopicName,
-    });
-    const alarmEcsCpuName = ename('ecs-high-cpu', props.appEnv);
-    this.ecsCpuAlarm = new Alarm(this, alarmEcsCpuName, {
-      metric: metricEcsCpu,
-      threshold: 90,
-      evaluationPeriods: 1,
-      alarmName: alarmEcsCpuName,
-    });
-    this.ecsCpuAlarm.addAlarmAction(new SnsAction(this.ecsCpuAlarmTopic));
+		// ecs high cpu
+		const ecsCpuAlarmTopicName = iname('ecs-high-cpu-alarm', props);
+		this.ecsCpuAlarmTopic = new Topic(this, ecsCpuAlarmTopicName, {
+			topicName: ecsCpuAlarmTopicName,
+		});
+		const alarmEcsCpuName = ename('ecs-high-cpu', props.appEnv);
+		this.ecsCpuAlarm = new Alarm(this, alarmEcsCpuName, {
+			metric: metricEcsCpu,
+			threshold: 90,
+			evaluationPeriods: 1,
+			alarmName: alarmEcsCpuName,
+		});
+		this.ecsCpuAlarm.addAlarmAction(new SnsAction(this.ecsCpuAlarmTopic));
 
-    // ecs high memory
-    const ecsMemoryAlarmTopicName = iname('ecs-high-memory-alarm', props);
-    this.ecsMemoryAlarmTopic = new Topic(this, ecsMemoryAlarmTopicName, {
-      topicName: ecsMemoryAlarmTopicName,
-    });
-    const alarmEcsMemoryName = ename('ecs-high-memory', props.appEnv);
-    this.ecsMemoryAlarm = new Alarm(this, alarmEcsMemoryName, {
-      metric: metricEcsMemory,
-      threshold: 90,
-      evaluationPeriods: 1,
-      alarmName: alarmEcsMemoryName,
-    });
-    this.ecsMemoryAlarm.addAlarmAction(new SnsAction(this.ecsMemoryAlarmTopic));
+		// ecs high memory
+		const ecsMemoryAlarmTopicName = iname('ecs-high-memory-alarm', props);
+		this.ecsMemoryAlarmTopic = new Topic(this, ecsMemoryAlarmTopicName, {
+			topicName: ecsMemoryAlarmTopicName,
+		});
+		const alarmEcsMemoryName = ename('ecs-high-memory', props.appEnv);
+		this.ecsMemoryAlarm = new Alarm(this, alarmEcsMemoryName, {
+			metric: metricEcsMemory,
+			threshold: 90,
+			evaluationPeriods: 1,
+			alarmName: alarmEcsMemoryName,
+		});
+		this.ecsMemoryAlarm.addAlarmAction(new SnsAction(this.ecsMemoryAlarmTopic));
 
-    // lb (NONE at present)
-    // *** END alarms ***
+		// lb (NONE at present)
+		// *** END alarms ***
 
-    // alarm action emails
-    if (props.onMetricAlarmEmails && props.onMetricAlarmEmails.length > 0) {
-      props.onMetricAlarmEmails
-        .map(email => new EmailSubscription(email))
-        .forEach(sub => {
-          this.dbCpuAlarmTopic.addSubscription(sub);
-          this.dbFresStorageSpaceAlarmTopic.addSubscription(sub);
-          this.ecsCpuAlarmTopic.addSubscription(sub);
-          this.ecsMemoryAlarmTopic.addSubscription(sub);
-        });
-    }
+		// alarm action emails
+		if (props.onMetricAlarmEmails && props.onMetricAlarmEmails.length > 0) {
+			props.onMetricAlarmEmails
+				.map(email => new EmailSubscription(email))
+				.forEach(sub => {
+					this.dbCpuAlarmTopic.addSubscription(sub);
+					this.dbFresStorageSpaceAlarmTopic.addSubscription(sub);
+					this.ecsCpuAlarmTopic.addSubscription(sub);
+					this.ecsMemoryAlarmTopic.addSubscription(sub);
+				});
+		}
 
-    // *** cloudwatch dashboard ***
-    const dashboardName = iname('metrics', props);
-    this.dashboard = new Dashboard(this, 'metrics', {
-      dashboardName: dashboardName,
-    });
-    this.dashboard.addWidgets(
-      // lb
-      this.buildGraphWidget('lb-request-count', metricsLbRequestCount),
-      // ecs
-      this.buildAlarmWidget('ecs-memory', this.ecsMemoryAlarm),
-      this.buildAlarmWidget('ecs-cpu', this.ecsCpuAlarm),
-      // db
-      this.buildGraphWidget('db-num-connections', metricDbNumConnections),
-      this.buildAlarmWidget('db-disk-space', this.dbFreeStorageSpaceAlarm),
-      this.buildAlarmWidget('db-cpu', this.dbCpuAlarm),
-    );
-    // *** END cloudwatch dashboard ***
+		// *** cloudwatch dashboard ***
+		const dashboardName = iname('metrics', props);
+		this.dashboard = new Dashboard(this, 'metrics', {
+			dashboardName: dashboardName,
+		});
+		this.dashboard.addWidgets(
+			// lb
+			this.buildGraphWidget('lb-request-count', metricsLbRequestCount),
+			// ecs
+			this.buildAlarmWidget('ecs-memory', this.ecsMemoryAlarm),
+			this.buildAlarmWidget('ecs-cpu', this.ecsCpuAlarm),
+			// db
+			this.buildGraphWidget('db-num-connections', metricDbNumConnections),
+			this.buildAlarmWidget('db-disk-space', this.dbFreeStorageSpaceAlarm),
+			this.buildAlarmWidget('db-cpu', this.dbCpuAlarm),
+		);
+		// *** END cloudwatch dashboard ***
 
-    // stack output
-    new CfnOutput(this, 'dbHighCpuAlarmName', {
-      value: this.dbCpuAlarm.alarmName,
-    });
-    new CfnOutput(this, 'dbFreeStorageSpaceAlarmName', {
-      value: this.dbFreeStorageSpaceAlarm.alarmName,
-    });
-    new CfnOutput(this, 'ecsHighCpuAlarmName', {
-      value: this.ecsCpuAlarm.alarmName,
-    });
-    new CfnOutput(this, 'ecsHighMemoryAlarmName', {
-      value: this.ecsMemoryAlarm.alarmName,
-    });
-    new CfnOutput(this, 'dashboard', {
-      value: this.dashboard.toString(),
-    });
-  }
+		// stack output
+		new CfnOutput(this, 'dbHighCpuAlarmName', {
+			value: this.dbCpuAlarm.alarmName,
+		});
+		new CfnOutput(this, 'dbFreeStorageSpaceAlarmName', {
+			value: this.dbFreeStorageSpaceAlarm.alarmName,
+		});
+		new CfnOutput(this, 'ecsHighCpuAlarmName', {
+			value: this.ecsCpuAlarm.alarmName,
+		});
+		new CfnOutput(this, 'ecsHighMemoryAlarmName', {
+			value: this.ecsMemoryAlarm.alarmName,
+		});
+		new CfnOutput(this, 'dashboard', {
+			value: this.dashboard.toString(),
+		});
+	}
 
-  private buildGraphWidget(title: string, metric: Metric): GraphWidget {
-    return new GraphWidget({
-      title: title,
-      left: [metric],
-    });
-  }
+	private buildGraphWidget(title: string, metric: Metric): GraphWidget {
+		return new GraphWidget({
+			title: title,
+			left: [metric],
+		});
+	}
 
-  private buildAlarmWidget(title: string, alarm: Alarm): AlarmWidget {
-    return new AlarmWidget({
-      title: title,
-      alarm: alarm,
-    });
-  }
+	private buildAlarmWidget(title: string, alarm: Alarm): AlarmWidget {
+		return new AlarmWidget({
+			title: title,
+			alarm: alarm,
+		});
+	}
 }

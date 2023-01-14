@@ -15,18 +15,18 @@ import com.google.inject.Singleton;
  */
 public class MCorpusRepoModule extends AbstractModule {
 
-  @Override
-  protected void configure() {}
+	@Override
+	protected void configure() {}
 
-  @Provides
-  @Singleton
-  MCorpusUserRepo mcorpusUserRepo(DataSource ds) {
-    return new MCorpusUserRepo(ds);
-  }
+	@Provides
+	@Singleton
+	MCorpusUserRepo mcorpusUserRepo(DataSource ds) {
+		return new MCorpusUserRepo(ds);
+	}
 
-  @Provides
-  @Singleton
-  MCorpusRepo mcorpusRepo(DataSource ds) {
-    return new MCorpusRepo(ds);
-  }
+	@Provides
+	@Singleton
+	MCorpusRepo mcorpusRepo(DataSource ds) {
+		return new MCorpusRepo(ds);
+	}
 }

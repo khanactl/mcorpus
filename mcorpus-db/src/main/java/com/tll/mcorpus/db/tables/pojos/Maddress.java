@@ -17,231 +17,231 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Maddress implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID mid;
-    private final Addressname addressName;
-    private final OffsetDateTime modified;
-    private final String attn;
-    private final String street1;
-    private final String street2;
-    private final String city;
-    private final String state;
-    private final String postalCode;
-    private final String country;
+		private final UUID mid;
+		private final Addressname addressName;
+		private final OffsetDateTime modified;
+		private final String attn;
+		private final String street1;
+		private final String street2;
+		private final String city;
+		private final String state;
+		private final String postalCode;
+		private final String country;
 
-    public Maddress(Maddress value) {
-        this.mid = value.mid;
-        this.addressName = value.addressName;
-        this.modified = value.modified;
-        this.attn = value.attn;
-        this.street1 = value.street1;
-        this.street2 = value.street2;
-        this.city = value.city;
-        this.state = value.state;
-        this.postalCode = value.postalCode;
-        this.country = value.country;
-    }
+		public Maddress(Maddress value) {
+				this.mid = value.mid;
+				this.addressName = value.addressName;
+				this.modified = value.modified;
+				this.attn = value.attn;
+				this.street1 = value.street1;
+				this.street2 = value.street2;
+				this.city = value.city;
+				this.state = value.state;
+				this.postalCode = value.postalCode;
+				this.country = value.country;
+		}
 
-    public Maddress(
-        UUID mid,
-        Addressname addressName,
-        OffsetDateTime modified,
-        String attn,
-        String street1,
-        String street2,
-        String city,
-        String state,
-        String postalCode,
-        String country
-    ) {
-        this.mid = mid;
-        this.addressName = addressName;
-        this.modified = modified;
-        this.attn = attn;
-        this.street1 = street1;
-        this.street2 = street2;
-        this.city = city;
-        this.state = state;
-        this.postalCode = postalCode;
-        this.country = country;
-    }
+		public Maddress(
+				UUID mid,
+				Addressname addressName,
+				OffsetDateTime modified,
+				String attn,
+				String street1,
+				String street2,
+				String city,
+				String state,
+				String postalCode,
+				String country
+		) {
+				this.mid = mid;
+				this.addressName = addressName;
+				this.modified = modified;
+				this.attn = attn;
+				this.street1 = street1;
+				this.street2 = street2;
+				this.city = city;
+				this.state = state;
+				this.postalCode = postalCode;
+				this.country = country;
+		}
 
-    /**
-     * Getter for <code>public.maddress.mid</code>.
-     */
-    public UUID getMid() {
-        return this.mid;
-    }
+		/**
+		 * Getter for <code>public.maddress.mid</code>.
+		 */
+		public UUID getMid() {
+				return this.mid;
+		}
 
-    /**
-     * Getter for <code>public.maddress.address_name</code>.
-     */
-    public Addressname getAddressName() {
-        return this.addressName;
-    }
+		/**
+		 * Getter for <code>public.maddress.address_name</code>.
+		 */
+		public Addressname getAddressName() {
+				return this.addressName;
+		}
 
-    /**
-     * Getter for <code>public.maddress.modified</code>.
-     */
-    public OffsetDateTime getModified() {
-        return this.modified;
-    }
+		/**
+		 * Getter for <code>public.maddress.modified</code>.
+		 */
+		public OffsetDateTime getModified() {
+				return this.modified;
+		}
 
-    /**
-     * Getter for <code>public.maddress.attn</code>.
-     */
-    public String getAttn() {
-        return this.attn;
-    }
+		/**
+		 * Getter for <code>public.maddress.attn</code>.
+		 */
+		public String getAttn() {
+				return this.attn;
+		}
 
-    /**
-     * Getter for <code>public.maddress.street1</code>.
-     */
-    public String getStreet1() {
-        return this.street1;
-    }
+		/**
+		 * Getter for <code>public.maddress.street1</code>.
+		 */
+		public String getStreet1() {
+				return this.street1;
+		}
 
-    /**
-     * Getter for <code>public.maddress.street2</code>.
-     */
-    public String getStreet2() {
-        return this.street2;
-    }
+		/**
+		 * Getter for <code>public.maddress.street2</code>.
+		 */
+		public String getStreet2() {
+				return this.street2;
+		}
 
-    /**
-     * Getter for <code>public.maddress.city</code>.
-     */
-    public String getCity() {
-        return this.city;
-    }
+		/**
+		 * Getter for <code>public.maddress.city</code>.
+		 */
+		public String getCity() {
+				return this.city;
+		}
 
-    /**
-     * Getter for <code>public.maddress.state</code>.
-     */
-    public String getState() {
-        return this.state;
-    }
+		/**
+		 * Getter for <code>public.maddress.state</code>.
+		 */
+		public String getState() {
+				return this.state;
+		}
 
-    /**
-     * Getter for <code>public.maddress.postal_code</code>.
-     */
-    public String getPostalCode() {
-        return this.postalCode;
-    }
+		/**
+		 * Getter for <code>public.maddress.postal_code</code>.
+		 */
+		public String getPostalCode() {
+				return this.postalCode;
+		}
 
-    /**
-     * Getter for <code>public.maddress.country</code>.
-     */
-    public String getCountry() {
-        return this.country;
-    }
+		/**
+		 * Getter for <code>public.maddress.country</code>.
+		 */
+		public String getCountry() {
+				return this.country;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final Maddress other = (Maddress) obj;
-        if (this.mid == null) {
-            if (other.mid != null)
-                return false;
-        }
-        else if (!this.mid.equals(other.mid))
-            return false;
-        if (this.addressName == null) {
-            if (other.addressName != null)
-                return false;
-        }
-        else if (!this.addressName.equals(other.addressName))
-            return false;
-        if (this.modified == null) {
-            if (other.modified != null)
-                return false;
-        }
-        else if (!this.modified.equals(other.modified))
-            return false;
-        if (this.attn == null) {
-            if (other.attn != null)
-                return false;
-        }
-        else if (!this.attn.equals(other.attn))
-            return false;
-        if (this.street1 == null) {
-            if (other.street1 != null)
-                return false;
-        }
-        else if (!this.street1.equals(other.street1))
-            return false;
-        if (this.street2 == null) {
-            if (other.street2 != null)
-                return false;
-        }
-        else if (!this.street2.equals(other.street2))
-            return false;
-        if (this.city == null) {
-            if (other.city != null)
-                return false;
-        }
-        else if (!this.city.equals(other.city))
-            return false;
-        if (this.state == null) {
-            if (other.state != null)
-                return false;
-        }
-        else if (!this.state.equals(other.state))
-            return false;
-        if (this.postalCode == null) {
-            if (other.postalCode != null)
-                return false;
-        }
-        else if (!this.postalCode.equals(other.postalCode))
-            return false;
-        if (this.country == null) {
-            if (other.country != null)
-                return false;
-        }
-        else if (!this.country.equals(other.country))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final Maddress other = (Maddress) obj;
+				if (this.mid == null) {
+						if (other.mid != null)
+								return false;
+				}
+				else if (!this.mid.equals(other.mid))
+						return false;
+				if (this.addressName == null) {
+						if (other.addressName != null)
+								return false;
+				}
+				else if (!this.addressName.equals(other.addressName))
+						return false;
+				if (this.modified == null) {
+						if (other.modified != null)
+								return false;
+				}
+				else if (!this.modified.equals(other.modified))
+						return false;
+				if (this.attn == null) {
+						if (other.attn != null)
+								return false;
+				}
+				else if (!this.attn.equals(other.attn))
+						return false;
+				if (this.street1 == null) {
+						if (other.street1 != null)
+								return false;
+				}
+				else if (!this.street1.equals(other.street1))
+						return false;
+				if (this.street2 == null) {
+						if (other.street2 != null)
+								return false;
+				}
+				else if (!this.street2.equals(other.street2))
+						return false;
+				if (this.city == null) {
+						if (other.city != null)
+								return false;
+				}
+				else if (!this.city.equals(other.city))
+						return false;
+				if (this.state == null) {
+						if (other.state != null)
+								return false;
+				}
+				else if (!this.state.equals(other.state))
+						return false;
+				if (this.postalCode == null) {
+						if (other.postalCode != null)
+								return false;
+				}
+				else if (!this.postalCode.equals(other.postalCode))
+						return false;
+				if (this.country == null) {
+						if (other.country != null)
+								return false;
+				}
+				else if (!this.country.equals(other.country))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
-        result = prime * result + ((this.addressName == null) ? 0 : this.addressName.hashCode());
-        result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
-        result = prime * result + ((this.attn == null) ? 0 : this.attn.hashCode());
-        result = prime * result + ((this.street1 == null) ? 0 : this.street1.hashCode());
-        result = prime * result + ((this.street2 == null) ? 0 : this.street2.hashCode());
-        result = prime * result + ((this.city == null) ? 0 : this.city.hashCode());
-        result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
-        result = prime * result + ((this.postalCode == null) ? 0 : this.postalCode.hashCode());
-        result = prime * result + ((this.country == null) ? 0 : this.country.hashCode());
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+				result = prime * result + ((this.addressName == null) ? 0 : this.addressName.hashCode());
+				result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
+				result = prime * result + ((this.attn == null) ? 0 : this.attn.hashCode());
+				result = prime * result + ((this.street1 == null) ? 0 : this.street1.hashCode());
+				result = prime * result + ((this.street2 == null) ? 0 : this.street2.hashCode());
+				result = prime * result + ((this.city == null) ? 0 : this.city.hashCode());
+				result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
+				result = prime * result + ((this.postalCode == null) ? 0 : this.postalCode.hashCode());
+				result = prime * result + ((this.country == null) ? 0 : this.country.hashCode());
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("Maddress (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("Maddress (");
 
-        sb.append(mid);
-        sb.append(", ").append(addressName);
-        sb.append(", ").append(modified);
-        sb.append(", ").append(attn);
-        sb.append(", ").append(street1);
-        sb.append(", ").append(street2);
-        sb.append(", ").append(city);
-        sb.append(", ").append(state);
-        sb.append(", ").append(postalCode);
-        sb.append(", ").append(country);
+				sb.append(mid);
+				sb.append(", ").append(addressName);
+				sb.append(", ").append(modified);
+				sb.append(", ").append(attn);
+				sb.append(", ").append(street1);
+				sb.append(", ").append(street2);
+				sb.append(", ").append(city);
+				sb.append(", ").append(state);
+				sb.append(", ").append(postalCode);
+				sb.append(", ").append(country);
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

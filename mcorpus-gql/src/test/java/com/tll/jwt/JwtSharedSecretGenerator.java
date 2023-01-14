@@ -12,13 +12,13 @@ import java.util.Arrays;
  */
 public class JwtSharedSecretGenerator {
 
-  private JwtSharedSecretGenerator() {}
+	private JwtSharedSecretGenerator() {}
 
-  public static void main(String[] args) {
-    final byte[] randarr = JWT.generateJwtSharedSecret();
-    final String s = JWT.serialize(randarr);
-    final byte[] derandarr = JWT.deserialize(s);
-    if(!Arrays.equals(randarr, derandarr)) throw new Error("byte array mismatch.");
-    System.out.println(String.format("Random 32-byte hex token: %s", s));
-  }
+	public static void main(String[] args) {
+		final byte[] randarr = JWT.generateJwtSharedSecret();
+		final String s = JWT.serialize(randarr);
+		final byte[] derandarr = JWT.deserialize(s);
+		if(!Arrays.equals(randarr, derandarr)) throw new Error("byte array mismatch.");
+		System.out.println(String.format("Random 32-byte hex token: %s", s));
+	}
 }

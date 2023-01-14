@@ -24,45 +24,45 @@ import org.jooq.impl.UDTImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mref extends UDTImpl<MrefRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.mref</code>
-     */
-    public static final Mref MREF = new Mref();
+		/**
+		 * The reference instance of <code>public.mref</code>
+		 */
+		public static final Mref MREF = new Mref();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<MrefRecord> getRecordType() {
-        return MrefRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<MrefRecord> getRecordType() {
+				return MrefRecord.class;
+		}
 
-    /**
-     * The attribute <code>public.mref.mid</code>.
-     */
-    public static final UDTField<MrefRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID, MREF, "");
+		/**
+		 * The attribute <code>public.mref.mid</code>.
+		 */
+		public static final UDTField<MrefRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID, MREF, "");
 
-    /**
-     * The attribute <code>public.mref.emp_id</code>.
-     */
-    public static final UDTField<MrefRecord, String> EMP_ID = createField(DSL.name("emp_id"), SQLDataType.CLOB, MREF, "");
+		/**
+		 * The attribute <code>public.mref.emp_id</code>.
+		 */
+		public static final UDTField<MrefRecord, String> EMP_ID = createField(DSL.name("emp_id"), SQLDataType.CLOB, MREF, "");
 
-    /**
-     * The attribute <code>public.mref.location</code>.
-     */
-    public static final UDTField<MrefRecord, Location> LOCATION = createField(DSL.name("location"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), MREF, "");
+		/**
+		 * The attribute <code>public.mref.location</code>.
+		 */
+		public static final UDTField<MrefRecord, Location> LOCATION = createField(DSL.name("location"), SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.Location.class), MREF, "");
 
-    /**
-     * No further instances allowed
-     */
-    private Mref() {
-        super("mref", null, null, false);
-    }
+		/**
+		 * No further instances allowed
+		 */
+		private Mref() {
+				super("mref", null, null, false);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC != null ? Public.PUBLIC : new SchemaImpl(DSL.name("public"));
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC != null ? Public.PUBLIC : new SchemaImpl(DSL.name("public"));
+		}
 }

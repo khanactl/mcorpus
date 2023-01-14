@@ -25,366 +25,366 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAuditRecord extends UpdatableRecordImpl<McuserAuditRecord> implements Record8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * Setter for <code>public.mcuser_audit.uid</code>.
-     */
-    public void setUid(UUID value) {
-        set(0, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.uid</code>.
+		 */
+		public void setUid(UUID value) {
+				set(0, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.uid</code>.
-     */
-    public UUID getUid() {
-        return (UUID) get(0);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.uid</code>.
+		 */
+		public UUID getUid() {
+				return (UUID) get(0);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.created</code>.
-     */
-    public void setCreated(OffsetDateTime value) {
-        set(1, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.created</code>.
+		 */
+		public void setCreated(OffsetDateTime value) {
+				set(1, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.created</code>.
-     */
-    public OffsetDateTime getCreated() {
-        return (OffsetDateTime) get(1);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.created</code>.
+		 */
+		public OffsetDateTime getCreated() {
+				return (OffsetDateTime) get(1);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.type</code>.
-     */
-    public void setType(McuserAuditType value) {
-        set(2, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.type</code>.
+		 */
+		public void setType(McuserAuditType value) {
+				set(2, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.type</code>.
-     */
-    public McuserAuditType getType() {
-        return (McuserAuditType) get(2);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.type</code>.
+		 */
+		public McuserAuditType getType() {
+				return (McuserAuditType) get(2);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.request_timestamp</code>.
-     */
-    public void setRequestTimestamp(OffsetDateTime value) {
-        set(3, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.request_timestamp</code>.
+		 */
+		public void setRequestTimestamp(OffsetDateTime value) {
+				set(3, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.request_timestamp</code>.
-     */
-    public OffsetDateTime getRequestTimestamp() {
-        return (OffsetDateTime) get(3);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.request_timestamp</code>.
+		 */
+		public OffsetDateTime getRequestTimestamp() {
+				return (OffsetDateTime) get(3);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.request_origin</code>.
-     */
-    public void setRequestOrigin(InetAddress value) {
-        set(4, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.request_origin</code>.
+		 */
+		public void setRequestOrigin(InetAddress value) {
+				set(4, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.request_origin</code>.
-     */
-    public InetAddress getRequestOrigin() {
-        return (InetAddress) get(4);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.request_origin</code>.
+		 */
+		public InetAddress getRequestOrigin() {
+				return (InetAddress) get(4);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.login_expiration</code>.
-     */
-    public void setLoginExpiration(OffsetDateTime value) {
-        set(5, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.login_expiration</code>.
+		 */
+		public void setLoginExpiration(OffsetDateTime value) {
+				set(5, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.login_expiration</code>.
-     */
-    public OffsetDateTime getLoginExpiration() {
-        return (OffsetDateTime) get(5);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.login_expiration</code>.
+		 */
+		public OffsetDateTime getLoginExpiration() {
+				return (OffsetDateTime) get(5);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.jwt_id</code>.
-     */
-    public void setJwtId(UUID value) {
-        set(6, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.jwt_id</code>.
+		 */
+		public void setJwtId(UUID value) {
+				set(6, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.jwt_id</code>.
-     */
-    public UUID getJwtId() {
-        return (UUID) get(6);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.jwt_id</code>.
+		 */
+		public UUID getJwtId() {
+				return (UUID) get(6);
+		}
 
-    /**
-     * Setter for <code>public.mcuser_audit.jwt_id_status</code>.
-     */
-    public void setJwtIdStatus(JwtIdStatus value) {
-        set(7, value);
-    }
+		/**
+		 * Setter for <code>public.mcuser_audit.jwt_id_status</code>.
+		 */
+		public void setJwtIdStatus(JwtIdStatus value) {
+				set(7, value);
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.jwt_id_status</code>.
-     */
-    public JwtIdStatus getJwtIdStatus() {
-        return (JwtIdStatus) get(7);
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.jwt_id_status</code>.
+		 */
+		public JwtIdStatus getJwtIdStatus() {
+				return (JwtIdStatus) get(7);
+		}
 
-    // -------------------------------------------------------------------------
-    // Primary key information
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Primary key information
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Record4<UUID, OffsetDateTime, McuserAuditType, UUID> key() {
-        return (Record4) super.key();
-    }
+		@Override
+		public Record4<UUID, OffsetDateTime, McuserAuditType, UUID> key() {
+				return (Record4) super.key();
+		}
 
-    // -------------------------------------------------------------------------
-    // Record8 type implementation
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Record8 type implementation
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
-        return (Row8) super.fieldsRow();
-    }
+		@Override
+		public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
+				return (Row8) super.fieldsRow();
+		}
 
-    @Override
-    public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> valuesRow() {
-        return (Row8) super.valuesRow();
-    }
+		@Override
+		public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> valuesRow() {
+				return (Row8) super.valuesRow();
+		}
 
-    @Override
-    public Field<UUID> field1() {
-        return McuserAudit.MCUSER_AUDIT.UID;
-    }
+		@Override
+		public Field<UUID> field1() {
+				return McuserAudit.MCUSER_AUDIT.UID;
+		}
 
-    @Override
-    public Field<OffsetDateTime> field2() {
-        return McuserAudit.MCUSER_AUDIT.CREATED;
-    }
+		@Override
+		public Field<OffsetDateTime> field2() {
+				return McuserAudit.MCUSER_AUDIT.CREATED;
+		}
 
-    @Override
-    public Field<McuserAuditType> field3() {
-        return McuserAudit.MCUSER_AUDIT.TYPE;
-    }
+		@Override
+		public Field<McuserAuditType> field3() {
+				return McuserAudit.MCUSER_AUDIT.TYPE;
+		}
 
-    @Override
-    public Field<OffsetDateTime> field4() {
-        return McuserAudit.MCUSER_AUDIT.REQUEST_TIMESTAMP;
-    }
+		@Override
+		public Field<OffsetDateTime> field4() {
+				return McuserAudit.MCUSER_AUDIT.REQUEST_TIMESTAMP;
+		}
 
-    @Override
-    public Field<InetAddress> field5() {
-        return McuserAudit.MCUSER_AUDIT.REQUEST_ORIGIN;
-    }
+		@Override
+		public Field<InetAddress> field5() {
+				return McuserAudit.MCUSER_AUDIT.REQUEST_ORIGIN;
+		}
 
-    @Override
-    public Field<OffsetDateTime> field6() {
-        return McuserAudit.MCUSER_AUDIT.LOGIN_EXPIRATION;
-    }
+		@Override
+		public Field<OffsetDateTime> field6() {
+				return McuserAudit.MCUSER_AUDIT.LOGIN_EXPIRATION;
+		}
 
-    @Override
-    public Field<UUID> field7() {
-        return McuserAudit.MCUSER_AUDIT.JWT_ID;
-    }
+		@Override
+		public Field<UUID> field7() {
+				return McuserAudit.MCUSER_AUDIT.JWT_ID;
+		}
 
-    @Override
-    public Field<JwtIdStatus> field8() {
-        return McuserAudit.MCUSER_AUDIT.JWT_ID_STATUS;
-    }
+		@Override
+		public Field<JwtIdStatus> field8() {
+				return McuserAudit.MCUSER_AUDIT.JWT_ID_STATUS;
+		}
 
-    @Override
-    public UUID component1() {
-        return getUid();
-    }
+		@Override
+		public UUID component1() {
+				return getUid();
+		}
 
-    @Override
-    public OffsetDateTime component2() {
-        return getCreated();
-    }
+		@Override
+		public OffsetDateTime component2() {
+				return getCreated();
+		}
 
-    @Override
-    public McuserAuditType component3() {
-        return getType();
-    }
+		@Override
+		public McuserAuditType component3() {
+				return getType();
+		}
 
-    @Override
-    public OffsetDateTime component4() {
-        return getRequestTimestamp();
-    }
+		@Override
+		public OffsetDateTime component4() {
+				return getRequestTimestamp();
+		}
 
-    @Override
-    public InetAddress component5() {
-        return getRequestOrigin();
-    }
+		@Override
+		public InetAddress component5() {
+				return getRequestOrigin();
+		}
 
-    @Override
-    public OffsetDateTime component6() {
-        return getLoginExpiration();
-    }
+		@Override
+		public OffsetDateTime component6() {
+				return getLoginExpiration();
+		}
 
-    @Override
-    public UUID component7() {
-        return getJwtId();
-    }
+		@Override
+		public UUID component7() {
+				return getJwtId();
+		}
 
-    @Override
-    public JwtIdStatus component8() {
-        return getJwtIdStatus();
-    }
+		@Override
+		public JwtIdStatus component8() {
+				return getJwtIdStatus();
+		}
 
-    @Override
-    public UUID value1() {
-        return getUid();
-    }
+		@Override
+		public UUID value1() {
+				return getUid();
+		}
 
-    @Override
-    public OffsetDateTime value2() {
-        return getCreated();
-    }
+		@Override
+		public OffsetDateTime value2() {
+				return getCreated();
+		}
 
-    @Override
-    public McuserAuditType value3() {
-        return getType();
-    }
+		@Override
+		public McuserAuditType value3() {
+				return getType();
+		}
 
-    @Override
-    public OffsetDateTime value4() {
-        return getRequestTimestamp();
-    }
+		@Override
+		public OffsetDateTime value4() {
+				return getRequestTimestamp();
+		}
 
-    @Override
-    public InetAddress value5() {
-        return getRequestOrigin();
-    }
+		@Override
+		public InetAddress value5() {
+				return getRequestOrigin();
+		}
 
-    @Override
-    public OffsetDateTime value6() {
-        return getLoginExpiration();
-    }
+		@Override
+		public OffsetDateTime value6() {
+				return getLoginExpiration();
+		}
 
-    @Override
-    public UUID value7() {
-        return getJwtId();
-    }
+		@Override
+		public UUID value7() {
+				return getJwtId();
+		}
 
-    @Override
-    public JwtIdStatus value8() {
-        return getJwtIdStatus();
-    }
+		@Override
+		public JwtIdStatus value8() {
+				return getJwtIdStatus();
+		}
 
-    @Override
-    public McuserAuditRecord value1(UUID value) {
-        setUid(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value1(UUID value) {
+				setUid(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value2(OffsetDateTime value) {
-        setCreated(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value2(OffsetDateTime value) {
+				setCreated(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value3(McuserAuditType value) {
-        setType(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value3(McuserAuditType value) {
+				setType(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value4(OffsetDateTime value) {
-        setRequestTimestamp(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value4(OffsetDateTime value) {
+				setRequestTimestamp(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value5(InetAddress value) {
-        setRequestOrigin(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value5(InetAddress value) {
+				setRequestOrigin(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value6(OffsetDateTime value) {
-        setLoginExpiration(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value6(OffsetDateTime value) {
+				setLoginExpiration(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value7(UUID value) {
-        setJwtId(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value7(UUID value) {
+				setJwtId(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord value8(JwtIdStatus value) {
-        setJwtIdStatus(value);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord value8(JwtIdStatus value) {
+				setJwtIdStatus(value);
+				return this;
+		}
 
-    @Override
-    public McuserAuditRecord values(UUID value1, OffsetDateTime value2, McuserAuditType value3, OffsetDateTime value4, InetAddress value5, OffsetDateTime value6, UUID value7, JwtIdStatus value8) {
-        value1(value1);
-        value2(value2);
-        value3(value3);
-        value4(value4);
-        value5(value5);
-        value6(value6);
-        value7(value7);
-        value8(value8);
-        return this;
-    }
+		@Override
+		public McuserAuditRecord values(UUID value1, OffsetDateTime value2, McuserAuditType value3, OffsetDateTime value4, InetAddress value5, OffsetDateTime value6, UUID value7, JwtIdStatus value8) {
+				value1(value1);
+				value2(value2);
+				value3(value3);
+				value4(value4);
+				value5(value5);
+				value6(value6);
+				value7(value7);
+				value8(value8);
+				return this;
+		}
 
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Constructors
+		// -------------------------------------------------------------------------
 
-    /**
-     * Create a detached McuserAuditRecord
-     */
-    public McuserAuditRecord() {
-        super(McuserAudit.MCUSER_AUDIT);
-    }
+		/**
+		 * Create a detached McuserAuditRecord
+		 */
+		public McuserAuditRecord() {
+				super(McuserAudit.MCUSER_AUDIT);
+		}
 
-    /**
-     * Create a detached, initialised McuserAuditRecord
-     */
-    public McuserAuditRecord(UUID uid, OffsetDateTime created, McuserAuditType type, OffsetDateTime requestTimestamp, InetAddress requestOrigin, OffsetDateTime loginExpiration, UUID jwtId, JwtIdStatus jwtIdStatus) {
-        super(McuserAudit.MCUSER_AUDIT);
+		/**
+		 * Create a detached, initialised McuserAuditRecord
+		 */
+		public McuserAuditRecord(UUID uid, OffsetDateTime created, McuserAuditType type, OffsetDateTime requestTimestamp, InetAddress requestOrigin, OffsetDateTime loginExpiration, UUID jwtId, JwtIdStatus jwtIdStatus) {
+				super(McuserAudit.MCUSER_AUDIT);
 
-        setUid(uid);
-        setCreated(created);
-        setType(type);
-        setRequestTimestamp(requestTimestamp);
-        setRequestOrigin(requestOrigin);
-        setLoginExpiration(loginExpiration);
-        setJwtId(jwtId);
-        setJwtIdStatus(jwtIdStatus);
-    }
+				setUid(uid);
+				setCreated(created);
+				setType(type);
+				setRequestTimestamp(requestTimestamp);
+				setRequestOrigin(requestOrigin);
+				setLoginExpiration(loginExpiration);
+				setJwtId(jwtId);
+				setJwtIdStatus(jwtIdStatus);
+		}
 
-    /**
-     * Create a detached, initialised McuserAuditRecord
-     */
-    public McuserAuditRecord(com.tll.mcorpus.db.tables.pojos.McuserAudit value) {
-        super(McuserAudit.MCUSER_AUDIT);
+		/**
+		 * Create a detached, initialised McuserAuditRecord
+		 */
+		public McuserAuditRecord(com.tll.mcorpus.db.tables.pojos.McuserAudit value) {
+				super(McuserAudit.MCUSER_AUDIT);
 
-        if (value != null) {
-            setUid(value.getUid());
-            setCreated(value.getCreated());
-            setType(value.getType());
-            setRequestTimestamp(value.getRequestTimestamp());
-            setRequestOrigin(value.getRequestOrigin());
-            setLoginExpiration(value.getLoginExpiration());
-            setJwtId(value.getJwtId());
-            setJwtIdStatus(value.getJwtIdStatus());
-        }
-    }
+				if (value != null) {
+						setUid(value.getUid());
+						setCreated(value.getCreated());
+						setType(value.getType());
+						setRequestTimestamp(value.getRequestTimestamp());
+						setRequestOrigin(value.getRequestOrigin());
+						setLoginExpiration(value.getLoginExpiration());
+						setJwtId(value.getJwtId());
+						setJwtIdStatus(value.getJwtIdStatus());
+				}
+		}
 }

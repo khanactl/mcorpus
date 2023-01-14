@@ -26,114 +26,114 @@ import com.tll.mcorpus.gmodel.mcuser.Mcuser;
 
 public class McuserXfrm extends BaseMcorpusTransformer<Mcuser, com.tll.mcorpus.db.tables.pojos.Mcuser> {
 
-  public static McuserStatus mcuserStatusFromString(final String s) {
-    try {
-      return McuserStatus.valueOf(upper(clean(s)));
-    } catch(Exception e) {
-      return null;
-    }
-  }
+	public static McuserStatus mcuserStatusFromString(final String s) {
+		try {
+			return McuserStatus.valueOf(upper(clean(s)));
+		} catch(Exception e) {
+			return null;
+		}
+	}
 
-  public static String mcuserStatusToString(final McuserStatus enm) {
-    return isNull(enm) ? null : enm.getLiteral();
-  }
+	public static String mcuserStatusToString(final McuserStatus enm) {
+		return isNull(enm) ? null : enm.getLiteral();
+	}
 
-  public static McuserRole mcuserRoleFromString(final String s) {
-    try {
-      return McuserRole.valueOf(upper(clean(s)));
-    } catch(Exception e) {
-      return null;
-    }
-  }
+	public static McuserRole mcuserRoleFromString(final String s) {
+		try {
+			return McuserRole.valueOf(upper(clean(s)));
+		} catch(Exception e) {
+			return null;
+		}
+	}
 
-  public static String mcuserRoleToString(final McuserRole enm) {
-    return isNull(enm) ? null : enm.getLiteral();
-  }
+	public static String mcuserRoleToString(final McuserRole enm) {
+		return isNull(enm) ? null : enm.getLiteral();
+	}
 
-  public static McuserRole[] mcuserRolesArrayFromStringCollection(final Collection<String> sroles) {
-    return isNullOrEmpty(sroles) ? new McuserRole[0] : sroles.stream()
-        .map(srole -> mcuserRoleFromString(srole))
-        .filter(mr -> isNotNull(mr))
-        .collect(Collectors.toSet())
-        .toArray(new McuserRole[0]);
-  }
+	public static McuserRole[] mcuserRolesArrayFromStringCollection(final Collection<String> sroles) {
+		return isNullOrEmpty(sroles) ? new McuserRole[0] : sroles.stream()
+				.map(srole -> mcuserRoleFromString(srole))
+				.filter(mr -> isNotNull(mr))
+				.collect(Collectors.toSet())
+				.toArray(new McuserRole[0]);
+	}
 
-  public static Set<String> mcuserRolesArrayToStringSet(final McuserRole[] roles) {
-    return isNullOrEmpty(roles) ? Collections.emptySet() : Arrays.stream(roles)
-        .map(role -> mcuserRoleToString(role))
-        .filter(mr -> isNotNull(mr))
-        .collect(Collectors.toSet())
-        ;
-  }
+	public static Set<String> mcuserRolesArrayToStringSet(final McuserRole[] roles) {
+		return isNullOrEmpty(roles) ? Collections.emptySet() : Arrays.stream(roles)
+				.map(role -> mcuserRoleToString(role))
+				.filter(mr -> isNotNull(mr))
+				.collect(Collectors.toSet())
+				;
+	}
 
-  public static String[] mcuserRolesArrayToStringArray(final McuserRole[] roles) {
-    return isNullOrEmpty(roles) ? new String[0] : Arrays.stream(roles)
-        .map(role -> mcuserRoleToString(role))
-        .filter(mr -> isNotNull(mr))
-        .toArray(String[]::new);
-  }
+	public static String[] mcuserRolesArrayToStringArray(final McuserRole[] roles) {
+		return isNullOrEmpty(roles) ? new String[0] : Arrays.stream(roles)
+				.map(role -> mcuserRoleToString(role))
+				.filter(mr -> isNotNull(mr))
+				.toArray(String[]::new);
+	}
 
-  public static Set<String> rolesListToSet(final List<String> rlist) {
-    return isNull(rlist) ? null : new HashSet<>(rlist);
-  }
+	public static Set<String> rolesListToSet(final List<String> rlist) {
+		return isNull(rlist) ? null : new HashSet<>(rlist);
+	}
 
-  @Override
-  protected Mcuser fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
-    return new Mcuser(
-      null,
-      null,
-      null,
-      clean(fval("name", gqlMap)),
-      clean(fval("email", gqlMap)),
-      clean(fval("username", gqlMap)),
-      fval("pswd", gqlMap), // do not clean pswd
-      clean(fval("status", gqlMap)),
-      rolesListToSet(fval("roles", gqlMap))
-    );
-  }
+	@Override
+	protected Mcuser fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
+		return new Mcuser(
+			null,
+			null,
+			null,
+			clean(fval("name", gqlMap)),
+			clean(fval("email", gqlMap)),
+			clean(fval("username", gqlMap)),
+			fval("pswd", gqlMap), // do not clean pswd
+			clean(fval("status", gqlMap)),
+			rolesListToSet(fval("roles", gqlMap))
+		);
+	}
 
-  @Override
-  public Mcuser fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
-    return new Mcuser(
-      uuidFromToken(fval("uid", gqlMap)),
-      null,
-      null,
-      neclean(fval("name", gqlMap)),
-      neclean(fval("email", gqlMap)),
-      neclean(fval("username", gqlMap)),
-      null,
-      neclean(fval("status", gqlMap)),
-      rolesListToSet(fval("roles", gqlMap))
-    );
-  }
+	@Override
+	public Mcuser fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
+		return new Mcuser(
+			uuidFromToken(fval("uid", gqlMap)),
+			null,
+			null,
+			neclean(fval("name", gqlMap)),
+			neclean(fval("email", gqlMap)),
+			neclean(fval("username", gqlMap)),
+			null,
+			neclean(fval("status", gqlMap)),
+			rolesListToSet(fval("roles", gqlMap))
+		);
+	}
 
-  @Override
-  protected Mcuser fromNonNullBackend(final com.tll.mcorpus.db.tables.pojos.Mcuser d) {
-    return new Mcuser(
-      d.getUid(),
-      odtToDate(d.getCreated()),
-      odtToDate(d.getModified()),
-      clean(d.getName()),
-      clean(d.getEmail()),
-      clean(d.getUsername()),
-      d.getPswd(),
-      mcuserStatusToString(d.getStatus()),
-      mcuserRolesArrayToStringSet(d.getRoles())
-    );
-  }
+	@Override
+	protected Mcuser fromNonNullBackend(final com.tll.mcorpus.db.tables.pojos.Mcuser d) {
+		return new Mcuser(
+			d.getUid(),
+			odtToDate(d.getCreated()),
+			odtToDate(d.getModified()),
+			clean(d.getName()),
+			clean(d.getEmail()),
+			clean(d.getUsername()),
+			d.getPswd(),
+			mcuserStatusToString(d.getStatus()),
+			mcuserRolesArrayToStringSet(d.getRoles())
+		);
+	}
 
-  @Override
-  protected com.tll.mcorpus.db.tables.pojos.Mcuser toBackendFromNonNull(final Mcuser g) {
-    return new com.tll.mcorpus.db.tables.pojos.Mcuser(
-      g.getUid(),
-      odtFromDate(g.getCreated()),
-      odtFromDate(g.getModified()),
-      neclean(g.getName()),
-      neclean(g.getEmail()),
-      neclean(g.getUsername()),
-      neclean(g.getPswd()),
-      mcuserStatusFromString(g.getStatus()),
-      mcuserRolesArrayFromStringCollection(g.getRoles())
-    );
-  }
+	@Override
+	protected com.tll.mcorpus.db.tables.pojos.Mcuser toBackendFromNonNull(final Mcuser g) {
+		return new com.tll.mcorpus.db.tables.pojos.Mcuser(
+			g.getUid(),
+			odtFromDate(g.getCreated()),
+			odtFromDate(g.getModified()),
+			neclean(g.getName()),
+			neclean(g.getEmail()),
+			neclean(g.getUsername()),
+			neclean(g.getPswd()),
+			mcuserStatusFromString(g.getStatus()),
+			mcuserRolesArrayFromStringCollection(g.getRoles())
+		);
+	}
 }

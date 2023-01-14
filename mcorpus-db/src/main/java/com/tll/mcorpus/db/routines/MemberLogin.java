@@ -24,104 +24,104 @@ import org.jooq.impl.SQLDataType;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberLogin extends AbstractRoutine<MrefRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The parameter <code>public.member_login.RETURN_VALUE</code>.
-     */
-    public static final Parameter<MrefRecord> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", com.tll.mcorpus.db.udt.Mref.MREF.getDataType(), false, false);
+		/**
+		 * The parameter <code>public.member_login.RETURN_VALUE</code>.
+		 */
+		public static final Parameter<MrefRecord> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", com.tll.mcorpus.db.udt.Mref.MREF.getDataType(), false, false);
 
-    /**
-     * The parameter <code>public.member_login.member_username</code>.
-     */
-    public static final Parameter<String> MEMBER_USERNAME = Internal.createParameter("member_username", SQLDataType.CLOB, false, false);
+		/**
+		 * The parameter <code>public.member_login.member_username</code>.
+		 */
+		public static final Parameter<String> MEMBER_USERNAME = Internal.createParameter("member_username", SQLDataType.CLOB, false, false);
 
-    /**
-     * The parameter <code>public.member_login.member_password</code>.
-     */
-    public static final Parameter<String> MEMBER_PASSWORD = Internal.createParameter("member_password", SQLDataType.CLOB, false, false);
+		/**
+		 * The parameter <code>public.member_login.member_password</code>.
+		 */
+		public static final Parameter<String> MEMBER_PASSWORD = Internal.createParameter("member_password", SQLDataType.CLOB, false, false);
 
-    /**
-     * The parameter <code>public.member_login.in_request_timestamp</code>.
-     */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
+		/**
+		 * The parameter <code>public.member_login.in_request_timestamp</code>.
+		 */
+		public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
-    /**
-     * The parameter <code>public.member_login.in_request_origin</code>.
-     */
-    public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
+		/**
+		 * The parameter <code>public.member_login.in_request_origin</code>.
+		 */
+		public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
 
-    /**
-     * Create a new routine call instance
-     */
-    public MemberLogin() {
-        super("member_login", Public.PUBLIC, com.tll.mcorpus.db.udt.Mref.MREF.getDataType());
+		/**
+		 * Create a new routine call instance
+		 */
+		public MemberLogin() {
+				super("member_login", Public.PUBLIC, com.tll.mcorpus.db.udt.Mref.MREF.getDataType());
 
-        setReturnParameter(RETURN_VALUE);
-        addInParameter(MEMBER_USERNAME);
-        addInParameter(MEMBER_PASSWORD);
-        addInParameter(IN_REQUEST_TIMESTAMP);
-        addInParameter(IN_REQUEST_ORIGIN);
-    }
+				setReturnParameter(RETURN_VALUE);
+				addInParameter(MEMBER_USERNAME);
+				addInParameter(MEMBER_PASSWORD);
+				addInParameter(IN_REQUEST_TIMESTAMP);
+				addInParameter(IN_REQUEST_ORIGIN);
+		}
 
-    /**
-     * Set the <code>member_username</code> parameter IN value to the routine
-     */
-    public void setMemberUsername(String value) {
-        setValue(MEMBER_USERNAME, value);
-    }
+		/**
+		 * Set the <code>member_username</code> parameter IN value to the routine
+		 */
+		public void setMemberUsername(String value) {
+				setValue(MEMBER_USERNAME, value);
+		}
 
-    /**
-     * Set the <code>member_username</code> parameter to the function to be used
-     * with a {@link org.jooq.Select} statement
-     */
-    public void setMemberUsername(Field<String> field) {
-        setField(MEMBER_USERNAME, field);
-    }
+		/**
+		 * Set the <code>member_username</code> parameter to the function to be used
+		 * with a {@link org.jooq.Select} statement
+		 */
+		public void setMemberUsername(Field<String> field) {
+				setField(MEMBER_USERNAME, field);
+		}
 
-    /**
-     * Set the <code>member_password</code> parameter IN value to the routine
-     */
-    public void setMemberPassword(String value) {
-        setValue(MEMBER_PASSWORD, value);
-    }
+		/**
+		 * Set the <code>member_password</code> parameter IN value to the routine
+		 */
+		public void setMemberPassword(String value) {
+				setValue(MEMBER_PASSWORD, value);
+		}
 
-    /**
-     * Set the <code>member_password</code> parameter to the function to be used
-     * with a {@link org.jooq.Select} statement
-     */
-    public void setMemberPassword(Field<String> field) {
-        setField(MEMBER_PASSWORD, field);
-    }
+		/**
+		 * Set the <code>member_password</code> parameter to the function to be used
+		 * with a {@link org.jooq.Select} statement
+		 */
+		public void setMemberPassword(Field<String> field) {
+				setField(MEMBER_PASSWORD, field);
+		}
 
-    /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the
-     * routine
-     */
-    public void setInRequestTimestamp(OffsetDateTime value) {
-        setValue(IN_REQUEST_TIMESTAMP, value);
-    }
+		/**
+		 * Set the <code>in_request_timestamp</code> parameter IN value to the
+		 * routine
+		 */
+		public void setInRequestTimestamp(OffsetDateTime value) {
+				setValue(IN_REQUEST_TIMESTAMP, value);
+		}
 
-    /**
-     * Set the <code>in_request_timestamp</code> parameter to the function to be
-     * used with a {@link org.jooq.Select} statement
-     */
-    public void setInRequestTimestamp(Field<OffsetDateTime> field) {
-        setField(IN_REQUEST_TIMESTAMP, field);
-    }
+		/**
+		 * Set the <code>in_request_timestamp</code> parameter to the function to be
+		 * used with a {@link org.jooq.Select} statement
+		 */
+		public void setInRequestTimestamp(Field<OffsetDateTime> field) {
+				setField(IN_REQUEST_TIMESTAMP, field);
+		}
 
-    /**
-     * Set the <code>in_request_origin</code> parameter IN value to the routine
-     */
-    public void setInRequestOrigin(InetAddress value) {
-        setValue(IN_REQUEST_ORIGIN, value);
-    }
+		/**
+		 * Set the <code>in_request_origin</code> parameter IN value to the routine
+		 */
+		public void setInRequestOrigin(InetAddress value) {
+				setValue(IN_REQUEST_ORIGIN, value);
+		}
 
-    /**
-     * Set the <code>in_request_origin</code> parameter to the function to be
-     * used with a {@link org.jooq.Select} statement
-     */
-    public void setInRequestOrigin(Field<InetAddress> field) {
-        setField(IN_REQUEST_ORIGIN, field);
-    }
+		/**
+		 * Set the <code>in_request_origin</code> parameter to the function to be
+		 * used with a {@link org.jooq.Select} statement
+		 */
+		public void setInRequestOrigin(Field<InetAddress> field) {
+				setField(IN_REQUEST_ORIGIN, field);
+		}
 }

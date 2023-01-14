@@ -4,5 +4,5 @@ import com.tll.validate.BaseValidator;
 
 public abstract class BaseMcorpusValidator<E> extends BaseValidator<E> {
 
-  protected String getValidationMsgsRootName() { return "validate"; }
+	protected String getValidationMsgsRootName() { return "validate"; }
 }

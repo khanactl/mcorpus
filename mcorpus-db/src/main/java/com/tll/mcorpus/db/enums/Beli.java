@@ -17,50 +17,50 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum Beli implements EnumType {
 
-    _1("1"),
+		_1("1"),
 
-    _2("2"),
+		_2("2"),
 
-    _3("3"),
+		_3("3"),
 
-    _4("4"),
+		_4("4"),
 
-    _5("5"),
+		_5("5"),
 
-    P("P"),
+		P("P"),
 
-    _3f("?");
+		_3f("?");
 
-    private final String literal;
+		private final String literal;
 
-    private Beli(String literal) {
-        this.literal = literal;
-    }
+		private Beli(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "beli";
-    }
+		@Override
+		public String getName() {
+				return "beli";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static Beli lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(Beli.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static Beli lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(Beli.class, literal);
+		}
 }

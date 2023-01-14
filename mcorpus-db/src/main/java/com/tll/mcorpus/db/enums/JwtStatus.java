@@ -17,48 +17,48 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum JwtStatus implements EnumType {
 
-    PRESENT_BAD_STATE("PRESENT_BAD_STATE"),
+		PRESENT_BAD_STATE("PRESENT_BAD_STATE"),
 
-    NOT_PRESENT("NOT_PRESENT"),
+		NOT_PRESENT("NOT_PRESENT"),
 
-    BLACKLISTED("BLACKLISTED"),
+		BLACKLISTED("BLACKLISTED"),
 
-    EXPIRED("EXPIRED"),
+		EXPIRED("EXPIRED"),
 
-    MCUSER_NOTACTIVE("MCUSER_NOTACTIVE"),
+		MCUSER_NOTACTIVE("MCUSER_NOTACTIVE"),
 
-    VALID("VALID");
+		VALID("VALID");
 
-    private final String literal;
+		private final String literal;
 
-    private JwtStatus(String literal) {
-        this.literal = literal;
-    }
+		private JwtStatus(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "jwt_status";
-    }
+		@Override
+		public String getName() {
+				return "jwt_status";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static JwtStatus lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(JwtStatus.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static JwtStatus lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(JwtStatus.class, literal);
+		}
 }

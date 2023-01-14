@@ -24,404 +24,404 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserRecord extends UpdatableRecordImpl<McuserRecord> implements Record9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Setter for <code>public.mcuser.uid</code>.
-     */
-    public void setUid(UUID value) {
-        set(0, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.uid</code>.
-     */
-    public UUID getUid() {
-        return (UUID) get(0);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.created</code>.
-     */
-    public void setCreated(OffsetDateTime value) {
-        set(1, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.created</code>.
-     */
-    public OffsetDateTime getCreated() {
-        return (OffsetDateTime) get(1);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.modified</code>.
-     */
-    public void setModified(OffsetDateTime value) {
-        set(2, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.modified</code>.
-     */
-    public OffsetDateTime getModified() {
-        return (OffsetDateTime) get(2);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.name</code>.
-     */
-    public void setName(String value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.name</code>.
-     */
-    public String getName() {
-        return (String) get(3);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.email</code>.
-     */
-    public void setEmail(String value) {
-        set(4, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.email</code>.
-     */
-    public String getEmail() {
-        return (String) get(4);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.username</code>.
-     */
-    public void setUsername(String value) {
-        set(5, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.username</code>.
-     */
-    public String getUsername() {
-        return (String) get(5);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.pswd</code>.
-     */
-    public void setPswd(String value) {
-        set(6, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.pswd</code>.
-     */
-    public String getPswd() {
-        return (String) get(6);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.status</code>.
-     */
-    public void setStatus(McuserStatus value) {
-        set(7, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.status</code>.
-     */
-    public McuserStatus getStatus() {
-        return (McuserStatus) get(7);
-    }
-
-    /**
-     * Setter for <code>public.mcuser.roles</code>.
-     */
-    public void setRoles(McuserRole[] value) {
-        set(8, value);
-    }
-
-    /**
-     * Getter for <code>public.mcuser.roles</code>.
-     */
-    public McuserRole[] getRoles() {
-        return (McuserRole[]) get(8);
-    }
-
-    // -------------------------------------------------------------------------
-    // Primary key information
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Record1<UUID> key() {
-        return (Record1) super.key();
-    }
-
-    // -------------------------------------------------------------------------
-    // Record9 type implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Row9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> fieldsRow() {
-        return (Row9) super.fieldsRow();
-    }
-
-    @Override
-    public Row9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> valuesRow() {
-        return (Row9) super.valuesRow();
-    }
-
-    @Override
-    public Field<UUID> field1() {
-        return Mcuser.MCUSER.UID;
-    }
-
-    @Override
-    public Field<OffsetDateTime> field2() {
-        return Mcuser.MCUSER.CREATED;
-    }
-
-    @Override
-    public Field<OffsetDateTime> field3() {
-        return Mcuser.MCUSER.MODIFIED;
-    }
-
-    @Override
-    public Field<String> field4() {
-        return Mcuser.MCUSER.NAME;
-    }
-
-    @Override
-    public Field<String> field5() {
-        return Mcuser.MCUSER.EMAIL;
-    }
-
-    @Override
-    public Field<String> field6() {
-        return Mcuser.MCUSER.USERNAME;
-    }
-
-    @Override
-    public Field<String> field7() {
-        return Mcuser.MCUSER.PSWD;
-    }
-
-    @Override
-    public Field<McuserStatus> field8() {
-        return Mcuser.MCUSER.STATUS;
-    }
-
-    @Override
-    public Field<McuserRole[]> field9() {
-        return Mcuser.MCUSER.ROLES;
-    }
-
-    @Override
-    public UUID component1() {
-        return getUid();
-    }
-
-    @Override
-    public OffsetDateTime component2() {
-        return getCreated();
-    }
-
-    @Override
-    public OffsetDateTime component3() {
-        return getModified();
-    }
-
-    @Override
-    public String component4() {
-        return getName();
-    }
-
-    @Override
-    public String component5() {
-        return getEmail();
-    }
-
-    @Override
-    public String component6() {
-        return getUsername();
-    }
-
-    @Override
-    public String component7() {
-        return getPswd();
-    }
-
-    @Override
-    public McuserStatus component8() {
-        return getStatus();
-    }
-
-    @Override
-    public McuserRole[] component9() {
-        return getRoles();
-    }
-
-    @Override
-    public UUID value1() {
-        return getUid();
-    }
-
-    @Override
-    public OffsetDateTime value2() {
-        return getCreated();
-    }
-
-    @Override
-    public OffsetDateTime value3() {
-        return getModified();
-    }
-
-    @Override
-    public String value4() {
-        return getName();
-    }
-
-    @Override
-    public String value5() {
-        return getEmail();
-    }
-
-    @Override
-    public String value6() {
-        return getUsername();
-    }
-
-    @Override
-    public String value7() {
-        return getPswd();
-    }
-
-    @Override
-    public McuserStatus value8() {
-        return getStatus();
-    }
-
-    @Override
-    public McuserRole[] value9() {
-        return getRoles();
-    }
-
-    @Override
-    public McuserRecord value1(UUID value) {
-        setUid(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value2(OffsetDateTime value) {
-        setCreated(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value3(OffsetDateTime value) {
-        setModified(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value4(String value) {
-        setName(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value5(String value) {
-        setEmail(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value6(String value) {
-        setUsername(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value7(String value) {
-        setPswd(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value8(McuserStatus value) {
-        setStatus(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord value9(McuserRole[] value) {
-        setRoles(value);
-        return this;
-    }
-
-    @Override
-    public McuserRecord values(UUID value1, OffsetDateTime value2, OffsetDateTime value3, String value4, String value5, String value6, String value7, McuserStatus value8, McuserRole[] value9) {
-        value1(value1);
-        value2(value2);
-        value3(value3);
-        value4(value4);
-        value5(value5);
-        value6(value6);
-        value7(value7);
-        value8(value8);
-        value9(value9);
-        return this;
-    }
-
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-
-    /**
-     * Create a detached McuserRecord
-     */
-    public McuserRecord() {
-        super(Mcuser.MCUSER);
-    }
-
-    /**
-     * Create a detached, initialised McuserRecord
-     */
-    public McuserRecord(UUID uid, OffsetDateTime created, OffsetDateTime modified, String name, String email, String username, String pswd, McuserStatus status, McuserRole[] roles) {
-        super(Mcuser.MCUSER);
-
-        setUid(uid);
-        setCreated(created);
-        setModified(modified);
-        setName(name);
-        setEmail(email);
-        setUsername(username);
-        setPswd(pswd);
-        setStatus(status);
-        setRoles(roles);
-    }
-
-    /**
-     * Create a detached, initialised McuserRecord
-     */
-    public McuserRecord(com.tll.mcorpus.db.tables.pojos.Mcuser value) {
-        super(Mcuser.MCUSER);
-
-        if (value != null) {
-            setUid(value.getUid());
-            setCreated(value.getCreated());
-            setModified(value.getModified());
-            setName(value.getName());
-            setEmail(value.getEmail());
-            setUsername(value.getUsername());
-            setPswd(value.getPswd());
-            setStatus(value.getStatus());
-            setRoles(value.getRoles());
-        }
-    }
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Setter for <code>public.mcuser.uid</code>.
+		 */
+		public void setUid(UUID value) {
+				set(0, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.uid</code>.
+		 */
+		public UUID getUid() {
+				return (UUID) get(0);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.created</code>.
+		 */
+		public void setCreated(OffsetDateTime value) {
+				set(1, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.created</code>.
+		 */
+		public OffsetDateTime getCreated() {
+				return (OffsetDateTime) get(1);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.modified</code>.
+		 */
+		public void setModified(OffsetDateTime value) {
+				set(2, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.modified</code>.
+		 */
+		public OffsetDateTime getModified() {
+				return (OffsetDateTime) get(2);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.name</code>.
+		 */
+		public void setName(String value) {
+				set(3, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.name</code>.
+		 */
+		public String getName() {
+				return (String) get(3);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.email</code>.
+		 */
+		public void setEmail(String value) {
+				set(4, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.email</code>.
+		 */
+		public String getEmail() {
+				return (String) get(4);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.username</code>.
+		 */
+		public void setUsername(String value) {
+				set(5, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.username</code>.
+		 */
+		public String getUsername() {
+				return (String) get(5);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.pswd</code>.
+		 */
+		public void setPswd(String value) {
+				set(6, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.pswd</code>.
+		 */
+		public String getPswd() {
+				return (String) get(6);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.status</code>.
+		 */
+		public void setStatus(McuserStatus value) {
+				set(7, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.status</code>.
+		 */
+		public McuserStatus getStatus() {
+				return (McuserStatus) get(7);
+		}
+
+		/**
+		 * Setter for <code>public.mcuser.roles</code>.
+		 */
+		public void setRoles(McuserRole[] value) {
+				set(8, value);
+		}
+
+		/**
+		 * Getter for <code>public.mcuser.roles</code>.
+		 */
+		public McuserRole[] getRoles() {
+				return (McuserRole[]) get(8);
+		}
+
+		// -------------------------------------------------------------------------
+		// Primary key information
+		// -------------------------------------------------------------------------
+
+		@Override
+		public Record1<UUID> key() {
+				return (Record1) super.key();
+		}
+
+		// -------------------------------------------------------------------------
+		// Record9 type implementation
+		// -------------------------------------------------------------------------
+
+		@Override
+		public Row9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> fieldsRow() {
+				return (Row9) super.fieldsRow();
+		}
+
+		@Override
+		public Row9<UUID, OffsetDateTime, OffsetDateTime, String, String, String, String, McuserStatus, McuserRole[]> valuesRow() {
+				return (Row9) super.valuesRow();
+		}
+
+		@Override
+		public Field<UUID> field1() {
+				return Mcuser.MCUSER.UID;
+		}
+
+		@Override
+		public Field<OffsetDateTime> field2() {
+				return Mcuser.MCUSER.CREATED;
+		}
+
+		@Override
+		public Field<OffsetDateTime> field3() {
+				return Mcuser.MCUSER.MODIFIED;
+		}
+
+		@Override
+		public Field<String> field4() {
+				return Mcuser.MCUSER.NAME;
+		}
+
+		@Override
+		public Field<String> field5() {
+				return Mcuser.MCUSER.EMAIL;
+		}
+
+		@Override
+		public Field<String> field6() {
+				return Mcuser.MCUSER.USERNAME;
+		}
+
+		@Override
+		public Field<String> field7() {
+				return Mcuser.MCUSER.PSWD;
+		}
+
+		@Override
+		public Field<McuserStatus> field8() {
+				return Mcuser.MCUSER.STATUS;
+		}
+
+		@Override
+		public Field<McuserRole[]> field9() {
+				return Mcuser.MCUSER.ROLES;
+		}
+
+		@Override
+		public UUID component1() {
+				return getUid();
+		}
+
+		@Override
+		public OffsetDateTime component2() {
+				return getCreated();
+		}
+
+		@Override
+		public OffsetDateTime component3() {
+				return getModified();
+		}
+
+		@Override
+		public String component4() {
+				return getName();
+		}
+
+		@Override
+		public String component5() {
+				return getEmail();
+		}
+
+		@Override
+		public String component6() {
+				return getUsername();
+		}
+
+		@Override
+		public String component7() {
+				return getPswd();
+		}
+
+		@Override
+		public McuserStatus component8() {
+				return getStatus();
+		}
+
+		@Override
+		public McuserRole[] component9() {
+				return getRoles();
+		}
+
+		@Override
+		public UUID value1() {
+				return getUid();
+		}
+
+		@Override
+		public OffsetDateTime value2() {
+				return getCreated();
+		}
+
+		@Override
+		public OffsetDateTime value3() {
+				return getModified();
+		}
+
+		@Override
+		public String value4() {
+				return getName();
+		}
+
+		@Override
+		public String value5() {
+				return getEmail();
+		}
+
+		@Override
+		public String value6() {
+				return getUsername();
+		}
+
+		@Override
+		public String value7() {
+				return getPswd();
+		}
+
+		@Override
+		public McuserStatus value8() {
+				return getStatus();
+		}
+
+		@Override
+		public McuserRole[] value9() {
+				return getRoles();
+		}
+
+		@Override
+		public McuserRecord value1(UUID value) {
+				setUid(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value2(OffsetDateTime value) {
+				setCreated(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value3(OffsetDateTime value) {
+				setModified(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value4(String value) {
+				setName(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value5(String value) {
+				setEmail(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value6(String value) {
+				setUsername(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value7(String value) {
+				setPswd(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value8(McuserStatus value) {
+				setStatus(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord value9(McuserRole[] value) {
+				setRoles(value);
+				return this;
+		}
+
+		@Override
+		public McuserRecord values(UUID value1, OffsetDateTime value2, OffsetDateTime value3, String value4, String value5, String value6, String value7, McuserStatus value8, McuserRole[] value9) {
+				value1(value1);
+				value2(value2);
+				value3(value3);
+				value4(value4);
+				value5(value5);
+				value6(value6);
+				value7(value7);
+				value8(value8);
+				value9(value9);
+				return this;
+		}
+
+		// -------------------------------------------------------------------------
+		// Constructors
+		// -------------------------------------------------------------------------
+
+		/**
+		 * Create a detached McuserRecord
+		 */
+		public McuserRecord() {
+				super(Mcuser.MCUSER);
+		}
+
+		/**
+		 * Create a detached, initialised McuserRecord
+		 */
+		public McuserRecord(UUID uid, OffsetDateTime created, OffsetDateTime modified, String name, String email, String username, String pswd, McuserStatus status, McuserRole[] roles) {
+				super(Mcuser.MCUSER);
+
+				setUid(uid);
+				setCreated(created);
+				setModified(modified);
+				setName(name);
+				setEmail(email);
+				setUsername(username);
+				setPswd(pswd);
+				setStatus(status);
+				setRoles(roles);
+		}
+
+		/**
+		 * Create a detached, initialised McuserRecord
+		 */
+		public McuserRecord(com.tll.mcorpus.db.tables.pojos.Mcuser value) {
+				super(Mcuser.MCUSER);
+
+				if (value != null) {
+						setUid(value.getUid());
+						setCreated(value.getCreated());
+						setModified(value.getModified());
+						setName(value.getName());
+						setEmail(value.getEmail());
+						setUsername(value.getUsername());
+						setPswd(value.getPswd());
+						setStatus(value.getStatus());
+						setRoles(value.getRoles());
+				}
+		}
 }

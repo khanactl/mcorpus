@@ -16,269 +16,269 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID mid;
-    private final OffsetDateTime modified;
-    private final LocalDate dob;
-    private final String ssn;
-    private final String emailPersonal;
-    private final String emailWork;
-    private final String mobilePhone;
-    private final String homePhone;
-    private final String workPhone;
-    private final String fax;
-    private final String username;
-    private final String pswd;
+		private final UUID mid;
+		private final OffsetDateTime modified;
+		private final LocalDate dob;
+		private final String ssn;
+		private final String emailPersonal;
+		private final String emailWork;
+		private final String mobilePhone;
+		private final String homePhone;
+		private final String workPhone;
+		private final String fax;
+		private final String username;
+		private final String pswd;
 
-    public Mauth(Mauth value) {
-        this.mid = value.mid;
-        this.modified = value.modified;
-        this.dob = value.dob;
-        this.ssn = value.ssn;
-        this.emailPersonal = value.emailPersonal;
-        this.emailWork = value.emailWork;
-        this.mobilePhone = value.mobilePhone;
-        this.homePhone = value.homePhone;
-        this.workPhone = value.workPhone;
-        this.fax = value.fax;
-        this.username = value.username;
-        this.pswd = value.pswd;
-    }
+		public Mauth(Mauth value) {
+				this.mid = value.mid;
+				this.modified = value.modified;
+				this.dob = value.dob;
+				this.ssn = value.ssn;
+				this.emailPersonal = value.emailPersonal;
+				this.emailWork = value.emailWork;
+				this.mobilePhone = value.mobilePhone;
+				this.homePhone = value.homePhone;
+				this.workPhone = value.workPhone;
+				this.fax = value.fax;
+				this.username = value.username;
+				this.pswd = value.pswd;
+		}
 
-    public Mauth(
-        UUID mid,
-        OffsetDateTime modified,
-        LocalDate dob,
-        String ssn,
-        String emailPersonal,
-        String emailWork,
-        String mobilePhone,
-        String homePhone,
-        String workPhone,
-        String fax,
-        String username,
-        String pswd
-    ) {
-        this.mid = mid;
-        this.modified = modified;
-        this.dob = dob;
-        this.ssn = ssn;
-        this.emailPersonal = emailPersonal;
-        this.emailWork = emailWork;
-        this.mobilePhone = mobilePhone;
-        this.homePhone = homePhone;
-        this.workPhone = workPhone;
-        this.fax = fax;
-        this.username = username;
-        this.pswd = pswd;
-    }
+		public Mauth(
+				UUID mid,
+				OffsetDateTime modified,
+				LocalDate dob,
+				String ssn,
+				String emailPersonal,
+				String emailWork,
+				String mobilePhone,
+				String homePhone,
+				String workPhone,
+				String fax,
+				String username,
+				String pswd
+		) {
+				this.mid = mid;
+				this.modified = modified;
+				this.dob = dob;
+				this.ssn = ssn;
+				this.emailPersonal = emailPersonal;
+				this.emailWork = emailWork;
+				this.mobilePhone = mobilePhone;
+				this.homePhone = homePhone;
+				this.workPhone = workPhone;
+				this.fax = fax;
+				this.username = username;
+				this.pswd = pswd;
+		}
 
-    /**
-     * Getter for <code>public.mauth.mid</code>.
-     */
-    public UUID getMid() {
-        return this.mid;
-    }
+		/**
+		 * Getter for <code>public.mauth.mid</code>.
+		 */
+		public UUID getMid() {
+				return this.mid;
+		}
 
-    /**
-     * Getter for <code>public.mauth.modified</code>.
-     */
-    public OffsetDateTime getModified() {
-        return this.modified;
-    }
+		/**
+		 * Getter for <code>public.mauth.modified</code>.
+		 */
+		public OffsetDateTime getModified() {
+				return this.modified;
+		}
 
-    /**
-     * Getter for <code>public.mauth.dob</code>.
-     */
-    public LocalDate getDob() {
-        return this.dob;
-    }
+		/**
+		 * Getter for <code>public.mauth.dob</code>.
+		 */
+		public LocalDate getDob() {
+				return this.dob;
+		}
 
-    /**
-     * Getter for <code>public.mauth.ssn</code>.
-     */
-    public String getSsn() {
-        return this.ssn;
-    }
+		/**
+		 * Getter for <code>public.mauth.ssn</code>.
+		 */
+		public String getSsn() {
+				return this.ssn;
+		}
 
-    /**
-     * Getter for <code>public.mauth.email_personal</code>.
-     */
-    public String getEmailPersonal() {
-        return this.emailPersonal;
-    }
+		/**
+		 * Getter for <code>public.mauth.email_personal</code>.
+		 */
+		public String getEmailPersonal() {
+				return this.emailPersonal;
+		}
 
-    /**
-     * Getter for <code>public.mauth.email_work</code>.
-     */
-    public String getEmailWork() {
-        return this.emailWork;
-    }
+		/**
+		 * Getter for <code>public.mauth.email_work</code>.
+		 */
+		public String getEmailWork() {
+				return this.emailWork;
+		}
 
-    /**
-     * Getter for <code>public.mauth.mobile_phone</code>.
-     */
-    public String getMobilePhone() {
-        return this.mobilePhone;
-    }
+		/**
+		 * Getter for <code>public.mauth.mobile_phone</code>.
+		 */
+		public String getMobilePhone() {
+				return this.mobilePhone;
+		}
 
-    /**
-     * Getter for <code>public.mauth.home_phone</code>.
-     */
-    public String getHomePhone() {
-        return this.homePhone;
-    }
+		/**
+		 * Getter for <code>public.mauth.home_phone</code>.
+		 */
+		public String getHomePhone() {
+				return this.homePhone;
+		}
 
-    /**
-     * Getter for <code>public.mauth.work_phone</code>.
-     */
-    public String getWorkPhone() {
-        return this.workPhone;
-    }
+		/**
+		 * Getter for <code>public.mauth.work_phone</code>.
+		 */
+		public String getWorkPhone() {
+				return this.workPhone;
+		}
 
-    /**
-     * Getter for <code>public.mauth.fax</code>.
-     */
-    public String getFax() {
-        return this.fax;
-    }
+		/**
+		 * Getter for <code>public.mauth.fax</code>.
+		 */
+		public String getFax() {
+				return this.fax;
+		}
 
-    /**
-     * Getter for <code>public.mauth.username</code>.
-     */
-    public String getUsername() {
-        return this.username;
-    }
+		/**
+		 * Getter for <code>public.mauth.username</code>.
+		 */
+		public String getUsername() {
+				return this.username;
+		}
 
-    /**
-     * Getter for <code>public.mauth.pswd</code>.
-     */
-    public String getPswd() {
-        return this.pswd;
-    }
+		/**
+		 * Getter for <code>public.mauth.pswd</code>.
+		 */
+		public String getPswd() {
+				return this.pswd;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final Mauth other = (Mauth) obj;
-        if (this.mid == null) {
-            if (other.mid != null)
-                return false;
-        }
-        else if (!this.mid.equals(other.mid))
-            return false;
-        if (this.modified == null) {
-            if (other.modified != null)
-                return false;
-        }
-        else if (!this.modified.equals(other.modified))
-            return false;
-        if (this.dob == null) {
-            if (other.dob != null)
-                return false;
-        }
-        else if (!this.dob.equals(other.dob))
-            return false;
-        if (this.ssn == null) {
-            if (other.ssn != null)
-                return false;
-        }
-        else if (!this.ssn.equals(other.ssn))
-            return false;
-        if (this.emailPersonal == null) {
-            if (other.emailPersonal != null)
-                return false;
-        }
-        else if (!this.emailPersonal.equals(other.emailPersonal))
-            return false;
-        if (this.emailWork == null) {
-            if (other.emailWork != null)
-                return false;
-        }
-        else if (!this.emailWork.equals(other.emailWork))
-            return false;
-        if (this.mobilePhone == null) {
-            if (other.mobilePhone != null)
-                return false;
-        }
-        else if (!this.mobilePhone.equals(other.mobilePhone))
-            return false;
-        if (this.homePhone == null) {
-            if (other.homePhone != null)
-                return false;
-        }
-        else if (!this.homePhone.equals(other.homePhone))
-            return false;
-        if (this.workPhone == null) {
-            if (other.workPhone != null)
-                return false;
-        }
-        else if (!this.workPhone.equals(other.workPhone))
-            return false;
-        if (this.fax == null) {
-            if (other.fax != null)
-                return false;
-        }
-        else if (!this.fax.equals(other.fax))
-            return false;
-        if (this.username == null) {
-            if (other.username != null)
-                return false;
-        }
-        else if (!this.username.equals(other.username))
-            return false;
-        if (this.pswd == null) {
-            if (other.pswd != null)
-                return false;
-        }
-        else if (!this.pswd.equals(other.pswd))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final Mauth other = (Mauth) obj;
+				if (this.mid == null) {
+						if (other.mid != null)
+								return false;
+				}
+				else if (!this.mid.equals(other.mid))
+						return false;
+				if (this.modified == null) {
+						if (other.modified != null)
+								return false;
+				}
+				else if (!this.modified.equals(other.modified))
+						return false;
+				if (this.dob == null) {
+						if (other.dob != null)
+								return false;
+				}
+				else if (!this.dob.equals(other.dob))
+						return false;
+				if (this.ssn == null) {
+						if (other.ssn != null)
+								return false;
+				}
+				else if (!this.ssn.equals(other.ssn))
+						return false;
+				if (this.emailPersonal == null) {
+						if (other.emailPersonal != null)
+								return false;
+				}
+				else if (!this.emailPersonal.equals(other.emailPersonal))
+						return false;
+				if (this.emailWork == null) {
+						if (other.emailWork != null)
+								return false;
+				}
+				else if (!this.emailWork.equals(other.emailWork))
+						return false;
+				if (this.mobilePhone == null) {
+						if (other.mobilePhone != null)
+								return false;
+				}
+				else if (!this.mobilePhone.equals(other.mobilePhone))
+						return false;
+				if (this.homePhone == null) {
+						if (other.homePhone != null)
+								return false;
+				}
+				else if (!this.homePhone.equals(other.homePhone))
+						return false;
+				if (this.workPhone == null) {
+						if (other.workPhone != null)
+								return false;
+				}
+				else if (!this.workPhone.equals(other.workPhone))
+						return false;
+				if (this.fax == null) {
+						if (other.fax != null)
+								return false;
+				}
+				else if (!this.fax.equals(other.fax))
+						return false;
+				if (this.username == null) {
+						if (other.username != null)
+								return false;
+				}
+				else if (!this.username.equals(other.username))
+						return false;
+				if (this.pswd == null) {
+						if (other.pswd != null)
+								return false;
+				}
+				else if (!this.pswd.equals(other.pswd))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
-        result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
-        result = prime * result + ((this.dob == null) ? 0 : this.dob.hashCode());
-        result = prime * result + ((this.ssn == null) ? 0 : this.ssn.hashCode());
-        result = prime * result + ((this.emailPersonal == null) ? 0 : this.emailPersonal.hashCode());
-        result = prime * result + ((this.emailWork == null) ? 0 : this.emailWork.hashCode());
-        result = prime * result + ((this.mobilePhone == null) ? 0 : this.mobilePhone.hashCode());
-        result = prime * result + ((this.homePhone == null) ? 0 : this.homePhone.hashCode());
-        result = prime * result + ((this.workPhone == null) ? 0 : this.workPhone.hashCode());
-        result = prime * result + ((this.fax == null) ? 0 : this.fax.hashCode());
-        result = prime * result + ((this.username == null) ? 0 : this.username.hashCode());
-        result = prime * result + ((this.pswd == null) ? 0 : this.pswd.hashCode());
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+				result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
+				result = prime * result + ((this.dob == null) ? 0 : this.dob.hashCode());
+				result = prime * result + ((this.ssn == null) ? 0 : this.ssn.hashCode());
+				result = prime * result + ((this.emailPersonal == null) ? 0 : this.emailPersonal.hashCode());
+				result = prime * result + ((this.emailWork == null) ? 0 : this.emailWork.hashCode());
+				result = prime * result + ((this.mobilePhone == null) ? 0 : this.mobilePhone.hashCode());
+				result = prime * result + ((this.homePhone == null) ? 0 : this.homePhone.hashCode());
+				result = prime * result + ((this.workPhone == null) ? 0 : this.workPhone.hashCode());
+				result = prime * result + ((this.fax == null) ? 0 : this.fax.hashCode());
+				result = prime * result + ((this.username == null) ? 0 : this.username.hashCode());
+				result = prime * result + ((this.pswd == null) ? 0 : this.pswd.hashCode());
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("Mauth (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("Mauth (");
 
-        sb.append(mid);
-        sb.append(", ").append(modified);
-        sb.append(", ").append(dob);
-        sb.append(", ").append(ssn);
-        sb.append(", ").append(emailPersonal);
-        sb.append(", ").append(emailWork);
-        sb.append(", ").append(mobilePhone);
-        sb.append(", ").append(homePhone);
-        sb.append(", ").append(workPhone);
-        sb.append(", ").append(fax);
-        sb.append(", ").append(username);
-        sb.append(", ").append(pswd);
+				sb.append(mid);
+				sb.append(", ").append(modified);
+				sb.append(", ").append(dob);
+				sb.append(", ").append(ssn);
+				sb.append(", ").append(emailPersonal);
+				sb.append(", ").append(emailWork);
+				sb.append(", ").append(mobilePhone);
+				sb.append(", ").append(homePhone);
+				sb.append(", ").append(workPhone);
+				sb.append(", ").append(fax);
+				sb.append(", ").append(username);
+				sb.append(", ").append(pswd);
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

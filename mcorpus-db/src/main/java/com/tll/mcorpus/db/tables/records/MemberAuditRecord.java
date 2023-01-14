@@ -24,252 +24,252 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAuditRecord extends UpdatableRecordImpl<MemberAuditRecord> implements Record5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * Setter for <code>public.member_audit.mid</code>.
-     */
-    public void setMid(UUID value) {
-        set(0, value);
-    }
+		/**
+		 * Setter for <code>public.member_audit.mid</code>.
+		 */
+		public void setMid(UUID value) {
+				set(0, value);
+		}
 
-    /**
-     * Getter for <code>public.member_audit.mid</code>.
-     */
-    public UUID getMid() {
-        return (UUID) get(0);
-    }
+		/**
+		 * Getter for <code>public.member_audit.mid</code>.
+		 */
+		public UUID getMid() {
+				return (UUID) get(0);
+		}
 
-    /**
-     * Setter for <code>public.member_audit.created</code>.
-     */
-    public void setCreated(OffsetDateTime value) {
-        set(1, value);
-    }
+		/**
+		 * Setter for <code>public.member_audit.created</code>.
+		 */
+		public void setCreated(OffsetDateTime value) {
+				set(1, value);
+		}
 
-    /**
-     * Getter for <code>public.member_audit.created</code>.
-     */
-    public OffsetDateTime getCreated() {
-        return (OffsetDateTime) get(1);
-    }
+		/**
+		 * Getter for <code>public.member_audit.created</code>.
+		 */
+		public OffsetDateTime getCreated() {
+				return (OffsetDateTime) get(1);
+		}
 
-    /**
-     * Setter for <code>public.member_audit.type</code>.
-     */
-    public void setType(MemberAuditType value) {
-        set(2, value);
-    }
+		/**
+		 * Setter for <code>public.member_audit.type</code>.
+		 */
+		public void setType(MemberAuditType value) {
+				set(2, value);
+		}
 
-    /**
-     * Getter for <code>public.member_audit.type</code>.
-     */
-    public MemberAuditType getType() {
-        return (MemberAuditType) get(2);
-    }
+		/**
+		 * Getter for <code>public.member_audit.type</code>.
+		 */
+		public MemberAuditType getType() {
+				return (MemberAuditType) get(2);
+		}
 
-    /**
-     * Setter for <code>public.member_audit.request_timestamp</code>.
-     */
-    public void setRequestTimestamp(OffsetDateTime value) {
-        set(3, value);
-    }
+		/**
+		 * Setter for <code>public.member_audit.request_timestamp</code>.
+		 */
+		public void setRequestTimestamp(OffsetDateTime value) {
+				set(3, value);
+		}
 
-    /**
-     * Getter for <code>public.member_audit.request_timestamp</code>.
-     */
-    public OffsetDateTime getRequestTimestamp() {
-        return (OffsetDateTime) get(3);
-    }
+		/**
+		 * Getter for <code>public.member_audit.request_timestamp</code>.
+		 */
+		public OffsetDateTime getRequestTimestamp() {
+				return (OffsetDateTime) get(3);
+		}
 
-    /**
-     * Setter for <code>public.member_audit.request_origin</code>.
-     */
-    public void setRequestOrigin(InetAddress value) {
-        set(4, value);
-    }
+		/**
+		 * Setter for <code>public.member_audit.request_origin</code>.
+		 */
+		public void setRequestOrigin(InetAddress value) {
+				set(4, value);
+		}
 
-    /**
-     * Getter for <code>public.member_audit.request_origin</code>.
-     */
-    public InetAddress getRequestOrigin() {
-        return (InetAddress) get(4);
-    }
+		/**
+		 * Getter for <code>public.member_audit.request_origin</code>.
+		 */
+		public InetAddress getRequestOrigin() {
+				return (InetAddress) get(4);
+		}
 
-    // -------------------------------------------------------------------------
-    // Primary key information
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Primary key information
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Record3<UUID, OffsetDateTime, MemberAuditType> key() {
-        return (Record3) super.key();
-    }
+		@Override
+		public Record3<UUID, OffsetDateTime, MemberAuditType> key() {
+				return (Record3) super.key();
+		}
 
-    // -------------------------------------------------------------------------
-    // Record5 type implementation
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Record5 type implementation
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> fieldsRow() {
-        return (Row5) super.fieldsRow();
-    }
+		@Override
+		public Row5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> fieldsRow() {
+				return (Row5) super.fieldsRow();
+		}
 
-    @Override
-    public Row5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> valuesRow() {
-        return (Row5) super.valuesRow();
-    }
+		@Override
+		public Row5<UUID, OffsetDateTime, MemberAuditType, OffsetDateTime, InetAddress> valuesRow() {
+				return (Row5) super.valuesRow();
+		}
 
-    @Override
-    public Field<UUID> field1() {
-        return MemberAudit.MEMBER_AUDIT.MID;
-    }
+		@Override
+		public Field<UUID> field1() {
+				return MemberAudit.MEMBER_AUDIT.MID;
+		}
 
-    @Override
-    public Field<OffsetDateTime> field2() {
-        return MemberAudit.MEMBER_AUDIT.CREATED;
-    }
+		@Override
+		public Field<OffsetDateTime> field2() {
+				return MemberAudit.MEMBER_AUDIT.CREATED;
+		}
 
-    @Override
-    public Field<MemberAuditType> field3() {
-        return MemberAudit.MEMBER_AUDIT.TYPE;
-    }
+		@Override
+		public Field<MemberAuditType> field3() {
+				return MemberAudit.MEMBER_AUDIT.TYPE;
+		}
 
-    @Override
-    public Field<OffsetDateTime> field4() {
-        return MemberAudit.MEMBER_AUDIT.REQUEST_TIMESTAMP;
-    }
+		@Override
+		public Field<OffsetDateTime> field4() {
+				return MemberAudit.MEMBER_AUDIT.REQUEST_TIMESTAMP;
+		}
 
-    @Override
-    public Field<InetAddress> field5() {
-        return MemberAudit.MEMBER_AUDIT.REQUEST_ORIGIN;
-    }
+		@Override
+		public Field<InetAddress> field5() {
+				return MemberAudit.MEMBER_AUDIT.REQUEST_ORIGIN;
+		}
 
-    @Override
-    public UUID component1() {
-        return getMid();
-    }
+		@Override
+		public UUID component1() {
+				return getMid();
+		}
 
-    @Override
-    public OffsetDateTime component2() {
-        return getCreated();
-    }
+		@Override
+		public OffsetDateTime component2() {
+				return getCreated();
+		}
 
-    @Override
-    public MemberAuditType component3() {
-        return getType();
-    }
+		@Override
+		public MemberAuditType component3() {
+				return getType();
+		}
 
-    @Override
-    public OffsetDateTime component4() {
-        return getRequestTimestamp();
-    }
+		@Override
+		public OffsetDateTime component4() {
+				return getRequestTimestamp();
+		}
 
-    @Override
-    public InetAddress component5() {
-        return getRequestOrigin();
-    }
+		@Override
+		public InetAddress component5() {
+				return getRequestOrigin();
+		}
 
-    @Override
-    public UUID value1() {
-        return getMid();
-    }
+		@Override
+		public UUID value1() {
+				return getMid();
+		}
 
-    @Override
-    public OffsetDateTime value2() {
-        return getCreated();
-    }
+		@Override
+		public OffsetDateTime value2() {
+				return getCreated();
+		}
 
-    @Override
-    public MemberAuditType value3() {
-        return getType();
-    }
+		@Override
+		public MemberAuditType value3() {
+				return getType();
+		}
 
-    @Override
-    public OffsetDateTime value4() {
-        return getRequestTimestamp();
-    }
+		@Override
+		public OffsetDateTime value4() {
+				return getRequestTimestamp();
+		}
 
-    @Override
-    public InetAddress value5() {
-        return getRequestOrigin();
-    }
+		@Override
+		public InetAddress value5() {
+				return getRequestOrigin();
+		}
 
-    @Override
-    public MemberAuditRecord value1(UUID value) {
-        setMid(value);
-        return this;
-    }
+		@Override
+		public MemberAuditRecord value1(UUID value) {
+				setMid(value);
+				return this;
+		}
 
-    @Override
-    public MemberAuditRecord value2(OffsetDateTime value) {
-        setCreated(value);
-        return this;
-    }
+		@Override
+		public MemberAuditRecord value2(OffsetDateTime value) {
+				setCreated(value);
+				return this;
+		}
 
-    @Override
-    public MemberAuditRecord value3(MemberAuditType value) {
-        setType(value);
-        return this;
-    }
+		@Override
+		public MemberAuditRecord value3(MemberAuditType value) {
+				setType(value);
+				return this;
+		}
 
-    @Override
-    public MemberAuditRecord value4(OffsetDateTime value) {
-        setRequestTimestamp(value);
-        return this;
-    }
+		@Override
+		public MemberAuditRecord value4(OffsetDateTime value) {
+				setRequestTimestamp(value);
+				return this;
+		}
 
-    @Override
-    public MemberAuditRecord value5(InetAddress value) {
-        setRequestOrigin(value);
-        return this;
-    }
+		@Override
+		public MemberAuditRecord value5(InetAddress value) {
+				setRequestOrigin(value);
+				return this;
+		}
 
-    @Override
-    public MemberAuditRecord values(UUID value1, OffsetDateTime value2, MemberAuditType value3, OffsetDateTime value4, InetAddress value5) {
-        value1(value1);
-        value2(value2);
-        value3(value3);
-        value4(value4);
-        value5(value5);
-        return this;
-    }
+		@Override
+		public MemberAuditRecord values(UUID value1, OffsetDateTime value2, MemberAuditType value3, OffsetDateTime value4, InetAddress value5) {
+				value1(value1);
+				value2(value2);
+				value3(value3);
+				value4(value4);
+				value5(value5);
+				return this;
+		}
 
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Constructors
+		// -------------------------------------------------------------------------
 
-    /**
-     * Create a detached MemberAuditRecord
-     */
-    public MemberAuditRecord() {
-        super(MemberAudit.MEMBER_AUDIT);
-    }
+		/**
+		 * Create a detached MemberAuditRecord
+		 */
+		public MemberAuditRecord() {
+				super(MemberAudit.MEMBER_AUDIT);
+		}
 
-    /**
-     * Create a detached, initialised MemberAuditRecord
-     */
-    public MemberAuditRecord(UUID mid, OffsetDateTime created, MemberAuditType type, OffsetDateTime requestTimestamp, InetAddress requestOrigin) {
-        super(MemberAudit.MEMBER_AUDIT);
+		/**
+		 * Create a detached, initialised MemberAuditRecord
+		 */
+		public MemberAuditRecord(UUID mid, OffsetDateTime created, MemberAuditType type, OffsetDateTime requestTimestamp, InetAddress requestOrigin) {
+				super(MemberAudit.MEMBER_AUDIT);
 
-        setMid(mid);
-        setCreated(created);
-        setType(type);
-        setRequestTimestamp(requestTimestamp);
-        setRequestOrigin(requestOrigin);
-    }
+				setMid(mid);
+				setCreated(created);
+				setType(type);
+				setRequestTimestamp(requestTimestamp);
+				setRequestOrigin(requestOrigin);
+		}
 
-    /**
-     * Create a detached, initialised MemberAuditRecord
-     */
-    public MemberAuditRecord(com.tll.mcorpus.db.tables.pojos.MemberAudit value) {
-        super(MemberAudit.MEMBER_AUDIT);
+		/**
+		 * Create a detached, initialised MemberAuditRecord
+		 */
+		public MemberAuditRecord(com.tll.mcorpus.db.tables.pojos.MemberAudit value) {
+				super(MemberAudit.MEMBER_AUDIT);
 
-        if (value != null) {
-            setMid(value.getMid());
-            setCreated(value.getCreated());
-            setType(value.getType());
-            setRequestTimestamp(value.getRequestTimestamp());
-            setRequestOrigin(value.getRequestOrigin());
-        }
-    }
+				if (value != null) {
+						setMid(value.getMid());
+						setCreated(value.getCreated());
+						setType(value.getType());
+						setRequestTimestamp(value.getRequestTimestamp());
+						setRequestOrigin(value.getRequestOrigin());
+				}
+		}
 }

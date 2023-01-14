@@ -13,9 +13,9 @@ package com.tll.gmodel;
  */
 public interface IGEntity<E extends IGEntity<E, PK>, PK extends IKey> {
 
-  /**
-   * @return Never-null entity primary key which may or may not be set.
-   */
-  PK getPk();
+	/**
+	 * @return Never-null entity primary key which may or may not be set.
+	 */
+	PK getPk();
 
 }

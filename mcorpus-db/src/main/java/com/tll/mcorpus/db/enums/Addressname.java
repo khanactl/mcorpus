@@ -17,42 +17,42 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum Addressname implements EnumType {
 
-    home("home"),
+		home("home"),
 
-    work("work"),
+		work("work"),
 
-    other("other");
+		other("other");
 
-    private final String literal;
+		private final String literal;
 
-    private Addressname(String literal) {
-        this.literal = literal;
-    }
+		private Addressname(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "addressname";
-    }
+		@Override
+		public String getName() {
+				return "addressname";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static Addressname lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(Addressname.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static Addressname lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(Addressname.class, literal);
+		}
 }

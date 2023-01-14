@@ -17,29 +17,29 @@ import graphql.execution.ResultPath;
  * @author jpk
  */
 public class GraphQLDataValidationError extends GraphQLDataFetchError {
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public static GraphQLDataValidationError inst(final ResultPath epath, VldtnResult vrslt) {
-    return new GraphQLDataValidationError(
-      (isNull(epath) ? ResultPath.rootPath() : epath).toString(),
-      vrslt.getSummaryMsg(),
-      vrslt.getMappedFieldErrors()
-    );
-  }
+	public static GraphQLDataValidationError inst(final ResultPath epath, VldtnResult vrslt) {
+		return new GraphQLDataValidationError(
+			(isNull(epath) ? ResultPath.rootPath() : epath).toString(),
+			vrslt.getSummaryMsg(),
+			vrslt.getMappedFieldErrors()
+		);
+	}
 
-  private final Map<String, String> verrs;
+	private final Map<String, String> verrs;
 
-  /**
-   * Constructor
-   *
-   * @param epath the graphql execution path associated with the error(s)
-   * @param emsg the error message
-   * @param verrs the validation errors
-   */
-  private GraphQLDataValidationError(String epath, String emsg, Map<String, String> verrs) {
-    super(epath, emsg);
-    this.verrs = new HashMap<>(verrs);
-  }
+	/**
+	 * Constructor
+	 *
+	 * @param epath the graphql execution path associated with the error(s)
+	 * @param emsg the error message
+	 * @param verrs the validation errors
+	 */
+	private GraphQLDataValidationError(String epath, String emsg, Map<String, String> verrs) {
+		super(epath, emsg);
+		this.verrs = new HashMap<>(verrs);
+	}
 
-  public Map<String, String> getValidationErrors() { return verrs; }
+	public Map<String, String> getValidationErrors() { return verrs; }
 }

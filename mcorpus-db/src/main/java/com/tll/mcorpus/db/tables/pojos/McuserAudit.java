@@ -19,193 +19,193 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID uid;
-    private final OffsetDateTime created;
-    private final McuserAuditType type;
-    private final OffsetDateTime requestTimestamp;
-    private final InetAddress requestOrigin;
-    private final OffsetDateTime loginExpiration;
-    private final UUID jwtId;
-    private final JwtIdStatus jwtIdStatus;
+		private final UUID uid;
+		private final OffsetDateTime created;
+		private final McuserAuditType type;
+		private final OffsetDateTime requestTimestamp;
+		private final InetAddress requestOrigin;
+		private final OffsetDateTime loginExpiration;
+		private final UUID jwtId;
+		private final JwtIdStatus jwtIdStatus;
 
-    public McuserAudit(McuserAudit value) {
-        this.uid = value.uid;
-        this.created = value.created;
-        this.type = value.type;
-        this.requestTimestamp = value.requestTimestamp;
-        this.requestOrigin = value.requestOrigin;
-        this.loginExpiration = value.loginExpiration;
-        this.jwtId = value.jwtId;
-        this.jwtIdStatus = value.jwtIdStatus;
-    }
+		public McuserAudit(McuserAudit value) {
+				this.uid = value.uid;
+				this.created = value.created;
+				this.type = value.type;
+				this.requestTimestamp = value.requestTimestamp;
+				this.requestOrigin = value.requestOrigin;
+				this.loginExpiration = value.loginExpiration;
+				this.jwtId = value.jwtId;
+				this.jwtIdStatus = value.jwtIdStatus;
+		}
 
-    public McuserAudit(
-        UUID uid,
-        OffsetDateTime created,
-        McuserAuditType type,
-        OffsetDateTime requestTimestamp,
-        InetAddress requestOrigin,
-        OffsetDateTime loginExpiration,
-        UUID jwtId,
-        JwtIdStatus jwtIdStatus
-    ) {
-        this.uid = uid;
-        this.created = created;
-        this.type = type;
-        this.requestTimestamp = requestTimestamp;
-        this.requestOrigin = requestOrigin;
-        this.loginExpiration = loginExpiration;
-        this.jwtId = jwtId;
-        this.jwtIdStatus = jwtIdStatus;
-    }
+		public McuserAudit(
+				UUID uid,
+				OffsetDateTime created,
+				McuserAuditType type,
+				OffsetDateTime requestTimestamp,
+				InetAddress requestOrigin,
+				OffsetDateTime loginExpiration,
+				UUID jwtId,
+				JwtIdStatus jwtIdStatus
+		) {
+				this.uid = uid;
+				this.created = created;
+				this.type = type;
+				this.requestTimestamp = requestTimestamp;
+				this.requestOrigin = requestOrigin;
+				this.loginExpiration = loginExpiration;
+				this.jwtId = jwtId;
+				this.jwtIdStatus = jwtIdStatus;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.uid</code>.
-     */
-    public UUID getUid() {
-        return this.uid;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.uid</code>.
+		 */
+		public UUID getUid() {
+				return this.uid;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.created</code>.
-     */
-    public OffsetDateTime getCreated() {
-        return this.created;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.created</code>.
+		 */
+		public OffsetDateTime getCreated() {
+				return this.created;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.type</code>.
-     */
-    public McuserAuditType getType() {
-        return this.type;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.type</code>.
+		 */
+		public McuserAuditType getType() {
+				return this.type;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.request_timestamp</code>.
-     */
-    public OffsetDateTime getRequestTimestamp() {
-        return this.requestTimestamp;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.request_timestamp</code>.
+		 */
+		public OffsetDateTime getRequestTimestamp() {
+				return this.requestTimestamp;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.request_origin</code>.
-     */
-    public InetAddress getRequestOrigin() {
-        return this.requestOrigin;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.request_origin</code>.
+		 */
+		public InetAddress getRequestOrigin() {
+				return this.requestOrigin;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.login_expiration</code>.
-     */
-    public OffsetDateTime getLoginExpiration() {
-        return this.loginExpiration;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.login_expiration</code>.
+		 */
+		public OffsetDateTime getLoginExpiration() {
+				return this.loginExpiration;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.jwt_id</code>.
-     */
-    public UUID getJwtId() {
-        return this.jwtId;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.jwt_id</code>.
+		 */
+		public UUID getJwtId() {
+				return this.jwtId;
+		}
 
-    /**
-     * Getter for <code>public.mcuser_audit.jwt_id_status</code>.
-     */
-    public JwtIdStatus getJwtIdStatus() {
-        return this.jwtIdStatus;
-    }
+		/**
+		 * Getter for <code>public.mcuser_audit.jwt_id_status</code>.
+		 */
+		public JwtIdStatus getJwtIdStatus() {
+				return this.jwtIdStatus;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final McuserAudit other = (McuserAudit) obj;
-        if (this.uid == null) {
-            if (other.uid != null)
-                return false;
-        }
-        else if (!this.uid.equals(other.uid))
-            return false;
-        if (this.created == null) {
-            if (other.created != null)
-                return false;
-        }
-        else if (!this.created.equals(other.created))
-            return false;
-        if (this.type == null) {
-            if (other.type != null)
-                return false;
-        }
-        else if (!this.type.equals(other.type))
-            return false;
-        if (this.requestTimestamp == null) {
-            if (other.requestTimestamp != null)
-                return false;
-        }
-        else if (!this.requestTimestamp.equals(other.requestTimestamp))
-            return false;
-        if (this.requestOrigin == null) {
-            if (other.requestOrigin != null)
-                return false;
-        }
-        else if (!this.requestOrigin.equals(other.requestOrigin))
-            return false;
-        if (this.loginExpiration == null) {
-            if (other.loginExpiration != null)
-                return false;
-        }
-        else if (!this.loginExpiration.equals(other.loginExpiration))
-            return false;
-        if (this.jwtId == null) {
-            if (other.jwtId != null)
-                return false;
-        }
-        else if (!this.jwtId.equals(other.jwtId))
-            return false;
-        if (this.jwtIdStatus == null) {
-            if (other.jwtIdStatus != null)
-                return false;
-        }
-        else if (!this.jwtIdStatus.equals(other.jwtIdStatus))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final McuserAudit other = (McuserAudit) obj;
+				if (this.uid == null) {
+						if (other.uid != null)
+								return false;
+				}
+				else if (!this.uid.equals(other.uid))
+						return false;
+				if (this.created == null) {
+						if (other.created != null)
+								return false;
+				}
+				else if (!this.created.equals(other.created))
+						return false;
+				if (this.type == null) {
+						if (other.type != null)
+								return false;
+				}
+				else if (!this.type.equals(other.type))
+						return false;
+				if (this.requestTimestamp == null) {
+						if (other.requestTimestamp != null)
+								return false;
+				}
+				else if (!this.requestTimestamp.equals(other.requestTimestamp))
+						return false;
+				if (this.requestOrigin == null) {
+						if (other.requestOrigin != null)
+								return false;
+				}
+				else if (!this.requestOrigin.equals(other.requestOrigin))
+						return false;
+				if (this.loginExpiration == null) {
+						if (other.loginExpiration != null)
+								return false;
+				}
+				else if (!this.loginExpiration.equals(other.loginExpiration))
+						return false;
+				if (this.jwtId == null) {
+						if (other.jwtId != null)
+								return false;
+				}
+				else if (!this.jwtId.equals(other.jwtId))
+						return false;
+				if (this.jwtIdStatus == null) {
+						if (other.jwtIdStatus != null)
+								return false;
+				}
+				else if (!this.jwtIdStatus.equals(other.jwtIdStatus))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
-        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
-        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
-        result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
-        result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
-        result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
-        result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
-        result = prime * result + ((this.jwtIdStatus == null) ? 0 : this.jwtIdStatus.hashCode());
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
+				result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+				result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+				result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
+				result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
+				result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
+				result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
+				result = prime * result + ((this.jwtIdStatus == null) ? 0 : this.jwtIdStatus.hashCode());
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("McuserAudit (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("McuserAudit (");
 
-        sb.append(uid);
-        sb.append(", ").append(created);
-        sb.append(", ").append(type);
-        sb.append(", ").append(requestTimestamp);
-        sb.append(", ").append(requestOrigin);
-        sb.append(", ").append(loginExpiration);
-        sb.append(", ").append(jwtId);
-        sb.append(", ").append(jwtIdStatus);
+				sb.append(uid);
+				sb.append(", ").append(created);
+				sb.append(", ").append(type);
+				sb.append(", ").append(requestTimestamp);
+				sb.append(", ").append(requestOrigin);
+				sb.append(", ").append(loginExpiration);
+				sb.append(", ").append(jwtId);
+				sb.append(", ").append(jwtIdStatus);
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

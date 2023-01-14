@@ -16,117 +16,117 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetActiveLogins implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID jwtId;
-    private final OffsetDateTime loginExpiration;
-    private final OffsetDateTime requestTimestamp;
-    private final InetAddress requestOrigin;
+		private final UUID jwtId;
+		private final OffsetDateTime loginExpiration;
+		private final OffsetDateTime requestTimestamp;
+		private final InetAddress requestOrigin;
 
-    public GetActiveLogins(GetActiveLogins value) {
-        this.jwtId = value.jwtId;
-        this.loginExpiration = value.loginExpiration;
-        this.requestTimestamp = value.requestTimestamp;
-        this.requestOrigin = value.requestOrigin;
-    }
+		public GetActiveLogins(GetActiveLogins value) {
+				this.jwtId = value.jwtId;
+				this.loginExpiration = value.loginExpiration;
+				this.requestTimestamp = value.requestTimestamp;
+				this.requestOrigin = value.requestOrigin;
+		}
 
-    public GetActiveLogins(
-        UUID jwtId,
-        OffsetDateTime loginExpiration,
-        OffsetDateTime requestTimestamp,
-        InetAddress requestOrigin
-    ) {
-        this.jwtId = jwtId;
-        this.loginExpiration = loginExpiration;
-        this.requestTimestamp = requestTimestamp;
-        this.requestOrigin = requestOrigin;
-    }
+		public GetActiveLogins(
+				UUID jwtId,
+				OffsetDateTime loginExpiration,
+				OffsetDateTime requestTimestamp,
+				InetAddress requestOrigin
+		) {
+				this.jwtId = jwtId;
+				this.loginExpiration = loginExpiration;
+				this.requestTimestamp = requestTimestamp;
+				this.requestOrigin = requestOrigin;
+		}
 
-    /**
-     * Getter for <code>public.get_active_logins.jwt_id</code>.
-     */
-    public UUID getJwtId() {
-        return this.jwtId;
-    }
+		/**
+		 * Getter for <code>public.get_active_logins.jwt_id</code>.
+		 */
+		public UUID getJwtId() {
+				return this.jwtId;
+		}
 
-    /**
-     * Getter for <code>public.get_active_logins.login_expiration</code>.
-     */
-    public OffsetDateTime getLoginExpiration() {
-        return this.loginExpiration;
-    }
+		/**
+		 * Getter for <code>public.get_active_logins.login_expiration</code>.
+		 */
+		public OffsetDateTime getLoginExpiration() {
+				return this.loginExpiration;
+		}
 
-    /**
-     * Getter for <code>public.get_active_logins.request_timestamp</code>.
-     */
-    public OffsetDateTime getRequestTimestamp() {
-        return this.requestTimestamp;
-    }
+		/**
+		 * Getter for <code>public.get_active_logins.request_timestamp</code>.
+		 */
+		public OffsetDateTime getRequestTimestamp() {
+				return this.requestTimestamp;
+		}
 
-    /**
-     * Getter for <code>public.get_active_logins.request_origin</code>.
-     */
-    public InetAddress getRequestOrigin() {
-        return this.requestOrigin;
-    }
+		/**
+		 * Getter for <code>public.get_active_logins.request_origin</code>.
+		 */
+		public InetAddress getRequestOrigin() {
+				return this.requestOrigin;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final GetActiveLogins other = (GetActiveLogins) obj;
-        if (this.jwtId == null) {
-            if (other.jwtId != null)
-                return false;
-        }
-        else if (!this.jwtId.equals(other.jwtId))
-            return false;
-        if (this.loginExpiration == null) {
-            if (other.loginExpiration != null)
-                return false;
-        }
-        else if (!this.loginExpiration.equals(other.loginExpiration))
-            return false;
-        if (this.requestTimestamp == null) {
-            if (other.requestTimestamp != null)
-                return false;
-        }
-        else if (!this.requestTimestamp.equals(other.requestTimestamp))
-            return false;
-        if (this.requestOrigin == null) {
-            if (other.requestOrigin != null)
-                return false;
-        }
-        else if (!this.requestOrigin.equals(other.requestOrigin))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final GetActiveLogins other = (GetActiveLogins) obj;
+				if (this.jwtId == null) {
+						if (other.jwtId != null)
+								return false;
+				}
+				else if (!this.jwtId.equals(other.jwtId))
+						return false;
+				if (this.loginExpiration == null) {
+						if (other.loginExpiration != null)
+								return false;
+				}
+				else if (!this.loginExpiration.equals(other.loginExpiration))
+						return false;
+				if (this.requestTimestamp == null) {
+						if (other.requestTimestamp != null)
+								return false;
+				}
+				else if (!this.requestTimestamp.equals(other.requestTimestamp))
+						return false;
+				if (this.requestOrigin == null) {
+						if (other.requestOrigin != null)
+								return false;
+				}
+				else if (!this.requestOrigin.equals(other.requestOrigin))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
-        result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
-        result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
-        result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.jwtId == null) ? 0 : this.jwtId.hashCode());
+				result = prime * result + ((this.loginExpiration == null) ? 0 : this.loginExpiration.hashCode());
+				result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
+				result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("GetActiveLogins (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("GetActiveLogins (");
 
-        sb.append(jwtId);
-        sb.append(", ").append(loginExpiration);
-        sb.append(", ").append(requestTimestamp);
-        sb.append(", ").append(requestOrigin);
+				sb.append(jwtId);
+				sb.append(", ").append(loginExpiration);
+				sb.append(", ").append(requestTimestamp);
+				sb.append(", ").append(requestOrigin);
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

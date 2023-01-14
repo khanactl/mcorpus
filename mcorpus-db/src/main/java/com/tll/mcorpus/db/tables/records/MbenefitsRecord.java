@@ -23,604 +23,604 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MbenefitsRecord extends UpdatableRecordImpl<MbenefitsRecord> implements Record13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Setter for <code>public.mbenefits.mid</code>.
-     */
-    public void setMid(UUID value) {
-        set(0, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.mid</code>.
-     */
-    public UUID getMid() {
-        return (UUID) get(0);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.modified</code>.
-     */
-    public void setModified(OffsetDateTime value) {
-        set(1, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.modified</code>.
-     */
-    public OffsetDateTime getModified() {
-        return (OffsetDateTime) get(1);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.foreign_adrs_flag</code>.
-     */
-    public void setForeignAdrsFlag(String value) {
-        set(2, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.foreign_adrs_flag</code>.
-     */
-    public String getForeignAdrsFlag() {
-        return (String) get(2);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.beli</code>.
-     */
-    public void setBeli(Beli value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.beli</code>.
-     */
-    public Beli getBeli() {
-        return (Beli) get(3);
-    }
-
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    public void setMcb(Object value) {
-        set(4, value);
-    }
-
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    public Object getMcb() {
-        return get(4);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.med_plan_code</code>.
-     */
-    public void setMedPlanCode(String value) {
-        set(5, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.med_plan_code</code>.
-     */
-    public String getMedPlanCode() {
-        return (String) get(5);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.med_opt_out</code>.
-     */
-    public void setMedOptOut(String value) {
-        set(6, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.med_opt_out</code>.
-     */
-    public String getMedOptOut() {
-        return (String) get(6);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.den_plan_code</code>.
-     */
-    public void setDenPlanCode(String value) {
-        set(7, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.den_plan_code</code>.
-     */
-    public String getDenPlanCode() {
-        return (String) get(7);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.den_opt_out</code>.
-     */
-    public void setDenOptOut(String value) {
-        set(8, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.den_opt_out</code>.
-     */
-    public String getDenOptOut() {
-        return (String) get(8);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.vis_plan_code</code>.
-     */
-    public void setVisPlanCode(String value) {
-        set(9, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.vis_plan_code</code>.
-     */
-    public String getVisPlanCode() {
-        return (String) get(9);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.vis_opt_out</code>.
-     */
-    public void setVisOptOut(String value) {
-        set(10, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.vis_opt_out</code>.
-     */
-    public String getVisOptOut() {
-        return (String) get(10);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.leg_plan_code</code>.
-     */
-    public void setLegPlanCode(String value) {
-        set(11, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.leg_plan_code</code>.
-     */
-    public String getLegPlanCode() {
-        return (String) get(11);
-    }
-
-    /**
-     * Setter for <code>public.mbenefits.leg_opt_out</code>.
-     */
-    public void setLegOptOut(String value) {
-        set(12, value);
-    }
-
-    /**
-     * Getter for <code>public.mbenefits.leg_opt_out</code>.
-     */
-    public String getLegOptOut() {
-        return (String) get(12);
-    }
-
-    // -------------------------------------------------------------------------
-    // Primary key information
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Record1<UUID> key() {
-        return (Record1) super.key();
-    }
-
-    // -------------------------------------------------------------------------
-    // Record13 type implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Row13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> fieldsRow() {
-        return (Row13) super.fieldsRow();
-    }
-
-    @Override
-    public Row13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> valuesRow() {
-        return (Row13) super.valuesRow();
-    }
-
-    @Override
-    public Field<UUID> field1() {
-        return Mbenefits.MBENEFITS.MID;
-    }
-
-    @Override
-    public Field<OffsetDateTime> field2() {
-        return Mbenefits.MBENEFITS.MODIFIED;
-    }
-
-    @Override
-    public Field<String> field3() {
-        return Mbenefits.MBENEFITS.FOREIGN_ADRS_FLAG;
-    }
-
-    @Override
-    public Field<Beli> field4() {
-        return Mbenefits.MBENEFITS.BELI;
-    }
-
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    @Override
-    public Field<Object> field5() {
-        return Mbenefits.MBENEFITS.MCB;
-    }
-
-    @Override
-    public Field<String> field6() {
-        return Mbenefits.MBENEFITS.MED_PLAN_CODE;
-    }
-
-    @Override
-    public Field<String> field7() {
-        return Mbenefits.MBENEFITS.MED_OPT_OUT;
-    }
-
-    @Override
-    public Field<String> field8() {
-        return Mbenefits.MBENEFITS.DEN_PLAN_CODE;
-    }
-
-    @Override
-    public Field<String> field9() {
-        return Mbenefits.MBENEFITS.DEN_OPT_OUT;
-    }
-
-    @Override
-    public Field<String> field10() {
-        return Mbenefits.MBENEFITS.VIS_PLAN_CODE;
-    }
-
-    @Override
-    public Field<String> field11() {
-        return Mbenefits.MBENEFITS.VIS_OPT_OUT;
-    }
-
-    @Override
-    public Field<String> field12() {
-        return Mbenefits.MBENEFITS.LEG_PLAN_CODE;
-    }
-
-    @Override
-    public Field<String> field13() {
-        return Mbenefits.MBENEFITS.LEG_OPT_OUT;
-    }
-
-    @Override
-    public UUID component1() {
-        return getMid();
-    }
-
-    @Override
-    public OffsetDateTime component2() {
-        return getModified();
-    }
-
-    @Override
-    public String component3() {
-        return getForeignAdrsFlag();
-    }
-
-    @Override
-    public Beli component4() {
-        return getBeli();
-    }
-
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    @Override
-    public Object component5() {
-        return getMcb();
-    }
-
-    @Override
-    public String component6() {
-        return getMedPlanCode();
-    }
-
-    @Override
-    public String component7() {
-        return getMedOptOut();
-    }
-
-    @Override
-    public String component8() {
-        return getDenPlanCode();
-    }
-
-    @Override
-    public String component9() {
-        return getDenOptOut();
-    }
-
-    @Override
-    public String component10() {
-        return getVisPlanCode();
-    }
-
-    @Override
-    public String component11() {
-        return getVisOptOut();
-    }
-
-    @Override
-    public String component12() {
-        return getLegPlanCode();
-    }
-
-    @Override
-    public String component13() {
-        return getLegOptOut();
-    }
-
-    @Override
-    public UUID value1() {
-        return getMid();
-    }
-
-    @Override
-    public OffsetDateTime value2() {
-        return getModified();
-    }
-
-    @Override
-    public String value3() {
-        return getForeignAdrsFlag();
-    }
-
-    @Override
-    public Beli value4() {
-        return getBeli();
-    }
-
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    @Override
-    public Object value5() {
-        return getMcb();
-    }
-
-    @Override
-    public String value6() {
-        return getMedPlanCode();
-    }
-
-    @Override
-    public String value7() {
-        return getMedOptOut();
-    }
-
-    @Override
-    public String value8() {
-        return getDenPlanCode();
-    }
-
-    @Override
-    public String value9() {
-        return getDenOptOut();
-    }
-
-    @Override
-    public String value10() {
-        return getVisPlanCode();
-    }
-
-    @Override
-    public String value11() {
-        return getVisOptOut();
-    }
-
-    @Override
-    public String value12() {
-        return getLegPlanCode();
-    }
-
-    @Override
-    public String value13() {
-        return getLegOptOut();
-    }
-
-    @Override
-    public MbenefitsRecord value1(UUID value) {
-        setMid(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value2(OffsetDateTime value) {
-        setModified(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value3(String value) {
-        setForeignAdrsFlag(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value4(Beli value) {
-        setBeli(value);
-        return this;
-    }
-
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    @Override
-    public MbenefitsRecord value5(Object value) {
-        setMcb(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value6(String value) {
-        setMedPlanCode(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value7(String value) {
-        setMedOptOut(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value8(String value) {
-        setDenPlanCode(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value9(String value) {
-        setDenOptOut(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value10(String value) {
-        setVisPlanCode(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value11(String value) {
-        setVisOptOut(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value12(String value) {
-        setLegPlanCode(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord value13(String value) {
-        setLegOptOut(value);
-        return this;
-    }
-
-    @Override
-    public MbenefitsRecord values(UUID value1, OffsetDateTime value2, String value3, Beli value4, Object value5, String value6, String value7, String value8, String value9, String value10, String value11, String value12, String value13) {
-        value1(value1);
-        value2(value2);
-        value3(value3);
-        value4(value4);
-        value5(value5);
-        value6(value6);
-        value7(value7);
-        value8(value8);
-        value9(value9);
-        value10(value10);
-        value11(value11);
-        value12(value12);
-        value13(value13);
-        return this;
-    }
-
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-
-    /**
-     * Create a detached MbenefitsRecord
-     */
-    public MbenefitsRecord() {
-        super(Mbenefits.MBENEFITS);
-    }
-
-    /**
-     * Create a detached, initialised MbenefitsRecord
-     */
-    public MbenefitsRecord(UUID mid, OffsetDateTime modified, String foreignAdrsFlag, Beli beli, Object mcb, String medPlanCode, String medOptOut, String denPlanCode, String denOptOut, String visPlanCode, String visOptOut, String legPlanCode, String legOptOut) {
-        super(Mbenefits.MBENEFITS);
-
-        setMid(mid);
-        setModified(modified);
-        setForeignAdrsFlag(foreignAdrsFlag);
-        setBeli(beli);
-        setMcb(mcb);
-        setMedPlanCode(medPlanCode);
-        setMedOptOut(medOptOut);
-        setDenPlanCode(denPlanCode);
-        setDenOptOut(denOptOut);
-        setVisPlanCode(visPlanCode);
-        setVisOptOut(visOptOut);
-        setLegPlanCode(legPlanCode);
-        setLegOptOut(legOptOut);
-    }
-
-    /**
-     * Create a detached, initialised MbenefitsRecord
-     */
-    public MbenefitsRecord(com.tll.mcorpus.db.tables.pojos.Mbenefits value) {
-        super(Mbenefits.MBENEFITS);
-
-        if (value != null) {
-            setMid(value.getMid());
-            setModified(value.getModified());
-            setForeignAdrsFlag(value.getForeignAdrsFlag());
-            setBeli(value.getBeli());
-            setMcb(value.getMcb());
-            setMedPlanCode(value.getMedPlanCode());
-            setMedOptOut(value.getMedOptOut());
-            setDenPlanCode(value.getDenPlanCode());
-            setDenOptOut(value.getDenOptOut());
-            setVisPlanCode(value.getVisPlanCode());
-            setVisOptOut(value.getVisOptOut());
-            setLegPlanCode(value.getLegPlanCode());
-            setLegOptOut(value.getLegOptOut());
-        }
-    }
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Setter for <code>public.mbenefits.mid</code>.
+		 */
+		public void setMid(UUID value) {
+				set(0, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.mid</code>.
+		 */
+		public UUID getMid() {
+				return (UUID) get(0);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.modified</code>.
+		 */
+		public void setModified(OffsetDateTime value) {
+				set(1, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.modified</code>.
+		 */
+		public OffsetDateTime getModified() {
+				return (OffsetDateTime) get(1);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.foreign_adrs_flag</code>.
+		 */
+		public void setForeignAdrsFlag(String value) {
+				set(2, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.foreign_adrs_flag</code>.
+		 */
+		public String getForeignAdrsFlag() {
+				return (String) get(2);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.beli</code>.
+		 */
+		public void setBeli(Beli value) {
+				set(3, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.beli</code>.
+		 */
+		public Beli getBeli() {
+				return (Beli) get(3);
+		}
+
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		public void setMcb(Object value) {
+				set(4, value);
+		}
+
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		public Object getMcb() {
+				return get(4);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.med_plan_code</code>.
+		 */
+		public void setMedPlanCode(String value) {
+				set(5, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.med_plan_code</code>.
+		 */
+		public String getMedPlanCode() {
+				return (String) get(5);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.med_opt_out</code>.
+		 */
+		public void setMedOptOut(String value) {
+				set(6, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.med_opt_out</code>.
+		 */
+		public String getMedOptOut() {
+				return (String) get(6);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.den_plan_code</code>.
+		 */
+		public void setDenPlanCode(String value) {
+				set(7, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.den_plan_code</code>.
+		 */
+		public String getDenPlanCode() {
+				return (String) get(7);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.den_opt_out</code>.
+		 */
+		public void setDenOptOut(String value) {
+				set(8, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.den_opt_out</code>.
+		 */
+		public String getDenOptOut() {
+				return (String) get(8);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.vis_plan_code</code>.
+		 */
+		public void setVisPlanCode(String value) {
+				set(9, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.vis_plan_code</code>.
+		 */
+		public String getVisPlanCode() {
+				return (String) get(9);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.vis_opt_out</code>.
+		 */
+		public void setVisOptOut(String value) {
+				set(10, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.vis_opt_out</code>.
+		 */
+		public String getVisOptOut() {
+				return (String) get(10);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.leg_plan_code</code>.
+		 */
+		public void setLegPlanCode(String value) {
+				set(11, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.leg_plan_code</code>.
+		 */
+		public String getLegPlanCode() {
+				return (String) get(11);
+		}
+
+		/**
+		 * Setter for <code>public.mbenefits.leg_opt_out</code>.
+		 */
+		public void setLegOptOut(String value) {
+				set(12, value);
+		}
+
+		/**
+		 * Getter for <code>public.mbenefits.leg_opt_out</code>.
+		 */
+		public String getLegOptOut() {
+				return (String) get(12);
+		}
+
+		// -------------------------------------------------------------------------
+		// Primary key information
+		// -------------------------------------------------------------------------
+
+		@Override
+		public Record1<UUID> key() {
+				return (Record1) super.key();
+		}
+
+		// -------------------------------------------------------------------------
+		// Record13 type implementation
+		// -------------------------------------------------------------------------
+
+		@Override
+		public Row13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> fieldsRow() {
+				return (Row13) super.fieldsRow();
+		}
+
+		@Override
+		public Row13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> valuesRow() {
+				return (Row13) super.valuesRow();
+		}
+
+		@Override
+		public Field<UUID> field1() {
+				return Mbenefits.MBENEFITS.MID;
+		}
+
+		@Override
+		public Field<OffsetDateTime> field2() {
+				return Mbenefits.MBENEFITS.MODIFIED;
+		}
+
+		@Override
+		public Field<String> field3() {
+				return Mbenefits.MBENEFITS.FOREIGN_ADRS_FLAG;
+		}
+
+		@Override
+		public Field<Beli> field4() {
+				return Mbenefits.MBENEFITS.BELI;
+		}
+
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		@Override
+		public Field<Object> field5() {
+				return Mbenefits.MBENEFITS.MCB;
+		}
+
+		@Override
+		public Field<String> field6() {
+				return Mbenefits.MBENEFITS.MED_PLAN_CODE;
+		}
+
+		@Override
+		public Field<String> field7() {
+				return Mbenefits.MBENEFITS.MED_OPT_OUT;
+		}
+
+		@Override
+		public Field<String> field8() {
+				return Mbenefits.MBENEFITS.DEN_PLAN_CODE;
+		}
+
+		@Override
+		public Field<String> field9() {
+				return Mbenefits.MBENEFITS.DEN_OPT_OUT;
+		}
+
+		@Override
+		public Field<String> field10() {
+				return Mbenefits.MBENEFITS.VIS_PLAN_CODE;
+		}
+
+		@Override
+		public Field<String> field11() {
+				return Mbenefits.MBENEFITS.VIS_OPT_OUT;
+		}
+
+		@Override
+		public Field<String> field12() {
+				return Mbenefits.MBENEFITS.LEG_PLAN_CODE;
+		}
+
+		@Override
+		public Field<String> field13() {
+				return Mbenefits.MBENEFITS.LEG_OPT_OUT;
+		}
+
+		@Override
+		public UUID component1() {
+				return getMid();
+		}
+
+		@Override
+		public OffsetDateTime component2() {
+				return getModified();
+		}
+
+		@Override
+		public String component3() {
+				return getForeignAdrsFlag();
+		}
+
+		@Override
+		public Beli component4() {
+				return getBeli();
+		}
+
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		@Override
+		public Object component5() {
+				return getMcb();
+		}
+
+		@Override
+		public String component6() {
+				return getMedPlanCode();
+		}
+
+		@Override
+		public String component7() {
+				return getMedOptOut();
+		}
+
+		@Override
+		public String component8() {
+				return getDenPlanCode();
+		}
+
+		@Override
+		public String component9() {
+				return getDenOptOut();
+		}
+
+		@Override
+		public String component10() {
+				return getVisPlanCode();
+		}
+
+		@Override
+		public String component11() {
+				return getVisOptOut();
+		}
+
+		@Override
+		public String component12() {
+				return getLegPlanCode();
+		}
+
+		@Override
+		public String component13() {
+				return getLegOptOut();
+		}
+
+		@Override
+		public UUID value1() {
+				return getMid();
+		}
+
+		@Override
+		public OffsetDateTime value2() {
+				return getModified();
+		}
+
+		@Override
+		public String value3() {
+				return getForeignAdrsFlag();
+		}
+
+		@Override
+		public Beli value4() {
+				return getBeli();
+		}
+
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		@Override
+		public Object value5() {
+				return getMcb();
+		}
+
+		@Override
+		public String value6() {
+				return getMedPlanCode();
+		}
+
+		@Override
+		public String value7() {
+				return getMedOptOut();
+		}
+
+		@Override
+		public String value8() {
+				return getDenPlanCode();
+		}
+
+		@Override
+		public String value9() {
+				return getDenOptOut();
+		}
+
+		@Override
+		public String value10() {
+				return getVisPlanCode();
+		}
+
+		@Override
+		public String value11() {
+				return getVisOptOut();
+		}
+
+		@Override
+		public String value12() {
+				return getLegPlanCode();
+		}
+
+		@Override
+		public String value13() {
+				return getLegOptOut();
+		}
+
+		@Override
+		public MbenefitsRecord value1(UUID value) {
+				setMid(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value2(OffsetDateTime value) {
+				setModified(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value3(String value) {
+				setForeignAdrsFlag(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value4(Beli value) {
+				setBeli(value);
+				return this;
+		}
+
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		@Override
+		public MbenefitsRecord value5(Object value) {
+				setMcb(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value6(String value) {
+				setMedPlanCode(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value7(String value) {
+				setMedOptOut(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value8(String value) {
+				setDenPlanCode(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value9(String value) {
+				setDenOptOut(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value10(String value) {
+				setVisPlanCode(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value11(String value) {
+				setVisOptOut(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value12(String value) {
+				setLegPlanCode(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord value13(String value) {
+				setLegOptOut(value);
+				return this;
+		}
+
+		@Override
+		public MbenefitsRecord values(UUID value1, OffsetDateTime value2, String value3, Beli value4, Object value5, String value6, String value7, String value8, String value9, String value10, String value11, String value12, String value13) {
+				value1(value1);
+				value2(value2);
+				value3(value3);
+				value4(value4);
+				value5(value5);
+				value6(value6);
+				value7(value7);
+				value8(value8);
+				value9(value9);
+				value10(value10);
+				value11(value11);
+				value12(value12);
+				value13(value13);
+				return this;
+		}
+
+		// -------------------------------------------------------------------------
+		// Constructors
+		// -------------------------------------------------------------------------
+
+		/**
+		 * Create a detached MbenefitsRecord
+		 */
+		public MbenefitsRecord() {
+				super(Mbenefits.MBENEFITS);
+		}
+
+		/**
+		 * Create a detached, initialised MbenefitsRecord
+		 */
+		public MbenefitsRecord(UUID mid, OffsetDateTime modified, String foreignAdrsFlag, Beli beli, Object mcb, String medPlanCode, String medOptOut, String denPlanCode, String denOptOut, String visPlanCode, String visOptOut, String legPlanCode, String legOptOut) {
+				super(Mbenefits.MBENEFITS);
+
+				setMid(mid);
+				setModified(modified);
+				setForeignAdrsFlag(foreignAdrsFlag);
+				setBeli(beli);
+				setMcb(mcb);
+				setMedPlanCode(medPlanCode);
+				setMedOptOut(medOptOut);
+				setDenPlanCode(denPlanCode);
+				setDenOptOut(denOptOut);
+				setVisPlanCode(visPlanCode);
+				setVisOptOut(visOptOut);
+				setLegPlanCode(legPlanCode);
+				setLegOptOut(legOptOut);
+		}
+
+		/**
+		 * Create a detached, initialised MbenefitsRecord
+		 */
+		public MbenefitsRecord(com.tll.mcorpus.db.tables.pojos.Mbenefits value) {
+				super(Mbenefits.MBENEFITS);
+
+				if (value != null) {
+						setMid(value.getMid());
+						setModified(value.getModified());
+						setForeignAdrsFlag(value.getForeignAdrsFlag());
+						setBeli(value.getBeli());
+						setMcb(value.getMcb());
+						setMedPlanCode(value.getMedPlanCode());
+						setMedOptOut(value.getMedOptOut());
+						setDenPlanCode(value.getDenPlanCode());
+						setDenOptOut(value.getDenOptOut());
+						setVisPlanCode(value.getVisPlanCode());
+						setVisOptOut(value.getVisOptOut());
+						setLegPlanCode(value.getLegPlanCode());
+						setLegOptOut(value.getLegOptOut());
+				}
+		}
 }

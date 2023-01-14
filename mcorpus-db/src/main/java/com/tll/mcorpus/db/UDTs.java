@@ -14,13 +14,13 @@ import com.tll.mcorpus.db.udt.Mref;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class UDTs {
 
-    /**
-     * The type <code>public.jwt_mcuser_status</code>
-     */
-    public static final JwtMcuserStatus JWT_MCUSER_STATUS = com.tll.mcorpus.db.udt.JwtMcuserStatus.JWT_MCUSER_STATUS;
+		/**
+		 * The type <code>public.jwt_mcuser_status</code>
+		 */
+		public static final JwtMcuserStatus JWT_MCUSER_STATUS = com.tll.mcorpus.db.udt.JwtMcuserStatus.JWT_MCUSER_STATUS;
 
-    /**
-     * The type <code>public.mref</code>
-     */
-    public static final Mref MREF = com.tll.mcorpus.db.udt.Mref.MREF;
+		/**
+		 * The type <code>public.mref</code>
+		 */
+		public static final Mref MREF = com.tll.mcorpus.db.udt.Mref.MREF;
 }

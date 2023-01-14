@@ -18,9 +18,9 @@ import org.jooq.impl.Internal;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Indexes {
 
-    // -------------------------------------------------------------------------
-    // INDEX definitions
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// INDEX definitions
+		// -------------------------------------------------------------------------
 
-    public static final Index MCUSER_AUDIT__JWT_ID = Internal.createIndex(DSL.name("mcuser_audit__jwt_id"), McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.JWT_ID }, false);
+		public static final Index MCUSER_AUDIT__JWT_ID = Internal.createIndex(DSL.name("mcuser_audit__jwt_id"), McuserAudit.MCUSER_AUDIT, new OrderField[] { McuserAudit.MCUSER_AUDIT.JWT_ID }, false);
 }

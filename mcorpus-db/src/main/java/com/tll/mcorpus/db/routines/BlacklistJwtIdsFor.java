@@ -23,55 +23,55 @@ import org.jooq.impl.SQLDataType;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class BlacklistJwtIdsFor extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The parameter <code>public.blacklist_jwt_ids_for.in_uid</code>.
-     */
-    public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
+		/**
+		 * The parameter <code>public.blacklist_jwt_ids_for.in_uid</code>.
+		 */
+		public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
 
-    /**
-     * The parameter
-     * <code>public.blacklist_jwt_ids_for.in_request_timestamp</code>.
-     */
-    public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
+		/**
+		 * The parameter
+		 * <code>public.blacklist_jwt_ids_for.in_request_timestamp</code>.
+		 */
+		public static final Parameter<OffsetDateTime> IN_REQUEST_TIMESTAMP = Internal.createParameter("in_request_timestamp", SQLDataType.TIMESTAMPWITHTIMEZONE(6), false, false);
 
-    /**
-     * The parameter
-     * <code>public.blacklist_jwt_ids_for.in_request_origin</code>.
-     */
-    public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
+		/**
+		 * The parameter
+		 * <code>public.blacklist_jwt_ids_for.in_request_origin</code>.
+		 */
+		public static final Parameter<InetAddress> IN_REQUEST_ORIGIN = Internal.createParameter("in_request_origin", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), false, false, new PostgresInetAddressBinding());
 
-    /**
-     * Create a new routine call instance
-     */
-    public BlacklistJwtIdsFor() {
-        super("blacklist_jwt_ids_for", Public.PUBLIC);
+		/**
+		 * Create a new routine call instance
+		 */
+		public BlacklistJwtIdsFor() {
+				super("blacklist_jwt_ids_for", Public.PUBLIC);
 
-        addInParameter(IN_UID);
-        addInParameter(IN_REQUEST_TIMESTAMP);
-        addInParameter(IN_REQUEST_ORIGIN);
-    }
+				addInParameter(IN_UID);
+				addInParameter(IN_REQUEST_TIMESTAMP);
+				addInParameter(IN_REQUEST_ORIGIN);
+		}
 
-    /**
-     * Set the <code>in_uid</code> parameter IN value to the routine
-     */
-    public void setInUid(UUID value) {
-        setValue(IN_UID, value);
-    }
+		/**
+		 * Set the <code>in_uid</code> parameter IN value to the routine
+		 */
+		public void setInUid(UUID value) {
+				setValue(IN_UID, value);
+		}
 
-    /**
-     * Set the <code>in_request_timestamp</code> parameter IN value to the
-     * routine
-     */
-    public void setInRequestTimestamp(OffsetDateTime value) {
-        setValue(IN_REQUEST_TIMESTAMP, value);
-    }
+		/**
+		 * Set the <code>in_request_timestamp</code> parameter IN value to the
+		 * routine
+		 */
+		public void setInRequestTimestamp(OffsetDateTime value) {
+				setValue(IN_REQUEST_TIMESTAMP, value);
+		}
 
-    /**
-     * Set the <code>in_request_origin</code> parameter IN value to the routine
-     */
-    public void setInRequestOrigin(InetAddress value) {
-        setValue(IN_REQUEST_ORIGIN, value);
-    }
+		/**
+		 * Set the <code>in_request_origin</code> parameter IN value to the routine
+		 */
+		public void setInRequestOrigin(InetAddress value) {
+				setValue(IN_REQUEST_ORIGIN, value);
+		}
 }

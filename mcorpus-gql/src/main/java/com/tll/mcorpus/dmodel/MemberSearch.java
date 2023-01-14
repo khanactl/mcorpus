@@ -12,17 +12,17 @@ import org.jooq.SortField;
  * @author jpk
  */
 public class MemberSearch {
-  public final Condition[] conditions;
-  public final SortField<?>[] orderBys;
-  public final int offset;
-  public final int limit;
+	public final Condition[] conditions;
+	public final SortField<?>[] orderBys;
+	public final int offset;
+	public final int limit;
 
-  public MemberSearch(final Condition[] conditions, final SortField<?>[] orderBys, int offset, int limit) {
-    this.conditions = conditions;
-    this.orderBys = orderBys;
-    this.offset = offset;
-    this.limit = limit;
-  }
+	public MemberSearch(final Condition[] conditions, final SortField<?>[] orderBys, int offset, int limit) {
+		this.conditions = conditions;
+		this.orderBys = orderBys;
+		this.offset = offset;
+		this.limit = limit;
+	}
 
-  public boolean hasSearchConditions() { return not(isNullOrEmpty(conditions)); }
+	public boolean hasSearchConditions() { return not(isNullOrEmpty(conditions)); }
 }

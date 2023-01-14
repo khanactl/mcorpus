@@ -18,136 +18,136 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MemberAudit implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID mid;
-    private final OffsetDateTime created;
-    private final MemberAuditType type;
-    private final OffsetDateTime requestTimestamp;
-    private final InetAddress requestOrigin;
+		private final UUID mid;
+		private final OffsetDateTime created;
+		private final MemberAuditType type;
+		private final OffsetDateTime requestTimestamp;
+		private final InetAddress requestOrigin;
 
-    public MemberAudit(MemberAudit value) {
-        this.mid = value.mid;
-        this.created = value.created;
-        this.type = value.type;
-        this.requestTimestamp = value.requestTimestamp;
-        this.requestOrigin = value.requestOrigin;
-    }
+		public MemberAudit(MemberAudit value) {
+				this.mid = value.mid;
+				this.created = value.created;
+				this.type = value.type;
+				this.requestTimestamp = value.requestTimestamp;
+				this.requestOrigin = value.requestOrigin;
+		}
 
-    public MemberAudit(
-        UUID mid,
-        OffsetDateTime created,
-        MemberAuditType type,
-        OffsetDateTime requestTimestamp,
-        InetAddress requestOrigin
-    ) {
-        this.mid = mid;
-        this.created = created;
-        this.type = type;
-        this.requestTimestamp = requestTimestamp;
-        this.requestOrigin = requestOrigin;
-    }
+		public MemberAudit(
+				UUID mid,
+				OffsetDateTime created,
+				MemberAuditType type,
+				OffsetDateTime requestTimestamp,
+				InetAddress requestOrigin
+		) {
+				this.mid = mid;
+				this.created = created;
+				this.type = type;
+				this.requestTimestamp = requestTimestamp;
+				this.requestOrigin = requestOrigin;
+		}
 
-    /**
-     * Getter for <code>public.member_audit.mid</code>.
-     */
-    public UUID getMid() {
-        return this.mid;
-    }
+		/**
+		 * Getter for <code>public.member_audit.mid</code>.
+		 */
+		public UUID getMid() {
+				return this.mid;
+		}
 
-    /**
-     * Getter for <code>public.member_audit.created</code>.
-     */
-    public OffsetDateTime getCreated() {
-        return this.created;
-    }
+		/**
+		 * Getter for <code>public.member_audit.created</code>.
+		 */
+		public OffsetDateTime getCreated() {
+				return this.created;
+		}
 
-    /**
-     * Getter for <code>public.member_audit.type</code>.
-     */
-    public MemberAuditType getType() {
-        return this.type;
-    }
+		/**
+		 * Getter for <code>public.member_audit.type</code>.
+		 */
+		public MemberAuditType getType() {
+				return this.type;
+		}
 
-    /**
-     * Getter for <code>public.member_audit.request_timestamp</code>.
-     */
-    public OffsetDateTime getRequestTimestamp() {
-        return this.requestTimestamp;
-    }
+		/**
+		 * Getter for <code>public.member_audit.request_timestamp</code>.
+		 */
+		public OffsetDateTime getRequestTimestamp() {
+				return this.requestTimestamp;
+		}
 
-    /**
-     * Getter for <code>public.member_audit.request_origin</code>.
-     */
-    public InetAddress getRequestOrigin() {
-        return this.requestOrigin;
-    }
+		/**
+		 * Getter for <code>public.member_audit.request_origin</code>.
+		 */
+		public InetAddress getRequestOrigin() {
+				return this.requestOrigin;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final MemberAudit other = (MemberAudit) obj;
-        if (this.mid == null) {
-            if (other.mid != null)
-                return false;
-        }
-        else if (!this.mid.equals(other.mid))
-            return false;
-        if (this.created == null) {
-            if (other.created != null)
-                return false;
-        }
-        else if (!this.created.equals(other.created))
-            return false;
-        if (this.type == null) {
-            if (other.type != null)
-                return false;
-        }
-        else if (!this.type.equals(other.type))
-            return false;
-        if (this.requestTimestamp == null) {
-            if (other.requestTimestamp != null)
-                return false;
-        }
-        else if (!this.requestTimestamp.equals(other.requestTimestamp))
-            return false;
-        if (this.requestOrigin == null) {
-            if (other.requestOrigin != null)
-                return false;
-        }
-        else if (!this.requestOrigin.equals(other.requestOrigin))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final MemberAudit other = (MemberAudit) obj;
+				if (this.mid == null) {
+						if (other.mid != null)
+								return false;
+				}
+				else if (!this.mid.equals(other.mid))
+						return false;
+				if (this.created == null) {
+						if (other.created != null)
+								return false;
+				}
+				else if (!this.created.equals(other.created))
+						return false;
+				if (this.type == null) {
+						if (other.type != null)
+								return false;
+				}
+				else if (!this.type.equals(other.type))
+						return false;
+				if (this.requestTimestamp == null) {
+						if (other.requestTimestamp != null)
+								return false;
+				}
+				else if (!this.requestTimestamp.equals(other.requestTimestamp))
+						return false;
+				if (this.requestOrigin == null) {
+						if (other.requestOrigin != null)
+								return false;
+				}
+				else if (!this.requestOrigin.equals(other.requestOrigin))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
-        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
-        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
-        result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
-        result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.mid == null) ? 0 : this.mid.hashCode());
+				result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+				result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+				result = prime * result + ((this.requestTimestamp == null) ? 0 : this.requestTimestamp.hashCode());
+				result = prime * result + ((this.requestOrigin == null) ? 0 : this.requestOrigin.hashCode());
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("MemberAudit (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("MemberAudit (");
 
-        sb.append(mid);
-        sb.append(", ").append(created);
-        sb.append(", ").append(type);
-        sb.append(", ").append(requestTimestamp);
-        sb.append(", ").append(requestOrigin);
+				sb.append(mid);
+				sb.append(", ").append(created);
+				sb.append(", ").append(type);
+				sb.append(", ").append(requestTimestamp);
+				sb.append(", ").append(requestOrigin);
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

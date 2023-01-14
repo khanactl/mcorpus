@@ -34,161 +34,161 @@ import org.slf4j.LoggerFactory;
  */
 public class MCorpusJwtBackendHandler implements IJwtBackendHandler {
 
-  private static JwtBackendStatus map(final com.tll.mcorpus.db.enums.JwtStatus repoJwtStatus) {
-    switch (repoJwtStatus) {
-    case BLACKLISTED:
-      return JwtBackendStatus.BLACKLISTED;
-    case EXPIRED:
-      return JwtBackendStatus.EXPIRED;
-    case MCUSER_NOTACTIVE:
-      return JwtBackendStatus.BAD_USER;
-    case NOT_PRESENT:
-      return JwtBackendStatus.NOT_PRESENT;
-    case PRESENT_BAD_STATE:
-      return JwtBackendStatus.PRESENT_BAD_STATE;
-    case VALID:
-      return JwtBackendStatus.VALID;
-    default:
-      return JwtBackendStatus.ERROR;
-    }
-  }
+	private static JwtBackendStatus map(final com.tll.mcorpus.db.enums.JwtStatus repoJwtStatus) {
+		switch (repoJwtStatus) {
+		case BLACKLISTED:
+			return JwtBackendStatus.BLACKLISTED;
+		case EXPIRED:
+			return JwtBackendStatus.EXPIRED;
+		case MCUSER_NOTACTIVE:
+			return JwtBackendStatus.BAD_USER;
+		case NOT_PRESENT:
+			return JwtBackendStatus.NOT_PRESENT;
+		case PRESENT_BAD_STATE:
+			return JwtBackendStatus.PRESENT_BAD_STATE;
+		case VALID:
+			return JwtBackendStatus.VALID;
+		default:
+			return JwtBackendStatus.ERROR;
+		}
+	}
 
-  private static IJwtInfo map(final ActiveLoginDomain al) {
-    return new IJwtInfo() {
+	private static IJwtInfo map(final ActiveLoginDomain al) {
+		return new IJwtInfo() {
 
-      @Override
-      public UUID getJwtId() {
-        return al.jwtId;
-      }
+			@Override
+			public UUID getJwtId() {
+				return al.jwtId;
+			}
 
-      @Override
-      public Date expires() {
-        return odtToDate(al.expires);
-      }
+			@Override
+			public Date expires() {
+				return odtToDate(al.expires);
+			}
 
-      @Override
-      public Date created() {
-        return odtToDate(al.requestTimestamp);
-      }
+			@Override
+			public Date created() {
+				return odtToDate(al.requestTimestamp);
+			}
 
-      @Override
-      public String clientOrigin() {
-        return al.requestOrigin.getHostAddress();
-      }
-    };
-  }
+			@Override
+			public String clientOrigin() {
+				return al.requestOrigin.getHostAddress();
+			}
+		};
+	}
 
-  private static IJwtUser map(final Mcuser mc) {
-    return new IJwtUser() {
+	private static IJwtUser map(final Mcuser mc) {
+		return new IJwtUser() {
 
-      @Override
-      public UUID getJwtUserId() {
-        return mc.getUid();
-      }
+			@Override
+			public UUID getJwtUserId() {
+				return mc.getUid();
+			}
 
-      @Override
-      public String getJwtUserName() {
-        return mc.getName();
-      }
+			@Override
+			public String getJwtUserName() {
+				return mc.getName();
+			}
 
-      @Override
-      public String getJwtUserUsername() {
-        return mc.getUsername();
-      }
+			@Override
+			public String getJwtUserUsername() {
+				return mc.getUsername();
+			}
 
-      @Override
-      public String getJwtUserEmail() {
-        return mc.getEmail();
-      }
+			@Override
+			public String getJwtUserEmail() {
+				return mc.getEmail();
+			}
 
-      @Override
-      public boolean isAdministrator() {
-        return isNullOrEmpty(mc.getRoles()) ?
-          false : Arrays.stream(mc.getRoles()).anyMatch(McuserRole.ADMIN::equals);
-      }
+			@Override
+			public boolean isAdministrator() {
+				return isNullOrEmpty(mc.getRoles()) ?
+					false : Arrays.stream(mc.getRoles()).anyMatch(McuserRole.ADMIN::equals);
+			}
 
-      @Override
-      public String[] getJwtUserRoles() {
-        return mcuserRolesArrayToStringArray(mc.getRoles());
-      }
-    };
-  }
+			@Override
+			public String[] getJwtUserRoles() {
+				return mcuserRolesArrayToStringArray(mc.getRoles());
+			}
+		};
+	}
 
-  private final Logger log = LoggerFactory.getLogger(MCorpusJwtBackendHandler.class);
+	private final Logger log = LoggerFactory.getLogger(MCorpusJwtBackendHandler.class);
 
-  private final MCorpusUserRepo mcuserRepo;
+	private final MCorpusUserRepo mcuserRepo;
 
-  public MCorpusJwtBackendHandler(final MCorpusUserRepo mcuserRepo) {
-    this.mcuserRepo = mcuserRepo;
-  }
+	public MCorpusJwtBackendHandler(final MCorpusUserRepo mcuserRepo) {
+		this.mcuserRepo = mcuserRepo;
+	}
 
-  @Override
-  public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId) {
-    final FetchResult<JwtStatus> fr = mcuserRepo.getBackendJwtStatus(jwtId);
-    final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
-    return fetchrslt(jstat, fr.getErrorMsg());
-  }
+	@Override
+	public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId) {
+		final FetchResult<JwtStatus> fr = mcuserRepo.getBackendJwtStatus(jwtId);
+		final JwtBackendStatus jstat = isNull(fr.get()) ? null : map(fr.get());
+		return fetchrslt(jstat, fr.getErrorMsg());
+	}
 
-  @Override
-  public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
-    FetchResult<Mcuser> fr = mcuserRepo.fetchMcuser(jwtUserId);
-    if (fr.isSuccess()) {
-      final IJwtUser jwtUser = map(fr.get());
-      return fetchrslt(jwtUser);
-    } else {
-      return fetchrslt(fr.getErrorMsg());
-    }
-  }
+	@Override
+	public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+		FetchResult<Mcuser> fr = mcuserRepo.fetchMcuser(jwtUserId);
+		if (fr.isSuccess()) {
+			final IJwtUser jwtUser = map(fr.get());
+			return fetchrslt(jwtUser);
+		} else {
+			return fetchrslt(fr.getErrorMsg());
+		}
+	}
 
-  @Override
-  public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
-    FetchResult<List<ActiveLoginDomain>> fr = mcuserRepo.getActiveLogins(jwtUserId);
-    if (fr.isSuccess()) {
-      final List<IJwtInfo> jlist = fr.get().stream()
-        .map(al -> map(al))
-        .collect(Collectors.toList());
-        return fetchrslt(jlist, null);
-    } else {
-      return fetchrslt(fr.getErrorMsg());
-    }
-  }
+	@Override
+	public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
+		FetchResult<List<ActiveLoginDomain>> fr = mcuserRepo.getActiveLogins(jwtUserId);
+		if (fr.isSuccess()) {
+			final List<IJwtInfo> jlist = fr.get().stream()
+				.map(al -> map(al))
+				.collect(Collectors.toList());
+				return fetchrslt(jlist, null);
+		} else {
+			return fetchrslt(fr.getErrorMsg());
+		}
+	}
 
-  @Override
-  public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
-      InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
-    log.debug("Authenticating mcuser '{}'..", username);
-    final FetchResult<Mcuser> loginResult = mcuserRepo.login(username, pswd, pendingJwtId, jwtExpiration,
-        requestInstant, requestOrigin);
-    if (loginResult.isSuccess()) {
-      return fetchrslt(map(loginResult.get()), loginResult.getErrorMsg());
-    } else {
-      return fetchrslt(loginResult.getErrorMsg());
-    }
-  }
+	@Override
+	public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
+			InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
+		log.debug("Authenticating mcuser '{}'..", username);
+		final FetchResult<Mcuser> loginResult = mcuserRepo.login(username, pswd, pendingJwtId, jwtExpiration,
+				requestInstant, requestOrigin);
+		if (loginResult.isSuccess()) {
+			return fetchrslt(map(loginResult.get()), loginResult.getErrorMsg());
+		} else {
+			return fetchrslt(loginResult.getErrorMsg());
+		}
+	}
 
-  @Override
-  public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId,
-      InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
-    log.debug("Authenticating mcuser for refresh with old jwt id '{}'..", oldJwtId);
-    final FetchResult<Mcuser> loginResult = mcuserRepo.loginRefresh(oldJwtId, pendingJwtId, jwtExpiration,
-        requestInstant, requestOrigin);
-    if (loginResult.isSuccess()) {
-      return fetchrslt(map(loginResult.get()), loginResult.getErrorMsg());
-    } else {
-      return fetchrslt(loginResult.getErrorMsg());
-    }
-  }
+	@Override
+	public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId,
+			InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
+		log.debug("Authenticating mcuser for refresh with old jwt id '{}'..", oldJwtId);
+		final FetchResult<Mcuser> loginResult = mcuserRepo.loginRefresh(oldJwtId, pendingJwtId, jwtExpiration,
+				requestInstant, requestOrigin);
+		if (loginResult.isSuccess()) {
+			return fetchrslt(map(loginResult.get()), loginResult.getErrorMsg());
+		} else {
+			return fetchrslt(loginResult.getErrorMsg());
+		}
+	}
 
-  @Override
-  public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
-      Instant requestInstant) {
-    FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstant, requestOrigin);
-    return fr;
-  }
+	@Override
+	public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
+			Instant requestInstant) {
+		FetchResult<Boolean> fr = mcuserRepo.logout(jwtUserId, jwtId, requestInstant, requestOrigin);
+		return fr;
+	}
 
-  @Override
-  public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin, Instant requestInstant) {
-    return mcuserRepo.invalidateJwtsFor(jwtUserId, requestInstant, requestOrigin);
-  }
+	@Override
+	public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin, Instant requestInstant) {
+		return mcuserRepo.invalidateJwtsFor(jwtUserId, requestInstant, requestOrigin);
+	}
 
 }

@@ -39,212 +39,212 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mbenefits extends TableImpl<MbenefitsRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.mbenefits</code>
-     */
-    public static final Mbenefits MBENEFITS = new Mbenefits();
+		/**
+		 * The reference instance of <code>public.mbenefits</code>
+		 */
+		public static final Mbenefits MBENEFITS = new Mbenefits();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<MbenefitsRecord> getRecordType() {
-        return MbenefitsRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<MbenefitsRecord> getRecordType() {
+				return MbenefitsRecord.class;
+		}
 
-    /**
-     * The column <code>public.mbenefits.mid</code>.
-     */
-    public final TableField<MbenefitsRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
+		/**
+		 * The column <code>public.mbenefits.mid</code>.
+		 */
+		public final TableField<MbenefitsRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mbenefits.modified</code>.
-     */
-    public final TableField<MbenefitsRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+		/**
+		 * The column <code>public.mbenefits.modified</code>.
+		 */
+		public final TableField<MbenefitsRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
-    /**
-     * The column <code>public.mbenefits.foreign_adrs_flag</code>.
-     */
-    public final TableField<MbenefitsRecord, String> FOREIGN_ADRS_FLAG = createField(DSL.name("foreign_adrs_flag"), SQLDataType.CHAR(1), this, "");
+		/**
+		 * The column <code>public.mbenefits.foreign_adrs_flag</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> FOREIGN_ADRS_FLAG = createField(DSL.name("foreign_adrs_flag"), SQLDataType.CHAR(1), this, "");
 
-    /**
-     * The column <code>public.mbenefits.beli</code>.
-     */
-    public final TableField<MbenefitsRecord, Beli> BELI = createField(DSL.name("beli"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Beli.class), this, "");
+		/**
+		 * The column <code>public.mbenefits.beli</code>.
+		 */
+		public final TableField<MbenefitsRecord, Beli> BELI = createField(DSL.name("beli"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Beli.class), this, "");
 
-    /**
-     * @deprecated Unknown data type. If this is a qualified, user-defined type,
-     * it may have been excluded from code generation. If this is a built-in
-     * type, you can define an explicit {@link org.jooq.Binding} to specify how
-     * this type should be handled. Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @Deprecated
-    public final TableField<MbenefitsRecord, Object> MCB = createField(DSL.name("mcb"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"money\"").nullable(false), this, "");
+		/**
+		 * @deprecated Unknown data type. If this is a qualified, user-defined type,
+		 * it may have been excluded from code generation. If this is a built-in
+		 * type, you can define an explicit {@link org.jooq.Binding} to specify how
+		 * this type should be handled. Deprecation can be turned off using
+		 * {@literal <deprecationOnUnknownTypes/>} in your code generator
+		 * configuration.
+		 */
+		@Deprecated
+		public final TableField<MbenefitsRecord, Object> MCB = createField(DSL.name("mcb"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"money\"").nullable(false), this, "");
 
-    /**
-     * The column <code>public.mbenefits.med_plan_code</code>.
-     */
-    public final TableField<MbenefitsRecord, String> MED_PLAN_CODE = createField(DSL.name("med_plan_code"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.med_plan_code</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> MED_PLAN_CODE = createField(DSL.name("med_plan_code"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.med_opt_out</code>.
-     */
-    public final TableField<MbenefitsRecord, String> MED_OPT_OUT = createField(DSL.name("med_opt_out"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.med_opt_out</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> MED_OPT_OUT = createField(DSL.name("med_opt_out"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.den_plan_code</code>.
-     */
-    public final TableField<MbenefitsRecord, String> DEN_PLAN_CODE = createField(DSL.name("den_plan_code"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.den_plan_code</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> DEN_PLAN_CODE = createField(DSL.name("den_plan_code"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.den_opt_out</code>.
-     */
-    public final TableField<MbenefitsRecord, String> DEN_OPT_OUT = createField(DSL.name("den_opt_out"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.den_opt_out</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> DEN_OPT_OUT = createField(DSL.name("den_opt_out"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.vis_plan_code</code>.
-     */
-    public final TableField<MbenefitsRecord, String> VIS_PLAN_CODE = createField(DSL.name("vis_plan_code"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.vis_plan_code</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> VIS_PLAN_CODE = createField(DSL.name("vis_plan_code"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.vis_opt_out</code>.
-     */
-    public final TableField<MbenefitsRecord, String> VIS_OPT_OUT = createField(DSL.name("vis_opt_out"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.vis_opt_out</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> VIS_OPT_OUT = createField(DSL.name("vis_opt_out"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.leg_plan_code</code>.
-     */
-    public final TableField<MbenefitsRecord, String> LEG_PLAN_CODE = createField(DSL.name("leg_plan_code"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.leg_plan_code</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> LEG_PLAN_CODE = createField(DSL.name("leg_plan_code"), SQLDataType.CHAR(2), this, "");
 
-    /**
-     * The column <code>public.mbenefits.leg_opt_out</code>.
-     */
-    public final TableField<MbenefitsRecord, String> LEG_OPT_OUT = createField(DSL.name("leg_opt_out"), SQLDataType.CHAR(2), this, "");
+		/**
+		 * The column <code>public.mbenefits.leg_opt_out</code>.
+		 */
+		public final TableField<MbenefitsRecord, String> LEG_OPT_OUT = createField(DSL.name("leg_opt_out"), SQLDataType.CHAR(2), this, "");
 
-    private Mbenefits(Name alias, Table<MbenefitsRecord> aliased) {
-        this(alias, aliased, null);
-    }
+		private Mbenefits(Name alias, Table<MbenefitsRecord> aliased) {
+				this(alias, aliased, null);
+		}
 
-    private Mbenefits(Name alias, Table<MbenefitsRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
-    }
+		private Mbenefits(Name alias, Table<MbenefitsRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+		}
 
-    /**
-     * Create an aliased <code>public.mbenefits</code> table reference
-     */
-    public Mbenefits(String alias) {
-        this(DSL.name(alias), MBENEFITS);
-    }
+		/**
+		 * Create an aliased <code>public.mbenefits</code> table reference
+		 */
+		public Mbenefits(String alias) {
+				this(DSL.name(alias), MBENEFITS);
+		}
 
-    /**
-     * Create an aliased <code>public.mbenefits</code> table reference
-     */
-    public Mbenefits(Name alias) {
-        this(alias, MBENEFITS);
-    }
+		/**
+		 * Create an aliased <code>public.mbenefits</code> table reference
+		 */
+		public Mbenefits(Name alias) {
+				this(alias, MBENEFITS);
+		}
 
-    /**
-     * Create a <code>public.mbenefits</code> table reference
-     */
-    public Mbenefits() {
-        this(DSL.name("mbenefits"), null);
-    }
+		/**
+		 * Create a <code>public.mbenefits</code> table reference
+		 */
+		public Mbenefits() {
+				this(DSL.name("mbenefits"), null);
+		}
 
-    public <O extends Record> Mbenefits(Table<O> child, ForeignKey<O, MbenefitsRecord> key) {
-        super(child, key, MBENEFITS);
-    }
+		public <O extends Record> Mbenefits(Table<O> child, ForeignKey<O, MbenefitsRecord> key) {
+				super(child, key, MBENEFITS);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public UniqueKey<MbenefitsRecord> getPrimaryKey() {
-        return Keys.MBENEFITS_PKEY;
-    }
+		@Override
+		public UniqueKey<MbenefitsRecord> getPrimaryKey() {
+				return Keys.MBENEFITS_PKEY;
+		}
 
-    @Override
-    public List<ForeignKey<MbenefitsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.MBENEFITS__MBENEFITS_MID_FKEY);
-    }
+		@Override
+		public List<ForeignKey<MbenefitsRecord, ?>> getReferences() {
+				return Arrays.asList(Keys.MBENEFITS__MBENEFITS_MID_FKEY);
+		}
 
-    private transient Member _member;
+		private transient Member _member;
 
-    /**
-     * Get the implicit join path to the <code>public.member</code> table.
-     */
-    public Member member() {
-        if (_member == null)
-            _member = new Member(this, Keys.MBENEFITS__MBENEFITS_MID_FKEY);
+		/**
+		 * Get the implicit join path to the <code>public.member</code> table.
+		 */
+		public Member member() {
+				if (_member == null)
+						_member = new Member(this, Keys.MBENEFITS__MBENEFITS_MID_FKEY);
 
-        return _member;
-    }
+				return _member;
+		}
 
-    @Override
-    public Mbenefits as(String alias) {
-        return new Mbenefits(DSL.name(alias), this);
-    }
+		@Override
+		public Mbenefits as(String alias) {
+				return new Mbenefits(DSL.name(alias), this);
+		}
 
-    @Override
-    public Mbenefits as(Name alias) {
-        return new Mbenefits(alias, this);
-    }
+		@Override
+		public Mbenefits as(Name alias) {
+				return new Mbenefits(alias, this);
+		}
 
-    @Override
-    public Mbenefits as(Table<?> alias) {
-        return new Mbenefits(alias.getQualifiedName(), this);
-    }
+		@Override
+		public Mbenefits as(Table<?> alias) {
+				return new Mbenefits(alias.getQualifiedName(), this);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mbenefits rename(String name) {
-        return new Mbenefits(DSL.name(name), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mbenefits rename(String name) {
+				return new Mbenefits(DSL.name(name), null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mbenefits rename(Name name) {
-        return new Mbenefits(name, null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mbenefits rename(Name name) {
+				return new Mbenefits(name, null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mbenefits rename(Table<?> name) {
-        return new Mbenefits(name.getQualifiedName(), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mbenefits rename(Table<?> name) {
+				return new Mbenefits(name.getQualifiedName(), null);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row13 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row13 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> fieldsRow() {
-        return (Row13) super.fieldsRow();
-    }
+		@Override
+		public Row13<UUID, OffsetDateTime, String, Beli, Object, String, String, String, String, String, String, String, String> fieldsRow() {
+				return (Row13) super.fieldsRow();
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function13<? super UUID, ? super OffsetDateTime, ? super String, ? super Beli, ? super Object, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function13<? super UUID, ? super OffsetDateTime, ? super String, ? super Beli, ? super Object, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function13<? super UUID, ? super OffsetDateTime, ? super String, ? super Beli, ? super Object, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function13<? super UUID, ? super OffsetDateTime, ? super String, ? super Beli, ? super Object, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

@@ -27,77 +27,77 @@ import org.jooq.Result;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
 
-    /**
-     * The table <code>public.get_active_logins</code>.
-     */
-    public static final GetActiveLogins GET_ACTIVE_LOGINS = GetActiveLogins.GET_ACTIVE_LOGINS;
+		/**
+		 * The table <code>public.get_active_logins</code>.
+		 */
+		public static final GetActiveLogins GET_ACTIVE_LOGINS = GetActiveLogins.GET_ACTIVE_LOGINS;
 
-    /**
-     * Call <code>public.get_active_logins</code>.
-     */
-    public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(
-          Configuration configuration
-        , UUID mcuserId
-    ) {
-        return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-              mcuserId
-        )).fetch();
-    }
+		/**
+		 * Call <code>public.get_active_logins</code>.
+		 */
+		public static Result<GetActiveLoginsRecord> GET_ACTIVE_LOGINS(
+					Configuration configuration
+				, UUID mcuserId
+		) {
+				return configuration.dsl().selectFrom(com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+							mcuserId
+				)).fetch();
+		}
 
-    /**
-     * Get <code>public.get_active_logins</code> as a table.
-     */
-    public static GetActiveLogins GET_ACTIVE_LOGINS(
-          UUID mcuserId
-    ) {
-        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-            mcuserId
-        );
-    }
+		/**
+		 * Get <code>public.get_active_logins</code> as a table.
+		 */
+		public static GetActiveLogins GET_ACTIVE_LOGINS(
+					UUID mcuserId
+		) {
+				return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+						mcuserId
+				);
+		}
 
-    /**
-     * Get <code>public.get_active_logins</code> as a table.
-     */
-    public static GetActiveLogins GET_ACTIVE_LOGINS(
-          Field<UUID> mcuserId
-    ) {
-        return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
-            mcuserId
-        );
-    }
+		/**
+		 * Get <code>public.get_active_logins</code> as a table.
+		 */
+		public static GetActiveLogins GET_ACTIVE_LOGINS(
+					Field<UUID> mcuserId
+		) {
+				return com.tll.mcorpus.db.tables.GetActiveLogins.GET_ACTIVE_LOGINS.call(
+						mcuserId
+				);
+		}
 
-    /**
-     * The table <code>public.maddress</code>.
-     */
-    public static final Maddress MADDRESS = Maddress.MADDRESS;
+		/**
+		 * The table <code>public.maddress</code>.
+		 */
+		public static final Maddress MADDRESS = Maddress.MADDRESS;
 
-    /**
-     * The table <code>public.mauth</code>.
-     */
-    public static final Mauth MAUTH = Mauth.MAUTH;
+		/**
+		 * The table <code>public.mauth</code>.
+		 */
+		public static final Mauth MAUTH = Mauth.MAUTH;
 
-    /**
-     * The table <code>public.mbenefits</code>.
-     */
-    public static final Mbenefits MBENEFITS = Mbenefits.MBENEFITS;
+		/**
+		 * The table <code>public.mbenefits</code>.
+		 */
+		public static final Mbenefits MBENEFITS = Mbenefits.MBENEFITS;
 
-    /**
-     * The table <code>public.mcuser</code>.
-     */
-    public static final Mcuser MCUSER = Mcuser.MCUSER;
+		/**
+		 * The table <code>public.mcuser</code>.
+		 */
+		public static final Mcuser MCUSER = Mcuser.MCUSER;
 
-    /**
-     * The table <code>public.mcuser_audit</code>.
-     */
-    public static final McuserAudit MCUSER_AUDIT = McuserAudit.MCUSER_AUDIT;
+		/**
+		 * The table <code>public.mcuser_audit</code>.
+		 */
+		public static final McuserAudit MCUSER_AUDIT = McuserAudit.MCUSER_AUDIT;
 
-    /**
-     * The table <code>public.member</code>.
-     */
-    public static final Member MEMBER = Member.MEMBER;
+		/**
+		 * The table <code>public.member</code>.
+		 */
+		public static final Member MEMBER = Member.MEMBER;
 
-    /**
-     * The table <code>public.member_audit</code>.
-     */
-    public static final MemberAudit MEMBER_AUDIT = MemberAudit.MEMBER_AUDIT;
+		/**
+		 * The table <code>public.member_audit</code>.
+		 */
+		public static final MemberAudit MEMBER_AUDIT = MemberAudit.MEMBER_AUDIT;
 }

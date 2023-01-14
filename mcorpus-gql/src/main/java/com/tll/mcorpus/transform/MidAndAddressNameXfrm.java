@@ -9,20 +9,20 @@ import com.tll.mcorpus.gmodel.MemberAddress.MidAndAddressNameKey;
 
 public class MidAndAddressNameXfrm extends BaseMcorpusTransformer<MidAndAddressNameKey, MidAndAddressname> {
 
-  @Override
-  protected MidAndAddressNameKey fromNonNullBackend(final MidAndAddressname d) {
-    return new MidAndAddressNameKey(
-      d.getMid(),
-      upper(addressnameToString(d.getAddressname()))
-    );
-  }
+	@Override
+	protected MidAndAddressNameKey fromNonNullBackend(final MidAndAddressname d) {
+		return new MidAndAddressNameKey(
+			d.getMid(),
+			upper(addressnameToString(d.getAddressname()))
+		);
+	}
 
-  @Override
-  protected MidAndAddressname toBackendFromNonNull(final MidAndAddressNameKey g) {
-    return new MidAndAddressname(
-      g.getMid(),
-      addressnameFromString(g.getAddressName()) 
-    );
-  }
+	@Override
+	protected MidAndAddressname toBackendFromNonNull(final MidAndAddressNameKey g) {
+		return new MidAndAddressname(
+			g.getMid(),
+			addressnameFromString(g.getAddressName()) 
+		);
+	}
 
 }

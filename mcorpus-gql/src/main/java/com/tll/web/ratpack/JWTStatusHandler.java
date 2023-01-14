@@ -46,142 +46,142 @@ import ratpack.core.handling.Handler;
  */
 public class JWTStatusHandler implements Handler {
 
-  static class JwtHttpRequestProviderImpl implements IJwtHttpRequestProvider {
+	static class JwtHttpRequestProviderImpl implements IJwtHttpRequestProvider {
 
-    private final String jwt;
-    private final String refreshToken;
-    private final Instant requestInstant;
-    private final InetAddress requestOrigin;
+		private final String jwt;
+		private final String refreshToken;
+		private final Instant requestInstant;
+		private final InetAddress requestOrigin;
 
-    public JwtHttpRequestProviderImpl(String jwt, String refreshToken, Instant requestInstant, InetAddress requestOrigin) {
-      this.jwt = jwt;
-      this.refreshToken = refreshToken;
-      this.requestInstant = requestInstant;
-      this.requestOrigin = requestOrigin;
-    }
+		public JwtHttpRequestProviderImpl(String jwt, String refreshToken, Instant requestInstant, InetAddress requestOrigin) {
+			this.jwt = jwt;
+			this.refreshToken = refreshToken;
+			this.requestInstant = requestInstant;
+			this.requestOrigin = requestOrigin;
+		}
 
-    @Override
-    public InetAddress getRequestOrigin() {
-      return requestOrigin;
-    }
+		@Override
+		public InetAddress getRequestOrigin() {
+			return requestOrigin;
+		}
 
-    @Override
-    public String getJwt() {
-      return jwt;
-    }
+		@Override
+		public String getJwt() {
+			return jwt;
+		}
 
-    @Override
-    public String getJwtRefreshToken() {
-      return refreshToken;
-    }
+		@Override
+		public String getJwtRefreshToken() {
+			return refreshToken;
+		}
 
-    @Override
-    public Instant getRequestInstant() {
-      return requestInstant;
-    }
+		@Override
+		public Instant getRequestInstant() {
+			return requestInstant;
+		}
 
-    @Override
-    public boolean verifyRequestOrigin(final String jwtAudience) {
-      return requestOrigin.getHostAddress().equals(jwtAudience);
-    }
-  }
+		@Override
+		public boolean verifyRequestOrigin(final String jwtAudience) {
+			return requestOrigin.getHostAddress().equals(jwtAudience);
+		}
+	}
 
-  static class JwtHttpResponseActionImpl implements IJwtHttpResponseAction {
+	static class JwtHttpResponseActionImpl implements IJwtHttpResponseAction {
 
-    private final boolean cookieSecure;
-    private final String jwtRefreshTokenName;
-    private final Context ctx;
+		private final boolean cookieSecure;
+		private final String jwtRefreshTokenName;
+		private final Context ctx;
 
-    public JwtHttpResponseActionImpl(final boolean cookieSecure, final String jwtRefreshTokenName, final Context ctx) {
-      this.cookieSecure = cookieSecure;
-      this.jwtRefreshTokenName = jwtRefreshTokenName;
-      this.ctx = ctx;
-    }
+		public JwtHttpResponseActionImpl(final boolean cookieSecure, final String jwtRefreshTokenName, final Context ctx) {
+			this.cookieSecure = cookieSecure;
+			this.jwtRefreshTokenName = jwtRefreshTokenName;
+			this.ctx = ctx;
+		}
 
-    @Override
-    public void expireJwtClientside() {
-      ctx.getResponse().getHeaders().set("Authorization", "");
-      expireCookie(ctx, jwtRefreshTokenName, "/", cookieSecure);
-    }
+		@Override
+		public void expireJwtClientside() {
+			ctx.getResponse().getHeaders().set("Authorization", "");
+			expireCookie(ctx, jwtRefreshTokenName, "/", cookieSecure);
+		}
 
-    @Override
-    public void setJwtClientside(String jwt, String refreshToken, Duration refreshTokenTimeToLive) {
-      ctx.getResponse().getHeaders().set("Authorization", "Bearer " + jwt);
-      setCookie(ctx, jwtRefreshTokenName, refreshToken, "/", refreshTokenTimeToLive.getSeconds(), cookieSecure);
-    }
-  }
+		@Override
+		public void setJwtClientside(String jwt, String refreshToken, Duration refreshTokenTimeToLive) {
+			ctx.getResponse().getHeaders().set("Authorization", "Bearer " + jwt);
+			setCookie(ctx, jwtRefreshTokenName, refreshToken, "/", refreshTokenTimeToLive.getSeconds(), cookieSecure);
+		}
+	}
 
-  /**
-   * Resolve the incoming http request's originating IP address by interrogating
-   * the http request headers.
-   */
-  static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
-    final String sro;
-    // primary: x-forwarded-for http header
-    if (isNotNull(rs.getXForwardedForClientIp()))
-      sro = rs.getXForwardedForClientIp();
-    // fallback: remote address host
-    else if (isNotNull(rs.getRemoteAddressHost()))
-      sro = rs.getRemoteAddressHost();
-    else
-      throw new UnknownHostException();
-    return InetAddress.getByName(sro);
-  }
+	/**
+	 * Resolve the incoming http request's originating IP address by interrogating
+	 * the http request headers.
+	 */
+	static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
+		final String sro;
+		// primary: x-forwarded-for http header
+		if (isNotNull(rs.getXForwardedForClientIp()))
+			sro = rs.getXForwardedForClientIp();
+		// fallback: remote address host
+		else if (isNotNull(rs.getRemoteAddressHost()))
+			sro = rs.getRemoteAddressHost();
+		else
+			throw new UnknownHostException();
+		return InetAddress.getByName(sro);
+	}
 
-  private final Logger log = LoggerFactory.getLogger(JWTStatusHandler.class);
+	private final Logger log = LoggerFactory.getLogger(JWTStatusHandler.class);
 
-  private final boolean cookieSecure;
-  private final String jwtRefreshTokenName;
+	private final boolean cookieSecure;
+	private final String jwtRefreshTokenName;
 
-  /**
-   * Constructor.
-   *
-   * @param cookieSecure the cookie secure flag (https or http)
-   * @param jwtTokenName the name to use for generated JWTs
-   */
-  public JWTStatusHandler(boolean cookieSecure, String jwtRefreshTokenName) {
-    this.cookieSecure = cookieSecure;
-    this.jwtRefreshTokenName = jwtRefreshTokenName;
-  }
+	/**
+	 * Constructor.
+	 *
+	 * @param cookieSecure the cookie secure flag (https or http)
+	 * @param jwtTokenName the name to use for generated JWTs
+	 */
+	public JWTStatusHandler(boolean cookieSecure, String jwtRefreshTokenName) {
+		this.cookieSecure = cookieSecure;
+		this.jwtRefreshTokenName = jwtRefreshTokenName;
+	}
 
-  @Override
-  public void handle(Context ctx) throws Exception {
-    final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
+	@Override
+	public void handle(Context ctx) throws Exception {
+		final RequestSnapshot rs = ctx.get(RequestSnapshotFactory.class).getOrCreateRequestSnapshot(ctx);
 
-    // create jwt request provider and cache in request for downstream access
-    final IJwtHttpRequestProvider rp;
-    try {
-      // NOTE: the http request instant is truncated to seconds
-      // so that conversion to/from <code>java.util.Date</code> objects are equal!
-      rp = new JwtHttpRequestProviderImpl(
-        rs.getAuthBearer(),
-        rs.getJwtRefreshTokenCookie(),
-        rs.getRequestInstant().truncatedTo(ChronoUnit.SECONDS),
-        resolveRequestOrigin(rs)
-      );
-      ctx.getRequest().add(rp);
-      log.debug("JWT request provider cached in request (Request origin: {}).", rp.getRequestOrigin());
-    } catch (UnknownHostException e) {
-      log.error("Un-resolvable http request origin: {}", rs);
-      ctx.clientError(401); // unauthorized
-      return;
-    }
+		// create jwt request provider and cache in request for downstream access
+		final IJwtHttpRequestProvider rp;
+		try {
+			// NOTE: the http request instant is truncated to seconds
+			// so that conversion to/from <code>java.util.Date</code> objects are equal!
+			rp = new JwtHttpRequestProviderImpl(
+				rs.getAuthBearer(),
+				rs.getJwtRefreshTokenCookie(),
+				rs.getRequestInstant().truncatedTo(ChronoUnit.SECONDS),
+				resolveRequestOrigin(rs)
+			);
+			ctx.getRequest().add(rp);
+			log.debug("JWT request provider cached in request (Request origin: {}).", rp.getRequestOrigin());
+		} catch (UnknownHostException e) {
+			log.error("Un-resolvable http request origin: {}", rs);
+			ctx.clientError(401); // unauthorized
+			return;
+		}
 
-    // create jwt response action and cache in request for downstream access
-    final IJwtHttpResponseAction ra = new JwtHttpResponseActionImpl(
-      cookieSecure,
-      jwtRefreshTokenName,
-      ctx
-    );
-    ctx.getRequest().add(ra);
-    log.debug("JWT response action cached in request.");
+		// create jwt response action and cache in request for downstream access
+		final IJwtHttpResponseAction ra = new JwtHttpResponseActionImpl(
+			cookieSecure,
+			jwtRefreshTokenName,
+			ctx
+		);
+		ctx.getRequest().add(ra);
+		log.debug("JWT response action cached in request.");
 
-    // determine the JWT http request status
-    Blocking.get(() -> ctx.get(JWT.class).jwtHttpRequestStatus(rp)).then(jwtStatus -> {
-      ctx.getRequest().add(jwtStatus);
-      log.info("{} cached in request.", jwtStatus);
-      ctx.next();
-    });
-  }
+		// determine the JWT http request status
+		Blocking.get(() -> ctx.get(JWT.class).jwtHttpRequestStatus(rp)).then(jwtStatus -> {
+			ctx.getRequest().add(jwtStatus);
+			log.info("{} cached in request.", jwtStatus);
+			ctx.next();
+		});
+	}
 
 }

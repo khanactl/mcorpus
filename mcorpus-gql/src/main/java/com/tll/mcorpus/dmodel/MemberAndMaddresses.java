@@ -12,18 +12,18 @@ import com.tll.mcorpus.db.tables.pojos.Maddress;
  */
 public class MemberAndMaddresses {
 
-  public final MemberAndMauth member;
-  public final List<Maddress> addresses;
+	public final MemberAndMauth member;
+	public final List<Maddress> addresses;
 
-  /**
-   * Constructor.
-   *
-   * @param member the backend {@link MemberAndMauth} pojo
-   * @param addresses the backend {@link Maddress} pojo
-   */
-  public MemberAndMaddresses(MemberAndMauth member, List<Maddress> addresses) {
-    this.member = member;
-    this.addresses = isNull(addresses) ? Collections.emptyList() : addresses;
-  }
+	/**
+	 * Constructor.
+	 *
+	 * @param member the backend {@link MemberAndMauth} pojo
+	 * @param addresses the backend {@link Maddress} pojo
+	 */
+	public MemberAndMaddresses(MemberAndMauth member, List<Maddress> addresses) {
+		this.member = member;
+		this.addresses = isNull(addresses) ? Collections.emptyList() : addresses;
+	}
 
 }

@@ -39,191 +39,191 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Maddress extends TableImpl<MaddressRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.maddress</code>
-     */
-    public static final Maddress MADDRESS = new Maddress();
+		/**
+		 * The reference instance of <code>public.maddress</code>
+		 */
+		public static final Maddress MADDRESS = new Maddress();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<MaddressRecord> getRecordType() {
-        return MaddressRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<MaddressRecord> getRecordType() {
+				return MaddressRecord.class;
+		}
 
-    /**
-     * The column <code>public.maddress.mid</code>.
-     */
-    public final TableField<MaddressRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
+		/**
+		 * The column <code>public.maddress.mid</code>.
+		 */
+		public final TableField<MaddressRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
-    /**
-     * The column <code>public.maddress.address_name</code>.
-     */
-    public final TableField<MaddressRecord, Addressname> ADDRESS_NAME = createField(DSL.name("address_name"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Addressname.class), this, "");
+		/**
+		 * The column <code>public.maddress.address_name</code>.
+		 */
+		public final TableField<MaddressRecord, Addressname> ADDRESS_NAME = createField(DSL.name("address_name"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.Addressname.class), this, "");
 
-    /**
-     * The column <code>public.maddress.modified</code>.
-     */
-    public final TableField<MaddressRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+		/**
+		 * The column <code>public.maddress.modified</code>.
+		 */
+		public final TableField<MaddressRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
-    /**
-     * The column <code>public.maddress.attn</code>.
-     */
-    public final TableField<MaddressRecord, String> ATTN = createField(DSL.name("attn"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.maddress.attn</code>.
+		 */
+		public final TableField<MaddressRecord, String> ATTN = createField(DSL.name("attn"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.maddress.street1</code>.
-     */
-    public final TableField<MaddressRecord, String> STREET1 = createField(DSL.name("street1"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.maddress.street1</code>.
+		 */
+		public final TableField<MaddressRecord, String> STREET1 = createField(DSL.name("street1"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.maddress.street2</code>.
-     */
-    public final TableField<MaddressRecord, String> STREET2 = createField(DSL.name("street2"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.maddress.street2</code>.
+		 */
+		public final TableField<MaddressRecord, String> STREET2 = createField(DSL.name("street2"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.maddress.city</code>.
-     */
-    public final TableField<MaddressRecord, String> CITY = createField(DSL.name("city"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.maddress.city</code>.
+		 */
+		public final TableField<MaddressRecord, String> CITY = createField(DSL.name("city"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.maddress.state</code>.
-     */
-    public final TableField<MaddressRecord, String> STATE = createField(DSL.name("state"), SQLDataType.CHAR(2).nullable(false), this, "");
+		/**
+		 * The column <code>public.maddress.state</code>.
+		 */
+		public final TableField<MaddressRecord, String> STATE = createField(DSL.name("state"), SQLDataType.CHAR(2).nullable(false), this, "");
 
-    /**
-     * The column <code>public.maddress.postal_code</code>.
-     */
-    public final TableField<MaddressRecord, String> POSTAL_CODE = createField(DSL.name("postal_code"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.maddress.postal_code</code>.
+		 */
+		public final TableField<MaddressRecord, String> POSTAL_CODE = createField(DSL.name("postal_code"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.maddress.country</code>.
-     */
-    public final TableField<MaddressRecord, String> COUNTRY = createField(DSL.name("country"), SQLDataType.CLOB.nullable(false).defaultValue(DSL.field("'USA'::text", SQLDataType.CLOB)), this, "");
+		/**
+		 * The column <code>public.maddress.country</code>.
+		 */
+		public final TableField<MaddressRecord, String> COUNTRY = createField(DSL.name("country"), SQLDataType.CLOB.nullable(false).defaultValue(DSL.field("'USA'::text", SQLDataType.CLOB)), this, "");
 
-    private Maddress(Name alias, Table<MaddressRecord> aliased) {
-        this(alias, aliased, null);
-    }
+		private Maddress(Name alias, Table<MaddressRecord> aliased) {
+				this(alias, aliased, null);
+		}
 
-    private Maddress(Name alias, Table<MaddressRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
-    }
+		private Maddress(Name alias, Table<MaddressRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+		}
 
-    /**
-     * Create an aliased <code>public.maddress</code> table reference
-     */
-    public Maddress(String alias) {
-        this(DSL.name(alias), MADDRESS);
-    }
+		/**
+		 * Create an aliased <code>public.maddress</code> table reference
+		 */
+		public Maddress(String alias) {
+				this(DSL.name(alias), MADDRESS);
+		}
 
-    /**
-     * Create an aliased <code>public.maddress</code> table reference
-     */
-    public Maddress(Name alias) {
-        this(alias, MADDRESS);
-    }
+		/**
+		 * Create an aliased <code>public.maddress</code> table reference
+		 */
+		public Maddress(Name alias) {
+				this(alias, MADDRESS);
+		}
 
-    /**
-     * Create a <code>public.maddress</code> table reference
-     */
-    public Maddress() {
-        this(DSL.name("maddress"), null);
-    }
+		/**
+		 * Create a <code>public.maddress</code> table reference
+		 */
+		public Maddress() {
+				this(DSL.name("maddress"), null);
+		}
 
-    public <O extends Record> Maddress(Table<O> child, ForeignKey<O, MaddressRecord> key) {
-        super(child, key, MADDRESS);
-    }
+		public <O extends Record> Maddress(Table<O> child, ForeignKey<O, MaddressRecord> key) {
+				super(child, key, MADDRESS);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public UniqueKey<MaddressRecord> getPrimaryKey() {
-        return Keys.MADDRESS_PKEY;
-    }
+		@Override
+		public UniqueKey<MaddressRecord> getPrimaryKey() {
+				return Keys.MADDRESS_PKEY;
+		}
 
-    @Override
-    public List<ForeignKey<MaddressRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.MADDRESS__MADDRESS_MID_FKEY);
-    }
+		@Override
+		public List<ForeignKey<MaddressRecord, ?>> getReferences() {
+				return Arrays.asList(Keys.MADDRESS__MADDRESS_MID_FKEY);
+		}
 
-    private transient Member _member;
+		private transient Member _member;
 
-    /**
-     * Get the implicit join path to the <code>public.member</code> table.
-     */
-    public Member member() {
-        if (_member == null)
-            _member = new Member(this, Keys.MADDRESS__MADDRESS_MID_FKEY);
+		/**
+		 * Get the implicit join path to the <code>public.member</code> table.
+		 */
+		public Member member() {
+				if (_member == null)
+						_member = new Member(this, Keys.MADDRESS__MADDRESS_MID_FKEY);
 
-        return _member;
-    }
+				return _member;
+		}
 
-    @Override
-    public Maddress as(String alias) {
-        return new Maddress(DSL.name(alias), this);
-    }
+		@Override
+		public Maddress as(String alias) {
+				return new Maddress(DSL.name(alias), this);
+		}
 
-    @Override
-    public Maddress as(Name alias) {
-        return new Maddress(alias, this);
-    }
+		@Override
+		public Maddress as(Name alias) {
+				return new Maddress(alias, this);
+		}
 
-    @Override
-    public Maddress as(Table<?> alias) {
-        return new Maddress(alias.getQualifiedName(), this);
-    }
+		@Override
+		public Maddress as(Table<?> alias) {
+				return new Maddress(alias.getQualifiedName(), this);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Maddress rename(String name) {
-        return new Maddress(DSL.name(name), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Maddress rename(String name) {
+				return new Maddress(DSL.name(name), null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Maddress rename(Name name) {
-        return new Maddress(name, null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Maddress rename(Name name) {
+				return new Maddress(name, null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Maddress rename(Table<?> name) {
-        return new Maddress(name.getQualifiedName(), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Maddress rename(Table<?> name) {
+				return new Maddress(name.getQualifiedName(), null);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row10 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row10 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row10<UUID, Addressname, OffsetDateTime, String, String, String, String, String, String, String> fieldsRow() {
-        return (Row10) super.fieldsRow();
-    }
+		@Override
+		public Row10<UUID, Addressname, OffsetDateTime, String, String, String, String, String, String, String> fieldsRow() {
+				return (Row10) super.fieldsRow();
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function10<? super UUID, ? super Addressname, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function10<? super UUID, ? super Addressname, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super UUID, ? super Addressname, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function10<? super UUID, ? super Addressname, ? super OffsetDateTime, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

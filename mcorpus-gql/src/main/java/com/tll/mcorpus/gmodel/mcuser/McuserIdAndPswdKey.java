@@ -8,24 +8,24 @@ import java.util.UUID;
 import com.tll.gmodel.IKey;
 
 public class McuserIdAndPswdKey implements IKey {
-  private final UUID uid;
-  private final String pswd;
+	private final UUID uid;
+	private final String pswd;
 
-  public McuserIdAndPswdKey(UUID uid, String pswd) {
-    this.uid = uid;
-    this.pswd = pswd;
-  }
+	public McuserIdAndPswdKey(UUID uid, String pswd) {
+		this.uid = uid;
+		this.pswd = pswd;
+	}
 
-  public UUID getUid() { return uid; }
+	public UUID getUid() { return uid; }
 
-  public String getPswd() { return pswd; }
+	public String getPswd() { return pswd; }
 
-  @Override
-  public boolean isSet() { return isNotNull(uid) && isNotBlank(pswd); }
+	@Override
+	public boolean isSet() { return isNotNull(uid) && isNotBlank(pswd); }
 
-  @Override
-  public String refToken() { return String.format("McuserIdAndPswdKey[uid: %s]", uid); }
+	@Override
+	public String refToken() { return String.format("McuserIdAndPswdKey[uid: %s]", uid); }
 
-  
+	
 
 }

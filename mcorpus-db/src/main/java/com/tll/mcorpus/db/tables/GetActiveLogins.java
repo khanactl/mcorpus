@@ -34,163 +34,163 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetActiveLogins extends TableImpl<GetActiveLoginsRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.get_active_logins</code>
-     */
-    public static final GetActiveLogins GET_ACTIVE_LOGINS = new GetActiveLogins();
+		/**
+		 * The reference instance of <code>public.get_active_logins</code>
+		 */
+		public static final GetActiveLogins GET_ACTIVE_LOGINS = new GetActiveLogins();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<GetActiveLoginsRecord> getRecordType() {
-        return GetActiveLoginsRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<GetActiveLoginsRecord> getRecordType() {
+				return GetActiveLoginsRecord.class;
+		}
 
-    /**
-     * The column <code>public.get_active_logins.jwt_id</code>.
-     */
-    public final TableField<GetActiveLoginsRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID, this, "");
+		/**
+		 * The column <code>public.get_active_logins.jwt_id</code>.
+		 */
+		public final TableField<GetActiveLoginsRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID, this, "");
 
-    /**
-     * The column <code>public.get_active_logins.login_expiration</code>.
-     */
-    public final TableField<GetActiveLoginsRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+		/**
+		 * The column <code>public.get_active_logins.login_expiration</code>.
+		 */
+		public final TableField<GetActiveLoginsRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
-    /**
-     * The column <code>public.get_active_logins.request_timestamp</code>.
-     */
-    public final TableField<GetActiveLoginsRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+		/**
+		 * The column <code>public.get_active_logins.request_timestamp</code>.
+		 */
+		public final TableField<GetActiveLoginsRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
-    /**
-     * The column <code>public.get_active_logins.request_origin</code>.
-     */
-    public final TableField<GetActiveLoginsRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), this, "", new PostgresInetAddressBinding());
+		/**
+		 * The column <code>public.get_active_logins.request_origin</code>.
+		 */
+		public final TableField<GetActiveLoginsRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\""), this, "", new PostgresInetAddressBinding());
 
-    private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased) {
-        this(alias, aliased, new Field[] {
-            DSL.val(null, SQLDataType.UUID)
-        });
-    }
+		private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased) {
+				this(alias, aliased, new Field[] {
+						DSL.val(null, SQLDataType.UUID)
+				});
+		}
 
-    private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.function());
-    }
+		private GetActiveLogins(Name alias, Table<GetActiveLoginsRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.function());
+		}
 
-    /**
-     * Create an aliased <code>public.get_active_logins</code> table reference
-     */
-    public GetActiveLogins(String alias) {
-        this(DSL.name(alias), GET_ACTIVE_LOGINS);
-    }
+		/**
+		 * Create an aliased <code>public.get_active_logins</code> table reference
+		 */
+		public GetActiveLogins(String alias) {
+				this(DSL.name(alias), GET_ACTIVE_LOGINS);
+		}
 
-    /**
-     * Create an aliased <code>public.get_active_logins</code> table reference
-     */
-    public GetActiveLogins(Name alias) {
-        this(alias, GET_ACTIVE_LOGINS);
-    }
+		/**
+		 * Create an aliased <code>public.get_active_logins</code> table reference
+		 */
+		public GetActiveLogins(Name alias) {
+				this(alias, GET_ACTIVE_LOGINS);
+		}
 
-    /**
-     * Create a <code>public.get_active_logins</code> table reference
-     */
-    public GetActiveLogins() {
-        this(DSL.name("get_active_logins"), null);
-    }
+		/**
+		 * Create a <code>public.get_active_logins</code> table reference
+		 */
+		public GetActiveLogins() {
+				this(DSL.name("get_active_logins"), null);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public GetActiveLogins as(String alias) {
-        return new GetActiveLogins(DSL.name(alias), this, parameters);
-    }
+		@Override
+		public GetActiveLogins as(String alias) {
+				return new GetActiveLogins(DSL.name(alias), this, parameters);
+		}
 
-    @Override
-    public GetActiveLogins as(Name alias) {
-        return new GetActiveLogins(alias, this, parameters);
-    }
+		@Override
+		public GetActiveLogins as(Name alias) {
+				return new GetActiveLogins(alias, this, parameters);
+		}
 
-    @Override
-    public GetActiveLogins as(Table<?> alias) {
-        return new GetActiveLogins(alias.getQualifiedName(), this, parameters);
-    }
+		@Override
+		public GetActiveLogins as(Table<?> alias) {
+				return new GetActiveLogins(alias.getQualifiedName(), this, parameters);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public GetActiveLogins rename(String name) {
-        return new GetActiveLogins(DSL.name(name), null, parameters);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public GetActiveLogins rename(String name) {
+				return new GetActiveLogins(DSL.name(name), null, parameters);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public GetActiveLogins rename(Name name) {
-        return new GetActiveLogins(name, null, parameters);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public GetActiveLogins rename(Name name) {
+				return new GetActiveLogins(name, null, parameters);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public GetActiveLogins rename(Table<?> name) {
-        return new GetActiveLogins(name.getQualifiedName(), null, parameters);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public GetActiveLogins rename(Table<?> name) {
+				return new GetActiveLogins(name.getQualifiedName(), null, parameters);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row4 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row4 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row4<UUID, OffsetDateTime, OffsetDateTime, InetAddress> fieldsRow() {
-        return (Row4) super.fieldsRow();
-    }
+		@Override
+		public Row4<UUID, OffsetDateTime, OffsetDateTime, InetAddress> fieldsRow() {
+				return (Row4) super.fieldsRow();
+		}
 
-    /**
-     * Call this table-valued function
-     */
-    public GetActiveLogins call(
-          UUID mcuserId
-    ) {
-        GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
-            DSL.val(mcuserId, SQLDataType.UUID)
-        });
+		/**
+		 * Call this table-valued function
+		 */
+		public GetActiveLogins call(
+					UUID mcuserId
+		) {
+				GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
+						DSL.val(mcuserId, SQLDataType.UUID)
+				});
 
-        return aliased() ? result.as(getUnqualifiedName()) : result;
-    }
+				return aliased() ? result.as(getUnqualifiedName()) : result;
+		}
 
-    /**
-     * Call this table-valued function
-     */
-    public GetActiveLogins call(
-          Field<UUID> mcuserId
-    ) {
-        GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
-            mcuserId
-        });
+		/**
+		 * Call this table-valued function
+		 */
+		public GetActiveLogins call(
+					Field<UUID> mcuserId
+		) {
+				GetActiveLogins result = new GetActiveLogins(DSL.name("get_active_logins"), null, new Field[] {
+						mcuserId
+				});
 
-        return aliased() ? result.as(getUnqualifiedName()) : result;
-    }
+				return aliased() ? result.as(getUnqualifiedName()) : result;
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function4<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super InetAddress, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function4<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super InetAddress, ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function4<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super InetAddress, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function4<? super UUID, ? super OffsetDateTime, ? super OffsetDateTime, ? super InetAddress, ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

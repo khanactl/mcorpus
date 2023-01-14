@@ -4,34 +4,34 @@ import { CfnOutput, Construct } from '@aws-cdk/core';
 import { BaseStack, iname, IStackProps } from './cdk-native';
 
 export const ClusterStackRootProps = {
-  rootStackName: 'ecs-cluster',
-  description: 'Creates the ECS cluster in which the docker app container resides.',
+	rootStackName: 'ecs-cluster',
+	description: 'Creates the ECS cluster in which the docker app container resides.',
 };
 
 export interface IClusterStackProps extends IStackProps {
-  /**
-   * The VPC ref.
-   */
-  readonly vpc: IVpc;
+	/**
+	 * The VPC ref.
+	 */
+	readonly vpc: IVpc;
 }
 
 export class ClusterStack extends BaseStack {
-  public readonly cluster: Cluster;
+	public readonly cluster: Cluster;
 
-  constructor(scope: Construct, props: IClusterStackProps) {
-    super(scope, ClusterStackRootProps.rootStackName, {
-      ...props, ...{ description: ClusterStackRootProps.description }
-    });
+	constructor(scope: Construct, props: IClusterStackProps) {
+		super(scope, ClusterStackRootProps.rootStackName, {
+			...props, ...{ description: ClusterStackRootProps.description }
+		});
 
-    this.cluster = new Cluster(this, 'FargateCluster', {
-      vpc: props.vpc,
-      clusterName: iname('cluster', props),
-      containerInsights: true,
-    });
+		this.cluster = new Cluster(this, 'FargateCluster', {
+			vpc: props.vpc,
+			clusterName: iname('cluster', props),
+			containerInsights: true,
+		});
 
-    // stack output
-    new CfnOutput(this, 'FargateClusterName', {
-      value: this.cluster.clusterName,
-    });
-  }
+		// stack output
+		new CfnOutput(this, 'FargateClusterName', {
+			value: this.cluster.clusterName,
+		});
+	}
 }

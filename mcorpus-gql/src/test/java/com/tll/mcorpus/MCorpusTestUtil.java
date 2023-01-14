@@ -33,257 +33,257 @@ import org.postgresql.ds.PGSimpleDataSource;
 
 public class MCorpusTestUtil {
 
-  public static final InetAddress testRequestOrigin;
+	public static final InetAddress testRequestOrigin;
 
-  public static final String testServerPublicAddress = "https://mcorpus.d2d";
+	public static final String testServerPublicAddress = "https://mcorpus.d2d";
 
-  private static DSLContext dslMcweb = null;
+	private static DSLContext dslMcweb = null;
 
-  private static DSLContext dslMcwebtest = null;
+	private static DSLContext dslMcwebtest = null;
 
-  static {
-    try {
-      testRequestOrigin = InetAddress.getByName("127.0.0.1");
-    } catch(Exception e) {
-      throw new Error(e);
-    }
-  }
+	static {
+		try {
+			testRequestOrigin = InetAddress.getByName("127.0.0.1");
+		} catch(Exception e) {
+			throw new Error(e);
+		}
+	}
 
-  /**
-   * @return A newly created {@link DataSource} to the test database intended for
-   *         testing.
-   */
-  public static DataSource ds_mcweb() {
-    PGSimpleDataSource ds = new PGSimpleDataSource();
-    final String jdbcUrl = System.getenv("MCORPUS_DB_URL");
-    ds.setUrl(jdbcUrl);
-    return ds;
-  }
+	/**
+	 * @return A newly created {@link DataSource} to the test database intended for
+	 *				 testing.
+	 */
+	public static DataSource ds_mcweb() {
+		PGSimpleDataSource ds = new PGSimpleDataSource();
+		final String jdbcUrl = System.getenv("MCORPUS_DB_URL");
+		ds.setUrl(jdbcUrl);
+		return ds;
+	}
 
-  /**
-   * @return A newly created {@link DataSource} to the test database intended for
-   *         testing.
-   */
-  public static DataSource ds_mcwebtest() {
-    PGSimpleDataSource ds = new PGSimpleDataSource();
-    final String jdbcUrl = System.getenv("MCORPUS_TEST_DB_URL");
-    ds.setUrl(jdbcUrl);
-    return ds;
-  }
+	/**
+	 * @return A newly created {@link DataSource} to the test database intended for
+	 *				 testing.
+	 */
+	public static DataSource ds_mcwebtest() {
+		PGSimpleDataSource ds = new PGSimpleDataSource();
+		final String jdbcUrl = System.getenv("MCORPUS_TEST_DB_URL");
+		ds.setUrl(jdbcUrl);
+		return ds;
+	}
 
-  /**
-   * @return true if the internally managed test dsl context has been loaded.
-   */
-  public static synchronized boolean isTestDslMcwebLoaded() {
-    return dslMcweb != null;
-  }
+	/**
+	 * @return true if the internally managed test dsl context has been loaded.
+	 */
+	public static synchronized boolean isTestDslMcwebLoaded() {
+		return dslMcweb != null;
+	}
 
-  /**
-   * @return a JooQ {@link DSLContext} intended for testing with <em>mcweb</em> db
-   *         credentials.
-   */
-  public static synchronized DSLContext testDslMcweb() {
-    if(dslMcweb == null) {
-      Settings s = new Settings();
-      s.setRenderSchema(false);
-      s.setRenderNameCase(RenderNameCase.LOWER);
-      s.setRenderKeywordCase(RenderKeywordCase.UPPER);
-      dslMcweb = DSL.using(ds_mcweb(), SQLDialect.POSTGRES, s);
-    }
-    return dslMcweb;
-  }
+	/**
+	 * @return a JooQ {@link DSLContext} intended for testing with <em>mcweb</em> db
+	 *				 credentials.
+	 */
+	public static synchronized DSLContext testDslMcweb() {
+		if(dslMcweb == null) {
+			Settings s = new Settings();
+			s.setRenderSchema(false);
+			s.setRenderNameCase(RenderNameCase.LOWER);
+			s.setRenderKeywordCase(RenderKeywordCase.UPPER);
+			dslMcweb = DSL.using(ds_mcweb(), SQLDialect.POSTGRES, s);
+		}
+		return dslMcweb;
+	}
 
-  /**
-   * @return true if the internally managed mcwebtest dsl context has been loaded.
-   */
-  public static synchronized boolean isTestDslMcwebTestLoaded() {
-    return dslMcwebtest != null;
-  }
+	/**
+	 * @return true if the internally managed mcwebtest dsl context has been loaded.
+	 */
+	public static synchronized boolean isTestDslMcwebTestLoaded() {
+		return dslMcwebtest != null;
+	}
 
-  /**
-   * @return a JooQ {@link DSLContext} intended for testing with <em>mcwebtest</em> db
-   *         credentials.
-   */
-  public static synchronized DSLContext testDslMcwebTest() {
-    if(dslMcwebtest == null) {
-      Settings s = new Settings();
-      s.setRenderSchema(false);
-      s.setRenderNameCase(RenderNameCase.LOWER);
-      s.setRenderKeywordCase(RenderKeywordCase.UPPER);
-      dslMcwebtest = DSL.using(ds_mcwebtest(), SQLDialect.POSTGRES, s);
-    }
-    return dslMcwebtest;
-  }
+	/**
+	 * @return a JooQ {@link DSLContext} intended for testing with <em>mcwebtest</em> db
+	 *				 credentials.
+	 */
+	public static synchronized DSLContext testDslMcwebTest() {
+		if(dslMcwebtest == null) {
+			Settings s = new Settings();
+			s.setRenderSchema(false);
+			s.setRenderNameCase(RenderNameCase.LOWER);
+			s.setRenderKeywordCase(RenderKeywordCase.UPPER);
+			dslMcwebtest = DSL.using(ds_mcwebtest(), SQLDialect.POSTGRES, s);
+		}
+		return dslMcwebtest;
+	}
 
-  public static IJwtUser mockJwtUser() {
-    return new IJwtUser() {
+	public static IJwtUser mockJwtUser() {
+		return new IJwtUser() {
 
-      @Override
-      public UUID getJwtUserId() {
-        return UUID.randomUUID();
-      }
+			@Override
+			public UUID getJwtUserId() {
+				return UUID.randomUUID();
+			}
 
-      @Override
-      public String getJwtUserName() {
-        return "name";
-      }
+			@Override
+			public String getJwtUserName() {
+				return "name";
+			}
 
-      @Override
-      public String getJwtUserUsername() {
-        return "username";
-      }
+			@Override
+			public String getJwtUserUsername() {
+				return "username";
+			}
 
-      @Override
-      public String getJwtUserEmail() {
-        return "email@domain.com";
-      }
+			@Override
+			public String getJwtUserEmail() {
+				return "email@domain.com";
+			}
 
-      @Override
-      public boolean isAdministrator() {
-        return true;
-      }
+			@Override
+			public boolean isAdministrator() {
+				return true;
+			}
 
-      @Override
-      public String[] getJwtUserRoles() {
-        return new String[] { "ADMIN" };
-      }
-    };
-  }
+			@Override
+			public String[] getJwtUserRoles() {
+				return new String[] { "ADMIN" };
+			}
+		};
+	}
 
-  public static IJwtBackendHandler mockJwtBackendHandler() {
-    return new IJwtBackendHandler() {
+	public static IJwtBackendHandler mockJwtBackendHandler() {
+		return new IJwtBackendHandler() {
 
-      final IJwtUser jwtUser = mockJwtUser();
+			final IJwtUser jwtUser = mockJwtUser();
 
-      @Override
-      public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin,
-          Instant requestInstant) {
-        return FetchResult.fetchrslt(Boolean.TRUE);
-      }
+			@Override
+			public FetchResult<Boolean> jwtInvalidateAllForUser(UUID jwtUserId, InetAddress requestOrigin,
+					Instant requestInstant) {
+				return FetchResult.fetchrslt(Boolean.TRUE);
+			}
 
-      @Override
-      public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
-          Instant requestInstant) {
-          return FetchResult.fetchrslt(Boolean.TRUE);
-      }
+			@Override
+			public FetchResult<Boolean> jwtBackendLogout(UUID jwtUserId, UUID jwtId, InetAddress requestOrigin,
+					Instant requestInstant) {
+					return FetchResult.fetchrslt(Boolean.TRUE);
+			}
 
-      @Override
-      public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
-          InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
-        return FetchResult.fetchrslt(jwtUser);
-      }
+			@Override
+			public FetchResult<IJwtUser> jwtBackendLogin(String username, String pswd, UUID pendingJwtId,
+					InetAddress requestOrigin, Instant requestInstant, Instant jwtExpiration) {
+				return FetchResult.fetchrslt(jwtUser);
+			}
 
-      @Override
-      public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId, InetAddress requestOrigin,
-          Instant requestInstant, Instant jwtExpiration) {
-        return null;
-      }
+			@Override
+			public FetchResult<IJwtUser> jwtBackendLoginRefresh(UUID oldJwtId, UUID pendingJwtId, InetAddress requestOrigin,
+					Instant requestInstant, Instant jwtExpiration) {
+				return null;
+			}
 
-      @Override
-      public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
-        return FetchResult.fetchrslt(Collections.emptyList());
-      }
+			@Override
+			public FetchResult<List<IJwtInfo>> getActiveJwtLogins(UUID jwtUserId) {
+				return FetchResult.fetchrslt(Collections.emptyList());
+			}
 
-      @Override
-      public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId) {
-        return FetchResult.fetchrslt(JwtBackendStatus.NOT_PRESENT);
-      }
+			@Override
+			public FetchResult<JwtBackendStatus> getBackendJwtStatus(UUID jwtId, UUID jwtUserId) {
+				return FetchResult.fetchrslt(JwtBackendStatus.NOT_PRESENT);
+			}
 
-      @Override
-      public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
-        return FetchResult.fetchrslt(jwtUser);
-      }
-    };
-  }
+			@Override
+			public FetchResult<IJwtUser> getJwtUserInfo(UUID jwtUserId) {
+				return FetchResult.fetchrslt(jwtUser);
+			}
+		};
+	}
 
-  public static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
-    final String sro;
-    // primary: x-forwarded-for http header
-    if (isNotNull(rs.getXForwardedForClientIp()))
-      sro = rs.getXForwardedForClientIp();
-    // fallback: remote address host
-    else if (isNotNull(rs.getRemoteAddressHost()))
-      sro = rs.getRemoteAddressHost();
-    else
-      throw new UnknownHostException();
-    return InetAddress.getByName(sro);
-  }
+	public static InetAddress resolveRequestOrigin(final RequestSnapshot rs) throws UnknownHostException {
+		final String sro;
+		// primary: x-forwarded-for http header
+		if (isNotNull(rs.getXForwardedForClientIp()))
+			sro = rs.getXForwardedForClientIp();
+		// fallback: remote address host
+		else if (isNotNull(rs.getRemoteAddressHost()))
+			sro = rs.getRemoteAddressHost();
+		else
+			throw new UnknownHostException();
+		return InetAddress.getByName(sro);
+	}
 
-  /**
-   * @return Newly created {@link JWT} instance suitable for testing.
-   */
-  public static JWT jwt() {
-    byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
-    Duration jwtTtl = Duration.ofMinutes(15);
-    Duration refreshTokenTtl = Duration.ofDays(14);
-    return new JWT(
-      mockJwtBackendHandler(),
-      jwtTtl,
-      refreshTokenTtl,
-      jwtSharedSecret,
-      testServerPublicAddress
-    );
-  }
+	/**
+	 * @return Newly created {@link JWT} instance suitable for testing.
+	 */
+	public static JWT jwt() {
+		byte[] jwtSharedSecret = JWT.generateJwtSharedSecret();
+		Duration jwtTtl = Duration.ofMinutes(15);
+		Duration refreshTokenTtl = Duration.ofDays(14);
+		return new JWT(
+			mockJwtBackendHandler(),
+			jwtTtl,
+			refreshTokenTtl,
+			jwtSharedSecret,
+			testServerPublicAddress
+		);
+	}
 
-  /**
-   * @return Newly created {@link IJwtBackendHandler} instance suitable for testing.
-   */
-  public static IJwtBackendHandler testJwtBackendHandler() {
-    return new MCorpusJwtBackendHandler(new MCorpusUserRepo(ds_mcweb()));
-  }
+	/**
+	 * @return Newly created {@link IJwtBackendHandler} instance suitable for testing.
+	 */
+	public static IJwtBackendHandler testJwtBackendHandler() {
+		return new MCorpusJwtBackendHandler(new MCorpusUserRepo(ds_mcweb()));
+	}
 
-  public static IJwtHttpRequestProvider testJwtRequestProvider(RequestSnapshot rs) {
-    return new IJwtHttpRequestProvider(){
+	public static IJwtHttpRequestProvider testJwtRequestProvider(RequestSnapshot rs) {
+		return new IJwtHttpRequestProvider(){
 
-      @Override
-      public boolean verifyRequestOrigin(String jwtAudience) {
-        return true;
-      }
+			@Override
+			public boolean verifyRequestOrigin(String jwtAudience) {
+				return true;
+			}
 
-      @Override
-      public InetAddress getRequestOrigin() {
-        try {
-          return InetAddress.getByName("127.0.0.1");
-        } catch(UnknownHostException e) {
-          throw new Error();
-        }
-      }
+			@Override
+			public InetAddress getRequestOrigin() {
+				try {
+					return InetAddress.getByName("127.0.0.1");
+				} catch(UnknownHostException e) {
+					throw new Error();
+				}
+			}
 
-      @Override
-      public Instant getRequestInstant() {
-        return Instant.now();
-      }
+			@Override
+			public Instant getRequestInstant() {
+				return Instant.now();
+			}
 
-      @Override
-      public String getJwt() {
-        return "TODO";
-      }
+			@Override
+			public String getJwt() {
+				return "TODO";
+			}
 
-      @Override
-      public String getJwtRefreshToken() {
-        return "TODO";
-      }
-    };
-  }
+			@Override
+			public String getJwtRefreshToken() {
+				return "TODO";
+			}
+		};
+	}
 
-  /**
-   * @return Newly created {@link IJwtHttpResponseAction} instance
-   *         whose implementation methods are no-ops (they do nothing).
-   */
-  public static IJwtHttpResponseAction testJwtResponseAction() {
-    return new IJwtHttpResponseAction(){
+	/**
+	 * @return Newly created {@link IJwtHttpResponseAction} instance
+	 *				 whose implementation methods are no-ops (they do nothing).
+	 */
+	public static IJwtHttpResponseAction testJwtResponseAction() {
+		return new IJwtHttpResponseAction(){
 
-      @Override
-      public void setJwtClientside(String jwt, String refreshToken, Duration refreshTokenTimeToLive) {
-        // testing no-op
-      }
+			@Override
+			public void setJwtClientside(String jwt, String refreshToken, Duration refreshTokenTimeToLive) {
+				// testing no-op
+			}
 
-      @Override
-      public void expireJwtClientside() {
-        // testing no-op
-      }
-    };
-  }
+			@Override
+			public void expireJwtClientside() {
+				// testing no-op
+			}
+		};
+	}
 
-  private MCorpusTestUtil() {}
+	private MCorpusTestUtil() {}
 }

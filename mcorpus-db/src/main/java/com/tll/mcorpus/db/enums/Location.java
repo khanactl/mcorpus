@@ -17,58 +17,58 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum Location implements EnumType {
 
-    _01("01"),
+		_01("01"),
 
-    _02("02"),
+		_02("02"),
 
-    _03("03"),
+		_03("03"),
 
-    _04("04"),
+		_04("04"),
 
-    _05("05"),
+		_05("05"),
 
-    _06("06"),
+		_06("06"),
 
-    _07("07"),
+		_07("07"),
 
-    _08("08"),
+		_08("08"),
 
-    _09("09"),
+		_09("09"),
 
-    _98("98"),
+		_98("98"),
 
-    _20("20");
+		_20("20");
 
-    private final String literal;
+		private final String literal;
 
-    private Location(String literal) {
-        this.literal = literal;
-    }
+		private Location(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "location";
-    }
+		@Override
+		public String getName() {
+				return "location";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static Location lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(Location.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static Location lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(Location.class, literal);
+		}
 }

@@ -14,50 +14,50 @@ import com.tll.transform.BaseTransformer;
 
 public class McuserHistoryXfrm extends BaseTransformer<McuserHistory, McuserHistoryDomain> {
 
-  public static List<McuserHistory.LoginEvent> backToFrontLogin(final List<McuserHistoryDomain.LoginEventDomain> blist) {
-    return isNull(blist) ? null : blist.stream()
-      .map(b -> new McuserHistory.LoginEvent(
-        b.jwtId,
-        odtToDate(b.timestamp),
-        fromInet(b.requestOrigin)
-      ))
-      .collect(Collectors.toList())
-    ;
-  }
+	public static List<McuserHistory.LoginEvent> backToFrontLogin(final List<McuserHistoryDomain.LoginEventDomain> blist) {
+		return isNull(blist) ? null : blist.stream()
+			.map(b -> new McuserHistory.LoginEvent(
+				b.jwtId,
+				odtToDate(b.timestamp),
+				fromInet(b.requestOrigin)
+			))
+			.collect(Collectors.toList())
+		;
+	}
 
-  public static List<McuserHistory.LogoutEvent> backToFrontLogout(final List<McuserHistoryDomain.LogoutEventDomain> blist) {
-    return isNull(blist) ? null : blist.stream()
-      .map(b -> new McuserHistory.LogoutEvent(
-        b.jwtId,
-        odtToDate(b.timestamp),
-        fromInet(b.requestOrigin)
-      ))
-      .collect(Collectors.toList())
-    ;
-  }
+	public static List<McuserHistory.LogoutEvent> backToFrontLogout(final List<McuserHistoryDomain.LogoutEventDomain> blist) {
+		return isNull(blist) ? null : blist.stream()
+			.map(b -> new McuserHistory.LogoutEvent(
+				b.jwtId,
+				odtToDate(b.timestamp),
+				fromInet(b.requestOrigin)
+			))
+			.collect(Collectors.toList())
+		;
+	}
 
-  private static String fromInet(final InetAddress ia) {
-    return ia == null ? null : ia.getHostAddress();
-  }
+	private static String fromInet(final InetAddress ia) {
+		return ia == null ? null : ia.getHostAddress();
+	}
 
-  @Override
-  protected McuserHistory fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
-    throw new UnsupportedOperationException();
-  }
+	@Override
+	protected McuserHistory fromNotEmptyGraphQLMapForAdd(final Map<String, Object> gqlMap) {
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public McuserHistory fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
-    throw new UnsupportedOperationException();
-  }
+	@Override
+	public McuserHistory fromNotEmptyGraphQLMapForUpdate(final Map<String, Object> gqlMap) {
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  protected McuserHistory fromNonNullBackend(final McuserHistoryDomain d) {
-    return new McuserHistory(d.uid, backToFrontLogin(d.logins), backToFrontLogout(d.logouts));
-  }
+	@Override
+	protected McuserHistory fromNonNullBackend(final McuserHistoryDomain d) {
+		return new McuserHistory(d.uid, backToFrontLogin(d.logins), backToFrontLogout(d.logouts));
+	}
 
-  @Override
-  protected McuserHistoryDomain toBackendFromNonNull(final McuserHistory g) {
-    throw new UnsupportedOperationException();
-  }
+	@Override
+	protected McuserHistoryDomain toBackendFromNonNull(final McuserHistory g) {
+		throw new UnsupportedOperationException();
+	}
 
 }

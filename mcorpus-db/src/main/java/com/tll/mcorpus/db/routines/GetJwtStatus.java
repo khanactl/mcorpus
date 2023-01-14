@@ -22,40 +22,40 @@ import org.jooq.impl.SQLDataType;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class GetJwtStatus extends AbstractRoutine<JwtStatus> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The parameter <code>public.get_jwt_status.RETURN_VALUE</code>.
-     */
-    public static final Parameter<JwtStatus> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), false, false);
+		/**
+		 * The parameter <code>public.get_jwt_status.RETURN_VALUE</code>.
+		 */
+		public static final Parameter<JwtStatus> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class), false, false);
 
-    /**
-     * The parameter <code>public.get_jwt_status.jwt_id</code>.
-     */
-    public static final Parameter<UUID> JWT_ID = Internal.createParameter("jwt_id", SQLDataType.UUID, false, false);
+		/**
+		 * The parameter <code>public.get_jwt_status.jwt_id</code>.
+		 */
+		public static final Parameter<UUID> JWT_ID = Internal.createParameter("jwt_id", SQLDataType.UUID, false, false);
 
-    /**
-     * Create a new routine call instance
-     */
-    public GetJwtStatus() {
-        super("get_jwt_status", Public.PUBLIC, SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class));
+		/**
+		 * Create a new routine call instance
+		 */
+		public GetJwtStatus() {
+				super("get_jwt_status", Public.PUBLIC, SQLDataType.VARCHAR.asEnumDataType(com.tll.mcorpus.db.enums.JwtStatus.class));
 
-        setReturnParameter(RETURN_VALUE);
-        addInParameter(JWT_ID);
-    }
+				setReturnParameter(RETURN_VALUE);
+				addInParameter(JWT_ID);
+		}
 
-    /**
-     * Set the <code>jwt_id</code> parameter IN value to the routine
-     */
-    public void setJwtId(UUID value) {
-        setValue(JWT_ID, value);
-    }
+		/**
+		 * Set the <code>jwt_id</code> parameter IN value to the routine
+		 */
+		public void setJwtId(UUID value) {
+				setValue(JWT_ID, value);
+		}
 
-    /**
-     * Set the <code>jwt_id</code> parameter to the function to be used with a
-     * {@link org.jooq.Select} statement
-     */
-    public void setJwtId(Field<UUID> field) {
-        setField(JWT_ID, field);
-    }
+		/**
+		 * Set the <code>jwt_id</code> parameter to the function to be used with a
+		 * {@link org.jooq.Select} statement
+		 */
+		public void setJwtId(Field<UUID> field) {
+				setField(JWT_ID, field);
+		}
 }

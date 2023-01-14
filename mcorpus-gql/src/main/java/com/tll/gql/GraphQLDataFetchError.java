@@ -24,48 +24,48 @@ import graphql.language.SourceLocation;
  * @author jpk
  */
 public class GraphQLDataFetchError implements GraphQLError {
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public static GraphQLDataFetchError inst(final ResultPath epath, String emsg) {
-    return new GraphQLDataFetchError(
-      (isNull(epath) ? ResultPath.rootPath() : epath).toString(),
-      isNullOrEmpty(emsg) ? "Unspecified data fetch error." : clean(emsg)
-    );
-  }
+	public static GraphQLDataFetchError inst(final ResultPath epath, String emsg) {
+		return new GraphQLDataFetchError(
+			(isNull(epath) ? ResultPath.rootPath() : epath).toString(),
+			isNullOrEmpty(emsg) ? "Unspecified data fetch error." : clean(emsg)
+		);
+	}
 
-  public static GraphQLDataFetchError inst(final ResultPath epath, final Throwable exception) {
-    return inst(epath, exception.getMessage());
-  }
+	public static GraphQLDataFetchError inst(final ResultPath epath, final Throwable exception) {
+		return inst(epath, exception.getMessage());
+	}
 
-  private final String epath;
-  private final String emsg;
+	private final String epath;
+	private final String emsg;
 
-  /**
-   * Constructor
-   *
-   * @param epath the graphql execution path associated with the error(s)
-   * @param emsg the error message
-   */
-  protected GraphQLDataFetchError(String epath, String emsg) {
-    this.epath = epath;
-    this.emsg = emsg;
-  }
+	/**
+	 * Constructor
+	 *
+	 * @param epath the graphql execution path associated with the error(s)
+	 * @param emsg the error message
+	 */
+	protected GraphQLDataFetchError(String epath, String emsg) {
+		this.epath = epath;
+		this.emsg = emsg;
+	}
 
-  @Override
-  public String getMessage() { return emsg; }
+	@Override
+	public String getMessage() { return emsg; }
 
-  @Override @JsonIgnore
-  public List<SourceLocation> getLocations() { return null; }
+	@Override @JsonIgnore
+	public List<SourceLocation> getLocations() { return null; }
 
-  @Override
-  public ErrorClassification getErrorType() { return ErrorType.DataFetchingException; }
+	@Override
+	public ErrorClassification getErrorType() { return ErrorType.DataFetchingException; }
 
-  @Override
-  public List<Object> getPath() { return Collections.singletonList(epath); }
+	@Override
+	public List<Object> getPath() { return Collections.singletonList(epath); }
 
-  @Override @JsonIgnore
-  public Map<String, Object> getExtensions() { return null; }
+	@Override @JsonIgnore
+	public Map<String, Object> getExtensions() { return null; }
 
-  @Override
-  public String toString() { return getMessage(); }
+	@Override
+	public String toString() { return getMessage(); }
 }

@@ -19,212 +19,212 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mcuser implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    private final UUID uid;
-    private final OffsetDateTime created;
-    private final OffsetDateTime modified;
-    private final String name;
-    private final String email;
-    private final String username;
-    private final String pswd;
-    private final McuserStatus status;
-    private final McuserRole[] roles;
+		private final UUID uid;
+		private final OffsetDateTime created;
+		private final OffsetDateTime modified;
+		private final String name;
+		private final String email;
+		private final String username;
+		private final String pswd;
+		private final McuserStatus status;
+		private final McuserRole[] roles;
 
-    public Mcuser(Mcuser value) {
-        this.uid = value.uid;
-        this.created = value.created;
-        this.modified = value.modified;
-        this.name = value.name;
-        this.email = value.email;
-        this.username = value.username;
-        this.pswd = value.pswd;
-        this.status = value.status;
-        this.roles = value.roles;
-    }
+		public Mcuser(Mcuser value) {
+				this.uid = value.uid;
+				this.created = value.created;
+				this.modified = value.modified;
+				this.name = value.name;
+				this.email = value.email;
+				this.username = value.username;
+				this.pswd = value.pswd;
+				this.status = value.status;
+				this.roles = value.roles;
+		}
 
-    public Mcuser(
-        UUID uid,
-        OffsetDateTime created,
-        OffsetDateTime modified,
-        String name,
-        String email,
-        String username,
-        String pswd,
-        McuserStatus status,
-        McuserRole[] roles
-    ) {
-        this.uid = uid;
-        this.created = created;
-        this.modified = modified;
-        this.name = name;
-        this.email = email;
-        this.username = username;
-        this.pswd = pswd;
-        this.status = status;
-        this.roles = roles;
-    }
+		public Mcuser(
+				UUID uid,
+				OffsetDateTime created,
+				OffsetDateTime modified,
+				String name,
+				String email,
+				String username,
+				String pswd,
+				McuserStatus status,
+				McuserRole[] roles
+		) {
+				this.uid = uid;
+				this.created = created;
+				this.modified = modified;
+				this.name = name;
+				this.email = email;
+				this.username = username;
+				this.pswd = pswd;
+				this.status = status;
+				this.roles = roles;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.uid</code>.
-     */
-    public UUID getUid() {
-        return this.uid;
-    }
+		/**
+		 * Getter for <code>public.mcuser.uid</code>.
+		 */
+		public UUID getUid() {
+				return this.uid;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.created</code>.
-     */
-    public OffsetDateTime getCreated() {
-        return this.created;
-    }
+		/**
+		 * Getter for <code>public.mcuser.created</code>.
+		 */
+		public OffsetDateTime getCreated() {
+				return this.created;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.modified</code>.
-     */
-    public OffsetDateTime getModified() {
-        return this.modified;
-    }
+		/**
+		 * Getter for <code>public.mcuser.modified</code>.
+		 */
+		public OffsetDateTime getModified() {
+				return this.modified;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.name</code>.
-     */
-    public String getName() {
-        return this.name;
-    }
+		/**
+		 * Getter for <code>public.mcuser.name</code>.
+		 */
+		public String getName() {
+				return this.name;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.email</code>.
-     */
-    public String getEmail() {
-        return this.email;
-    }
+		/**
+		 * Getter for <code>public.mcuser.email</code>.
+		 */
+		public String getEmail() {
+				return this.email;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.username</code>.
-     */
-    public String getUsername() {
-        return this.username;
-    }
+		/**
+		 * Getter for <code>public.mcuser.username</code>.
+		 */
+		public String getUsername() {
+				return this.username;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.pswd</code>.
-     */
-    public String getPswd() {
-        return this.pswd;
-    }
+		/**
+		 * Getter for <code>public.mcuser.pswd</code>.
+		 */
+		public String getPswd() {
+				return this.pswd;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.status</code>.
-     */
-    public McuserStatus getStatus() {
-        return this.status;
-    }
+		/**
+		 * Getter for <code>public.mcuser.status</code>.
+		 */
+		public McuserStatus getStatus() {
+				return this.status;
+		}
 
-    /**
-     * Getter for <code>public.mcuser.roles</code>.
-     */
-    public McuserRole[] getRoles() {
-        return this.roles;
-    }
+		/**
+		 * Getter for <code>public.mcuser.roles</code>.
+		 */
+		public McuserRole[] getRoles() {
+				return this.roles;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final Mcuser other = (Mcuser) obj;
-        if (this.uid == null) {
-            if (other.uid != null)
-                return false;
-        }
-        else if (!this.uid.equals(other.uid))
-            return false;
-        if (this.created == null) {
-            if (other.created != null)
-                return false;
-        }
-        else if (!this.created.equals(other.created))
-            return false;
-        if (this.modified == null) {
-            if (other.modified != null)
-                return false;
-        }
-        else if (!this.modified.equals(other.modified))
-            return false;
-        if (this.name == null) {
-            if (other.name != null)
-                return false;
-        }
-        else if (!this.name.equals(other.name))
-            return false;
-        if (this.email == null) {
-            if (other.email != null)
-                return false;
-        }
-        else if (!this.email.equals(other.email))
-            return false;
-        if (this.username == null) {
-            if (other.username != null)
-                return false;
-        }
-        else if (!this.username.equals(other.username))
-            return false;
-        if (this.pswd == null) {
-            if (other.pswd != null)
-                return false;
-        }
-        else if (!this.pswd.equals(other.pswd))
-            return false;
-        if (this.status == null) {
-            if (other.status != null)
-                return false;
-        }
-        else if (!this.status.equals(other.status))
-            return false;
-        if (this.roles == null) {
-            if (other.roles != null)
-                return false;
-        }
-        else if (!Arrays.equals(this.roles, other.roles))
-            return false;
-        return true;
-    }
+		@Override
+		public boolean equals(Object obj) {
+				if (this == obj)
+						return true;
+				if (obj == null)
+						return false;
+				if (getClass() != obj.getClass())
+						return false;
+				final Mcuser other = (Mcuser) obj;
+				if (this.uid == null) {
+						if (other.uid != null)
+								return false;
+				}
+				else if (!this.uid.equals(other.uid))
+						return false;
+				if (this.created == null) {
+						if (other.created != null)
+								return false;
+				}
+				else if (!this.created.equals(other.created))
+						return false;
+				if (this.modified == null) {
+						if (other.modified != null)
+								return false;
+				}
+				else if (!this.modified.equals(other.modified))
+						return false;
+				if (this.name == null) {
+						if (other.name != null)
+								return false;
+				}
+				else if (!this.name.equals(other.name))
+						return false;
+				if (this.email == null) {
+						if (other.email != null)
+								return false;
+				}
+				else if (!this.email.equals(other.email))
+						return false;
+				if (this.username == null) {
+						if (other.username != null)
+								return false;
+				}
+				else if (!this.username.equals(other.username))
+						return false;
+				if (this.pswd == null) {
+						if (other.pswd != null)
+								return false;
+				}
+				else if (!this.pswd.equals(other.pswd))
+						return false;
+				if (this.status == null) {
+						if (other.status != null)
+								return false;
+				}
+				else if (!this.status.equals(other.status))
+						return false;
+				if (this.roles == null) {
+						if (other.roles != null)
+								return false;
+				}
+				else if (!Arrays.equals(this.roles, other.roles))
+						return false;
+				return true;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
-        result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
-        result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
-        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        result = prime * result + ((this.email == null) ? 0 : this.email.hashCode());
-        result = prime * result + ((this.username == null) ? 0 : this.username.hashCode());
-        result = prime * result + ((this.pswd == null) ? 0 : this.pswd.hashCode());
-        result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
-        result = prime * result + ((this.roles == null) ? 0 : Arrays.hashCode(this.roles));
-        return result;
-    }
+		@Override
+		public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((this.uid == null) ? 0 : this.uid.hashCode());
+				result = prime * result + ((this.created == null) ? 0 : this.created.hashCode());
+				result = prime * result + ((this.modified == null) ? 0 : this.modified.hashCode());
+				result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+				result = prime * result + ((this.email == null) ? 0 : this.email.hashCode());
+				result = prime * result + ((this.username == null) ? 0 : this.username.hashCode());
+				result = prime * result + ((this.pswd == null) ? 0 : this.pswd.hashCode());
+				result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
+				result = prime * result + ((this.roles == null) ? 0 : Arrays.hashCode(this.roles));
+				return result;
+		}
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("Mcuser (");
+		@Override
+		public String toString() {
+				StringBuilder sb = new StringBuilder("Mcuser (");
 
-        sb.append(uid);
-        sb.append(", ").append(created);
-        sb.append(", ").append(modified);
-        sb.append(", ").append(name);
-        sb.append(", ").append(email);
-        sb.append(", ").append(username);
-        sb.append(", ").append(pswd);
-        sb.append(", ").append(status);
-        sb.append(", ").append(Arrays.toString(roles));
+				sb.append(uid);
+				sb.append(", ").append(created);
+				sb.append(", ").append(modified);
+				sb.append(", ").append(name);
+				sb.append(", ").append(email);
+				sb.append(", ").append(username);
+				sb.append(", ").append(pswd);
+				sb.append(", ").append(status);
+				sb.append(", ").append(Arrays.toString(roles));
 
-        sb.append(")");
-        return sb.toString();
-    }
+				sb.append(")");
+				return sb.toString();
+		}
 }

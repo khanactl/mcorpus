@@ -17,44 +17,44 @@ import org.jooq.Schema;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public enum McuserRole implements EnumType {
 
-    MCORPUS("MCORPUS"),
+		MCORPUS("MCORPUS"),
 
-    MEMBER("MEMBER"),
+		MEMBER("MEMBER"),
 
-    MPII("MPII"),
+		MPII("MPII"),
 
-    ADMIN("ADMIN");
+		ADMIN("ADMIN");
 
-    private final String literal;
+		private final String literal;
 
-    private McuserRole(String literal) {
-        this.literal = literal;
-    }
+		private McuserRole(String literal) {
+				this.literal = literal;
+		}
 
-    @Override
-    public Catalog getCatalog() {
-        return getSchema().getCatalog();
-    }
+		@Override
+		public Catalog getCatalog() {
+				return getSchema().getCatalog();
+		}
 
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return Public.PUBLIC;
+		}
 
-    @Override
-    public String getName() {
-        return "mcuser_role";
-    }
+		@Override
+		public String getName() {
+				return "mcuser_role";
+		}
 
-    @Override
-    public String getLiteral() {
-        return literal;
-    }
+		@Override
+		public String getLiteral() {
+				return literal;
+		}
 
-    /**
-     * Lookup a value of this EnumType by its literal
-     */
-    public static McuserRole lookupLiteral(String literal) {
-        return EnumType.lookupLiteral(McuserRole.class, literal);
-    }
+		/**
+		 * Lookup a value of this EnumType by its literal
+		 */
+		public static McuserRole lookupLiteral(String literal) {
+				return EnumType.lookupLiteral(McuserRole.class, literal);
+		}
 }

@@ -20,39 +20,39 @@ import org.jooq.impl.SQLDataType;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserPswd extends AbstractRoutine<java.lang.Void> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The parameter <code>public.mcuser_pswd.in_uid</code>.
-     */
-    public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
+		/**
+		 * The parameter <code>public.mcuser_pswd.in_uid</code>.
+		 */
+		public static final Parameter<UUID> IN_UID = Internal.createParameter("in_uid", SQLDataType.UUID, false, false);
 
-    /**
-     * The parameter <code>public.mcuser_pswd.in_pswd</code>.
-     */
-    public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", SQLDataType.CLOB, false, false);
+		/**
+		 * The parameter <code>public.mcuser_pswd.in_pswd</code>.
+		 */
+		public static final Parameter<String> IN_PSWD = Internal.createParameter("in_pswd", SQLDataType.CLOB, false, false);
 
-    /**
-     * Create a new routine call instance
-     */
-    public McuserPswd() {
-        super("mcuser_pswd", Public.PUBLIC);
+		/**
+		 * Create a new routine call instance
+		 */
+		public McuserPswd() {
+				super("mcuser_pswd", Public.PUBLIC);
 
-        addInParameter(IN_UID);
-        addInParameter(IN_PSWD);
-    }
+				addInParameter(IN_UID);
+				addInParameter(IN_PSWD);
+		}
 
-    /**
-     * Set the <code>in_uid</code> parameter IN value to the routine
-     */
-    public void setInUid(UUID value) {
-        setValue(IN_UID, value);
-    }
+		/**
+		 * Set the <code>in_uid</code> parameter IN value to the routine
+		 */
+		public void setInUid(UUID value) {
+				setValue(IN_UID, value);
+		}
 
-    /**
-     * Set the <code>in_pswd</code> parameter IN value to the routine
-     */
-    public void setInPswd(String value) {
-        setValue(IN_PSWD, value);
-    }
+		/**
+		 * Set the <code>in_pswd</code> parameter IN value to the routine
+		 */
+		public void setInPswd(String value) {
+				setValue(IN_PSWD, value);
+		}
 }

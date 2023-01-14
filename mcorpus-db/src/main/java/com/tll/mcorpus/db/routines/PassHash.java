@@ -19,40 +19,40 @@ import org.jooq.impl.SQLDataType;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class PassHash extends AbstractRoutine<String> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The parameter <code>public.pass_hash.RETURN_VALUE</code>.
-     */
-    public static final Parameter<String> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.CLOB, false, false);
+		/**
+		 * The parameter <code>public.pass_hash.RETURN_VALUE</code>.
+		 */
+		public static final Parameter<String> RETURN_VALUE = Internal.createParameter("RETURN_VALUE", SQLDataType.CLOB, false, false);
 
-    /**
-     * The parameter <code>public.pass_hash.pswd</code>.
-     */
-    public static final Parameter<String> PSWD = Internal.createParameter("pswd", SQLDataType.CLOB, false, false);
+		/**
+		 * The parameter <code>public.pass_hash.pswd</code>.
+		 */
+		public static final Parameter<String> PSWD = Internal.createParameter("pswd", SQLDataType.CLOB, false, false);
 
-    /**
-     * Create a new routine call instance
-     */
-    public PassHash() {
-        super("pass_hash", Public.PUBLIC, SQLDataType.CLOB);
+		/**
+		 * Create a new routine call instance
+		 */
+		public PassHash() {
+				super("pass_hash", Public.PUBLIC, SQLDataType.CLOB);
 
-        setReturnParameter(RETURN_VALUE);
-        addInParameter(PSWD);
-    }
+				setReturnParameter(RETURN_VALUE);
+				addInParameter(PSWD);
+		}
 
-    /**
-     * Set the <code>pswd</code> parameter IN value to the routine
-     */
-    public void setPswd(String value) {
-        setValue(PSWD, value);
-    }
+		/**
+		 * Set the <code>pswd</code> parameter IN value to the routine
+		 */
+		public void setPswd(String value) {
+				setValue(PSWD, value);
+		}
 
-    /**
-     * Set the <code>pswd</code> parameter to the function to be used with a
-     * {@link org.jooq.Select} statement
-     */
-    public void setPswd(Field<String> field) {
-        setField(PSWD, field);
-    }
+		/**
+		 * Set the <code>pswd</code> parameter to the function to be used with a
+		 * {@link org.jooq.Select} statement
+		 */
+		public void setPswd(Field<String> field) {
+				setField(PSWD, field);
+		}
 }

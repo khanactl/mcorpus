@@ -10,23 +10,23 @@ import java.util.UUID;
  * @author jpk
  */
 public interface IJwtInfo {
-  /**
-   * @return The unique id of the JWT.
-   */
-  UUID getJwtId();
+	/**
+	 * @return The unique id of the JWT.
+	 */
+	UUID getJwtId();
 
-  /**
-   * @return timestamp of when the JWT was created.
-   */
-  Date created();
+	/**
+	 * @return timestamp of when the JWT was created.
+	 */
+	Date created();
 
-  /**
-   * @return timestamp of when the JWT will expire.
-   */
-  Date expires();
+	/**
+	 * @return timestamp of when the JWT will expire.
+	 */
+	Date expires();
 
-  /**
-   * @return The resolved ip address of the http request that generated the JWT.
-   */
-  String clientOrigin();
+	/**
+	 * @return The resolved ip address of the http request that generated the JWT.
+	 */
+	String clientOrigin();
 }

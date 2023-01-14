@@ -21,72 +21,72 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class MemberAddressValidatorTest {
 
-  @Test
-  public void testAddressNameValid() {
-    assertFalse(addressNameValid(null));
-    assertTrue(addressNameValid(Addressname.home.getLiteral()));
-  }
+	@Test
+	public void testAddressNameValid() {
+		assertFalse(addressNameValid(null));
+		assertTrue(addressNameValid(Addressname.home.getLiteral()));
+	}
 
-  @Test
-  public void testAddressAttnValid() {
-    assertTrue(addressAttnValid(null));
-    assertTrue(addressAttnValid(""));
-    assertTrue(addressAttnValid("attn"));
-  }
+	@Test
+	public void testAddressAttnValid() {
+		assertTrue(addressAttnValid(null));
+		assertTrue(addressAttnValid(""));
+		assertTrue(addressAttnValid("attn"));
+	}
 
-  @Test
-  public void testAddressStreet1Valid() {
-    assertFalse(addressStreet1Valid(null));
-    assertFalse(addressStreet1Valid(""));
-    assertTrue(addressStreet1Valid("street 22 court. #1"));
-    assertTrue(addressStreet1Valid(strN(120)));
-    assertFalse(addressStreet1Valid(strN(121)));
-  }
+	@Test
+	public void testAddressStreet1Valid() {
+		assertFalse(addressStreet1Valid(null));
+		assertFalse(addressStreet1Valid(""));
+		assertTrue(addressStreet1Valid("street 22 court. #1"));
+		assertTrue(addressStreet1Valid(strN(120)));
+		assertFalse(addressStreet1Valid(strN(121)));
+	}
 
-  @Test
-  public void testAddressStreet2Valid() {
-    assertTrue(addressStreet2Valid(null));
-    assertTrue(addressStreet2Valid(""));
-    assertTrue(addressStreet1Valid("street 22 court. #1"));
-    assertTrue(addressStreet1Valid(strN(120)));
-    assertFalse(addressStreet1Valid(strN(121)));
-  }
+	@Test
+	public void testAddressStreet2Valid() {
+		assertTrue(addressStreet2Valid(null));
+		assertTrue(addressStreet2Valid(""));
+		assertTrue(addressStreet1Valid("street 22 court. #1"));
+		assertTrue(addressStreet1Valid(strN(120)));
+		assertFalse(addressStreet1Valid(strN(121)));
+	}
 
-  @Test
-  public void testAddressCityValid() {
-    assertFalse(addressCityValid(null));
-    assertFalse(addressCityValid(""));
-    assertTrue(addressCityValid("st. petersberg"));
-    assertTrue(addressCityValid(strN(120)));
-    assertFalse(addressCityValid(strN(121)));
-  }
+	@Test
+	public void testAddressCityValid() {
+		assertFalse(addressCityValid(null));
+		assertFalse(addressCityValid(""));
+		assertTrue(addressCityValid("st. petersberg"));
+		assertTrue(addressCityValid(strN(120)));
+		assertFalse(addressCityValid(strN(121)));
+	}
 
-  @Test
-  public void testAddressStateValid() {
-    assertFalse(addressStateValid(null));
-    assertFalse(addressStateValid(""));
-    assertTrue(addressStateValid("MI"));
-    assertTrue(addressStateValid(strN(2)));
-    assertFalse(addressStateValid(strN(3)));
-  }
+	@Test
+	public void testAddressStateValid() {
+		assertFalse(addressStateValid(null));
+		assertFalse(addressStateValid(""));
+		assertTrue(addressStateValid("MI"));
+		assertTrue(addressStateValid(strN(2)));
+		assertFalse(addressStateValid(strN(3)));
+	}
 
-  @Test
-  public void testAddressPostalCodeValid() {
-    assertFalse(addressPostalCodeValid(null));
-    assertFalse(addressPostalCodeValid(""));
-    assertTrue(addressPostalCodeValid("33443"));
-    assertTrue(addressPostalCodeValid(strN(16)));
-    assertFalse(addressPostalCodeValid(strN(17)));
-  }
+	@Test
+	public void testAddressPostalCodeValid() {
+		assertFalse(addressPostalCodeValid(null));
+		assertFalse(addressPostalCodeValid(""));
+		assertTrue(addressPostalCodeValid("33443"));
+		assertTrue(addressPostalCodeValid(strN(16)));
+		assertFalse(addressPostalCodeValid(strN(17)));
+	}
 
-  @Test
-  public void testAddressCountryValid() {
-    assertFalse(addressCountryValid(null));
-    assertFalse(addressCountryValid(""));
-    assertTrue(addressCountryValid("USA"));
-    assertTrue(addressCountryValid(strN(120)));
-    assertFalse(addressCountryValid(strN(121)));
-  }
+	@Test
+	public void testAddressCountryValid() {
+		assertFalse(addressCountryValid(null));
+		assertFalse(addressCountryValid(""));
+		assertTrue(addressCountryValid("USA"));
+		assertTrue(addressCountryValid(strN(120)));
+		assertFalse(addressCountryValid(strN(121)));
+	}
 
 
 }

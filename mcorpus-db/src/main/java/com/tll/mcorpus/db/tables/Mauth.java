@@ -39,206 +39,206 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mauth extends TableImpl<MauthRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.mauth</code>
-     */
-    public static final Mauth MAUTH = new Mauth();
+		/**
+		 * The reference instance of <code>public.mauth</code>
+		 */
+		public static final Mauth MAUTH = new Mauth();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<MauthRecord> getRecordType() {
-        return MauthRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<MauthRecord> getRecordType() {
+				return MauthRecord.class;
+		}
 
-    /**
-     * The column <code>public.mauth.mid</code>.
-     */
-    public final TableField<MauthRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
+		/**
+		 * The column <code>public.mauth.mid</code>.
+		 */
+		public final TableField<MauthRecord, UUID> MID = createField(DSL.name("mid"), SQLDataType.UUID.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mauth.modified</code>.
-     */
-    public final TableField<MauthRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+		/**
+		 * The column <code>public.mauth.modified</code>.
+		 */
+		public final TableField<MauthRecord, OffsetDateTime> MODIFIED = createField(DSL.name("modified"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
-    /**
-     * The column <code>public.mauth.dob</code>.
-     */
-    public final TableField<MauthRecord, LocalDate> DOB = createField(DSL.name("dob"), SQLDataType.LOCALDATE.nullable(false), this, "");
+		/**
+		 * The column <code>public.mauth.dob</code>.
+		 */
+		public final TableField<MauthRecord, LocalDate> DOB = createField(DSL.name("dob"), SQLDataType.LOCALDATE.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mauth.ssn</code>.
-     */
-    public final TableField<MauthRecord, String> SSN = createField(DSL.name("ssn"), SQLDataType.CHAR(9).nullable(false), this, "");
+		/**
+		 * The column <code>public.mauth.ssn</code>.
+		 */
+		public final TableField<MauthRecord, String> SSN = createField(DSL.name("ssn"), SQLDataType.CHAR(9).nullable(false), this, "");
 
-    /**
-     * The column <code>public.mauth.email_personal</code>.
-     */
-    public final TableField<MauthRecord, String> EMAIL_PERSONAL = createField(DSL.name("email_personal"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.mauth.email_personal</code>.
+		 */
+		public final TableField<MauthRecord, String> EMAIL_PERSONAL = createField(DSL.name("email_personal"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.mauth.email_work</code>.
-     */
-    public final TableField<MauthRecord, String> EMAIL_WORK = createField(DSL.name("email_work"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.mauth.email_work</code>.
+		 */
+		public final TableField<MauthRecord, String> EMAIL_WORK = createField(DSL.name("email_work"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.mauth.mobile_phone</code>.
-     */
-    public final TableField<MauthRecord, String> MOBILE_PHONE = createField(DSL.name("mobile_phone"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.mauth.mobile_phone</code>.
+		 */
+		public final TableField<MauthRecord, String> MOBILE_PHONE = createField(DSL.name("mobile_phone"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.mauth.home_phone</code>.
-     */
-    public final TableField<MauthRecord, String> HOME_PHONE = createField(DSL.name("home_phone"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.mauth.home_phone</code>.
+		 */
+		public final TableField<MauthRecord, String> HOME_PHONE = createField(DSL.name("home_phone"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.mauth.work_phone</code>.
-     */
-    public final TableField<MauthRecord, String> WORK_PHONE = createField(DSL.name("work_phone"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.mauth.work_phone</code>.
+		 */
+		public final TableField<MauthRecord, String> WORK_PHONE = createField(DSL.name("work_phone"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.mauth.fax</code>.
-     */
-    public final TableField<MauthRecord, String> FAX = createField(DSL.name("fax"), SQLDataType.CLOB, this, "");
+		/**
+		 * The column <code>public.mauth.fax</code>.
+		 */
+		public final TableField<MauthRecord, String> FAX = createField(DSL.name("fax"), SQLDataType.CLOB, this, "");
 
-    /**
-     * The column <code>public.mauth.username</code>.
-     */
-    public final TableField<MauthRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.mauth.username</code>.
+		 */
+		public final TableField<MauthRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.CLOB.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mauth.pswd</code>.
-     */
-    public final TableField<MauthRecord, String> PSWD = createField(DSL.name("pswd"), SQLDataType.CLOB.nullable(false), this, "");
+		/**
+		 * The column <code>public.mauth.pswd</code>.
+		 */
+		public final TableField<MauthRecord, String> PSWD = createField(DSL.name("pswd"), SQLDataType.CLOB.nullable(false), this, "");
 
-    private Mauth(Name alias, Table<MauthRecord> aliased) {
-        this(alias, aliased, null);
-    }
+		private Mauth(Name alias, Table<MauthRecord> aliased) {
+				this(alias, aliased, null);
+		}
 
-    private Mauth(Name alias, Table<MauthRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
-    }
+		private Mauth(Name alias, Table<MauthRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+		}
 
-    /**
-     * Create an aliased <code>public.mauth</code> table reference
-     */
-    public Mauth(String alias) {
-        this(DSL.name(alias), MAUTH);
-    }
+		/**
+		 * Create an aliased <code>public.mauth</code> table reference
+		 */
+		public Mauth(String alias) {
+				this(DSL.name(alias), MAUTH);
+		}
 
-    /**
-     * Create an aliased <code>public.mauth</code> table reference
-     */
-    public Mauth(Name alias) {
-        this(alias, MAUTH);
-    }
+		/**
+		 * Create an aliased <code>public.mauth</code> table reference
+		 */
+		public Mauth(Name alias) {
+				this(alias, MAUTH);
+		}
 
-    /**
-     * Create a <code>public.mauth</code> table reference
-     */
-    public Mauth() {
-        this(DSL.name("mauth"), null);
-    }
+		/**
+		 * Create a <code>public.mauth</code> table reference
+		 */
+		public Mauth() {
+				this(DSL.name("mauth"), null);
+		}
 
-    public <O extends Record> Mauth(Table<O> child, ForeignKey<O, MauthRecord> key) {
-        super(child, key, MAUTH);
-    }
+		public <O extends Record> Mauth(Table<O> child, ForeignKey<O, MauthRecord> key) {
+				super(child, key, MAUTH);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public UniqueKey<MauthRecord> getPrimaryKey() {
-        return Keys.MAUTH_PKEY;
-    }
+		@Override
+		public UniqueKey<MauthRecord> getPrimaryKey() {
+				return Keys.MAUTH_PKEY;
+		}
 
-    @Override
-    public List<UniqueKey<MauthRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.MAUTH_USERNAME_KEY);
-    }
+		@Override
+		public List<UniqueKey<MauthRecord>> getUniqueKeys() {
+				return Arrays.asList(Keys.MAUTH_USERNAME_KEY);
+		}
 
-    @Override
-    public List<ForeignKey<MauthRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.MAUTH__MAUTH_MID_FKEY);
-    }
+		@Override
+		public List<ForeignKey<MauthRecord, ?>> getReferences() {
+				return Arrays.asList(Keys.MAUTH__MAUTH_MID_FKEY);
+		}
 
-    private transient Member _member;
+		private transient Member _member;
 
-    /**
-     * Get the implicit join path to the <code>public.member</code> table.
-     */
-    public Member member() {
-        if (_member == null)
-            _member = new Member(this, Keys.MAUTH__MAUTH_MID_FKEY);
+		/**
+		 * Get the implicit join path to the <code>public.member</code> table.
+		 */
+		public Member member() {
+				if (_member == null)
+						_member = new Member(this, Keys.MAUTH__MAUTH_MID_FKEY);
 
-        return _member;
-    }
+				return _member;
+		}
 
-    @Override
-    public Mauth as(String alias) {
-        return new Mauth(DSL.name(alias), this);
-    }
+		@Override
+		public Mauth as(String alias) {
+				return new Mauth(DSL.name(alias), this);
+		}
 
-    @Override
-    public Mauth as(Name alias) {
-        return new Mauth(alias, this);
-    }
+		@Override
+		public Mauth as(Name alias) {
+				return new Mauth(alias, this);
+		}
 
-    @Override
-    public Mauth as(Table<?> alias) {
-        return new Mauth(alias.getQualifiedName(), this);
-    }
+		@Override
+		public Mauth as(Table<?> alias) {
+				return new Mauth(alias.getQualifiedName(), this);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mauth rename(String name) {
-        return new Mauth(DSL.name(name), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mauth rename(String name) {
+				return new Mauth(DSL.name(name), null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mauth rename(Name name) {
-        return new Mauth(name, null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mauth rename(Name name) {
+				return new Mauth(name, null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public Mauth rename(Table<?> name) {
-        return new Mauth(name.getQualifiedName(), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public Mauth rename(Table<?> name) {
+				return new Mauth(name.getQualifiedName(), null);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row12 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row12 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row12<UUID, OffsetDateTime, LocalDate, String, String, String, String, String, String, String, String, String> fieldsRow() {
-        return (Row12) super.fieldsRow();
-    }
+		@Override
+		public Row12<UUID, OffsetDateTime, LocalDate, String, String, String, String, String, String, String, String, String> fieldsRow() {
+				return (Row12) super.fieldsRow();
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function12<? super UUID, ? super OffsetDateTime, ? super LocalDate, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function12<? super UUID, ? super OffsetDateTime, ? super LocalDate, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super UUID, ? super OffsetDateTime, ? super LocalDate, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function12<? super UUID, ? super OffsetDateTime, ? super LocalDate, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? super String, ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

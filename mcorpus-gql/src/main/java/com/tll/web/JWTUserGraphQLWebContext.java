@@ -34,395 +34,395 @@ import com.tll.repo.FetchResult;
  */
 public class JWTUserGraphQLWebContext extends GraphQLWebContext {
 
-  public static class JwtLoginResponse {
-    public final String jwt;
-    public final Date jwtExpires;
-    public final String errorMsg;
+	public static class JwtLoginResponse {
+		public final String jwt;
+		public final Date jwtExpires;
+		public final String errorMsg;
 
-    public JwtLoginResponse(String jwt, Instant jwtExpires) {
-      this.jwt = jwt;
-      this.jwtExpires = Date.from(jwtExpires);
-      this.errorMsg = null;
-    }
+		public JwtLoginResponse(String jwt, Instant jwtExpires) {
+			this.jwt = jwt;
+			this.jwtExpires = Date.from(jwtExpires);
+			this.errorMsg = null;
+		}
 
-    public JwtLoginResponse(String errorMsg) {
-      this.jwt = null;
-      this.jwtExpires = null;
-      this.errorMsg = errorMsg;
-    }
-  }
+		public JwtLoginResponse(String errorMsg) {
+			this.jwt = null;
+			this.jwtExpires = null;
+			this.errorMsg = errorMsg;
+		}
+	}
 
-  public static class CurrentJwtInfo {
+	public static class CurrentJwtInfo {
 
-    private final UUID jwtId;
-    private final UUID uid;
-    private final String jwtUserName;
-    private final String jwtUserUsername;
-    private final String jwtUserEmail;
+		private final UUID jwtId;
+		private final UUID uid;
+		private final String jwtUserName;
+		private final String jwtUserUsername;
+		private final String jwtUserEmail;
 
-    public CurrentJwtInfo(
-      UUID jwtId,
-      UUID uid,
-      String jwtUserName,
-      String jwtUserUsername,
-      String jwtUserEmail
-    ) {
-      this.jwtId = jwtId;
-      this.uid = uid;
-      this.jwtUserName = jwtUserName;
-      this.jwtUserUsername = jwtUserUsername;
-      this.jwtUserEmail = jwtUserEmail;
-    }
+		public CurrentJwtInfo(
+			UUID jwtId,
+			UUID uid,
+			String jwtUserName,
+			String jwtUserUsername,
+			String jwtUserEmail
+		) {
+			this.jwtId = jwtId;
+			this.uid = uid;
+			this.jwtUserName = jwtUserName;
+			this.jwtUserUsername = jwtUserUsername;
+			this.jwtUserEmail = jwtUserEmail;
+		}
 
-    public UUID getJwtId() { return jwtId; }
+		public UUID getJwtId() { return jwtId; }
 
-    public UUID getUserId() { return uid; }
+		public UUID getUserId() { return uid; }
 
-    public String getJwtUserName() { return jwtUserName; }
+		public String getJwtUserName() { return jwtUserName; }
 
-    public String getJwtUserUsername() { return jwtUserUsername; }
+		public String getJwtUserUsername() { return jwtUserUsername; }
 
-    public String getJwtUserEmail() { return jwtUserEmail; }
-  }
+		public String getJwtUserEmail() { return jwtUserEmail; }
+	}
 
-  private final JWTHttpRequestStatus jwtRequestStatus;
-  private final JWT jwtbiz;
-  private final IJwtHttpRequestProvider jwtRequest;
-  private final IJwtHttpResponseAction jwtResponse;
-  private final String jwtUserLoginQueryMethodName;
-  private final String jwtUserLoginRefreshQueryMethodName;
+	private final JWTHttpRequestStatus jwtRequestStatus;
+	private final JWT jwtbiz;
+	private final IJwtHttpRequestProvider jwtRequest;
+	private final IJwtHttpResponseAction jwtResponse;
+	private final String jwtUserLoginQueryMethodName;
+	private final String jwtUserLoginRefreshQueryMethodName;
 
-  /**
-   * Constructor.
-   *
-   * @param query           the GraphQL query string
-   * @param vmap            optional query variables expressed as a name/value map
-   * @param jwtRequest      snapshot of the sourcing http request providing the JWT if present
-   * @param jwtRequestStatus the status of the JWT of the sourcing http request
-   * @param jwtbiz          the JWT manager
-   * @param jwtBackend      the JWT backend handler
-   * @param jwtResponse     the JWT http response access object
-   * @param jwtUserLoginQueryMethodName the GraphQL schema method name purposed for JWT user logins
-   */
-  public JWTUserGraphQLWebContext(
-    String query,
-    Map<String, Object> vmap,
-    IJwtHttpRequestProvider jwtRequest,
-    JWTHttpRequestStatus jwtRequestStatus,
-    JWT jwtbiz,
-    IJwtHttpResponseAction jwtResponse,
-    String jwtUserLoginQueryMethodName,
-    String jwtUserLoginRefreshQueryMethodName
-  ) {
-    super(query, vmap);
-    this.jwtRequestStatus = jwtRequestStatus;
-    this.jwtbiz = jwtbiz;
-    this.jwtRequest = jwtRequest;
-    this.jwtResponse = jwtResponse;
-    this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
-    this.jwtUserLoginRefreshQueryMethodName = jwtUserLoginRefreshQueryMethodName;
-  }
+	/**
+	 * Constructor.
+	 *
+	 * @param query						the GraphQL query string
+	 * @param vmap						optional query variables expressed as a name/value map
+	 * @param jwtRequest			snapshot of the sourcing http request providing the JWT if present
+	 * @param jwtRequestStatus the status of the JWT of the sourcing http request
+	 * @param jwtbiz					the JWT manager
+	 * @param jwtBackend			the JWT backend handler
+	 * @param jwtResponse			the JWT http response access object
+	 * @param jwtUserLoginQueryMethodName the GraphQL schema method name purposed for JWT user logins
+	 */
+	public JWTUserGraphQLWebContext(
+		String query,
+		Map<String, Object> vmap,
+		IJwtHttpRequestProvider jwtRequest,
+		JWTHttpRequestStatus jwtRequestStatus,
+		JWT jwtbiz,
+		IJwtHttpResponseAction jwtResponse,
+		String jwtUserLoginQueryMethodName,
+		String jwtUserLoginRefreshQueryMethodName
+	) {
+		super(query, vmap);
+		this.jwtRequestStatus = jwtRequestStatus;
+		this.jwtbiz = jwtbiz;
+		this.jwtRequest = jwtRequest;
+		this.jwtResponse = jwtResponse;
+		this.jwtUserLoginQueryMethodName = jwtUserLoginQueryMethodName;
+		this.jwtUserLoginRefreshQueryMethodName = jwtUserLoginRefreshQueryMethodName;
+	}
 
-  @Override
-  public boolean isValid() {
-    return super.isValid() &&
-      isNotNull(jwtRequestStatus) &&
-      isNotNull(jwtbiz) &&
-      isNotNull(jwtRequest) &&
-      isNotNull(jwtResponse) &&
-      isNotNullOrEmpty(jwtUserLoginQueryMethodName) &&
-      isNotNullOrEmpty(jwtUserLoginRefreshQueryMethodName)
-    ;
-  }
+	@Override
+	public boolean isValid() {
+		return super.isValid() &&
+			isNotNull(jwtRequestStatus) &&
+			isNotNull(jwtbiz) &&
+			isNotNull(jwtRequest) &&
+			isNotNull(jwtResponse) &&
+			isNotNullOrEmpty(jwtUserLoginQueryMethodName) &&
+			isNotNullOrEmpty(jwtUserLoginRefreshQueryMethodName)
+		;
+	}
 
-  /**
-   * @return the JWT request provider instance of the sourcing http request.
-   */
-  public IJwtHttpRequestProvider getJwtRequestProvider() { return jwtRequest; }
+	/**
+	 * @return the JWT request provider instance of the sourcing http request.
+	 */
+	public IJwtHttpRequestProvider getJwtRequestProvider() { return jwtRequest; }
 
-  /**
-   * @return the JWT status of the received http request.
-   */
-  public JWTHttpRequestStatus getJwtRequestStatus() { return jwtRequestStatus; }
+	/**
+	 * @return the JWT status of the received http request.
+	 */
+	public JWTHttpRequestStatus getJwtRequestStatus() { return jwtRequestStatus; }
 
-  /**
-   * @return true when the GraphQL query is for JWT user login, false otherwise.
-   */
-  public boolean isJwtUserLoginQuery() {
-    return isMutation() && jwtUserLoginQueryMethodName.equals(getFirstMethodName());
-  }
+	/**
+	 * @return true when the GraphQL query is for JWT user login, false otherwise.
+	 */
+	public boolean isJwtUserLoginQuery() {
+		return isMutation() && jwtUserLoginQueryMethodName.equals(getFirstMethodName());
+	}
 
-  /**
-   * @return true when the GraphQL query is for JWT user login *refresh*, false otherwise.
-   */
-  public boolean isJwtUserLoginRefreshQuery() {
-    return isMutation() && jwtUserLoginRefreshQueryMethodName.equals(getFirstMethodName());
-  }
+	/**
+	 * @return true when the GraphQL query is for JWT user login *refresh*, false otherwise.
+	 */
+	public boolean isJwtUserLoginRefreshQuery() {
+		return isMutation() && jwtUserLoginRefreshQueryMethodName.equals(getFirstMethodName());
+	}
 
-  /**
-   * @return true when this GraphQL query is either a JWT user login mutation query
-   *         or an introspection query, false otherwise.
-   */
-  public boolean isJwtUserLoginOrIntrospectionQuery() {
-    return isJwtUserLoginQuery() || isIntrospectionQuery();
-  }
+	/**
+	 * @return true when this GraphQL query is either a JWT user login mutation query
+	 *				 or an introspection query, false otherwise.
+	 */
+	public boolean isJwtUserLoginOrIntrospectionQuery() {
+		return isJwtUserLoginQuery() || isIntrospectionQuery();
+	}
 
-  /**
-   * @return true when this GraphQL query is either a JWT user login *refresh* mutation query
-   *         or an introspection query, false otherwise.
-   */
-  public boolean isJwtUserLoginRefreshOrIntrospectionQuery() {
-    return isJwtUserLoginRefreshQuery() || isIntrospectionQuery();
-  }
+	/**
+	 * @return true when this GraphQL query is either a JWT user login *refresh* mutation query
+	 *				 or an introspection query, false otherwise.
+	 */
+	public boolean isJwtUserLoginRefreshOrIntrospectionQuery() {
+		return isJwtUserLoginRefreshQuery() || isIntrospectionQuery();
+	}
 
-  /**
-   * Get the JWT user info for the current (the one used to authenticate) JWT .
-   * <p>
-   * Blocking - A Db call is issued.
-   *
-   * @return Newly created {@link CurrentJwtInfo} when the http client presents a valid and
-   *         non-expired JWT -OR-<br>
-   *         null when no JWT is present or is not valid.
-   */
-  public CurrentJwtInfo currentJwt() {
-    final UUID jwtId = jwtRequestStatus.jwtId();
-    if(jwtRequestStatus.status().isValid()) {
-      final UUID jwtUserId = jwtRequestStatus.userId();
-      FetchResult<IJwtUser> fr = jwtbiz.getBackendHandler().getJwtUserInfo(jwtUserId);
-      if(fr.isSuccess()) {
-        // success
-        final CurrentJwtInfo cji = new CurrentJwtInfo(
-          jwtId,
-          jwtUserId,
-          fr.get().getJwtUserName(),
-          fr.get().getJwtUserUsername(),
-          fr.get().getJwtUserEmail()
-        );
-        return cji;
-      } else {
-        final String emsg = fr.getErrorMsg();
-        log.error(
-          "Invalid JWT info fetch result (emsg: {}) for JWT {}.",
-          emsg, jwtId
-        );
-      }
-    } else {
-      log.warn("Invalid JWT {} presented for JWT info fetch.", jwtId);
-    }
+	/**
+	 * Get the JWT user info for the current (the one used to authenticate) JWT .
+	 * <p>
+	 * Blocking - A Db call is issued.
+	 *
+	 * @return Newly created {@link CurrentJwtInfo} when the http client presents a valid and
+	 *				 non-expired JWT -OR-<br>
+	 *				 null when no JWT is present or is not valid.
+	 */
+	public CurrentJwtInfo currentJwt() {
+		final UUID jwtId = jwtRequestStatus.jwtId();
+		if(jwtRequestStatus.status().isValid()) {
+			final UUID jwtUserId = jwtRequestStatus.userId();
+			FetchResult<IJwtUser> fr = jwtbiz.getBackendHandler().getJwtUserInfo(jwtUserId);
+			if(fr.isSuccess()) {
+				// success
+				final CurrentJwtInfo cji = new CurrentJwtInfo(
+					jwtId,
+					jwtUserId,
+					fr.get().getJwtUserName(),
+					fr.get().getJwtUserUsername(),
+					fr.get().getJwtUserEmail()
+				);
+				return cji;
+			} else {
+				final String emsg = fr.getErrorMsg();
+				log.error(
+					"Invalid JWT info fetch result (emsg: {}) for JWT {}.",
+					emsg, jwtId
+				);
+			}
+		} else {
+			log.warn("Invalid JWT {} presented for JWT info fetch.", jwtId);
+		}
 
-    // default
-    return null;
-  }
+		// default
+		return null;
+	}
 
-  public List<IJwtInfo> activeJwts() {
-    final UUID jwtUserId = jwtRequestStatus.userId();
-    FetchResult<List<IJwtInfo>> fr = jwtbiz.getBackendHandler().getActiveJwtLogins(jwtUserId);
-    if(fr.isSuccess()) {
-      return fr.get();
-    } else {
-      final String emsg = fr.getErrorMsg();
-      log.error("Invalid active JWTs fetch result (emsg: {}) for current JWT.", emsg);
-      return Collections.emptyList();
-    }
-  }
+	public List<IJwtInfo> activeJwts() {
+		final UUID jwtUserId = jwtRequestStatus.userId();
+		FetchResult<List<IJwtInfo>> fr = jwtbiz.getBackendHandler().getActiveJwtLogins(jwtUserId);
+		if(fr.isSuccess()) {
+			return fr.get();
+		} else {
+			final String emsg = fr.getErrorMsg();
+			log.error("Invalid active JWTs fetch result (emsg: {}) for current JWT.", emsg);
+			return Collections.emptyList();
+		}
+	}
 
-  /**
-   * Log a JWT user in and issue a JWT back to client when the login op is successful.
-   * <p>
-   * Blocking - Db call is issued.
-   *
-   * @param username the posted JWT user username
-   * @param pswd the posted JWT user password
-   * @return Newly created, never-null {@link JwtLoginResponse}
-   */
-  public JwtLoginResponse jwtUserLogin(final String username, final String pswd) {
+	/**
+	 * Log a JWT user in and issue a JWT back to client when the login op is successful.
+	 * <p>
+	 * Blocking - Db call is issued.
+	 *
+	 * @param username the posted JWT user username
+	 * @param pswd the posted JWT user password
+	 * @return Newly created, never-null {@link JwtLoginResponse}
+	 */
+	public JwtLoginResponse jwtUserLogin(final String username, final String pswd) {
 
-    // verify the JWT status is either not present or expired
-    if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
-      return new JwtLoginResponse("Login failed: Invalid JWT request state.");
-    }
+		// verify the JWT status is either not present or expired
+		if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
+			return new JwtLoginResponse("Login failed: Invalid JWT request state.");
+		}
 
-    // validate login input
-    if(isBlank(username) || isBlank(pswd)) {
-      return new JwtLoginResponse("Login failed: Missing username and/or password.");
-    }
+		// validate login input
+		if(isBlank(username) || isBlank(pswd)) {
+			return new JwtLoginResponse("Login failed: Missing username and/or password.");
+		}
 
-    final UUID pendingJwtID = UUID.randomUUID();
-    final String refreshToken = uuidToToken(UUID.randomUUID());
-    final InetAddress requestOrigin = jwtRequest.getRequestOrigin();
-    final Instant requestInstant = jwtRequest.getRequestInstant();
-    final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
+		final UUID pendingJwtID = UUID.randomUUID();
+		final String refreshToken = uuidToToken(UUID.randomUUID());
+		final InetAddress requestOrigin = jwtRequest.getRequestOrigin();
+		final Instant requestInstant = jwtRequest.getRequestInstant();
+		final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
 
-    // call db login
-    log.debug("Authenticating JWT user '{}'..", username);
-    final FetchResult<IJwtUser> loginResult = jwtbiz.getBackendHandler().jwtBackendLogin(
-      username,
-      pswd,
-      pendingJwtID,
-      requestOrigin,
-      requestInstant,
-      loginExpiration
-    );
-    if(not(loginResult.isSuccess())) {
-      log.error("JWT user login failed (emsg: {}).", loginResult.getErrorMsg());
-      return new JwtLoginResponse("Login failed.");
-    }
-    log.info("JWT user '{}' authenticated.", username);
-    // at this point, we're authenticated
+		// call db login
+		log.debug("Authenticating JWT user '{}'..", username);
+		final FetchResult<IJwtUser> loginResult = jwtbiz.getBackendHandler().jwtBackendLogin(
+			username,
+			pswd,
+			pendingJwtID,
+			requestOrigin,
+			requestInstant,
+			loginExpiration
+		);
+		if(not(loginResult.isSuccess())) {
+			log.error("JWT user login failed (emsg: {}).", loginResult.getErrorMsg());
+			return new JwtLoginResponse("Login failed.");
+		}
+		log.info("JWT user '{}' authenticated.", username);
+		// at this point, we're authenticated
 
-    log.debug("Generating JWT for user '{}'..", username);
-    final IJwtUser jwtUser = loginResult.get();
-    try {
-      // create the JWT - and set as a cookie to go back to user
-      // the user is now expected to provide this JWT for subsequent GraphQL api requests
-      final GeneratedJwt genjwt = jwtbiz.jwtGenerate(
-          pendingJwtID,
-          refreshToken,
-          jwtUser.getJwtUserId(),
-          jwtUser.isAdministrator(),
-          isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
-            Arrays.stream(jwtUser.getJwtUserRoles())
-            .collect(Collectors.joining(",")),
-          jwtRequest
-      );
+		log.debug("Generating JWT for user '{}'..", username);
+		final IJwtUser jwtUser = loginResult.get();
+		try {
+			// create the JWT - and set as a cookie to go back to user
+			// the user is now expected to provide this JWT for subsequent GraphQL api requests
+			final GeneratedJwt genjwt = jwtbiz.jwtGenerate(
+					pendingJwtID,
+					refreshToken,
+					jwtUser.getJwtUserId(),
+					jwtUser.isAdministrator(),
+					isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
+						Arrays.stream(jwtUser.getJwtUserRoles())
+						.collect(Collectors.joining(",")),
+					jwtRequest
+			);
 
-      // jwt cookie
-      jwtResponse.setJwtClientside(genjwt.jwt, refreshToken, jwtbiz.jwtRefreshTokenTimeToLive());
+			// jwt cookie
+			jwtResponse.setJwtClientside(genjwt.jwt, refreshToken, jwtbiz.jwtRefreshTokenTimeToLive());
 
-      log.info("JWT user '{}' logged in.  JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
+			log.info("JWT user '{}' logged in.	JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
 
-      return new JwtLoginResponse(genjwt.jwt, genjwt.jwtExpiration);
-    }
-    catch(Exception e) {
-      log.error("JWT user '{}' login error: '{}'.", jwtUser.getJwtUserId(), e.getMessage());
-    }
+			return new JwtLoginResponse(genjwt.jwt, genjwt.jwtExpiration);
+		}
+		catch(Exception e) {
+			log.error("JWT user '{}' login error: '{}'.", jwtUser.getJwtUserId(), e.getMessage());
+		}
 
-    // default
-    return new JwtLoginResponse("Login error.");
-  }
+		// default
+		return new JwtLoginResponse("Login error.");
+	}
 
-  /**
-   * Refresh a JWT login based on a present and non-expired refresh token.
-   * <p>
-   * Blocking - Db call is issued.
-   *
-   * @return Newly created, never-null {@link JwtLoginResponse}
-   */
-  public JwtLoginResponse jwtRefresh() {
-    // verify the JWT is present but expired
-    if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
-      return new JwtLoginResponse("Login refresh failed: Invalid JWT status.");
-    }
-    // verify the refresh token is present, non-expired and valid
-    if(not(jwtRequestStatus.isRefreshTokenValid())) {
-      return new JwtLoginResponse("Login refresh failed: Invalid or expired refresh token.");
-    }
+	/**
+	 * Refresh a JWT login based on a present and non-expired refresh token.
+	 * <p>
+	 * Blocking - Db call is issued.
+	 *
+	 * @return Newly created, never-null {@link JwtLoginResponse}
+	 */
+	public JwtLoginResponse jwtRefresh() {
+		// verify the JWT is present but expired
+		if(not(jwtRequestStatus.isJWTStatusExpiredOrNotPresent())) {
+			return new JwtLoginResponse("Login refresh failed: Invalid JWT status.");
+		}
+		// verify the refresh token is present, non-expired and valid
+		if(not(jwtRequestStatus.isRefreshTokenValid())) {
+			return new JwtLoginResponse("Login refresh failed: Invalid or expired refresh token.");
+		}
 
-    final UUID pendingJwtID = UUID.randomUUID();
-    final String refreshToken = uuidToToken(UUID.randomUUID());
-    final InetAddress requestOrigin = jwtRequest.getRequestOrigin();
-    final Instant requestInstant = jwtRequest.getRequestInstant();
-    final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
+		final UUID pendingJwtID = UUID.randomUUID();
+		final String refreshToken = uuidToToken(UUID.randomUUID());
+		final InetAddress requestOrigin = jwtRequest.getRequestOrigin();
+		final Instant requestInstant = jwtRequest.getRequestInstant();
+		final Instant loginExpiration = requestInstant.plus(jwtbiz.jwtTimeToLive());
 
-    // call db login
-    log.debug("Refreshing JWT user '{}'..", jwtRequestStatus.userId());
-    final FetchResult<IJwtUser> loginResult = jwtbiz.getBackendHandler().jwtBackendLoginRefresh(
-      jwtRequestStatus.jwtId(),
-      pendingJwtID,
-      requestOrigin,
-      requestInstant,
-      loginExpiration
-    );
-    if(not(loginResult.isSuccess())) {
-      log.error("JWT login refresh failed (emsg: {}).", loginResult.getErrorMsg());
-      return new JwtLoginResponse("Login refresh failed: Backend login refresh failed.");
-    }
-    final IJwtUser jwtUser = loginResult.get();
+		// call db login
+		log.debug("Refreshing JWT user '{}'..", jwtRequestStatus.userId());
+		final FetchResult<IJwtUser> loginResult = jwtbiz.getBackendHandler().jwtBackendLoginRefresh(
+			jwtRequestStatus.jwtId(),
+			pendingJwtID,
+			requestOrigin,
+			requestInstant,
+			loginExpiration
+		);
+		if(not(loginResult.isSuccess())) {
+			log.error("JWT login refresh failed (emsg: {}).", loginResult.getErrorMsg());
+			return new JwtLoginResponse("Login refresh failed: Backend login refresh failed.");
+		}
+		final IJwtUser jwtUser = loginResult.get();
 
-    log.info("JWT user '{}' refreshed.", jwtUser.getJwtUserName());
-    // at this point, we're authenticated
+		log.info("JWT user '{}' refreshed.", jwtUser.getJwtUserName());
+		// at this point, we're authenticated
 
-    log.debug("Generating refresh JWT for user '{}'..", jwtUser.getJwtUserName());
-    try {
-      // create the JWT - and set as a cookie to go back to user
-      // the user is now expected to provide this JWT for subsequent GraphQL api requests
-      final GeneratedJwt genjwt = jwtbiz.jwtGenerate(
-          pendingJwtID,
-          refreshToken,
-          jwtUser.getJwtUserId(),
-          jwtUser.isAdministrator(),
-          isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
-            Arrays.stream(jwtUser.getJwtUserRoles())
-            .collect(Collectors.joining(",")),
-          jwtRequest
-      );
+		log.debug("Generating refresh JWT for user '{}'..", jwtUser.getJwtUserName());
+		try {
+			// create the JWT - and set as a cookie to go back to user
+			// the user is now expected to provide this JWT for subsequent GraphQL api requests
+			final GeneratedJwt genjwt = jwtbiz.jwtGenerate(
+					pendingJwtID,
+					refreshToken,
+					jwtUser.getJwtUserId(),
+					jwtUser.isAdministrator(),
+					isNullOrEmpty(jwtUser.getJwtUserRoles()) ? "" :
+						Arrays.stream(jwtUser.getJwtUserRoles())
+						.collect(Collectors.joining(",")),
+					jwtRequest
+			);
 
-      // jwt cookie
-      jwtResponse.setJwtClientside(genjwt.jwt, refreshToken, jwtbiz.jwtRefreshTokenTimeToLive());
+			// jwt cookie
+			jwtResponse.setJwtClientside(genjwt.jwt, refreshToken, jwtbiz.jwtRefreshTokenTimeToLive());
 
-      log.info("JWT user '{}' refreshed.  JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
+			log.info("JWT user '{}' refreshed.	JWT {} generated.", jwtUser.getJwtUserId(), pendingJwtID);
 
-      return new JwtLoginResponse(genjwt.jwt, genjwt.jwtExpiration);
-    }
-    catch(Exception e) {
-      log.error("JWT user '{}' login refresh error: '{}'.", jwtUser.getJwtUserId(), e.getMessage());
-    }
+			return new JwtLoginResponse(genjwt.jwt, genjwt.jwtExpiration);
+		}
+		catch(Exception e) {
+			log.error("JWT user '{}' login refresh error: '{}'.", jwtUser.getJwtUserId(), e.getMessage());
+		}
 
-    // default
-    return new JwtLoginResponse("Login refresh error.");
-  }
+		// default
+		return new JwtLoginResponse("Login refresh error.");
+	}
 
-    /**
-   * Log a JWT user out.
-   * <p>
-   * Blocking - Db call is issued.
-   *
-   * @return true when the user bound to the presenting JWT in incoming request
-   *         is successfully logged out, false otherwise.
-   */
-  public boolean jwtUserLogout() {
-    final FetchResult<Boolean> fetchResult = jwtbiz.getBackendHandler().jwtBackendLogout(
-      jwtRequestStatus.userId(),
-      jwtRequestStatus.jwtId(),
-      jwtRequest.getRequestOrigin(),
-      jwtRequest.getRequestInstant()
-    );
-    if(fetchResult.isSuccess()) {
-      // logout success - nix all cookies clientside
-      jwtResponse.expireJwtClientside();
-      log.info("JWT {} (user '{}') logged out.", jwtRequestStatus.jwtId(), jwtRequestStatus.userId());
-      return true;
-    }
+		/**
+	 * Log a JWT user out.
+	 * <p>
+	 * Blocking - Db call is issued.
+	 *
+	 * @return true when the user bound to the presenting JWT in incoming request
+	 *				 is successfully logged out, false otherwise.
+	 */
+	public boolean jwtUserLogout() {
+		final FetchResult<Boolean> fetchResult = jwtbiz.getBackendHandler().jwtBackendLogout(
+			jwtRequestStatus.userId(),
+			jwtRequestStatus.jwtId(),
+			jwtRequest.getRequestOrigin(),
+			jwtRequest.getRequestInstant()
+		);
+		if(fetchResult.isSuccess()) {
+			// logout success - nix all cookies clientside
+			jwtResponse.expireJwtClientside();
+			log.info("JWT {} (user '{}') logged out.", jwtRequestStatus.jwtId(), jwtRequestStatus.userId());
+			return true;
+		}
 
-    // default - logout failed
-    log.error("JWT {} (user '{}') logout failed.", jwtRequestStatus.jwtId(), jwtRequestStatus.userId());
-    return false;
-  }
+		// default - logout failed
+		log.error("JWT {} (user '{}') logout failed.", jwtRequestStatus.jwtId(), jwtRequestStatus.userId());
+		return false;
+	}
 
-  /**
-   * Invalidate all active JWTs for the given jwt user.
-   * <p>
-   * If the jwt user is the same as the one currently logged in,
-   * they will be logged out immediately.
-   *
-   * @param jwtUserId the id of the target jwt user
-   * @return true if the operation was successful
-   */
-  public boolean jwtInvalidateAllForUser(final UUID jwtUserId) {
-    final FetchResult<Boolean> fr = jwtbiz.getBackendHandler().jwtInvalidateAllForUser(
-      jwtUserId,
-      jwtRequest.getRequestOrigin(),
-      jwtRequest.getRequestInstant()
-    );
-    if(fr.isSuccess()) {
-      if(jwtUserId.equals(jwtRequestStatus.userId())) {
-        // this is the current jwt user so nix jwt state clientside
-        jwtResponse.expireJwtClientside();
-      }
-      log.info("All JWTs for user {} successfully invalidated.", jwtUserId);
-      return true;
-    }
-    // default - op failed
-    return false;
-  }
+	/**
+	 * Invalidate all active JWTs for the given jwt user.
+	 * <p>
+	 * If the jwt user is the same as the one currently logged in,
+	 * they will be logged out immediately.
+	 *
+	 * @param jwtUserId the id of the target jwt user
+	 * @return true if the operation was successful
+	 */
+	public boolean jwtInvalidateAllForUser(final UUID jwtUserId) {
+		final FetchResult<Boolean> fr = jwtbiz.getBackendHandler().jwtInvalidateAllForUser(
+			jwtUserId,
+			jwtRequest.getRequestOrigin(),
+			jwtRequest.getRequestInstant()
+		);
+		if(fr.isSuccess()) {
+			if(jwtUserId.equals(jwtRequestStatus.userId())) {
+				// this is the current jwt user so nix jwt state clientside
+				jwtResponse.expireJwtClientside();
+			}
+			log.info("All JWTs for user {} successfully invalidated.", jwtUserId);
+			return true;
+		}
+		// default - op failed
+		return false;
+	}
 }

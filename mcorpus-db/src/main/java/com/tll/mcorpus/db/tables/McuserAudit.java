@@ -44,186 +44,186 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class McuserAudit extends TableImpl<McuserAuditRecord> {
 
-    private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    /**
-     * The reference instance of <code>public.mcuser_audit</code>
-     */
-    public static final McuserAudit MCUSER_AUDIT = new McuserAudit();
+		/**
+		 * The reference instance of <code>public.mcuser_audit</code>
+		 */
+		public static final McuserAudit MCUSER_AUDIT = new McuserAudit();
 
-    /**
-     * The class holding records for this type
-     */
-    @Override
-    public Class<McuserAuditRecord> getRecordType() {
-        return McuserAuditRecord.class;
-    }
+		/**
+		 * The class holding records for this type
+		 */
+		@Override
+		public Class<McuserAuditRecord> getRecordType() {
+				return McuserAuditRecord.class;
+		}
 
-    /**
-     * The column <code>public.mcuser_audit.uid</code>.
-     */
-    public final TableField<McuserAuditRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID.nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.uid</code>.
+		 */
+		public final TableField<McuserAuditRecord, UUID> UID = createField(DSL.name("uid"), SQLDataType.UUID.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser_audit.created</code>.
-     */
-    public final TableField<McuserAuditRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.created</code>.
+		 */
+		public final TableField<McuserAuditRecord, OffsetDateTime> CREATED = createField(DSL.name("created"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
-    /**
-     * The column <code>public.mcuser_audit.type</code>.
-     */
-    public final TableField<McuserAuditRecord, McuserAuditType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.type</code>.
+		 */
+		public final TableField<McuserAuditRecord, McuserAuditType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.McuserAuditType.class), this, "");
 
-    /**
-     * The column <code>public.mcuser_audit.request_timestamp</code>.
-     */
-    public final TableField<McuserAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.request_timestamp</code>.
+		 */
+		public final TableField<McuserAuditRecord, OffsetDateTime> REQUEST_TIMESTAMP = createField(DSL.name("request_timestamp"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser_audit.request_origin</code>.
-     */
-    public final TableField<McuserAuditRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "", new PostgresInetAddressBinding());
+		/**
+		 * The column <code>public.mcuser_audit.request_origin</code>.
+		 */
+		public final TableField<McuserAuditRecord, InetAddress> REQUEST_ORIGIN = createField(DSL.name("request_origin"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"inet\"").nullable(false), this, "", new PostgresInetAddressBinding());
 
-    /**
-     * The column <code>public.mcuser_audit.login_expiration</code>.
-     */
-    public final TableField<McuserAuditRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.login_expiration</code>.
+		 */
+		public final TableField<McuserAuditRecord, OffsetDateTime> LOGIN_EXPIRATION = createField(DSL.name("login_expiration"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
-    /**
-     * The column <code>public.mcuser_audit.jwt_id</code>.
-     */
-    public final TableField<McuserAuditRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID.nullable(false), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.jwt_id</code>.
+		 */
+		public final TableField<McuserAuditRecord, UUID> JWT_ID = createField(DSL.name("jwt_id"), SQLDataType.UUID.nullable(false), this, "");
 
-    /**
-     * The column <code>public.mcuser_audit.jwt_id_status</code>.
-     */
-    public final TableField<McuserAuditRecord, JwtIdStatus> JWT_ID_STATUS = createField(DSL.name("jwt_id_status"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), this, "");
+		/**
+		 * The column <code>public.mcuser_audit.jwt_id_status</code>.
+		 */
+		public final TableField<McuserAuditRecord, JwtIdStatus> JWT_ID_STATUS = createField(DSL.name("jwt_id_status"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.tll.mcorpus.db.enums.JwtIdStatus.class), this, "");
 
-    private McuserAudit(Name alias, Table<McuserAuditRecord> aliased) {
-        this(alias, aliased, null);
-    }
+		private McuserAudit(Name alias, Table<McuserAuditRecord> aliased) {
+				this(alias, aliased, null);
+		}
 
-    private McuserAudit(Name alias, Table<McuserAuditRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
-    }
+		private McuserAudit(Name alias, Table<McuserAuditRecord> aliased, Field<?>[] parameters) {
+				super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+		}
 
-    /**
-     * Create an aliased <code>public.mcuser_audit</code> table reference
-     */
-    public McuserAudit(String alias) {
-        this(DSL.name(alias), MCUSER_AUDIT);
-    }
+		/**
+		 * Create an aliased <code>public.mcuser_audit</code> table reference
+		 */
+		public McuserAudit(String alias) {
+				this(DSL.name(alias), MCUSER_AUDIT);
+		}
 
-    /**
-     * Create an aliased <code>public.mcuser_audit</code> table reference
-     */
-    public McuserAudit(Name alias) {
-        this(alias, MCUSER_AUDIT);
-    }
+		/**
+		 * Create an aliased <code>public.mcuser_audit</code> table reference
+		 */
+		public McuserAudit(Name alias) {
+				this(alias, MCUSER_AUDIT);
+		}
 
-    /**
-     * Create a <code>public.mcuser_audit</code> table reference
-     */
-    public McuserAudit() {
-        this(DSL.name("mcuser_audit"), null);
-    }
+		/**
+		 * Create a <code>public.mcuser_audit</code> table reference
+		 */
+		public McuserAudit() {
+				this(DSL.name("mcuser_audit"), null);
+		}
 
-    public <O extends Record> McuserAudit(Table<O> child, ForeignKey<O, McuserAuditRecord> key) {
-        super(child, key, MCUSER_AUDIT);
-    }
+		public <O extends Record> McuserAudit(Table<O> child, ForeignKey<O, McuserAuditRecord> key) {
+				super(child, key, MCUSER_AUDIT);
+		}
 
-    @Override
-    public Schema getSchema() {
-        return aliased() ? null : Public.PUBLIC;
-    }
+		@Override
+		public Schema getSchema() {
+				return aliased() ? null : Public.PUBLIC;
+		}
 
-    @Override
-    public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.MCUSER_AUDIT__JWT_ID);
-    }
+		@Override
+		public List<Index> getIndexes() {
+				return Arrays.asList(Indexes.MCUSER_AUDIT__JWT_ID);
+		}
 
-    @Override
-    public UniqueKey<McuserAuditRecord> getPrimaryKey() {
-        return Keys.MCUSER_AUDIT_PKEY;
-    }
+		@Override
+		public UniqueKey<McuserAuditRecord> getPrimaryKey() {
+				return Keys.MCUSER_AUDIT_PKEY;
+		}
 
-    @Override
-    public List<ForeignKey<McuserAuditRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
-    }
+		@Override
+		public List<ForeignKey<McuserAuditRecord, ?>> getReferences() {
+				return Arrays.asList(Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
+		}
 
-    private transient Mcuser _mcuser;
+		private transient Mcuser _mcuser;
 
-    /**
-     * Get the implicit join path to the <code>public.mcuser</code> table.
-     */
-    public Mcuser mcuser() {
-        if (_mcuser == null)
-            _mcuser = new Mcuser(this, Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
+		/**
+		 * Get the implicit join path to the <code>public.mcuser</code> table.
+		 */
+		public Mcuser mcuser() {
+				if (_mcuser == null)
+						_mcuser = new Mcuser(this, Keys.MCUSER_AUDIT__MCUSER_AUDIT_UID_FKEY);
 
-        return _mcuser;
-    }
+				return _mcuser;
+		}
 
-    @Override
-    public McuserAudit as(String alias) {
-        return new McuserAudit(DSL.name(alias), this);
-    }
+		@Override
+		public McuserAudit as(String alias) {
+				return new McuserAudit(DSL.name(alias), this);
+		}
 
-    @Override
-    public McuserAudit as(Name alias) {
-        return new McuserAudit(alias, this);
-    }
+		@Override
+		public McuserAudit as(Name alias) {
+				return new McuserAudit(alias, this);
+		}
 
-    @Override
-    public McuserAudit as(Table<?> alias) {
-        return new McuserAudit(alias.getQualifiedName(), this);
-    }
+		@Override
+		public McuserAudit as(Table<?> alias) {
+				return new McuserAudit(alias.getQualifiedName(), this);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public McuserAudit rename(String name) {
-        return new McuserAudit(DSL.name(name), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public McuserAudit rename(String name) {
+				return new McuserAudit(DSL.name(name), null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public McuserAudit rename(Name name) {
-        return new McuserAudit(name, null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public McuserAudit rename(Name name) {
+				return new McuserAudit(name, null);
+		}
 
-    /**
-     * Rename this table
-     */
-    @Override
-    public McuserAudit rename(Table<?> name) {
-        return new McuserAudit(name.getQualifiedName(), null);
-    }
+		/**
+		 * Rename this table
+		 */
+		@Override
+		public McuserAudit rename(Table<?> name) {
+				return new McuserAudit(name.getQualifiedName(), null);
+		}
 
-    // -------------------------------------------------------------------------
-    // Row8 type methods
-    // -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
+		// Row8 type methods
+		// -------------------------------------------------------------------------
 
-    @Override
-    public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
-        return (Row8) super.fieldsRow();
-    }
+		@Override
+		public Row8<UUID, OffsetDateTime, McuserAuditType, OffsetDateTime, InetAddress, OffsetDateTime, UUID, JwtIdStatus> fieldsRow() {
+				return (Row8) super.fieldsRow();
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
-     */
-    public <U> SelectField<U> mapping(Function8<? super UUID, ? super OffsetDateTime, ? super McuserAuditType, ? super OffsetDateTime, ? super InetAddress, ? super OffsetDateTime, ? super UUID, ? super JwtIdStatus, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+		 */
+		public <U> SelectField<U> mapping(Function8<? super UUID, ? super OffsetDateTime, ? super McuserAuditType, ? super OffsetDateTime, ? super InetAddress, ? super OffsetDateTime, ? super UUID, ? super JwtIdStatus, ? extends U> from) {
+				return convertFrom(Records.mapping(from));
+		}
 
-    /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
-     */
-    public <U> SelectField<U> mapping(Class<U> toType, Function8<? super UUID, ? super OffsetDateTime, ? super McuserAuditType, ? super OffsetDateTime, ? super InetAddress, ? super OffsetDateTime, ? super UUID, ? super JwtIdStatus, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
-    }
+		/**
+		 * Convenience mapping calling {@link SelectField#convertFrom(Class,
+		 * Function)}.
+		 */
+		public <U> SelectField<U> mapping(Class<U> toType, Function8<? super UUID, ? super OffsetDateTime, ? super McuserAuditType, ? super OffsetDateTime, ? super InetAddress, ? super OffsetDateTime, ? super UUID, ? super JwtIdStatus, ? extends U> from) {
+				return convertFrom(toType, Records.mapping(from));
+		}
 }

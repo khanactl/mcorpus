@@ -8,11 +8,11 @@ import com.tll.mcorpus.gmodel.EmpIdAndLocationKey;
 
 public class EmpIdAndLocationXfrm extends BaseMcorpusTransformer<EmpIdAndLocationKey, EmpIdAndLocation> {
 
-  protected EmpIdAndLocation toBackendFromNonNull(final EmpIdAndLocationKey e) {
-    return new EmpIdAndLocation(
-      clean(e.empId()),
-      locationFromString(e.location())
-    );
-  }
+	protected EmpIdAndLocation toBackendFromNonNull(final EmpIdAndLocationKey e) {
+		return new EmpIdAndLocation(
+			clean(e.empId()),
+			locationFromString(e.location())
+		);
+	}
 
 }

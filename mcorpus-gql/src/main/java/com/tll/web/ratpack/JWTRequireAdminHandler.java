@@ -21,17 +21,17 @@ import ratpack.core.handling.Handler;
  */
 public class JWTRequireAdminHandler implements Handler {
 
-  private final Logger log = LoggerFactory.getLogger(JWTRequireAdminHandler.class);
+	private final Logger log = LoggerFactory.getLogger(JWTRequireAdminHandler.class);
 
-  @Override
-  public void handle(Context ctx) throws Exception {
-    final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
-    if(jwtRequestStatus.status().isValid() && jwtRequestStatus.isAdmin()) {
-      log.info("JWT {} of user {} deemed as ADMIN.", uuidToToken(jwtRequestStatus.jwtId()), uuidToToken(jwtRequestStatus.userId()));
-      ctx.next(); // you may proceed
-    } else {
-      ctx.clientError(403); // forbidden
-    }
-  }
+	@Override
+	public void handle(Context ctx) throws Exception {
+		final JWTHttpRequestStatus jwtRequestStatus = ctx.getRequest().get(JWTHttpRequestStatus.class);
+		if(jwtRequestStatus.status().isValid() && jwtRequestStatus.isAdmin()) {
+			log.info("JWT {} of user {} deemed as ADMIN.", uuidToToken(jwtRequestStatus.jwtId()), uuidToToken(jwtRequestStatus.userId()));
+			ctx.next(); // you may proceed
+		} else {
+			ctx.clientError(403); // forbidden
+		}
+	}
 
 }
